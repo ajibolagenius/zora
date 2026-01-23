@@ -1,19 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { Slot, Stack, useRouter, useSegments } from 'expo-router';
+import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { View, ActivityIndicator, StyleSheet, Text } from 'react-native';
 import { Colors } from '../constants/colors';
 import { useAuthStore } from '../stores/authStore';
-
-function LoadingScreen() {
-  return (
-    <View style={styles.loadingContainer}>
-      <Text style={styles.logo}>ZORA</Text>
-      <ActivityIndicator size="large" color={Colors.primary} style={{ marginTop: 20 }} />
-      <StatusBar style="light" />
-    </View>
-  );
-}
 
 export default function RootLayout() {
   const { checkAuth } = useAuthStore();
@@ -40,14 +30,16 @@ export default function RootLayout() {
     return () => clearTimeout(timeoutId);
   }, []);
 
-  if (initializing) {
-    return <LoadingScreen />;
-  }
-
   return (
     <>
       <StatusBar style="light" />
-      <Slot />
+      <Stack
+        screenOptions={{
+          headerShown: false,
+          contentStyle: { backgroundColor: Colors.backgroundDark },
+          animation: 'slide_from_right',
+        }}
+      />
     </>
   );
 }
