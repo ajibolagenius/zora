@@ -110,4 +110,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: Colors.backgroundDark,
   },
+  logo: {
+    fontSize: 48,
+    fontWeight: 'bold',
+    color: Colors.primary,
+    letterSpacing: 6,
+  },
 });
