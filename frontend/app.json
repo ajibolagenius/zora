@@ -52,7 +52,8 @@
           "merchantIdentifier": "merchant.com.zora.africanmarket",
           "enableGooglePay": true
         }
-      ]
+      ],
+      "expo-font"
     ],
     "experiments": {
       "typedRoutes": true
