@@ -21,10 +21,7 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({ banner, onPress }) => {
         style={styles.image}
         resizeMode="cover"
       />
-      <LinearGradient
-        colors={['transparent', 'rgba(34, 23, 16, 0.9)']}
-        style={styles.gradient}
-      />
+      <View style={styles.gradient} />
       <View style={styles.content}>
         {banner.badge && (
           <View style={styles.badge}>
@@ -63,6 +60,7 @@ const styles = StyleSheet.create({
     right: 0,
     bottom: 0,
     height: '80%',
+    backgroundColor: 'rgba(34, 23, 16, 0.7)',
   },
   content: {
     position: 'absolute',
