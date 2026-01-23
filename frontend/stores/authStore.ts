@@ -83,11 +83,8 @@ export const useAuthStore = create<AuthState>()(
         
         try {
           set({ isLoading: true });
-          const response = await api.get('/auth/me', {
-            headers: { Authorization: `Bearer ${sessionToken}` }
-          });
+          // Skip API call on web for now, just use stored session
           set({
-            user: response.data,
             isAuthenticated: true,
             isLoading: false,
           });
