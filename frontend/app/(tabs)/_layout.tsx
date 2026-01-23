@@ -5,7 +5,6 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Colors } from '../../constants/colors';
 import { FontSize, FontWeight } from '../../constants/typography';
 import { useCartStore } from '../../stores/cartStore';
-import { BlurView } from 'expo-blur';
 
 type TabIconProps = {
   name: keyof typeof MaterialCommunityIcons.glyphMap;
@@ -41,11 +40,7 @@ export default function TabLayout() {
         tabBarStyle: styles.tabBar,
         tabBarLabelStyle: styles.tabBarLabel,
         tabBarBackground: () => (
-          Platform.OS === 'ios' ? (
-            <BlurView intensity={80} tint="dark" style={StyleSheet.absoluteFill} />
-          ) : (
-            <View style={[StyleSheet.absoluteFill, { backgroundColor: Colors.tabBarBackground }]} />
-          )
+          <View style={[StyleSheet.absoluteFill, { backgroundColor: Colors.tabBarBackground }]} />
         ),
       }}
     >
