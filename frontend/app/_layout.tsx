@@ -1,39 +1,43 @@
 import React, { useEffect, useState } from 'react';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { View, ActivityIndicator, StyleSheet } from 'react-native';
+import { View, ActivityIndicator, StyleSheet, Text } from 'react-native';
 import { Colors } from '../constants/colors';
 import { useAuthStore } from '../stores/authStore';
 import * as Linking from 'expo-linking';
 import { Platform } from 'react-native';
 
 export default function RootLayout() {
-  const { checkAuth, isLoading, login, setLoading } = useAuthStore();
+  const { checkAuth, login, setLoading } = useAuthStore();
   const [initializing, setInitializing] = useState(true);
 
   useEffect(() => {
     const initApp = async () => {
-      // Check for session_id in URL (from OAuth redirect)
       try {
+        // Check for session_id in URL (from OAuth redirect)
         const url = await Linking.getInitialURL();
         if (url) {
           const sessionId = extractSessionId(url);
           if (sessionId) {
             await login(sessionId);
-            setInitializing(false);
-            return;
           }
         }
+        // Check existing auth
+        await checkAuth();
       } catch (e) {
-        console.log('Error checking initial URL:', e);
+        console.log('Init error:', e);
+      } finally {
+        // Always stop initializing
+        setInitializing(false);
       }
-
-      // Check existing auth
-      await checkAuth();
-      setInitializing(false);
     };
 
-    initApp();
+    // Run init with timeout fallback
+    const timeoutId = setTimeout(() => {
+      setInitializing(false);
+    }, 3000);
+
+    initApp().finally(() => clearTimeout(timeoutId));
 
     // Listen for deep links
     const subscription = Linking.addEventListener('url', async (event) => {
@@ -44,7 +48,10 @@ export default function RootLayout() {
       }
     });
 
-    return () => subscription.remove();
+    return () => {
+      subscription.remove();
+      clearTimeout(timeoutId);
+    };
   }, []);
 
   // Extract session_id from URL hash or query
@@ -62,10 +69,11 @@ export default function RootLayout() {
     return null;
   };
 
-  if (initializing || isLoading) {
+  if (initializing) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color={Colors.primary} />
+        <Text style={styles.logo}>ZORA</Text>
+        <ActivityIndicator size="large" color={Colors.primary} style={{ marginTop: 20 }} />
         <StatusBar style="light" />
       </View>
     );
