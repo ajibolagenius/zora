@@ -77,7 +77,14 @@ agenthub/agents/youtube/db
 .cache/
 
 # Mobile development
-android-sdk/ -e 
+android-sdk/ -e
 # Environment files
 *.env
 *.env.*
+
+# Documentation
+docs/
+
+# Assets
+assets/
+stitch_zora_african_market/
