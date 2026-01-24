@@ -619,11 +619,12 @@ const styles = StyleSheet.create({
     gap: 2,
   },
   infoCardTitle: {
+    fontFamily: FontFamily.bodySemiBold,
     fontSize: FontSize.small,
-    fontWeight: FontWeight.bold,
     color: Colors.textPrimary,
   },
   infoCardSubtitle: {
+    fontFamily: FontFamily.body,
     fontSize: FontSize.caption,
     color: Colors.textMuted,
   },
