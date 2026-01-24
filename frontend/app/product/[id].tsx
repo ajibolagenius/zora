@@ -50,12 +50,15 @@ export default function ProductScreen() {
   const fetchData = useCallback(async () => {
     if (!id) return;
     try {
-      const productData = await productService.getById(id);
-      setProduct(productData);
-      
-      if (productData?.vendor_id) {
-        const vendorData = await vendorService.getById(productData.vendor_id);
-        setVendor(vendorData);
+      // Use mock data service
+      const productData = productService.getById(id);
+      if (productData) {
+        setProduct(productData);
+        
+        if (productData.vendor_id) {
+          const vendorData = vendorService.getById(productData.vendor_id);
+          setVendor(vendorData || null);
+        }
       }
     } catch (error) {
       console.error('Error fetching product:', error);
