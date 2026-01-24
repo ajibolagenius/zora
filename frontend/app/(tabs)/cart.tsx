@@ -9,9 +9,15 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { 
+  ShoppingCart, 
+  Trash, 
+  Minus, 
+  Plus,
+  Truck,
+} from 'phosphor-react-native';
 import { Colors } from '../../constants/colors';
-import { Spacing, BorderRadius } from '../../constants/spacing';
+import { Spacing, BorderRadius, Heights, TouchTarget } from '../../constants/spacing';
 import { FontSize, FontWeight } from '../../constants/typography';
 import { Button } from '../../components/ui';
 import { useCartStore } from '../../stores/cartStore';
@@ -27,7 +33,9 @@ export default function CartTab() {
           <Text style={styles.title}>Your Cart</Text>
         </View>
         <View style={styles.emptyContainer}>
-          <MaterialCommunityIcons name="cart-outline" size={80} color={Colors.textMuted} />
+          <View style={styles.emptyIconContainer}>
+            <ShoppingCart size={48} color={Colors.textMuted} weight="duotone" />
+          </View>
           <Text style={styles.emptyTitle}>Your cart is empty</Text>
           <Text style={styles.emptySubtitle}>Add items to get started</Text>
           <Button
@@ -44,7 +52,7 @@ export default function CartTab() {
     <SafeAreaView style={styles.container} edges={['top']}>
       <View style={styles.header}>
         <Text style={styles.title}>Your Cart</Text>
-        <TouchableOpacity onPress={clearCart}>
+        <TouchableOpacity style={styles.clearButton} onPress={clearCart}>
           <Text style={styles.clearText}>Clear All</Text>
         </TouchableOpacity>
       </View>
@@ -54,12 +62,12 @@ export default function CartTab() {
           <View key={vendor.id} style={styles.vendorSection}>
             <View style={styles.vendorHeader}>
               <Image source={{ uri: vendor.logo_url }} style={styles.vendorLogo} />
-              <View>
+              <View style={styles.vendorInfoContainer}>
                 <Text style={styles.vendorName}>{vendor.name}</Text>
-                <Text style={styles.deliveryTime}>
-                  <MaterialCommunityIcons name="truck-delivery-outline" size={12} color={Colors.textMuted} />
-                  {' '}Delivers in {vendor.delivery_time}
-                </Text>
+                <View style={styles.deliveryInfo}>
+                  <Truck size={14} color={Colors.textMuted} weight="duotone" />
+                  <Text style={styles.deliveryTime}>Delivers in {vendor.delivery_time}</Text>
+                </View>
               </View>
             </View>
 
@@ -75,14 +83,14 @@ export default function CartTab() {
                         style={styles.quantityButton}
                         onPress={() => updateQuantity(item.product_id, item.quantity - 1)}
                       >
-                        <MaterialCommunityIcons name="minus" size={18} color={Colors.textPrimary} />
+                        <Minus size={18} color={Colors.textPrimary} weight="bold" />
                       </TouchableOpacity>
                       <Text style={styles.quantityText}>{item.quantity}</Text>
                       <TouchableOpacity
                         style={styles.quantityButton}
                         onPress={() => updateQuantity(item.product_id, item.quantity + 1)}
                       >
-                        <MaterialCommunityIcons name="plus" size={18} color={Colors.textPrimary} />
+                        <Plus size={18} color={Colors.textPrimary} weight="bold" />
                       </TouchableOpacity>
                     </View>
                     <Text style={styles.itemPrice}>
@@ -94,7 +102,7 @@ export default function CartTab() {
                   style={styles.deleteButton}
                   onPress={() => removeItem(item.product_id)}
                 >
-                  <MaterialCommunityIcons name="delete-outline" size={20} color={Colors.textMuted} />
+                  <Trash size={20} color={Colors.textMuted} weight="duotone" />
                 </TouchableOpacity>
               </View>
             ))}
@@ -154,6 +162,10 @@ const styles = StyleSheet.create({
     fontSize: FontSize.h2,
     fontWeight: FontWeight.bold,
   },
+  clearButton: {
+    paddingVertical: Spacing.sm,
+    paddingHorizontal: Spacing.md,
+  },
   clearText: {
     color: Colors.primary,
     fontSize: FontSize.small,
@@ -164,6 +176,15 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: Spacing.xl,
+  },
+  emptyIconContainer: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    backgroundColor: Colors.cardDark,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: Spacing.md,
   },
   emptyTitle: {
     color: Colors.textPrimary,
@@ -195,30 +216,38 @@ const styles = StyleSheet.create({
     borderBottomColor: Colors.borderDark,
   },
   vendorLogo: {
-    width: 40,
-    height: 40,
+    width: 48,
+    height: 48,
     borderRadius: BorderRadius.full,
     marginRight: Spacing.md,
     backgroundColor: Colors.backgroundDark,
+  },
+  vendorInfoContainer: {
+    flex: 1,
   },
   vendorName: {
     color: Colors.textPrimary,
     fontSize: FontSize.body,
     fontWeight: FontWeight.bold,
   },
+  deliveryInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.xs,
+    marginTop: 4,
+  },
   deliveryTime: {
     color: Colors.textMuted,
     fontSize: FontSize.caption,
-    marginTop: 2,
   },
   itemRow: {
     flexDirection: 'row',
     marginBottom: Spacing.md,
   },
   itemImage: {
-    width: 70,
-    height: 70,
-    borderRadius: BorderRadius.md,
+    width: 80,
+    height: 80,
+    borderRadius: BorderRadius.lg,
     backgroundColor: Colors.backgroundDark,
   },
   itemInfo: {
@@ -245,19 +274,20 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: Colors.backgroundDark,
-    borderRadius: BorderRadius.md,
+    borderRadius: BorderRadius.lg,
+    padding: 4,
   },
   quantityButton: {
-    width: 32,
-    height: 32,
+    width: 36,
+    height: 36,
     alignItems: 'center',
     justifyContent: 'center',
   },
   quantityText: {
     color: Colors.textPrimary,
     fontSize: FontSize.body,
-    fontWeight: FontWeight.semiBold,
-    minWidth: 30,
+    fontWeight: FontWeight.bold,
+    minWidth: 32,
     textAlign: 'center',
   },
   itemPrice: {
@@ -266,7 +296,10 @@ const styles = StyleSheet.create({
     fontWeight: FontWeight.bold,
   },
   deleteButton: {
-    padding: Spacing.sm,
+    width: TouchTarget.min,
+    height: TouchTarget.min,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   summarySection: {
     backgroundColor: Colors.cardDark,
