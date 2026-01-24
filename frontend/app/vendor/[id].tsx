@@ -551,9 +551,8 @@ const styles = StyleSheet.create({
     fontSize: FontSize.small,
     color: Colors.textPrimary,
   },
-    color: Colors.textPrimary,
-  },
   ratingCount: {
+    fontFamily: FontFamily.body,
     fontSize: FontSize.small,
     color: Colors.textMuted,
   },
