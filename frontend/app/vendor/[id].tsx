@@ -9,7 +9,6 @@ import {
   ActivityIndicator,
   useWindowDimensions,
   Platform,
-  ImageBackground,
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
@@ -26,7 +25,7 @@ import {
   SealCheck,
 } from 'phosphor-react-native';
 import { Colors } from '../../constants/colors';
-import { Spacing, BorderRadius } from '../../constants/spacing';
+import { Spacing, BorderRadius, TouchTarget, Heights } from '../../constants/spacing';
 import { FontSize, FontWeight } from '../../constants/typography';
 import { vendorService, productService, type Vendor, type Product } from '../../services/mockDataService';
 import { useCartStore } from '../../stores/cartStore';
@@ -51,15 +50,12 @@ export default function VendorScreen() {
   const fetchData = useCallback(() => {
     if (!id) return;
     try {
-      // Get vendor data from mock database
       const vendorData = vendorService.getById(id);
       if (vendorData) {
         setVendor(vendorData);
-        // Get products for this vendor
         const vendorProducts = productService.getByVendor(vendorData.id);
         setProducts(vendorProducts);
       } else {
-        // Fallback to first vendor if not found
         const allVendors = vendorService.getAll();
         if (allVendors.length > 0) {
           setVendor(allVendors[0]);
@@ -117,34 +113,9 @@ export default function VendorScreen() {
 
   return (
     <View style={styles.container}>
-      {/* Fixed Top App Bar */}
-      <View style={[styles.topAppBar, { paddingTop: insets.top + 8 }]}>
-        <TouchableOpacity
-          style={styles.appBarButton}
-          onPress={() => router.back()}
-        >
-          <ArrowLeft size={24} color={Colors.textPrimary} weight="bold" />
-        </TouchableOpacity>
-        <View style={styles.appBarActions}>
-          <TouchableOpacity style={styles.appBarButton}>
-            <MagnifyingGlass size={22} color={Colors.textPrimary} weight="bold" />
-          </TouchableOpacity>
-          <TouchableOpacity 
-            style={styles.appBarButton}
-            onPress={() => router.push('/(tabs)/cart')}
-          >
-            <ShoppingBag size={22} color={Colors.textPrimary} weight="bold" />
-            {cartItemCount > 0 && (
-              <View style={styles.cartBadge} />
-            )}
-          </TouchableOpacity>
-        </View>
-      </View>
-
       <ScrollView
         style={styles.scrollView}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingTop: insets.top + 56 }}
       >
         {/* Header Image (Shop Front) */}
         <View style={styles.headerImageContainer}>
@@ -154,6 +125,28 @@ export default function VendorScreen() {
             resizeMode="cover"
           />
           <View style={styles.headerOverlay} />
+          
+          {/* Transparent Header - Same style as Explore/Product pages */}
+          <SafeAreaView style={styles.header} edges={['top']}>
+            <TouchableOpacity 
+              style={styles.headerButton} 
+              onPress={() => router.back()}
+            >
+              <ArrowLeft size={24} color={Colors.textPrimary} weight="bold" />
+            </TouchableOpacity>
+            <View style={styles.headerActions}>
+              <TouchableOpacity style={styles.headerButton}>
+                <MagnifyingGlass size={22} color={Colors.textPrimary} weight="bold" />
+              </TouchableOpacity>
+              <TouchableOpacity 
+                style={styles.headerButton}
+                onPress={() => router.push('/(tabs)/cart')}
+              >
+                <ShoppingBag size={22} color={Colors.textPrimary} weight="bold" />
+                {cartItemCount > 0 && <View style={styles.cartBadge} />}
+              </TouchableOpacity>
+            </View>
+          </SafeAreaView>
         </View>
 
         {/* Profile Header Section */}
@@ -220,7 +213,7 @@ export default function VendorScreen() {
           </View>
         </View>
 
-        {/* Sticky Tabs */}
+        {/* Tabs */}
         <View style={styles.tabsContainer}>
           {(['products', 'reviews', 'about'] as TabType[]).map((tab) => (
             <TouchableOpacity
@@ -242,7 +235,7 @@ export default function VendorScreen() {
         {/* Products Tab Content */}
         {activeTab === 'products' && (
           <>
-            {/* Featured Products Header */}
+            {/* Section Header */}
             <View style={styles.sectionHeader}>
               <Text style={styles.sectionTitle}>Featured Products</Text>
               <TouchableOpacity>
@@ -414,29 +407,43 @@ const styles = StyleSheet.create({
   scrollView: {
     flex: 1,
   },
-  // Top App Bar
-  topAppBar: {
+  
+  // Header Image
+  headerImageContainer: {
+    height: 220,
+    position: 'relative',
+  },
+  headerImage: {
+    width: '100%',
+    height: '100%',
+  },
+  headerOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0, 0, 0, 0.3)',
+  },
+  
+  // Transparent Header (matches Explore/Product pages)
+  header: {
     position: 'absolute',
     top: 0,
     left: 0,
     right: 0,
-    zIndex: 50,
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
+    justifyContent: 'space-between',
     paddingHorizontal: Spacing.base,
-    paddingBottom: Spacing.sm,
-    backgroundColor: 'rgba(34, 23, 16, 0.95)',
+    paddingTop: Spacing.sm,
+    paddingBottom: Spacing.md,
   },
-  appBarButton: {
-    width: 40,
-    height: 40,
+  headerButton: {
+    width: TouchTarget.min,
+    height: TouchTarget.min,
     borderRadius: BorderRadius.full,
-    backgroundColor: 'transparent',
+    backgroundColor: 'rgba(0, 0, 0, 0.4)',
     justifyContent: 'center',
     alignItems: 'center',
   },
-  appBarActions: {
+  headerActions: {
     flexDirection: 'row',
     gap: Spacing.sm,
   },
@@ -449,25 +456,11 @@ const styles = StyleSheet.create({
     borderRadius: 4,
     backgroundColor: Colors.primary,
   },
-  // Header Image
-  headerImageContainer: {
-    width: '100%',
-    height: 200,
-    position: 'relative',
-  },
-  headerImage: {
-    width: '100%',
-    height: '100%',
-  },
-  headerOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: Colors.overlay,
-    opacity: 0.3,
-  },
+  
   // Profile Section
   profileSection: {
     paddingHorizontal: Spacing.base,
-    marginTop: -56,
+    marginTop: -50,
     position: 'relative',
     zIndex: 10,
   },
@@ -480,9 +473,9 @@ const styles = StyleSheet.create({
     position: 'relative',
   },
   avatar: {
-    width: 112,
-    height: 112,
-    borderRadius: 56,
+    width: 100,
+    height: 100,
+    borderRadius: 50,
     borderWidth: 4,
     borderColor: Colors.backgroundDark,
     backgroundColor: Colors.cardDark,
@@ -507,7 +500,7 @@ const styles = StyleSheet.create({
   },
   followButton: {
     height: 36,
-    paddingHorizontal: 20,
+    paddingHorizontal: Spacing.lg,
     borderRadius: BorderRadius.full,
     backgroundColor: Colors.primary,
     justifyContent: 'center',
@@ -567,6 +560,7 @@ const styles = StyleSheet.create({
     lineHeight: 20,
     marginTop: Spacing.md,
   },
+  
   // Tabs
   tabsContainer: {
     flexDirection: 'row',
@@ -599,6 +593,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.primary,
     borderRadius: 1,
   },
+  
   // Section Header
   sectionHeader: {
     flexDirection: 'row',
@@ -618,6 +613,7 @@ const styles = StyleSheet.create({
     fontWeight: FontWeight.semiBold,
     color: Colors.primary,
   },
+  
   // Product Grid
   productGrid: {
     flexDirection: 'row',
@@ -625,7 +621,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.base,
     gap: Spacing.base,
   },
-  // Product Card
   productCard: {
     backgroundColor: Colors.cardDark,
     borderRadius: BorderRadius.lg,
@@ -660,10 +655,10 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: Spacing.sm,
     right: Spacing.sm,
-    width: 28,
-    height: 28,
+    width: 32,
+    height: 32,
     borderRadius: BorderRadius.full,
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    backgroundColor: 'rgba(0, 0, 0, 0.4)',
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -693,18 +688,20 @@ const styles = StyleSheet.create({
     color: Colors.primary,
   },
   addButton: {
-    width: 28,
-    height: 28,
+    width: 32,
+    height: 32,
     borderRadius: BorderRadius.full,
     backgroundColor: Colors.primary,
     justifyContent: 'center',
     alignItems: 'center',
   },
+  
   // Tab Content
   tabContent: {
     paddingHorizontal: Spacing.base,
     paddingTop: Spacing.lg,
   },
+  
   // Review Summary
   reviewSummary: {
     alignItems: 'center',
@@ -727,6 +724,7 @@ const styles = StyleSheet.create({
     fontSize: FontSize.small,
     color: Colors.textMuted,
   },
+  
   // Review Card
   reviewCard: {
     backgroundColor: Colors.cardDark,
@@ -775,6 +773,7 @@ const styles = StyleSheet.create({
     color: Colors.textSecondary,
     lineHeight: 22,
   },
+  
   // About Section
   aboutSection: {
     marginBottom: Spacing.lg,
