@@ -217,10 +217,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: Spacing.md,
+    justifyContent: 'space-between',
   },
   categoryCard: {
     width: CARD_WIDTH,
-    aspectRatio: 1,
+    height: CARD_WIDTH, // Use fixed height instead of aspectRatio for web compatibility
     backgroundColor: Colors.cardDark,
     borderRadius: BorderRadius.lg,
     padding: Spacing.base,
