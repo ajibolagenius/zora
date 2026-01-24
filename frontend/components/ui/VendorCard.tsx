@@ -199,8 +199,8 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   name: {
+    fontFamily: FontFamily.bodyBold,
     fontSize: FontSize.body,
-    fontWeight: FontWeight.bold,
     color: Colors.textPrimary,
     flex: 1,
   },
@@ -214,11 +214,12 @@ const styles = StyleSheet.create({
     borderRadius: BorderRadius.sm,
   },
   rating: {
+    fontFamily: FontFamily.bodySemiBold,
     fontSize: FontSize.small,
-    fontWeight: FontWeight.semiBold,
     color: Colors.textPrimary,
   },
   category: {
+    fontFamily: FontFamily.body,
     fontSize: FontSize.small,
     color: Colors.textMuted,
     marginBottom: Spacing.sm,
