@@ -199,7 +199,7 @@ const styles = StyleSheet.create({
     gap: Spacing.sm,
   },
   text: {
-    fontWeight: FontWeight.bold,
+    fontFamily: FontFamily.bodyBold,
   },
   leftIcon: {
     marginRight: Spacing.xs,
