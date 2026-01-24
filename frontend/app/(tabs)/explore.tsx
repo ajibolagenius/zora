@@ -35,53 +35,18 @@ const FILTERS: { id: FilterType; label: string }[] = [
   { id: 'topRated', label: 'Top Rated' },
 ];
 
-// Sample vendor data for the demo
-const SAMPLE_VENDORS = [
-  {
-    id: 'vendor-1',
-    name: "Mama Zora's Spices",
-    category: 'Spices • Dry Goods • Authentic',
-    image: 'https://images.unsplash.com/photo-1596040033229-a9821ebd058d?w=400',
-    rating: 4.8,
-    distance: '0.8 km',
-    deliveryTime: '15 min',
-    status: 'Open until 8pm',
-    statusColor: '#22C55E',
-  },
-  {
-    id: 'vendor-2',
-    name: 'Lagos Textiles',
-    category: 'Fabrics • Clothing • Accessories',
-    image: 'https://images.unsplash.com/photo-1558171813-4c088753af8f?w=400',
-    rating: 4.5,
-    distance: '1.2 km',
-    deliveryTime: '22 min',
-    status: 'Open until 9pm',
-    statusColor: '#22C55E',
-  },
-  {
-    id: 'vendor-3',
-    name: 'Fresh Roots Market',
-    category: 'Produce • Organic • Fruits',
-    image: 'https://images.unsplash.com/photo-1488459716781-31db52582fe9?w=400',
-    rating: 4.9,
-    distance: '0.5 km',
-    deliveryTime: '10 min',
-    status: 'Closing Soon',
-    statusColor: '#F97316',
-  },
-  {
-    id: 'vendor-4',
-    name: 'Ethiopian Delights',
-    category: 'Coffee • Spices • Grains',
-    image: 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=400',
-    rating: 4.7,
-    distance: '1.5 km',
-    deliveryTime: '25 min',
-    status: 'Open until 10pm',
-    statusColor: '#22C55E',
-  },
-];
+// Transform vendor data for display
+const transformVendorForDisplay = (vendor: Vendor) => ({
+  id: vendor.id,
+  name: vendor.shop_name,
+  category: vendor.categories.join(' • '),
+  image: vendor.cover_image_url,
+  rating: vendor.rating,
+  distance: `${(Math.random() * 2 + 0.5).toFixed(1)} km`,
+  deliveryTime: `${vendor.delivery_time_min} min`,
+  status: 'Open until 8pm',
+  statusColor: '#22C55E',
+});
 
 export default function ExploreScreen() {
   const router = useRouter();
