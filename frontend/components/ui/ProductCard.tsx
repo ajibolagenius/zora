@@ -189,7 +189,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   content: {
-    padding: Spacing.md,
+    padding: Spacing.sm,
   },
   regionTag: {
     color: Colors.primary,
@@ -197,24 +197,24 @@ const styles = StyleSheet.create({
     fontWeight: FontWeight.semiBold,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
-    marginBottom: Spacing.xs,
+    marginBottom: 2,
   },
   name: {
     color: Colors.textPrimary,
     fontSize: FontSize.small,
     fontWeight: FontWeight.semiBold,
-    marginBottom: Spacing.xs,
+    marginBottom: 2,
   },
   weight: {
     color: Colors.textMuted,
     fontSize: FontSize.caption,
-    marginBottom: Spacing.xs,
+    marginBottom: 2,
   },
   ratingContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 2,
-    marginBottom: Spacing.sm,
+    marginBottom: Spacing.xs,
   },
   rating: {
     color: Colors.rating,
