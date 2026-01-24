@@ -4,8 +4,12 @@ import {
   Text,
   StyleSheet,
   TouchableOpacity,
-  ActivityIndicator,
+  TextInput,
+  KeyboardAvoidingView,
   Platform,
+  ScrollView,
+  ActivityIndicator,
+  Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -15,21 +19,27 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Colors } from '../../constants/colors';
 import { Spacing, BorderRadius } from '../../constants/spacing';
 import { FontSize, FontWeight } from '../../constants/typography';
-import { Button } from '../../components/ui';
 import { useAuthStore } from '../../stores/authStore';
 
-const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL || 'http://localhost:8001';
+type AuthMode = 'signin' | 'signup';
+
+const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL || '';
 
 export default function LoginScreen() {
   const router = useRouter();
   const { login, setLoading } = useAuthStore();
+  const [mode, setMode] = useState<AuthMode>('signin');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [name, setName] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
   const [loading, setLocalLoading] = useState(false);
 
   const handleGoogleLogin = async () => {
     try {
       setLocalLoading(true);
       
-      // Create platform-specific redirect URL
       const redirectUrl = Platform.OS === 'web'
         ? `${BACKEND_URL}/`
         : Linking.createURL('/');
@@ -37,19 +47,16 @@ export default function LoginScreen() {
       const authUrl = `https://auth.emergentagent.com/?redirect=${encodeURIComponent(redirectUrl)}`;
       
       if (Platform.OS === 'web') {
-        // For web, redirect directly
         window.location.href = authUrl;
       } else {
-        // For mobile, use WebBrowser
         const result = await WebBrowser.openAuthSessionAsync(authUrl, redirectUrl);
         
         if (result.type === 'success' && result.url) {
-          // Extract session_id from the returned URL
           const sessionId = extractSessionId(result.url);
           if (sessionId) {
             setLoading(true);
             await login(sessionId);
-            router.replace('/(tabs)');
+            router.replace('/onboarding/heritage');
           }
         }
       }
@@ -62,16 +69,27 @@ export default function LoginScreen() {
 
   const extractSessionId = (url: string): string | null => {
     if (!url) return null;
-    
-    // Check hash
     const hashMatch = url.match(/#session_id=([^&]+)/);
     if (hashMatch) return hashMatch[1];
-    
-    // Check query
     const queryMatch = url.match(/[?&]session_id=([^&]+)/);
     if (queryMatch) return queryMatch[1];
-    
     return null;
+  };
+
+  const handleAppleLogin = async () => {
+    // Apple Sign In would be implemented here
+    console.log('Apple login');
+  };
+
+  const handleEmailAuth = () => {
+    // Email authentication would be implemented here
+    if (mode === 'signin') {
+      // Sign in logic
+      router.replace('/onboarding/heritage');
+    } else {
+      // Sign up logic
+      router.replace('/onboarding/heritage');
+    }
   };
 
   const handleSkip = () => {
@@ -80,60 +98,183 @@ export default function LoginScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.content}>
-        {/* Logo */}
-        <View style={styles.logoContainer}>
-          <Text style={styles.logo}>ZORA</Text>
-          <Text style={styles.tagline}>African Market</Text>
-        </View>
-
-        {/* Welcome Text */}
-        <View style={styles.welcomeContainer}>
-          <Text style={styles.welcomeTitle}>Welcome Back</Text>
-          <Text style={styles.welcomeSubtitle}>
-            Sign in to access your orders, saved items, and exclusive deals
-          </Text>
-        </View>
-
-        {/* Login Button */}
-        <TouchableOpacity
-          style={styles.googleButton}
-          onPress={handleGoogleLogin}
-          disabled={loading}
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={styles.keyboardView}
+      >
+        <ScrollView
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
         >
-          {loading ? (
-            <ActivityIndicator color={Colors.textPrimary} />
-          ) : (
-            <>
-              <MaterialCommunityIcons name="google" size={24} color={Colors.textPrimary} />
-              <Text style={styles.googleButtonText}>Continue with Google</Text>
-            </>
+          {/* Header */}
+          <View style={styles.header}>
+            <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+              <MaterialCommunityIcons name="arrow-left" size={24} color={Colors.textPrimary} />
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.avatarButton}>
+              <MaterialCommunityIcons name="account-circle" size={36} color={Colors.textMuted} />
+            </TouchableOpacity>
+          </View>
+
+          {/* Auth Mode Tabs */}
+          <View style={styles.tabContainer}>
+            <TouchableOpacity
+              style={[styles.tab, mode === 'signin' && styles.tabActive]}
+              onPress={() => setMode('signin')}
+            >
+              <Text style={[styles.tabText, mode === 'signin' && styles.tabTextActive]}>
+                Sign In
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.tab, mode === 'signup' && styles.tabActive]}
+              onPress={() => setMode('signup')}
+            >
+              <Text style={[styles.tabText, mode === 'signup' && styles.tabTextActive]}>
+                Sign Up
+              </Text>
+            </TouchableOpacity>
+          </View>
+
+          {/* Welcome Text */}
+          <View style={styles.welcomeContainer}>
+            <Text style={styles.welcomeTitle}>
+              {mode === 'signin' ? 'Welcome Back' : 'Create Account'}
+            </Text>
+            <Text style={styles.welcomeSubtitle}>
+              {mode === 'signin'
+                ? 'Sign in to access your orders, saved items, and exclusive deals'
+                : 'Join Zora to discover authentic African products and connect with vendors'}
+            </Text>
+          </View>
+
+          {/* Input Fields */}
+          <View style={styles.inputContainer}>
+            {mode === 'signup' && (
+              <View style={styles.inputWrapper}>
+                <MaterialCommunityIcons name="account-outline" size={22} color={Colors.textMuted} />
+                <TextInput
+                  style={styles.input}
+                  placeholder="Full Name"
+                  placeholderTextColor={Colors.textMuted}
+                  value={name}
+                  onChangeText={setName}
+                  autoCapitalize="words"
+                />
+              </View>
+            )}
+
+            <View style={styles.inputWrapper}>
+              <MaterialCommunityIcons name="email-outline" size={22} color={Colors.textMuted} />
+              <TextInput
+                style={styles.input}
+                placeholder="Email Address"
+                placeholderTextColor={Colors.textMuted}
+                value={email}
+                onChangeText={setEmail}
+                keyboardType="email-address"
+                autoCapitalize="none"
+              />
+            </View>
+
+            <View style={styles.inputWrapper}>
+              <MaterialCommunityIcons name="lock-outline" size={22} color={Colors.textMuted} />
+              <TextInput
+                style={styles.input}
+                placeholder="Password"
+                placeholderTextColor={Colors.textMuted}
+                value={password}
+                onChangeText={setPassword}
+                secureTextEntry={!showPassword}
+              />
+              <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+                <MaterialCommunityIcons
+                  name={showPassword ? 'eye-outline' : 'eye-off-outline'}
+                  size={22}
+                  color={Colors.textMuted}
+                />
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          {/* Remember Me & Forgot Password */}
+          {mode === 'signin' && (
+            <View style={styles.optionsRow}>
+              <TouchableOpacity
+                style={styles.checkboxContainer}
+                onPress={() => setRememberMe(!rememberMe)}
+              >
+                <View style={[styles.checkbox, rememberMe && styles.checkboxChecked]}>
+                  {rememberMe && (
+                    <MaterialCommunityIcons name="check" size={14} color={Colors.textPrimary} />
+                  )}
+                </View>
+                <Text style={styles.checkboxLabel}>Remember me</Text>
+              </TouchableOpacity>
+              <TouchableOpacity>
+                <Text style={styles.forgotPassword}>Forgot Password?</Text>
+              </TouchableOpacity>
+            </View>
           )}
-        </TouchableOpacity>
 
-        {/* Divider */}
-        <View style={styles.divider}>
-          <View style={styles.dividerLine} />
-          <Text style={styles.dividerText}>or</Text>
-          <View style={styles.dividerLine} />
-        </View>
+          {/* Sign In/Up Button */}
+          <TouchableOpacity
+            style={styles.primaryButton}
+            onPress={handleEmailAuth}
+            disabled={loading}
+          >
+            {loading ? (
+              <ActivityIndicator color={Colors.textPrimary} />
+            ) : (
+              <Text style={styles.primaryButtonText}>
+                {mode === 'signin' ? 'Sign In' : 'Sign Up'}
+              </Text>
+            )}
+          </TouchableOpacity>
 
-        {/* Skip Button */}
-        <Button
-          title="Browse as Guest"
-          variant="outline"
-          fullWidth
-          onPress={handleSkip}
-        />
+          {/* Divider */}
+          <View style={styles.divider}>
+            <View style={styles.dividerLine} />
+            <Text style={styles.dividerText}>Or continue with</Text>
+            <View style={styles.dividerLine} />
+          </View>
 
-        {/* Terms */}
-        <Text style={styles.terms}>
-          By continuing, you agree to our{' '}
-          <Text style={styles.termsLink}>Terms of Service</Text>
-          {' '}and{' '}
-          <Text style={styles.termsLink}>Privacy Policy</Text>
-        </Text>
-      </View>
+          {/* Social Login Buttons */}
+          <View style={styles.socialContainer}>
+            <TouchableOpacity
+              style={styles.socialButton}
+              onPress={handleGoogleLogin}
+              disabled={loading}
+            >
+              <MaterialCommunityIcons name="google" size={24} color="#DB4437" />
+              <Text style={styles.socialButtonText}>Google</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.socialButton}
+              onPress={handleAppleLogin}
+              disabled={loading}
+            >
+              <MaterialCommunityIcons name="apple" size={24} color="#000000" />
+              <Text style={styles.socialButtonText}>Apple</Text>
+            </TouchableOpacity>
+          </View>
+
+          {/* Terms */}
+          <Text style={styles.terms}>
+            By {mode === 'signin' ? 'signing in' : 'signing up'}, you agree to our{' '}
+            <Text style={styles.termsLink}>Terms of Service</Text>
+            {' '}and{' '}
+            <Text style={styles.termsLink}>Privacy Policy</Text>
+          </Text>
+
+          {/* Skip Button */}
+          <TouchableOpacity style={styles.skipButton} onPress={handleSkip}>
+            <Text style={styles.skipButtonText}>Browse as Guest</Text>
+          </TouchableOpacity>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
@@ -143,33 +284,64 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Colors.backgroundDark,
   },
-  content: {
+  keyboardView: {
     flex: 1,
+  },
+  scrollContent: {
+    flexGrow: 1,
     paddingHorizontal: Spacing.xl,
-    justifyContent: 'center',
+    paddingBottom: Spacing['2xl'],
   },
-  logoContainer: {
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: Spacing['3xl'],
+    paddingVertical: Spacing.md,
   },
-  logo: {
-    fontSize: 56,
-    fontWeight: FontWeight.bold,
-    color: Colors.primary,
-    letterSpacing: 8,
+  backButton: {
+    width: 44,
+    height: 44,
+    borderRadius: BorderRadius.full,
+    backgroundColor: Colors.cardDark,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  tagline: {
+  avatarButton: {
+    width: 44,
+    height: 44,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  tabContainer: {
+    flexDirection: 'row',
+    backgroundColor: Colors.cardDark,
+    borderRadius: BorderRadius.full,
+    padding: 4,
+    marginTop: Spacing.md,
+  },
+  tab: {
+    flex: 1,
+    paddingVertical: Spacing.md,
+    alignItems: 'center',
+    borderRadius: BorderRadius.full,
+  },
+  tabActive: {
+    backgroundColor: Colors.primary,
+  },
+  tabText: {
+    color: Colors.textMuted,
     fontSize: FontSize.body,
-    color: Colors.secondary,
-    marginTop: 4,
-    letterSpacing: 2,
+    fontWeight: FontWeight.semiBold,
+  },
+  tabTextActive: {
+    color: Colors.textPrimary,
   },
   welcomeContainer: {
-    alignItems: 'center',
-    marginBottom: Spacing['2xl'],
+    marginTop: Spacing['2xl'],
+    marginBottom: Spacing.xl,
   },
   welcomeTitle: {
-    fontSize: FontSize.h2,
+    fontSize: FontSize.h1,
     fontWeight: FontWeight.bold,
     color: Colors.textPrimary,
     marginBottom: Spacing.sm,
@@ -177,22 +349,71 @@ const styles = StyleSheet.create({
   welcomeSubtitle: {
     fontSize: FontSize.body,
     color: Colors.textMuted,
-    textAlign: 'center',
     lineHeight: 24,
   },
-  googleButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: Colors.cardDark,
-    paddingVertical: Spacing.base,
-    borderRadius: BorderRadius.md,
+  inputContainer: {
     gap: Spacing.md,
   },
-  googleButtonText: {
+  inputWrapper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: Colors.cardDark,
+    borderRadius: BorderRadius.lg,
+    paddingHorizontal: Spacing.base,
+    height: 56,
+    gap: Spacing.md,
+  },
+  input: {
+    flex: 1,
     color: Colors.textPrimary,
     fontSize: FontSize.body,
+  },
+  optionsRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: Spacing.md,
+    marginBottom: Spacing.xl,
+  },
+  checkboxContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.sm,
+  },
+  checkbox: {
+    width: 20,
+    height: 20,
+    borderRadius: BorderRadius.sm,
+    borderWidth: 2,
+    borderColor: Colors.textMuted,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  checkboxChecked: {
+    backgroundColor: Colors.primary,
+    borderColor: Colors.primary,
+  },
+  checkboxLabel: {
+    color: Colors.textMuted,
+    fontSize: FontSize.small,
+  },
+  forgotPassword: {
+    color: Colors.primary,
+    fontSize: FontSize.small,
     fontWeight: FontWeight.semiBold,
+  },
+  primaryButton: {
+    backgroundColor: Colors.primary,
+    borderRadius: BorderRadius.lg,
+    height: 56,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: Spacing.xl,
+  },
+  primaryButtonText: {
+    color: Colors.textPrimary,
+    fontSize: FontSize.body,
+    fontWeight: FontWeight.bold,
   },
   divider: {
     flexDirection: 'row',
@@ -206,8 +427,27 @@ const styles = StyleSheet.create({
   },
   dividerText: {
     color: Colors.textMuted,
-    marginHorizontal: Spacing.md,
     fontSize: FontSize.small,
+    marginHorizontal: Spacing.md,
+  },
+  socialContainer: {
+    flexDirection: 'row',
+    gap: Spacing.md,
+  },
+  socialButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: Colors.textPrimary,
+    borderRadius: BorderRadius.lg,
+    height: 56,
+    gap: Spacing.sm,
+  },
+  socialButtonText: {
+    color: Colors.backgroundDark,
+    fontSize: FontSize.body,
+    fontWeight: FontWeight.semiBold,
   },
   terms: {
     fontSize: FontSize.caption,
@@ -218,5 +458,15 @@ const styles = StyleSheet.create({
   },
   termsLink: {
     color: Colors.primary,
+  },
+  skipButton: {
+    marginTop: Spacing.lg,
+    paddingVertical: Spacing.md,
+    alignItems: 'center',
+  },
+  skipButtonText: {
+    color: Colors.textMuted,
+    fontSize: FontSize.body,
+    fontWeight: FontWeight.medium,
   },
 });
