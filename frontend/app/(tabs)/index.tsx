@@ -209,10 +209,11 @@ export default function HomeScreen() {
             {filteredProducts?.map((product, index) => (
               <View 
                 key={product.id} 
-                style={[
-                  styles.productCardWrapper,
-                  index % 2 === 0 ? styles.productCardLeft : styles.productCardRight
-                ]}
+                style={{
+                  width: productCardWidth,
+                  marginRight: index % 2 === 0 ? PRODUCT_GAP : 0,
+                  marginBottom: PRODUCT_GAP,
+                }}
               >
                 <ProductCard
                   product={product}
