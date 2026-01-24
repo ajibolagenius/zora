@@ -215,7 +215,7 @@ export default function ProductScreen() {
           >
             <View style={styles.vendorAvatarContainer}>
               <Image
-                source={{ uri: vendor.avatar }}
+                source={{ uri: vendor.logo_url }}
                 style={styles.vendorAvatar}
                 resizeMode="cover"
               />
@@ -223,7 +223,7 @@ export default function ProductScreen() {
             <View style={styles.vendorInfo}>
               <Text style={styles.vendorLabel}>Sold by</Text>
               <View style={styles.vendorNameRow}>
-                <Text style={styles.vendorName}>{vendor.name}</Text>
+                <Text style={styles.vendorName}>{vendor.shop_name}</Text>
                 {vendor.is_verified && (
                   <ShieldCheck size={16} color={Colors.success} weight="fill" />
                 )}
