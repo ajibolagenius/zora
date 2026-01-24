@@ -9,6 +9,7 @@ import {
   ActivityIndicator,
   Dimensions,
   Platform,
+  useWindowDimensions,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -27,9 +28,7 @@ import { homeService } from '../../services/dataService';
 import { HomeData, Product, Vendor, Region } from '../../types';
 import { useCartStore } from '../../stores/cartStore';
 
-const { width } = Dimensions.get('window');
-const PRODUCT_GAP = 8; // Gap between products
-const PRODUCT_CARD_WIDTH = (width - 32 - PRODUCT_GAP) / 2; // 16px padding on each side
+const PRODUCT_GAP = 8;
 
 export default function HomeScreen() {
   const router = useRouter();
