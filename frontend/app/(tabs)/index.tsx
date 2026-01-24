@@ -28,8 +28,8 @@ import { HomeData, Product, Vendor, Region } from '../../types';
 import { useCartStore } from '../../stores/cartStore';
 
 const { width } = Dimensions.get('window');
-const PRODUCT_GAP = 10; // Reduced gap between products
-const PRODUCT_CARD_WIDTH = (width - Spacing.base * 2 - PRODUCT_GAP) / 2;
+const PRODUCT_GAP = 8; // Gap between products
+const PRODUCT_CARD_WIDTH = (width - 32 - PRODUCT_GAP) / 2; // 16px padding on each side
 
 export default function HomeScreen() {
   const router = useRouter();
