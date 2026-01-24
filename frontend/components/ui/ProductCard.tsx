@@ -282,7 +282,6 @@ const styles = StyleSheet.create({
     fontSize: FontSize.caption,
     textDecorationLine: 'line-through',
   },
-  },
   addButton: {
     width: 32,
     height: 32,
