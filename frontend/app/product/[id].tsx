@@ -305,7 +305,7 @@ export default function ProductScreen() {
           {expandedSections.includes('heritage') && (
             <View style={styles.sectionContent}>
               <Text style={styles.sectionText}>
-                This product represents generations of African culinary tradition. Sourced from family-owned farms in {product.region?.replace('-', ' ') || 'West Africa'}, it carries the authentic flavors that have been cherished for centuries. By purchasing this product, you're supporting local African communities and preserving cultural heritage.
+                {product.heritage_story || `This product represents generations of African culinary tradition. Sourced from family-owned farms in ${product.cultural_region?.replace('-', ' ') || 'West Africa'}, it carries the authentic flavors that have been cherished for centuries. By purchasing this product, you're supporting local African communities and preserving cultural heritage.`}
               </Text>
             </View>
           )}
