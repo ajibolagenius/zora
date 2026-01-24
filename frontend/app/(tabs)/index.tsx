@@ -363,14 +363,14 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.sm,
   },
   sectionTitle: {
+    fontFamily: FontFamily.displayMedium,
     color: Colors.textPrimary,
     fontSize: FontSize.h4,
-    fontWeight: FontWeight.bold,
   },
   seeAllText: {
+    fontFamily: FontFamily.bodySemiBold,
     color: Colors.primary,
     fontSize: FontSize.small,
-    fontWeight: FontWeight.semiBold,
   },
   regionsContainer: {
     paddingHorizontal: Spacing.base,
