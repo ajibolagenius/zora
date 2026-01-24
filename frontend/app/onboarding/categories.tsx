@@ -21,7 +21,7 @@ const CATEGORIES = [
   {
     id: 'traditional-ingredients',
     name: 'Traditional Ingredients',
-    icon: 'pot-steam-outline',
+    icon: 'pot-steam',
   },
   {
     id: 'spices-seasonings',
@@ -31,22 +31,22 @@ const CATEGORIES = [
   {
     id: 'beverages',
     name: 'Beverages',
-    icon: 'cup',
+    icon: 'coffee',
   },
   {
     id: 'fashion-textiles',
     name: 'Fashion & Textiles',
-    icon: 'hanger',
+    icon: 'tshirt-crew',
   },
   {
     id: 'art-crafts',
     name: 'Art & Crafts',
-    icon: 'palette-outline',
+    icon: 'palette',
   },
   {
     id: 'beauty-wellness',
     name: 'Beauty & Wellness',
-    icon: 'flower-outline',
+    icon: 'flower',
   },
 ];
 
