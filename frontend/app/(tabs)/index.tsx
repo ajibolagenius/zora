@@ -299,9 +299,9 @@ const styles = StyleSheet.create({
     gap: Spacing.xs,
   },
   locationText: {
+    fontFamily: FontFamily.bodyMedium,
     color: Colors.textPrimary,
     fontSize: FontSize.small,
-    fontWeight: FontWeight.medium,
   },
   notificationButton: {
     position: 'relative',
