@@ -1,10 +1,10 @@
 import React from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
+import { Star, Clock, Truck, ShieldCheck, MapPin } from 'phosphor-react-native';
 import { Colors } from '../../constants/colors';
 import { BorderRadius, Spacing, Shadows } from '../../constants/spacing';
 import { FontSize, FontWeight } from '../../constants/typography';
 import { Vendor } from '../../types';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 interface VendorCardProps {
   vendor: Vendor;
@@ -20,20 +20,44 @@ export const VendorCard: React.FC<VendorCardProps> = ({ vendor, onPress }) => {
           style={styles.coverImage}
           resizeMode="cover"
         />
+        
+        {/* Tag Badge */}
         {vendor.tag && (
-          <View style={styles.badge}>
-            <Text style={styles.badgeText}>{vendor.tag}</Text>
+          <View style={styles.tagBadge}>
+            <Text style={styles.tagText}>{vendor.tag}</Text>
           </View>
         )}
+        
+        {/* Verified Badge */}
+        {vendor.is_verified && (
+          <View style={styles.verifiedBadge}>
+            <ShieldCheck size={16} color={Colors.success} weight="fill" />
+          </View>
+        )}
+
+        {/* Open/Closed Status */}
+        <View style={[
+          styles.statusBadge,
+          { backgroundColor: vendor.is_open ? Colors.success : Colors.error }
+        ]}>
+          <Text style={styles.statusText}>
+            {vendor.is_open ? 'Open' : 'Closed'}
+          </Text>
+        </View>
       </View>
       
       <View style={styles.content}>
         <View style={styles.header}>
-          <Text style={styles.name} numberOfLines={1}>
-            {vendor.name}
-          </Text>
+          <View style={styles.nameContainer}>
+            <Text style={styles.name} numberOfLines={1}>
+              {vendor.name}
+            </Text>
+            {vendor.is_verified && (
+              <ShieldCheck size={14} color={Colors.success} weight="fill" />
+            )}
+          </View>
           <View style={styles.ratingContainer}>
-            <MaterialCommunityIcons name="star" size={14} color={Colors.rating} />
+            <Star size={14} color={Colors.rating} weight="fill" />
             <Text style={styles.rating}>{vendor.rating.toFixed(1)}</Text>
           </View>
         </View>
@@ -44,13 +68,35 @@ export const VendorCard: React.FC<VendorCardProps> = ({ vendor, onPress }) => {
         
         <View style={styles.footer}>
           <View style={styles.footerItem}>
-            <MaterialCommunityIcons name="clock-outline" size={14} color={Colors.textMuted} />
+            <Clock size={14} color={Colors.textMuted} weight="duotone" />
             <Text style={styles.footerText}>{vendor.delivery_time}</Text>
           </View>
           <View style={styles.footerItem}>
-            <MaterialCommunityIcons name="truck-delivery-outline" size={14} color={Colors.textMuted} />
-            <Text style={styles.footerText}>£{vendor.delivery_fee.toFixed(2)}</Text>
+            <Truck size={14} color={Colors.textMuted} weight="duotone" />
+            <Text style={styles.footerText}>
+              {vendor.delivery_fee === 0 ? 'Free' : `£${vendor.delivery_fee.toFixed(2)}`}
+            </Text>
           </View>
+          {vendor.distance && (
+            <View style={styles.footerItem}>
+              <MapPin size={14} color={Colors.textMuted} weight="duotone" />
+              <Text style={styles.footerText}>{vendor.distance}</Text>
+            </View>
+          )}
+        </View>
+
+        {/* Trust Indicators */}
+        <View style={styles.trustIndicators}>
+          {vendor.min_order > 0 && (
+            <View style={styles.trustBadge}>
+              <Text style={styles.trustText}>Min £{vendor.min_order}</Text>
+            </View>
+          )}
+          {vendor.is_verified && (
+            <View style={[styles.trustBadge, styles.verifiedTrustBadge]}>
+              <Text style={[styles.trustText, styles.verifiedTrustText]}>Verified</Text>
+            </View>
+          )}
         </View>
       </View>
     </TouchableOpacity>
@@ -73,7 +119,7 @@ const styles = StyleSheet.create({
     height: 120,
     backgroundColor: Colors.backgroundDark,
   },
-  badge: {
+  tagBadge: {
     position: 'absolute',
     top: Spacing.sm,
     left: Spacing.sm,
@@ -82,10 +128,35 @@ const styles = StyleSheet.create({
     borderRadius: BorderRadius.sm,
     backgroundColor: Colors.primary,
   },
-  badgeText: {
+  tagText: {
     color: Colors.textPrimary,
     fontSize: FontSize.tiny,
     fontWeight: FontWeight.bold,
+    textTransform: 'uppercase',
+  },
+  verifiedBadge: {
+    position: 'absolute',
+    top: Spacing.sm,
+    right: Spacing.sm,
+    width: 28,
+    height: 28,
+    borderRadius: BorderRadius.full,
+    backgroundColor: Colors.backgroundDark,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  statusBadge: {
+    position: 'absolute',
+    bottom: Spacing.sm,
+    left: Spacing.sm,
+    paddingHorizontal: Spacing.sm,
+    paddingVertical: 2,
+    borderRadius: BorderRadius.sm,
+  },
+  statusText: {
+    color: Colors.textPrimary,
+    fontSize: FontSize.tiny,
+    fontWeight: FontWeight.semiBold,
   },
   content: {
     padding: Spacing.md,
@@ -95,6 +166,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     marginBottom: Spacing.xs,
+  },
+  nameContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+    gap: Spacing.xs,
   },
   name: {
     color: Colors.textPrimary,
@@ -110,12 +187,12 @@ const styles = StyleSheet.create({
     paddingVertical: 2,
     borderRadius: BorderRadius.sm,
     marginLeft: Spacing.sm,
+    gap: 2,
   },
   rating: {
     color: Colors.rating,
     fontSize: FontSize.caption,
     fontWeight: FontWeight.semiBold,
-    marginLeft: 2,
   },
   category: {
     color: Colors.textMuted,
@@ -125,7 +202,8 @@ const styles = StyleSheet.create({
   footer: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: Spacing.base,
+    gap: Spacing.md,
+    marginBottom: Spacing.sm,
   },
   footerItem: {
     flexDirection: 'row',
@@ -135,6 +213,27 @@ const styles = StyleSheet.create({
   footerText: {
     color: Colors.textMuted,
     fontSize: FontSize.caption,
+  },
+  trustIndicators: {
+    flexDirection: 'row',
+    gap: Spacing.sm,
+  },
+  trustBadge: {
+    paddingHorizontal: Spacing.sm,
+    paddingVertical: 2,
+    borderRadius: BorderRadius.sm,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  verifiedTrustBadge: {
+    backgroundColor: 'rgba(34, 197, 94, 0.1)',
+  },
+  trustText: {
+    color: Colors.textMuted,
+    fontSize: FontSize.tiny,
+    fontWeight: FontWeight.medium,
+  },
+  verifiedTrustText: {
+    color: Colors.success,
   },
 });
 
