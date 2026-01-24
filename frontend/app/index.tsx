@@ -72,7 +72,7 @@ export default function SplashScreen() {
       }),
     ]).start();
 
-    // Navigate after animation completes
+    // Navigate after 4 seconds (as per design requirements)
     const timer = setTimeout(() => {
       if (isAuthenticated) {
         if (hasCompletedOnboarding) {
@@ -83,7 +83,7 @@ export default function SplashScreen() {
       } else {
         router.replace('/(auth)/login');
       }
-    }, 2500);
+    }, 4000);
 
     return () => clearTimeout(timer);
   }, [isAuthenticated, hasCompletedOnboarding]);
