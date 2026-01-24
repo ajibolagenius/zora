@@ -9,7 +9,17 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import {
+  ArrowLeft,
+  ArrowRight,
+  Check,
+  CookingPot,
+  Leaf,
+  Coffee,
+  TShirt,
+  Palette,
+  Flower,
+} from 'phosphor-react-native';
 import { Colors } from '../../constants/colors';
 import { Spacing, BorderRadius } from '../../constants/spacing';
 import { FontSize, FontWeight } from '../../constants/typography';
@@ -18,32 +28,32 @@ const CATEGORIES = [
   {
     id: 'traditional-ingredients',
     name: 'Traditional Ingredients',
-    icon: 'pot-steam',
+    icon: CookingPot,
   },
   {
     id: 'spices-seasonings',
     name: 'Spices & Seasonings',
-    icon: 'leaf',
+    icon: Leaf,
   },
   {
     id: 'beverages',
     name: 'Beverages',
-    icon: 'coffee',
+    icon: Coffee,
   },
   {
     id: 'fashion-textiles',
     name: 'Fashion & Textiles',
-    icon: 'tshirt-crew',
+    icon: TShirt,
   },
   {
     id: 'art-crafts',
     name: 'Art & Crafts',
-    icon: 'palette',
+    icon: Palette,
   },
   {
     id: 'beauty-wellness',
     name: 'Beauty & Wellness',
-    icon: 'flower',
+    icon: Flower,
   },
 ];
 
@@ -70,7 +80,7 @@ export default function CategoriesScreen() {
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
-          <MaterialCommunityIcons name="arrow-left" size={24} color={Colors.textPrimary} />
+          <ArrowLeft size={24} color={Colors.textPrimary} weight="bold" />
         </TouchableOpacity>
         <View style={styles.progressContainer}>
           <View style={styles.progressBar}>
@@ -98,6 +108,7 @@ export default function CategoriesScreen() {
         <View style={styles.grid}>
           {CATEGORIES.map((category) => {
             const isSelected = selectedCategories.includes(category.id);
+            const IconComponent = category.icon;
             return (
               <TouchableOpacity
                 key={category.id}
@@ -112,16 +123,16 @@ export default function CategoriesScreen() {
                 {/* Selection Indicator */}
                 {isSelected && (
                   <View style={styles.checkmark}>
-                    <MaterialCommunityIcons name="check" size={14} color={Colors.textPrimary} />
+                    <Check size={14} color={Colors.textPrimary} weight="bold" />
                   </View>
                 )}
                 
                 {/* Icon */}
                 <View style={styles.iconContainer}>
-                  <MaterialCommunityIcons
-                    name={category.icon as any}
+                  <IconComponent
                     size={32}
                     color={Colors.primary}
+                    weight="duotone"
                   />
                 </View>
                 
@@ -145,7 +156,7 @@ export default function CategoriesScreen() {
           activeOpacity={0.8}
         >
           <Text style={styles.continueButtonText}>Continue</Text>
-          <MaterialCommunityIcons name="arrow-right" size={20} color={Colors.textPrimary} />
+          <ArrowRight size={20} color={Colors.textPrimary} weight="bold" />
         </TouchableOpacity>
       </View>
     </SafeAreaView>
@@ -266,7 +277,7 @@ const styles = StyleSheet.create({
   continueButton: {
     flexDirection: 'row',
     backgroundColor: Colors.primary,
-    borderRadius: BorderRadius.lg,
+    borderRadius: BorderRadius.md,
     height: 56,
     justifyContent: 'center',
     alignItems: 'center',
