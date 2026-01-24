@@ -59,8 +59,18 @@ export default function HomeScreen() {
 
   const fetchHomeData = async () => {
     try {
-      const data = await homeService.getHomeData();
-      setHomeData(data);
+      // Use mock data service instead of API
+      const banners = bannerService.getActive();
+      const regions = regionService.getAll();
+      const featured_vendors = vendorService.getFeatured();
+      const popular_products = productService.getFeatured();
+      
+      setHomeData({
+        banners,
+        regions,
+        featured_vendors,
+        popular_products,
+      });
     } catch (error) {
       console.error('Error fetching home data:', error);
     } finally {
