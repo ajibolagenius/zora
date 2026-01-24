@@ -227,9 +227,9 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   vendorName: {
+    fontFamily: FontFamily.bodyBold,
     color: Colors.textPrimary,
     fontSize: FontSize.body,
-    fontWeight: FontWeight.bold,
   },
   deliveryInfo: {
     flexDirection: 'row',
