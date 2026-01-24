@@ -565,14 +565,15 @@ const styles = StyleSheet.create({
     borderBottomWidth: 0,
   },
   sectionTitle: {
+    fontFamily: FontFamily.displayMedium,
     fontSize: FontSize.bodyLarge,
-    fontWeight: FontWeight.bold,
     color: Colors.textPrimary,
   },
   sectionContent: {
     paddingBottom: Spacing.base,
   },
   sectionText: {
+    fontFamily: FontFamily.body,
     fontSize: FontSize.small,
     color: Colors.textSecondary,
     lineHeight: 22,
