@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { ArrowLeft, ArrowRight, Check } from 'phosphor-react-native';
 import { Colors } from '../../constants/colors';
 import { Spacing, BorderRadius } from '../../constants/spacing';
 import { FontSize, FontWeight } from '../../constants/typography';
@@ -71,7 +71,7 @@ export default function HeritageScreen() {
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
-          <MaterialCommunityIcons name="arrow-left" size={24} color={Colors.textPrimary} />
+          <ArrowLeft size={24} color={Colors.textPrimary} weight="bold" />
         </TouchableOpacity>
         <View style={styles.progressContainer}>
           <View style={styles.progressBar}>
@@ -124,7 +124,7 @@ export default function HeritageScreen() {
                   isSelected && styles.selectionIndicatorSelected,
                 ]}>
                   {isSelected && (
-                    <MaterialCommunityIcons name="check" size={18} color={Colors.textPrimary} />
+                    <Check size={18} color={Colors.textPrimary} weight="bold" />
                   )}
                 </View>
               </View>
@@ -145,7 +145,7 @@ export default function HeritageScreen() {
           activeOpacity={0.8}
         >
           <Text style={styles.continueButtonText}>Continue</Text>
-          <MaterialCommunityIcons name="arrow-right" size={20} color={Colors.textPrimary} />
+          <ArrowRight size={20} color={Colors.textPrimary} weight="bold" />
         </TouchableOpacity>
       </View>
     </SafeAreaView>
@@ -271,7 +271,7 @@ const styles = StyleSheet.create({
   continueButton: {
     flexDirection: 'row',
     backgroundColor: Colors.primary,
-    borderRadius: BorderRadius.lg,
+    borderRadius: BorderRadius.md,
     height: 56,
     justifyContent: 'center',
     alignItems: 'center',
