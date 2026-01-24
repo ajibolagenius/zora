@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Zora African Market - Heritage Region Discovery</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&amp;family=Open+Sans:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#CC0000", // Zora Red
+                        "primary-hover": "#A30000",
+                        "zora-dark": "#221710", // Main Background
+                        "zora-header": "#221710", // Header Background
+                        "zora-button-bg": "#342418", // Back Button Background
+                        "zora-text-muted": "#CBA990", // Subtitle & Country text
+                        "zora-border-inactive": "rgba(255, 255, 255, 0.1)",
+                    },
+                    fontFamily: {
+                        display: ["Montserrat", "sans-serif"],
+                        body: ["Open Sans", "sans-serif"],
+                    },
+                    borderRadius: {
+                        DEFAULT: "12px",
+                        xl: "12px",
+                    },
+                    boxShadow: {
+                        'glow-red': '0 0 15px 0 rgba(204, 0, 0, 0.4)',
+                    }
+                },
+            },
+        };
+    </script>
+<style>
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        .gradient-overlay {
+            background: linear-gradient(90deg, rgba(34,23,16,0.9) 0%, rgba(34,23,16,0.3) 100%);
+        }
+        body {
+             background-color: #221710;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-zora-dark text-white font-display antialiased min-h-screen flex flex-col relative">
+<header class="pt-12 px-6 pb-4 sticky top-0 z-30 bg-zora-header">
+<button aria-label="Go back" class="w-[40px] h-[40px] rounded-full flex items-center justify-center bg-zora-button-bg text-white transition-colors mb-6">
+<span class="material-icons-round text-[24px]">chevron_left</span>
+</button>
+<h1 class="text-[32px] font-bold leading-tight mb-2 tracking-tight text-white font-display">
+            Discover Your Heritage
+        </h1>
+<p class="text-zora-text-muted text-[16px] font-body font-normal leading-relaxed">
+            Select the regions you connect with to personalize your market experience.
+        </p>
+</header>
+<main class="flex-1 overflow-y-auto no-scrollbar px-6 pb-32 mt-2 space-y-4">
+<div class="group relative w-full h-[128px] rounded-xl overflow-hidden cursor-pointer border-[2px] border-primary shadow-glow-red transition-all duration-300">
+<img alt="West African Market Vibes" class="absolute inset-0 w-full h-full object-cover transition-transform duration-700" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCQG1XTuA1hfkYYi3-h248dUH4NBygNhK71hsYrue4ud6LCkohfgiYiddZa4HiZAEHIiFumizn_3m_myAPu4hO2oCeowRL2ZnoLximnp_sUDE7HoCmj9ByxPpSiNGEIfQ0IlJTVTttdjEu0Q5X9JIAnKJM8KH1PxLU43vSWMOpSza9XAbNM7MIKrUNavIh1Gitzey7ZfgTOgM5f-z03wHAX7v1MDjk9U9dK5m8H-iZiV-Mv6OfvHK8dGbaKfl1moq8KAyUqWw9dzwju"/>
+<div class="absolute inset-0 gradient-overlay"></div>
+<div class="relative z-10 h-full flex items-center justify-between px-5">
+<div class="flex flex-col justify-center h-full max-w-[75%]">
+<h3 class="text-[20px] font-bold text-white mb-1 font-display">West Africa</h3>
+<p class="text-[14px] text-zora-text-muted font-medium font-body truncate">Nigeria, Ghana, Senegal, Mali...</p>
+</div>
+<div class="w-[28px] h-[28px] rounded-full bg-primary flex items-center justify-center text-white shadow-sm">
+<span class="material-icons-round text-[18px] font-bold">check</span>
+</div>
+</div>
+</div>
+<div class="group relative w-full h-[128px] rounded-xl overflow-hidden cursor-pointer border border-white/10 hover:border-white/30 transition-all duration-300">
+<img alt="East African Landscape" class="absolute inset-0 w-full h-full object-cover transition-transform duration-700" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDIL3NgxPI-0GqSaFWAVQ-ZCVpsbgmZlTcjp0_qkZNhnOVCVIWYXFxVxTMK1ocW9vCnD-b81bB1S-0lImFrGmtDSkiQPw4NgEcmXuU7dXVivDR_1-F-zrhL5bKZ5TRVo9F6G8_7sqsN2HY6cFSaDv8i-Cg-ohdj6gTP_8Uz4BVl_ftm7w1U--5Afjzef7Wk9CAzVcAXUfPXXi074vU5PdiNNh7ko8i1GkWhS6UamsVJjWIY7lnG-WKh6wBdUOSUWGXj-d2BE5ICiG5w"/>
+<div class="absolute inset-0 gradient-overlay"></div>
+<div class="relative z-10 h-full flex items-center justify-between px-5">
+<div class="flex flex-col justify-center h-full max-w-[75%]">
+<h3 class="text-[20px] font-bold text-white mb-1 font-display">East Africa</h3>
+<p class="text-[14px] text-zora-text-muted font-medium font-body truncate">Kenya, Ethiopia, Tanzania, Uganda...</p>
+</div>
+<div class="w-[28px] h-[28px] rounded-full border border-gray-400 bg-transparent flex items-center justify-center">
+</div>
+</div>
+</div>
+<div class="group relative w-full h-[128px] rounded-xl overflow-hidden cursor-pointer border border-white/10 hover:border-white/30 transition-all duration-300">
+<img alt="Southern African City" class="absolute inset-0 w-full h-full object-cover transition-transform duration-700" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBEwOuZN9uBpNVrYscpNNSg2m9xw68VrOD9CKqyQPDzBox-ccxPZUZ1u-x_xyX0z9ql5wz28Qx4cNoCYpo52iSuAiu-MTvQMKi8lZQePW8al3z5LC8gSigQHsbcc1dTlNQsCZQ_kqyHuurBzQN63cxy_B7VwlqjgolKrH4_Ln5W_Xdb_pizxlju2Z_PYiA6iUJ3kTX_4c_G0j81reFSXN4MDd2w8AVe6IJ2tQeVz4Ocg7z69UIPr4mjemKwe8bO_-Oqf5y8kl8DAqsi"/>
+<div class="absolute inset-0 gradient-overlay"></div>
+<div class="relative z-10 h-full flex items-center justify-between px-5">
+<div class="flex flex-col justify-center h-full max-w-[75%]">
+<h3 class="text-[20px] font-bold text-white mb-1 font-display">Southern Africa</h3>
+<p class="text-[14px] text-zora-text-muted font-medium font-body truncate">South Africa, Zimbabwe, Botswana...</p>
+</div>
+<div class="w-[28px] h-[28px] rounded-full border border-gray-400 bg-transparent flex items-center justify-center">
+</div>
+</div>
+</div>
+<div class="group relative w-full h-[128px] rounded-xl overflow-hidden cursor-pointer border border-white/10 hover:border-white/30 transition-all duration-300">
+<img alt="Central African Forest" class="absolute inset-0 w-full h-full object-cover transition-transform duration-700" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCfyAtW581stx5pDGETWWVNKhbOS3CwGnoW6VkWYQqLvXnKMn7wxeTsQujZ2YCUDKwROIsDtP9jhbFS0gfM_2vx5VVYLzI7viU_BIXlNNdQ3gH_5y-K80gIWdCZQF2IrclresFxFsp-qaGehdnjgV9MmJrnol0-gi5Bh0MXwnTJ2jf1XvFcm216u69-bDYIlBg358YWxlBFpna24suVp_eNoSmxJwm52vGn66RZMImms-pF4CY4Bj3Ik2CFuECvyaF2IhyVgFlj0T4x"/>
+<div class="absolute inset-0 gradient-overlay"></div>
+<div class="relative z-10 h-full flex items-center justify-between px-5">
+<div class="flex flex-col justify-center h-full max-w-[75%]">
+<h3 class="text-[20px] font-bold text-white mb-1 font-display">Central Africa</h3>
+<p class="text-[14px] text-zora-text-muted font-medium font-body truncate">Cameroon, DR Congo, Gabon...</p>
+</div>
+<div class="w-[28px] h-[28px] rounded-full border border-gray-400 bg-transparent flex items-center justify-center">
+</div>
+</div>
+</div>
+<div class="group relative w-full h-[128px] rounded-xl overflow-hidden cursor-pointer border-[2px] border-primary shadow-glow-red transition-all duration-300">
+<img alt="North African Desert" class="absolute inset-0 w-full h-full object-cover transition-transform duration-700" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC2Ocd5O67VlQxSvZKJ7DWcNl06GJ14v-NfZ5pERcdLaOQybsf7-5ZWfnYCNDst11lHffQSObLIP4JWthy_YdyHCgCwmw0yI3ujQ-QBA_Lda4izL71EX1GdOFe9oAYjkMHaWWeUnJ1Rh7pc8LGK6Wt5ki2LhmSozLDa8ip2cLhzHyBGlFLvIRceKIi70KasKprkRpojza5HVXfTM-ZzthE9d4UTNIooLU9iTVCC1TVjPGKzU9uUBak4_ucjBrkx-atiBvNgWSsR4sTg"/>
+<div class="absolute inset-0 gradient-overlay"></div>
+<div class="relative z-10 h-full flex items-center justify-between px-5">
+<div class="flex flex-col justify-center h-full max-w-[75%]">
+<h3 class="text-[20px] font-bold text-white mb-1 font-display">North Africa</h3>
+<p class="text-[14px] text-zora-text-muted font-medium font-body truncate">Egypt, Morocco, Algeria, Tunisia...</p>
+</div>
+<div class="w-[28px] h-[28px] rounded-full bg-primary flex items-center justify-center text-white shadow-sm">
+<span class="material-icons-round text-[18px] font-bold">check</span>
+</div>
+</div>
+</div>
+</main>
+<footer class="fixed bottom-0 left-0 right-0 p-6 bg-zora-dark/80 backdrop-blur-md border-t border-white/5 z-40">
+<button class="w-full h-[56px] bg-primary hover:bg-primary-hover text-white rounded-xl font-display font-semibold text-lg flex items-center justify-center gap-2 transition-all active:scale-[0.98]">
+<span>Start Shopping</span>
+<span class="material-icons-round text-2xl">arrow_forward</span>
+</button>
+</footer>
+
+</body></html>

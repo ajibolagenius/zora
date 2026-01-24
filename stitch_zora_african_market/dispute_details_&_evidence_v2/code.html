@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Dispute Details &amp; Evidence</title>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#c20a0a",
+                        "background-light": "#f8f5f5",
+                        "background-dark": "#221010",
+                        "surface-brown": "#342418", // Custom color from prompt
+                    },
+                    fontFamily: {
+                        "display": ["Plus Jakarta Sans", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.5rem", 
+                        "lg": "1rem", 
+                        "xl": "1.5rem", 
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        /* Custom scrollbar for better aesthetics */
+        textarea::-webkit-scrollbar {
+            width: 8px;
+        }
+        textarea::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        textarea::-webkit-scrollbar-thumb {
+            background-color: #543b3b;
+            border-radius: 20px;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-white font-display min-h-screen flex flex-col overflow-x-hidden antialiased selection:bg-primary selection:text-white">
+<!-- Header Section -->
+<header class="sticky top-0 z-50 bg-background-light/80 dark:bg-background-dark/95 backdrop-blur-md pt-safe-top">
+<div class="flex items-center justify-between px-4 py-3">
+<button class="flex items-center justify-center w-10 h-10 rounded-full hover:bg-black/5 dark:hover:bg-white/10 transition-colors">
+<span class="material-symbols-outlined text-[24px]">arrow_back_ios_new</span>
+</button>
+<h1 class="text-lg font-bold leading-tight tracking-tight flex-1 text-center">Describe the Issue</h1>
+<div class="w-10"></div> <!-- Spacer for visual balance -->
+</div>
+<!-- Progress Bar -->
+<div class="w-full px-6 pb-4">
+<div class="flex items-center gap-2">
+<div class="h-1.5 flex-1 rounded-full bg-primary/30"></div>
+<div class="h-1.5 flex-1 rounded-full bg-primary"></div>
+</div>
+<p class="text-center text-xs font-medium text-gray-500 dark:text-gray-400 mt-2">Step 2 of 2</p>
+</div>
+</header>
+<!-- Scrollable Content -->
+<main class="flex-1 flex flex-col px-4 pb-32 gap-6 pt-2">
+<!-- Item Summary Card -->
+<section>
+<div class="flex items-center gap-4 bg-white dark:bg-surface-brown p-3 pr-4 rounded-[12px] shadow-sm ring-1 ring-black/5 dark:ring-white/5">
+<div class="relative shrink-0">
+<div class="w-14 h-14 bg-gray-200 dark:bg-gray-700 rounded-lg bg-cover bg-center" data-alt="Jollof rice spice mix packaging" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCDEJhwwTThHAGsY2HYAUCTMb2ljy6RqjWUd8mG8bZ3QDLoVkOADYBnnlimeW_VzLFTLGvLhip0RZTm7cqtkhtmkPSd7h5m_0_yCJrMmxvJ65vmBaOtqq-Iyo2Gtcc7J_ubWkWHSCh7HfoUdHLyDeGJ8Hk0LNImClO883XRduDcgwyXYtYiABRxtmpx-aED429CnYGz2oqS9jMtaXzWdSWdrGR-f0FaHsIC8Vzn0AKKW3PyFajso946qVkRi_UHA_KOirQ0Gc1OqusP');">
+</div>
+</div>
+<div class="flex-1 min-w-0">
+<h3 class="text-sm font-semibold truncate text-gray-900 dark:text-white">Jollof Rice Spice Mix - 200g</h3>
+<p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Quantity: 2 items</p>
+</div>
+<button class="text-gray-400 hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-[20px]">info</span>
+</button>
+</div>
+</section>
+<!-- Description Input -->
+<section>
+<label class="block text-sm font-bold mb-2 ml-1 text-gray-800 dark:text-white" for="issue-description">
+                What went wrong?
+            </label>
+<div class="relative">
+<textarea class="w-full bg-white dark:bg-surface-brown border-0 ring-1 ring-black/5 dark:ring-white/5 focus:ring-2 focus:ring-primary rounded-[12px] p-4 text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-[#ba9c9c] min-h-[140px] resize-none" id="issue-description" placeholder="Please describe the issue in detail, e.g., damaged packaging, expired product..."></textarea>
+<div class="absolute bottom-3 right-3 text-[10px] font-medium text-gray-400 dark:text-[#ba9c9c]">
+                    0/500
+                </div>
+</div>
+</section>
+<!-- Evidence Upload -->
+<section>
+<div class="flex items-center justify-between mb-3 ml-1">
+<h3 class="text-sm font-bold text-gray-800 dark:text-white">Upload Evidence</h3>
+<span class="text-xs text-gray-500 dark:text-gray-400 font-medium">Optional</span>
+</div>
+<div class="grid grid-cols-3 gap-3">
+<!-- Add Button -->
+<button class="aspect-square flex flex-col items-center justify-center gap-2 rounded-[12px] border-2 border-dashed border-gray-300 dark:border-white/20 bg-transparent hover:bg-primary/5 active:bg-primary/10 transition-colors group">
+<span class="material-symbols-outlined text-gray-400 group-hover:text-primary transition-colors text-[28px]">add_a_photo</span>
+<span class="text-[10px] font-semibold text-gray-400 group-hover:text-primary transition-colors">Add</span>
+</button>
+<!-- Uploaded Image 1 -->
+<div class="relative aspect-square rounded-[12px] overflow-hidden group">
+<div class="absolute inset-0 bg-cover bg-center" data-alt="Damaged box corner close up" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDvnQoYuDGTyGGwzwdT5xr2EQRdmPtYT4BJQ3MhtHfqGcf2Qdv7lp-hDSi2BTDENYtOnWVAXTLKIY__x9FcONmMpD04RAR219Hmtq1V1Rm0LHLOgurNgAkHeJimbnswWqLfCnZhoAd7PG4XVp2z_9VL5vYEbVWX0TOLOJvEWYxicro8uQ5uPKZpOJR0wTxXMLowmFn264ENHz7txKsGI7On5j-QpibHWZ92QS2ukzUkLnUkbf0KzBB2WI-d423sA8iExcyOdrFzk4Jh');">
+</div>
+<!-- Gradient overlay for delete button visibility -->
+<div class="absolute inset-0 bg-black/10"></div>
+<!-- Delete Button -->
+<button aria-label="Remove photo" class="absolute top-1.5 right-1.5 w-6 h-6 flex items-center justify-center bg-primary text-white rounded-full shadow-lg hover:scale-110 active:scale-95 transition-transform">
+<span class="material-symbols-outlined text-[14px] font-bold">close</span>
+</button>
+</div>
+<!-- Uploaded Image 2 -->
+<div class="relative aspect-square rounded-[12px] overflow-hidden group">
+<div class="absolute inset-0 bg-cover bg-center" data-alt="Spilled spice powder on table" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAQj0InSxxXpL74aQnLDvkCDf83_hzkUzfriWdXPh2LI-0vVMmgtpsxHq-s0sHEfh7X_xyZz-tHM4QLVN4kbF5dhZO8jYgZQeeQy30jgXjAGL0LQPOyWmySQJ4k7oQH97n7ri8O5ve-qoxDpeKNLvyAqSA53153p75tkuD2ASElDMAl8yH6abZ_gu3GAVL_wfR-X80OvX6OtELg-MgYb7F_Zuh8qQkmza-gC5jss0yf3-jeebUuSm_z4D-j3p8_ZUUQkm9n4JGr043g');">
+</div>
+<div class="absolute inset-0 bg-black/10"></div>
+<button aria-label="Remove photo" class="absolute top-1.5 right-1.5 w-6 h-6 flex items-center justify-center bg-primary text-white rounded-full shadow-lg hover:scale-110 active:scale-95 transition-transform">
+<span class="material-symbols-outlined text-[14px] font-bold">close</span>
+</button>
+</div>
+</div>
+</section>
+<!-- Desired Outcome -->
+<section>
+<h3 class="text-sm font-bold mb-3 ml-1 text-gray-800 dark:text-white">Desired Outcome</h3>
+<div class="flex flex-col gap-3">
+<!-- Option 1: Refund -->
+<label class="relative flex items-center p-3 rounded-[12px] bg-white dark:bg-surface-brown ring-1 ring-black/5 dark:ring-white/5 cursor-pointer hover:ring-primary/50 transition-all has-[:checked]:ring-2 has-[:checked]:ring-primary has-[:checked]:bg-primary/5 dark:has-[:checked]:bg-primary/10">
+<input checked="" class="peer sr-only" name="outcome" type="radio"/>
+<div class="flex items-center justify-center w-5 h-5 rounded-full border-2 border-gray-400 dark:border-gray-500 peer-checked:border-primary peer-checked:bg-primary transition-colors">
+<div class="w-2 h-2 rounded-full bg-white scale-0 peer-checked:scale-100 transition-transform"></div>
+</div>
+<div class="ml-3 flex flex-col">
+<span class="text-sm font-semibold text-gray-900 dark:text-white">Refund to Original Payment</span>
+<span class="text-xs text-gray-500 dark:text-gray-400">Receive $12.50 back to your card ending in 4242</span>
+</div>
+</label>
+<!-- Option 2: Replacement -->
+<label class="relative flex items-center p-3 rounded-[12px] bg-white dark:bg-surface-brown ring-1 ring-black/5 dark:ring-white/5 cursor-pointer hover:ring-primary/50 transition-all has-[:checked]:ring-2 has-[:checked]:ring-primary has-[:checked]:bg-primary/5 dark:has-[:checked]:bg-primary/10">
+<input class="peer sr-only" name="outcome" type="radio"/>
+<div class="flex items-center justify-center w-5 h-5 rounded-full border-2 border-gray-400 dark:border-gray-500 peer-checked:border-primary peer-checked:bg-primary transition-colors">
+<div class="w-2 h-2 rounded-full bg-white scale-0 peer-checked:scale-100 transition-transform"></div>
+</div>
+<div class="ml-3 flex flex-col">
+<span class="text-sm font-semibold text-gray-900 dark:text-white">Send Replacement</span>
+<span class="text-xs text-gray-500 dark:text-gray-400">Ship the same items again at no cost</span>
+</div>
+</label>
+<!-- Option 3: Store Credit -->
+<label class="relative flex items-center p-3 rounded-[12px] bg-white dark:bg-surface-brown ring-1 ring-black/5 dark:ring-white/5 cursor-pointer hover:ring-primary/50 transition-all has-[:checked]:ring-2 has-[:checked]:ring-primary has-[:checked]:bg-primary/5 dark:has-[:checked]:bg-primary/10">
+<input class="peer sr-only" name="outcome" type="radio"/>
+<div class="flex items-center justify-center w-5 h-5 rounded-full border-2 border-gray-400 dark:border-gray-500 peer-checked:border-primary peer-checked:bg-primary transition-colors">
+<div class="w-2 h-2 rounded-full bg-white scale-0 peer-checked:scale-100 transition-transform"></div>
+</div>
+<div class="ml-3 flex flex-col">
+<span class="text-sm font-semibold text-gray-900 dark:text-white">Zora Store Credit</span>
+<span class="text-xs text-gray-500 dark:text-gray-400">Instant credit applied to your wallet</span>
+</div>
+</label>
+</div>
+</section>
+</main>
+<!-- Sticky Footer -->
+<footer class="fixed bottom-0 left-0 w-full bg-background-light dark:bg-background-dark border-t border-gray-200 dark:border-white/5 p-4 pb-8 z-40 backdrop-blur-xl bg-opacity-90 dark:bg-opacity-90">
+<button class="w-full bg-primary hover:bg-primary/90 text-white font-bold text-base py-3.5 px-6 rounded-[12px] shadow-lg shadow-primary/20 transition-all active:scale-[0.98]">
+            Submit Dispute
+        </button>
+</footer>
+</body></html>

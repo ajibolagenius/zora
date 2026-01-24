@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Select Dispute Items</title>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&amp;family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#cc0000",
+                        "background-light": "#f8f5f5",
+                        "background-dark": "#181010", // Matching the component example
+                        "card-brown": "#342418",
+                    },
+                    fontFamily: {
+                        "display": ["Plus Jakarta Sans", "sans-serif"],
+                        "heading": ["Montserrat", "sans-serif"],
+                    },
+                    borderRadius: {"DEFAULT": "0.5rem", "lg": "1rem", "xl": "1.5rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        /* Custom scrollbar hiding for clean UI */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        body {
+            font-family: "Plus Jakarta Sans", "Noto Sans", sans-serif;
+        }
+        h1, h2, h3, h4, h5, h6 {
+            font-family: "Montserrat", sans-serif;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-dark text-white">
+<div class="relative flex h-full min-h-screen w-full flex-col bg-[#181010] dark group/design-root overflow-x-hidden pb-32">
+<!-- Header -->
+<div class="sticky top-0 z-20 flex items-center bg-[#181010]/95 backdrop-blur-md p-4 pb-2 justify-between border-b border-white/5">
+<button class="text-white flex size-12 shrink-0 items-center justify-center hover:bg-white/10 rounded-full transition-colors">
+<span class="material-symbols-outlined">arrow_back</span>
+</button>
+<h2 class="text-white text-lg font-bold leading-tight tracking-[-0.015em] flex-1 text-center pr-12 font-heading">Report an Issue</h2>
+</div>
+<!-- Issue Type Section -->
+<div class="px-4 pt-6">
+<h2 class="text-white tracking-wide text-xl font-bold leading-tight text-left pb-4 font-heading">What went wrong?</h2>
+<div class="grid grid-cols-2 gap-3">
+<!-- Selected Card: Missing Item -->
+<div class="cursor-pointer bg-[#342418] border-2 border-[#cc0000] rounded-xl p-4 flex flex-col justify-between aspect-[1.4/1] relative shadow-lg shadow-[#cc0000]/10 transition-all">
+<div class="flex justify-between items-start w-full">
+<div class="bg-[#cc0000]/20 p-2 rounded-lg text-[#cc0000]">
+<span class="material-symbols-outlined filled">package_2</span>
+</div>
+<span class="material-symbols-outlined text-[#cc0000] filled">radio_button_checked</span>
+</div>
+<p class="text-white text-sm font-bold leading-tight">Missing Item</p>
+</div>
+<!-- Unselected Card: Wrong Item -->
+<div class="cursor-pointer bg-[#342418] border-2 border-transparent hover:border-white/10 rounded-xl p-4 flex flex-col justify-between aspect-[1.4/1] relative transition-all">
+<div class="flex justify-between items-start w-full">
+<div class="bg-white/5 p-2 rounded-lg text-white/70">
+<span class="material-symbols-outlined">assignment_return</span>
+</div>
+<span class="material-symbols-outlined text-white/30">radio_button_unchecked</span>
+</div>
+<p class="text-white/80 text-sm font-bold leading-tight">Wrong Item</p>
+</div>
+<!-- Unselected Card: Damaged -->
+<div class="cursor-pointer bg-[#342418] border-2 border-transparent hover:border-white/10 rounded-xl p-4 flex flex-col justify-between aspect-[1.4/1] relative transition-all">
+<div class="flex justify-between items-start w-full">
+<div class="bg-white/5 p-2 rounded-lg text-white/70">
+<span class="material-symbols-outlined">broken_image</span>
+</div>
+<span class="material-symbols-outlined text-white/30">radio_button_unchecked</span>
+</div>
+<p class="text-white/80 text-sm font-bold leading-tight">Damaged</p>
+</div>
+<!-- Unselected Card: Quality Issue -->
+<div class="cursor-pointer bg-[#342418] border-2 border-transparent hover:border-white/10 rounded-xl p-4 flex flex-col justify-between aspect-[1.4/1] relative transition-all">
+<div class="flex justify-between items-start w-full">
+<div class="bg-white/5 p-2 rounded-lg text-white/70">
+<span class="material-symbols-outlined">thumb_down</span>
+</div>
+<span class="material-symbols-outlined text-white/30">radio_button_unchecked</span>
+</div>
+<p class="text-white/80 text-sm font-bold leading-tight">Quality Issue</p>
+</div>
+<!-- Unselected Card: Other -->
+<div class="cursor-pointer col-span-2 bg-[#342418] border-2 border-transparent hover:border-white/10 rounded-xl p-4 flex items-center gap-4 relative transition-all min-h-[72px]">
+<div class="bg-white/5 p-2 rounded-lg text-white/70 shrink-0">
+<span class="material-symbols-outlined">more_horiz</span>
+</div>
+<p class="text-white/80 text-sm font-bold leading-tight flex-1">Other Issue</p>
+<span class="material-symbols-outlined text-white/30 shrink-0">radio_button_unchecked</span>
+</div>
+</div>
+</div>
+<div class="h-8"></div>
+<!-- Item List Section -->
+<div class="px-4">
+<div class="flex items-center justify-between pb-4">
+<h2 class="text-white tracking-wide text-xl font-bold leading-tight font-heading">Select affected items</h2>
+<button class="text-sm font-medium text-white/60 underline decoration-white/30 hover:text-white">Select All</button>
+</div>
+<div class="flex flex-col gap-2">
+<!-- Item 1 -->
+<div class="flex items-center gap-4 bg-[#231515] p-3 rounded-xl justify-between border border-white/5">
+<div class="flex items-center gap-4 overflow-hidden">
+<div class="bg-center bg-no-repeat bg-cover rounded-lg size-16 shrink-0 shadow-inner bg-stone-800" data-alt="Close up of delicious Jollof Rice in a bowl" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBK4ghvlt4709Xerh_JNfbchgI-A9K4xrjN2f9ID99D29RDPQ48aaEuIB4imPNo7Cx0cfoXsN-VQmM3o_ztoq9xGL0T_WPczOtKM3POZVn1lbeS0bnT2EQSG4pT7Ela7kZ6C57zJ1mf4DFev9FrrB365EtrzJ1O_e6LeuPwg793oGxjoeFZHGVfxxVncsevegdUiGlfAHLR9_0w5YduDVO8pWaBT5nKwg37wyssWCmmvEzZV580OOCi0Q2TytkdvNegz-NSRCv23pYU");'></div>
+<div class="flex flex-col gap-1 min-w-0">
+<p class="text-white text-base font-bold leading-tight truncate">Jollof Rice (Party Size)</p>
+<p class="text-white/60 text-sm font-medium">2lb • $12.99</p>
+</div>
+</div>
+<div class="shrink-0 pl-2">
+<div class="flex size-7 items-center justify-center relative">
+<input checked="" class="peer h-6 w-6 cursor-pointer appearance-none rounded border-2 border-[#563939] bg-transparent text-[#cc0000] transition-all checked:border-[#cc0000] checked:bg-[#cc0000] focus:ring-0 focus:ring-offset-0" type="checkbox"/>
+<span class="material-symbols-outlined absolute pointer-events-none opacity-0 peer-checked:opacity-100 text-white text-sm font-bold">check</span>
+</div>
+</div>
+</div>
+<!-- Item 2 -->
+<div class="flex items-center gap-4 bg-[#181010] p-3 rounded-xl justify-between border border-white/5 hover:bg-[#231515] transition-colors">
+<div class="flex items-center gap-4 overflow-hidden">
+<div class="bg-center bg-no-repeat bg-cover rounded-lg size-16 shrink-0 shadow-inner bg-stone-800" data-alt="Fresh plantains with yellow and black spots" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBv5ECVHmTytsH3kQr8zw418nbbqNa0o2Zl2Jc6B91jRGnsg8iFm3HSnyFvDe881ZE0cYpIIaT8hyjT-jVjm0s96NDkyTchaYW8xknpT_X4lWk6u7IxzDaLoqqIC4Gyo6uhUqZnJiCxuuvsB1f2m6vDPseyNvHO_CzD3w0GRW0OYIrWkEZunAEY1iE8CXS0r7T24pTBYpfTPaTDJwfHJ_T9EJ84aZ-lVrYlVdAmXHXGMWaKZSzNIooCGdhXhWQBkLKBlmsFKcpJCwbs");'></div>
+<div class="flex flex-col gap-1 min-w-0">
+<p class="text-white text-base font-medium leading-tight truncate">Sweet Plantains</p>
+<p class="text-white/60 text-sm font-medium">5ct • $4.50</p>
+</div>
+</div>
+<div class="shrink-0 pl-2">
+<div class="flex size-7 items-center justify-center relative">
+<input class="peer h-6 w-6 cursor-pointer appearance-none rounded border-2 border-[#563939] bg-transparent text-[#cc0000] transition-all checked:border-[#cc0000] checked:bg-[#cc0000] focus:ring-0 focus:ring-offset-0" type="checkbox"/>
+<span class="material-symbols-outlined absolute pointer-events-none opacity-0 peer-checked:opacity-100 text-white text-sm font-bold">check</span>
+</div>
+</div>
+</div>
+<!-- Item 3 -->
+<div class="flex items-center gap-4 bg-[#181010] p-3 rounded-xl justify-between border border-white/5 hover:bg-[#231515] transition-colors">
+<div class="flex items-center gap-4 overflow-hidden">
+<div class="bg-center bg-no-repeat bg-cover rounded-lg size-16 shrink-0 shadow-inner bg-stone-800" data-alt="Golden brown fried puff puff donuts" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCW7Og1Vx5ZSxS3cMJvKWDNpY3UhDq91Q6BWonLZzaR-9Cj2Uh8Zdfa-6jLCTOd5XsVgMizuc_dx1w57ZjrLEmOJzqJhHRp6ZX8_uz7IlXiYugiXr-Ft6nzoC3r87hf3pPMC1N_uvA5Z7Fq34NdtwjFbRTXjbveucwy5Fimw1LGMRGvvWsFJQ7i-5O36nmSlah6fnh644kCI_FAggHDUrvQxsye9MZyYZ8QGseHeM7Ha_wbRhiRk1C7hDKFPi1ELN0EGTbZZ4rHSFw0");'></div>
+<div class="flex flex-col gap-1 min-w-0">
+<p class="text-white text-base font-medium leading-tight truncate">Puff Puff (Tray)</p>
+<p class="text-white/60 text-sm font-medium">1 Tray • $25.00</p>
+</div>
+</div>
+<div class="shrink-0 pl-2">
+<div class="flex size-7 items-center justify-center relative">
+<input class="peer h-6 w-6 cursor-pointer appearance-none rounded border-2 border-[#563939] bg-transparent text-[#cc0000] transition-all checked:border-[#cc0000] checked:bg-[#cc0000] focus:ring-0 focus:ring-offset-0" type="checkbox"/>
+<span class="material-symbols-outlined absolute pointer-events-none opacity-0 peer-checked:opacity-100 text-white text-sm font-bold">check</span>
+</div>
+</div>
+</div>
+<!-- Item 4 -->
+<div class="flex items-center gap-4 bg-[#181010] p-3 rounded-xl justify-between border border-white/5 hover:bg-[#231515] transition-colors">
+<div class="flex items-center gap-4 overflow-hidden">
+<div class="bg-center bg-no-repeat bg-cover rounded-lg size-16 shrink-0 shadow-inner bg-stone-800" data-alt="Can of malt beverage with condensation" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuA8b-h6fYSSxBM-mCwj8KQ-tCDpsJazeV64FoFcUFCUBHb7wGmFn7NgHY2Rn89XqUE6CrXVRGXwklfQQv0F-LNaTyQnYFrzRDyaA3oInQY-2BqYVN8-U7NgVnFgJxJpnfFR498digipIF3jv9NkAKSXxYnJlJe5Yv3uGrmBIMOYGgdWaksJVgOaOY-kt-bK_G3nfmDHwmSvzw9-KqwJjtE00w9TK66aTUjWx8qZ5CUY9GYnDTY4hLbueHtoS8T7aXx8pJ_jnn7UnO-C");'></div>
+<div class="flex flex-col gap-1 min-w-0">
+<p class="text-white text-base font-medium leading-tight truncate">Supermalt (6 Pack)</p>
+<p class="text-white/60 text-sm font-medium">6pk • $9.99</p>
+</div>
+</div>
+<div class="shrink-0 pl-2">
+<div class="flex size-7 items-center justify-center relative">
+<input class="peer h-6 w-6 cursor-pointer appearance-none rounded border-2 border-[#563939] bg-transparent text-[#cc0000] transition-all checked:border-[#cc0000] checked:bg-[#cc0000] focus:ring-0 focus:ring-offset-0" type="checkbox"/>
+<span class="material-symbols-outlined absolute pointer-events-none opacity-0 peer-checked:opacity-100 text-white text-sm font-bold">check</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Fixed Footer -->
+<div class="fixed bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-[#181010] via-[#181010] to-transparent pt-12 z-30">
+<button class="w-full bg-[#cc0000] hover:bg-[#a30000] active:scale-[0.98] transition-all text-white font-bold text-lg h-14 rounded-full shadow-lg shadow-red-900/30 flex items-center justify-center gap-2">
+                Continue
+            </button>
+<div class="h-4"></div> <!-- Safe area spacing -->
+</div>
+</div>
+</body></html>

@@ -1,24 +1,36 @@
 import React from 'react';
 import { Tabs } from 'expo-router';
 import { View, Text, StyleSheet, Platform } from 'react-native';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import {
+  House,
+  Compass,
+  ClipboardText,
+  ShoppingCart,
+  User,
+} from 'phosphor-react-native';
 import { Colors } from '../../constants/colors';
 import { FontSize, FontWeight } from '../../constants/typography';
 import { useCartStore } from '../../stores/cartStore';
 
+type PhosphorIconProps = {
+  size: number;
+  color: string;
+  weight: 'duotone' | 'fill' | 'regular' | 'bold' | 'light' | 'thin';
+};
+
 type TabIconProps = {
-  name: keyof typeof MaterialCommunityIcons.glyphMap;
+  IconComponent: React.ComponentType<PhosphorIconProps>;
   color: string;
   focused: boolean;
   badge?: number;
 };
 
-const TabIcon = ({ name, color, focused, badge }: TabIconProps) => (
+const TabIcon = ({ IconComponent, color, focused, badge }: TabIconProps) => (
   <View style={styles.iconContainer}>
-    <MaterialCommunityIcons
-      name={focused ? name : (`${name}-outline` as any)}
+    <IconComponent
       size={26}
       color={color}
+      weight={focused ? 'fill' : 'duotone'}
     />
     {badge !== undefined && badge > 0 && (
       <View style={styles.badge}>
@@ -49,7 +61,7 @@ export default function TabLayout() {
         options={{
           title: 'Home',
           tabBarIcon: ({ color, focused }) => (
-            <TabIcon name="home" color={color} focused={focused} />
+            <TabIcon IconComponent={House} color={color} focused={focused} />
           ),
         }}
       />
@@ -58,7 +70,7 @@ export default function TabLayout() {
         options={{
           title: 'Explore',
           tabBarIcon: ({ color, focused }) => (
-            <TabIcon name="compass" color={color} focused={focused} />
+            <TabIcon IconComponent={Compass} color={color} focused={focused} />
           ),
         }}
       />
@@ -67,7 +79,7 @@ export default function TabLayout() {
         options={{
           title: 'Orders',
           tabBarIcon: ({ color, focused }) => (
-            <TabIcon name="clipboard-text" color={color} focused={focused} />
+            <TabIcon IconComponent={ClipboardText} color={color} focused={focused} />
           ),
         }}
       />
@@ -76,7 +88,7 @@ export default function TabLayout() {
         options={{
           title: 'Cart',
           tabBarIcon: ({ color, focused }) => (
-            <TabIcon name="cart" color={color} focused={focused} badge={cartItemCount} />
+            <TabIcon IconComponent={ShoppingCart} color={color} focused={focused} badge={cartItemCount} />
           ),
         }}
       />
@@ -85,7 +97,7 @@ export default function TabLayout() {
         options={{
           title: 'Profile',
           tabBarIcon: ({ color, focused }) => (
-            <TabIcon name="account" color={color} focused={focused} />
+            <TabIcon IconComponent={User} color={color} focused={focused} />
           ),
         }}
       />

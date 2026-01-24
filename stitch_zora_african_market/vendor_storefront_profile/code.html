@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Vendor Storefront Profile - Zora African Market</title>
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Theme Config -->
+<script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "primary": "#c70505", // Zora Red
+              "secondary": "#342418", // Card Background / Lighter Brown
+              "tertiary": "#221710", // Main Background / Dark Brown
+              "accent-yellow": "#FFC107", // Zora Yellow
+              "text-muted": "#bb9b9b",
+            },
+            fontFamily: {
+              "display": ["Plus Jakarta Sans", "sans-serif"]
+            },
+            borderRadius: {
+              "DEFAULT": "0.75rem", // 12px
+              "lg": "0.75rem",
+              "xl": "1rem",
+              "full": "9999px"
+            },
+          },
+        },
+      }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-[#F8F5F5] dark:bg-tertiary font-display text-slate-900 dark:text-white antialiased selection:bg-primary selection:text-white">
+<div class="relative flex h-full min-h-screen w-full flex-col overflow-x-hidden max-w-md mx-auto shadow-2xl">
+<!-- Header Image & Top Bar -->
+<div class="relative h-48 w-full shrink-0">
+<!-- Background Image -->
+<div class="absolute inset-0 bg-cover bg-center" data-alt="Rich colorful display of african spices in wooden bowls" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAcJN5TLGc5TGRldOCQ98vh7tXVZ1ub5EJn9bvEXmH5zJB32tOYwFlI2MmC-6oZYDyJ8VFtkyj1d_luDzRHrBHo5wB2QxZWaYTObXbHd7RgTibHbTYmC5QKvmTAgYB3fBy9sj1NaZimgs4OIrAer9oxMLOub2PT9xOvnAGdUB5XV7giw0E_Y96pL660tWkOSaowK-2JmA32eBJLYirFJOfAKVfh6OZ4f0-3AhaCfYJA9P5-tysh7w4Od1hu8ZlOxwDLbdXs1_WRW8DS");'>
+</div>
+<!-- Gradient Overlay for readability -->
+<div class="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-black/60"></div>
+<!-- Top App Bar Actions -->
+<div class="relative z-10 flex items-center justify-between px-4 py-4 pt-12"> <!-- pt-12 to account for status bar -->
+<button class="flex h-10 w-10 items-center justify-center rounded-full bg-black/20 backdrop-blur-md text-white transition-colors hover:bg-black/40">
+<span class="material-symbols-outlined">arrow_back</span>
+</button>
+<div class="flex items-center gap-3">
+<button class="flex h-10 w-10 items-center justify-center rounded-full bg-black/20 backdrop-blur-md text-white transition-colors hover:bg-black/40">
+<span class="material-symbols-outlined">search</span>
+</button>
+<button class="relative flex h-10 w-10 items-center justify-center rounded-full bg-black/20 backdrop-blur-md text-white transition-colors hover:bg-black/40">
+<span class="material-symbols-outlined">shopping_cart</span>
+<span class="absolute right-2 top-2 h-2.5 w-2.5 rounded-full bg-primary ring-2 ring-tertiary"></span>
+</button>
+</div>
+</div>
+</div>
+<!-- Profile Info Section -->
+<div class="relative flex flex-col px-4 -mt-14 mb-4">
+<!-- Avatar -->
+<div class="relative h-28 w-28 rounded-full border-4 border-primary bg-secondary shadow-lg overflow-hidden shrink-0 self-start" data-alt="Mama Africa's Spices logo showing an african woman silhouette">
+<img alt="Vendor Avatar" class="h-full w-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBRi2NoT2LvuRsMfNRqJKTd2Dz_NdoAj-nN0perv78CsphyEeEhX4V5pil6wt0PMubIofTQza8e48BBqMe0uMQgorZlbvpx-34pK7JTZ4lAY6SegHaRAVvJfnt3MxIo114NpoMis3ts9LbF_JKCa2-CIX2lURb_W3P1HVMraLl3TBMIyruTYQ26x8CYhyUXQiTnDNGqMDB9aYO3L-3rlGqD4EuYoCdwQJP8JyNc7LZ_b1iQuv0LdvEOT-nN6N1E06FA5V26htNzyHpT"/>
+</div>
+<div class="mt-3 flex flex-col gap-1">
+<div class="flex items-center gap-2">
+<h1 class="text-2xl font-bold leading-tight tracking-tight text-white">Mama Africa's Spices</h1>
+<span class="material-symbols-outlined text-blue-500 fill-current" style="font-variation-settings: 'FILL' 1; font-size: 20px;">verified</span>
+</div>
+<div class="flex items-center gap-3 text-sm">
+<p class="text-text-muted">Verified Vendor</p>
+<span class="h-1 w-1 rounded-full bg-text-muted"></span>
+<div class="flex items-center gap-1 text-accent-yellow font-bold">
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">star</span>
+<span>4.8</span>
+<span class="font-normal text-text-muted">(1.2k)</span>
+</div>
+</div>
+</div>
+<!-- Action Buttons -->
+<div class="mt-5 flex gap-3">
+<button class="flex-1 h-12 rounded-xl bg-primary px-6 text-sm font-bold text-white shadow-lg shadow-primary/20 transition hover:bg-red-700 active:scale-95 flex items-center justify-center gap-2">
+                    Follow
+                </button>
+<button class="h-12 w-12 shrink-0 rounded-xl bg-secondary text-white flex items-center justify-center transition hover:bg-[#4a3525] active:scale-95">
+<span class="material-symbols-outlined">chat_bubble</span>
+</button>
+<button class="h-12 w-12 shrink-0 rounded-xl bg-secondary text-white flex items-center justify-center transition hover:bg-[#4a3525] active:scale-95">
+<span class="material-symbols-outlined">share</span>
+</button>
+</div>
+</div>
+<!-- Sticky Tabs -->
+<div class="sticky top-0 z-20 bg-[#F8F5F5] dark:bg-tertiary pt-2">
+<div class="flex w-full border-b border-white/10 px-4">
+<button class="group flex flex-1 flex-col items-center pb-3">
+<span class="text-sm font-bold text-primary">Products</span>
+<span class="mt-3 h-0.5 w-full rounded-full bg-primary"></span>
+</button>
+<button class="group flex flex-1 flex-col items-center pb-3">
+<span class="text-sm font-bold text-text-muted group-hover:text-white transition-colors">Reviews</span>
+<span class="mt-3 h-0.5 w-full rounded-full bg-transparent group-hover:bg-white/10 transition-colors"></span>
+</button>
+<button class="group flex flex-1 flex-col items-center pb-3">
+<span class="text-sm font-bold text-text-muted group-hover:text-white transition-colors">About</span>
+<span class="mt-3 h-0.5 w-full rounded-full bg-transparent group-hover:bg-white/10 transition-colors"></span>
+</button>
+</div>
+</div>
+<!-- Product Grid -->
+<div class="p-4 pb-24">
+<div class="grid grid-cols-2 gap-4">
+<!-- Product Card 1 -->
+<div class="group relative flex flex-col overflow-hidden rounded-xl bg-secondary p-3 transition-transform active:scale-[0.98]">
+<div class="relative aspect-square w-full overflow-hidden rounded-lg bg-tertiary">
+<img alt="Jollof Seasoning" class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110" data-alt="Bowl of red jollof rice seasoning powder" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCSTXrtnY1KRcIFzdwf0gp07sGWOAqbXsjIxeLQpAIrz2UTGPqv6hgPc05kGbJa1ZVTNDpFNPjkFP82wPEGSqQySw7k2GxVA1UzAEWE1DbfmKsNFY9MemAm1gC4Z-72iMUv_uLTDp9cIhRl25kHAwH4EwbH722eRAYUVI2jrtz8hmJjtIr5cJKNjierykD5cGCncYrvrmbT3riKMFiDpC0SbOWyUOditDmlXrV6ttZhwlcP-5Z7ndSmo6VrnAk_GnSSVvmlRo27SooO"/>
+<!-- Badges -->
+<div class="absolute left-2 top-2 rounded-md bg-primary px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white shadow-sm">
+                            Hot
+                        </div>
+<button class="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full bg-black/40 text-white backdrop-blur-sm transition hover:bg-primary hover:text-white">
+<span class="material-symbols-outlined text-[16px]">favorite</span>
+</button>
+</div>
+<div class="mt-3 flex flex-col gap-1">
+<h3 class="line-clamp-1 text-sm font-bold text-white">Jollof Seasoning</h3>
+<p class="text-xs text-text-muted">100g Pack</p>
+<div class="mt-2 flex items-center justify-between">
+<p class="text-base font-bold text-accent-yellow">$5.99</p>
+<button class="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-white shadow-lg shadow-primary/20 transition hover:bg-red-600">
+<span class="material-symbols-outlined text-[18px]">add</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Product Card 2 -->
+<div class="group relative flex flex-col overflow-hidden rounded-xl bg-secondary p-3 transition-transform active:scale-[0.98]">
+<div class="relative aspect-square w-full overflow-hidden rounded-lg bg-tertiary">
+<img alt="Suya Spice Mix" class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110" data-alt="Skewers of suya meat with spicy powder coating" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBTDn8W2PfLdFSvLutTHtCQzqQ0E9-Z_Yri7CHzpMJcPbRDexOEzhv_4BJOn-cdIHDQPDlBS_STT_gLkv5iM0KNYMFDPdRL3gN8U78QK71pUqsUBKzRDbNsVdV98ZiyiaznH8r1bTg_4JBwlXE6b0nJ2w9-uVp7LUcYjeMUrEDitZdSyVGHb9vRVfCzQR7rJtwyGDwm2ovFat8n3liywdpm5aEAtyrAArGIM3zWQYvaHYEn8sLv36os7Duardgwj52UNeqkQi06n-IS"/>
+<button class="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full bg-black/40 text-white backdrop-blur-sm transition hover:bg-primary hover:text-white">
+<span class="material-symbols-outlined text-[16px]">favorite</span>
+</button>
+</div>
+<div class="mt-3 flex flex-col gap-1">
+<h3 class="line-clamp-1 text-sm font-bold text-white">Suya Spice Mix</h3>
+<p class="text-xs text-text-muted">250g Jar</p>
+<div class="mt-2 flex items-center justify-between">
+<p class="text-base font-bold text-accent-yellow">$12.50</p>
+<button class="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-white shadow-lg shadow-primary/20 transition hover:bg-red-600">
+<span class="material-symbols-outlined text-[18px]">add</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Product Card 3 -->
+<div class="group relative flex flex-col overflow-hidden rounded-xl bg-secondary p-3 transition-transform active:scale-[0.98]">
+<div class="relative aspect-square w-full overflow-hidden rounded-lg bg-tertiary">
+<img alt="Berbere Blend" class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110" data-alt="Small bowl of red berbere spice blend" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCzdIvZEUnodRcTkwXX7aeWqZDinoYjhQgAzk9WhH-3Y-NpgjWI2PEQaZciHXQ8-aotdVYJ5pBFcNu_p7OT9Z2EYl-bH3oXPZljMXFBPRde-faPRGiNBmMwgghB1uBI3Ivz-LTOXZDsNn9hTLAbNb9Mi7riw2UFDaea7a1-nFtLtu1KFwhHSHx_ZeGm0DqWMGqEWVCDWTzxcaR4NoMNPLdfZVqvRJEUKtHEjICo1xhI8Q7-S8toQz74IICHIHiP8vceKX2Wip_mf4rv"/>
+<button class="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full bg-black/40 text-white backdrop-blur-sm transition hover:bg-primary hover:text-white">
+<span class="material-symbols-outlined text-[16px]">favorite</span>
+</button>
+</div>
+<div class="mt-3 flex flex-col gap-1">
+<h3 class="line-clamp-1 text-sm font-bold text-white">Berbere Blend</h3>
+<p class="text-xs text-text-muted">150g Pack</p>
+<div class="mt-2 flex items-center justify-between">
+<p class="text-base font-bold text-accent-yellow">$8.99</p>
+<button class="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-white shadow-lg shadow-primary/20 transition hover:bg-red-600">
+<span class="material-symbols-outlined text-[18px]">add</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Product Card 4 -->
+<div class="group relative flex flex-col overflow-hidden rounded-xl bg-secondary p-3 transition-transform active:scale-[0.98]">
+<div class="relative aspect-square w-full overflow-hidden rounded-lg bg-tertiary">
+<img alt="Egusi Seeds" class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110" data-alt="Heap of raw melon seeds (Egusi)" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAIgDbBl8Z6mVSrQU02y9bMExkw5VxRNQyBRm6L48LqPlynWER9NizitR7CaTwQlSqIlMdwCVd_aRcZXwJT1m6JzV_dT2Sco8Tnu8vqq7MbLxxTAROtZWTOPWvfehmU2EUCySPBfkE6VOhkxlSRnLj4m6gz1kBX6U883aGlHTmpSrBopWzU0ofQLxMwbfn1eTEsNqxseM80xm4CGnVmwP4ORogCAPkPM0XbBPwiN5GUDm2nRK5X-86-ZG8LMDcSCQfolNpgyPjm6CJ7"/>
+<!-- Badges -->
+<div class="absolute left-2 top-2 rounded-md bg-primary px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white shadow-sm">
+                            Hot
+                        </div>
+<button class="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full bg-black/40 text-white backdrop-blur-sm transition hover:bg-primary hover:text-white">
+<span class="material-symbols-outlined text-[16px]">favorite</span>
+</button>
+</div>
+<div class="mt-3 flex flex-col gap-1">
+<h3 class="line-clamp-1 text-sm font-bold text-white">Egusi Seeds</h3>
+<p class="text-xs text-text-muted">500g Bulk</p>
+<div class="mt-2 flex items-center justify-between">
+<p class="text-base font-bold text-accent-yellow">$15.00</p>
+<button class="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-white shadow-lg shadow-primary/20 transition hover:bg-red-600">
+<span class="material-symbols-outlined text-[18px]">add</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Product Card 5 -->
+<div class="group relative flex flex-col overflow-hidden rounded-xl bg-secondary p-3 transition-transform active:scale-[0.98]">
+<div class="relative aspect-square w-full overflow-hidden rounded-lg bg-tertiary">
+<img alt="Dried Peppers" class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110" data-alt="Pile of scotch bonnet peppers red and spicy" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBDJvHIC22LMwlJoKFVXur1uylded1S-wcnh2BOujQvgm6jkFB1LYQ9XRjj7GOxd-_QzPgSq0B7X6HIZrhfaPVY6FB0dO6PUvxULJfDl3mfZDYOCfT7vocIvA2v17Mzaf6PEAezp2mlVRr6Wt5-0JikSXDTyUk6KfW4lW5pTqKGweDuAsbnZ4XIIj1LOmG4qrbl2YnPjL8caplB2WI4jppuL6lBjeLKy3ihQdrTghr9OvHCeRPoBofZFY05NtKkBq_U4Mc9C-f_tzKC"/>
+<button class="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full bg-black/40 text-white backdrop-blur-sm transition hover:bg-primary hover:text-white">
+<span class="material-symbols-outlined text-[16px]">favorite</span>
+</button>
+</div>
+<div class="mt-3 flex flex-col gap-1">
+<h3 class="line-clamp-1 text-sm font-bold text-white">Dried Peppers</h3>
+<p class="text-xs text-text-muted">100g Bag</p>
+<div class="mt-2 flex items-center justify-between">
+<p class="text-base font-bold text-accent-yellow">$4.50</p>
+<button class="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-white shadow-lg shadow-primary/20 transition hover:bg-red-600">
+<span class="material-symbols-outlined text-[18px]">add</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Product Card 6 -->
+<div class="group relative flex flex-col overflow-hidden rounded-xl bg-secondary p-3 transition-transform active:scale-[0.98]">
+<div class="relative aspect-square w-full overflow-hidden rounded-lg bg-tertiary">
+<img alt="Turmeric Powder" class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110" data-alt="Turmeric powder in a wooden spoon" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC1EoA9jOb77DPOSElTE7PDgTW0UrKRrSy3J8qFzQWK55CaI9RRTAnXT3PIKp2elJhRqvuhHx1mKRNMA8ufSjmC5zLx_1Jvo4a29mLKI-KGsIiRNOiZicbYFPfcTJOH-K_rm9VtP3IUQ1K-Yf4HwKf3XKuejy7uXsRMeCYgfIW7ikAON5J3JzL8tvUuvMTBzjcMpkb2hoBQyd1Uf18gIbCfZ7Fb5nDP-MaYoccNh6eYSyKNngsjZ_kyQKkl1L-DxVPaiUd-khg5nURu"/>
+<button class="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full bg-black/40 text-white backdrop-blur-sm transition hover:bg-primary hover:text-white">
+<span class="material-symbols-outlined text-[16px]">favorite</span>
+</button>
+</div>
+<div class="mt-3 flex flex-col gap-1">
+<h3 class="line-clamp-1 text-sm font-bold text-white">Turmeric Powder</h3>
+<p class="text-xs text-text-muted">200g Jar</p>
+<div class="mt-2 flex items-center justify-between">
+<p class="text-base font-bold text-accent-yellow">$7.25</p>
+<button class="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-white shadow-lg shadow-primary/20 transition hover:bg-red-600">
+<span class="material-symbols-outlined text-[18px]">add</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</body></html>

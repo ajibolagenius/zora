@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Order Success</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Config -->
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#ec1313",
+                        "background-light": "#f8f6f6",
+                        "background-dark": "#181111", /* Adjusted to match component example dark bg */
+                        "card-dark": "#342418",
+                        "zora-yellow": "#FFCC00",
+                        "success-green": "#22C55E",
+                    },
+                    fontFamily: {
+                        "display": ["Plus Jakarta Sans", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.5rem", 
+                        "lg": "1rem", 
+                        "xl": "1.5rem", 
+                        "2xl": "2rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        /* Custom scrollbar for horizontal scrolling */
+        .scrollbar-hide::-webkit-scrollbar {
+            display: none;
+        }
+        .scrollbar-hide {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        
+        /* Static Confetti Simulation */
+        .confetti-piece {
+            position: absolute;
+            width: 8px;
+            height: 16px;
+            opacity: 0.7;
+            border-radius: 4px;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display antialiased selection:bg-primary selection:text-white">
+<div class="relative flex h-full min-h-screen w-full flex-col overflow-x-hidden pb-8">
+<!-- Decorative Background Gradient Overlay -->
+<div class="absolute inset-0 bg-gradient-to-b from-primary/5 to-transparent pointer-events-none h-64"></div>
+<!-- Confetti Decoration (Static) -->
+<div class="absolute top-10 left-[10%] w-2 h-4 bg-zora-yellow rotate-45 rounded-sm opacity-60"></div>
+<div class="absolute top-20 right-[15%] w-3 h-3 bg-primary rounded-full opacity-50"></div>
+<div class="absolute top-16 left-[20%] w-2 h-2 bg-success-green rotate-12 rounded-sm opacity-60"></div>
+<div class="absolute top-8 right-[25%] w-2 h-5 bg-blue-400 -rotate-12 rounded-sm opacity-50"></div>
+<div class="absolute top-24 left-[5%] w-3 h-3 bg-purple-400 rounded-full opacity-40"></div>
+<!-- Main Content Wrapper -->
+<div class="relative flex flex-col items-center pt-12 px-5 z-10 w-full max-w-md mx-auto">
+<!-- Success Icon -->
+<div class="mb-6 relative">
+<div class="size-20 bg-success-green rounded-full flex items-center justify-center shadow-[0_0_20px_rgba(34,197,94,0.4)]">
+<span class="material-symbols-outlined text-white text-[40px] font-bold">check</span>
+</div>
+</div>
+<!-- Header Text -->
+<div class="text-center w-full mb-8">
+<h1 class="text-gray-900 dark:text-white text-[28px] font-bold leading-tight mb-2 tracking-tight">
+                    Order Confirmed! 🎉
+                </h1>
+<p class="text-gray-600 dark:text-white/70 text-base font-medium leading-relaxed px-4">
+                    Thank you for supporting African vendors!
+                </p>
+<p class="text-gray-400 dark:text-white/40 text-sm mt-1 font-medium">
+                    Order #ZAM-2024-1234
+                </p>
+</div>
+<!-- Order Details Card -->
+<div class="w-full bg-white dark:bg-card-dark rounded-xl p-5 shadow-sm border border-gray-100 dark:border-white/5 mb-8">
+<div class="flex items-center justify-between border-b border-gray-100 dark:border-white/10 pb-4 mb-4">
+<div class="flex flex-col gap-1">
+<span class="text-gray-500 dark:text-[#b99d9d] text-xs uppercase tracking-wider font-semibold">Est. Delivery</span>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-gray-800 dark:text-white text-[20px]">local_shipping</span>
+<span class="text-gray-900 dark:text-white text-base font-semibold">Wed, Oct 24</span>
+</div>
+</div>
+<div class="flex flex-col gap-1 text-right">
+<span class="text-gray-500 dark:text-[#b99d9d] text-xs uppercase tracking-wider font-semibold">Ship to</span>
+<span class="text-gray-900 dark:text-white text-base font-medium truncate max-w-[120px]">123 Home St, NY</span>
+</div>
+</div>
+<div class="flex items-center justify-between">
+<div class="flex flex-col gap-1">
+<span class="text-gray-500 dark:text-[#b99d9d] text-xs uppercase tracking-wider font-semibold">Items</span>
+<span class="text-gray-900 dark:text-white text-base font-medium">3 items</span>
+</div>
+<div class="flex flex-col gap-1 text-right">
+<span class="text-gray-500 dark:text-[#b99d9d] text-xs uppercase tracking-wider font-semibold">Total Paid</span>
+<span class="text-zora-yellow text-xl font-bold">$45.50</span>
+</div>
+</div>
+</div>
+<!-- Actions -->
+<div class="w-full flex flex-col gap-3 mb-10">
+<button class="w-full h-14 bg-primary hover:bg-red-700 active:bg-red-800 text-white rounded-xl font-bold text-lg transition-colors flex items-center justify-center gap-2 shadow-lg shadow-primary/20">
+                    Track Order
+                </button>
+<button class="w-full h-14 bg-transparent border-2 border-primary/30 hover:bg-primary/5 active:bg-primary/10 text-primary rounded-xl font-bold text-lg transition-colors flex items-center justify-center">
+                    Continue Shopping
+                </button>
+</div>
+<!-- Recommendations Section -->
+<div class="w-full">
+<div class="flex items-center justify-between mb-4 px-1">
+<h3 class="text-gray-900 dark:text-white text-lg font-bold">You might also like</h3>
+<span class="text-primary text-sm font-semibold cursor-pointer">View All</span>
+</div>
+<!-- Horizontal Scroll Container -->
+<div class="flex overflow-x-auto gap-4 pb-4 -mx-5 px-5 scrollbar-hide snap-x">
+<!-- Product Card 1 -->
+<div class="snap-center shrink-0 w-[140px] flex flex-col gap-2">
+<div class="w-full aspect-square rounded-xl overflow-hidden bg-gray-100 dark:bg-white/5 relative group">
+<div class="w-full h-full bg-cover bg-center transition-transform duration-500 group-hover:scale-110" data-alt="West African Spices in glass jars" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDnRqIkHfPUyQXk6jzbJoPqVt6ae3kYnnhz8fx65k5OgfCwfVSLMks6UJWWmDSZssMVfYErsGowhiscjTanT9X2gQ_ASJgahdokTWOg3UCbIgt9MYf4H33U8FrQ0j7HYCu7d5lpj0vkrsDj4ORoKEqnhdVnpcJhFjktbBndjXzWcEJlbzDHnildM5n7PFOKilAUo32ARu_TfM2obHhddSt7qM4_icPNAUuqHE6Qiehxmj4S4SbQxZsjBcuwMztc4TyE2kwjtK1pH92u');"></div>
+</div>
+<div class="flex flex-col">
+<h4 class="text-gray-900 dark:text-white text-sm font-semibold truncate">Suya Spice Blend</h4>
+<p class="text-gray-500 dark:text-gray-400 text-xs">$8.50</p>
+</div>
+</div>
+<!-- Product Card 2 -->
+<div class="snap-center shrink-0 w-[140px] flex flex-col gap-2">
+<div class="w-full aspect-square rounded-xl overflow-hidden bg-gray-100 dark:bg-white/5 relative group">
+<div class="w-full h-full bg-cover bg-center transition-transform duration-500 group-hover:scale-110" data-alt="Patterned African fabric texture" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCxQ60repND4cF9JvNQLRZSrMjs5uSAkZ1JEQ-E3DvPP9_C3Yv812mlR4-oHZCuBFUqCS2bjjAN-K7AZLXtvrOw0Pyw-cDIKQMRsM3QLZHg7xo1DffYCmkTSSOAS298DR4TtRUXVbgqZUF_4FJJYH6KXhwrIExaRaBRXP8zLuON4bTUDvG3HrB-OoYDD_4d43H_YHALdldIFMeX54cbNXvMQp4lZmAEePxHmhJ7gZ-PLRYpkyH5p9q50GcxQuhFmrW26GRGSPrTWYsa');"></div>
+</div>
+<div class="flex flex-col">
+<h4 class="text-gray-900 dark:text-white text-sm font-semibold truncate">Kente Table Runner</h4>
+<p class="text-gray-500 dark:text-gray-400 text-xs">$32.00</p>
+</div>
+</div>
+<!-- Product Card 3 -->
+<div class="snap-center shrink-0 w-[140px] flex flex-col gap-2">
+<div class="w-full aspect-square rounded-xl overflow-hidden bg-gray-100 dark:bg-white/5 relative group">
+<div class="w-full h-full bg-cover bg-center transition-transform duration-500 group-hover:scale-110" data-alt="Bag of dried plantain chips" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDtFI_6-SVKon7pCY7nyB9mejmz1pv7aSn1SYJmt21CVt4wMR2Z3xgvAUTzXw6fEpiiIG1SeCazymn4Z0AHIlqC2Y-Y1FojP7BezyWPuftV3BDgtSs2H915rGDiIP7bAr0hbs9hod536mhS_xc8gt9rn_I_LJxnrsICpp307JH9RWZB8OqG4GIctpZ0Y3rZWfjwZYcxsu60u9RXX8vFMw3SQO9oI-euJtBJjFbrErqDA89w6a7tmLStvi_LIeMkZwbG2fljI1-r4Hyr');"></div>
+</div>
+<div class="flex flex-col">
+<h4 class="text-gray-900 dark:text-white text-sm font-semibold truncate">Plantain Chips</h4>
+<p class="text-gray-500 dark:text-gray-400 text-xs">$4.25</p>
+</div>
+</div>
+<!-- Product Card 4 -->
+<div class="snap-center shrink-0 w-[140px] flex flex-col gap-2">
+<div class="w-full aspect-square rounded-xl overflow-hidden bg-gray-100 dark:bg-white/5 relative group">
+<div class="w-full h-full bg-cover bg-center transition-transform duration-500 group-hover:scale-110" data-alt="Handcrafted woven basket" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAPbP3yIlXHaR-aDiw___ZugUSQqUBbJiYTtJS_V6RwICvCkvliEHso-5evbUs-XQfty2MDOpDCKYbOF6bxnGq1iiPtYFtrIgDU-X2Foh5ctjKBh0BnUQA6g1ShYYklpURVsoDGyZJ10A_yb8SVUWm761MdFV0QYl9DreI77C3r43HgNDllNwl8_LRj06_WPffruf5176MOw6z2sr5euwnnv_pbh8NRGfPn_iLpOf22y10s5S6_h3zWeYEtbjNL0ryi6b8WhKTOpCKF');"></div>
+</div>
+<div class="flex flex-col">
+<h4 class="text-gray-900 dark:text-white text-sm font-semibold truncate">Woven Basket</h4>
+<p class="text-gray-500 dark:text-gray-400 text-xs">$28.00</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</body></html>

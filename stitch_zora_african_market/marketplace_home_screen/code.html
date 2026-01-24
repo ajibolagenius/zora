@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Zora African Market</title>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&amp;family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#cc0000",
+                        "background-light": "#f8f5f5",
+                        "background-dark": "#230f0f",
+                        "zora-header": "#221710",
+                        "zora-surface": "#342418",
+                        "zora-nav": "#1F1610",
+                    },
+                    fontFamily: {
+                        "display": ["Plus Jakarta Sans", "sans-serif"],
+                        "headline": ["Montserrat", "sans-serif"],
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "2xl": "1rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        /* Hide scrollbar for Chrome, Safari and Opera */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        /* Hide scrollbar for IE, Edge and Firefox */
+        .no-scrollbar {
+            -ms-overflow-style: none;  /* IE and Edge */
+            scrollbar-width: none;  /* Firefox */
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display min-h-screen pb-24 text-gray-900 dark:text-white antialiased selection:bg-primary selection:text-white">
+<!-- Sticky Header -->
+<header class="sticky top-0 z-50 flex items-center justify-between px-4 py-3 bg-white/95 dark:bg-[#221710]/95 backdrop-blur-md shadow-sm dark:shadow-none border-b border-gray-100 dark:border-white/5">
+<!-- Location Pill -->
+<button class="flex items-center gap-2 bg-gray-100 dark:bg-[#342418] rounded-full px-3 py-1.5 transition-colors active:scale-95">
+<span class="material-symbols-outlined text-primary text-[20px] fill-1">location_on</span>
+<span class="text-sm font-bold text-gray-800 dark:text-white truncate max-w-[120px]">Brixton, London</span>
+<span class="material-symbols-outlined text-gray-500 dark:text-gray-400 text-[20px]">keyboard_arrow_down</span>
+</button>
+<!-- Notification Bell -->
+<button class="relative p-2 rounded-full hover:bg-gray-100 dark:hover:bg-white/5 transition-colors">
+<span class="material-symbols-outlined text-gray-800 dark:text-white text-[24px]">notifications</span>
+<span class="absolute top-2 right-2.5 flex h-2.5 w-2.5">
+<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+<span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-primary"></span>
+</span>
+</button>
+</header>
+<!-- Search Section -->
+<div class="px-4 py-4">
+<label class="relative flex w-full items-center">
+<div class="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none">
+<span class="material-symbols-outlined text-[#bc9a9a]">search</span>
+</div>
+<input class="block w-full rounded-xl border-none bg-white dark:bg-[#342418] py-3.5 pl-12 pr-12 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-[#bc9a9a] focus:ring-2 focus:ring-primary focus:ring-inset text-base shadow-sm dark:shadow-none" placeholder="Search for egusi, plantain, jollof..." type="text"/>
+<div class="absolute inset-y-0 right-0 flex items-center pr-3">
+<button class="p-1 rounded-lg hover:bg-black/5 dark:hover:bg-white/5">
+<span class="material-symbols-outlined text-[#bc9a9a]">tune</span>
+</button>
+</div>
+</label>
+</div>
+<!-- Hero Carousel -->
+<div class="relative w-full overflow-hidden pb-4">
+<div class="flex w-full snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-4 no-scrollbar">
+<!-- Card 1 -->
+<div class="relative flex h-[380px] w-full min-w-[85%] shrink-0 snap-center flex-col justify-end rounded-2xl overflow-hidden shadow-lg shadow-orange-900/10 dark:shadow-black/40">
+<div class="absolute inset-0 bg-cover bg-center transition-transform duration-700 hover:scale-105" data-alt="Top down view of a rich, red Jollof rice dish with chicken in a black bowl" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuC3AEjKiGjfW8IIO0_6B_Nt1laYcJyvGLyQBgYpNt3EIHInaruPFVwTGmC5BZxV-wkVhyn-HxHd1jcC_PgePXofF5PoLPWJycoXxB1k2v2oDEBQvDl4qIPt0B8ocCS-VE9i314GeG15qjaZPkHJKPK2AZZphgltR6a7BHfbffbtzAYJLQr3qYAFOxhbaHDvsZODsF1fWTDPNtEDgtlmS9jKs6m_jb4Xq1g2E9xz80QcVC7SyF7Jf6xR2JPR2flXEUMgivJFXN0J8xYZ');">
+</div>
+<!-- Gradient Overlay -->
+<div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent"></div>
+<div class="relative z-10 p-5 flex flex-col items-start gap-3">
+<span class="inline-flex items-center rounded-md bg-primary px-2.5 py-1 text-xs font-bold text-white uppercase tracking-wider">
+                        Featured
+                    </span>
+<h2 class="font-headline text-3xl font-bold text-white leading-tight">
+                        The Perfect<br/>Jollof Bundle
+                    </h2>
+<p class="text-gray-200 text-sm line-clamp-2 max-w-[90%]">
+                        Everything you need for an authentic taste of home, delivered in 30 mins.
+                    </p>
+<button class="mt-2 flex cursor-pointer items-center justify-center rounded-lg bg-primary px-6 py-3 text-sm font-bold text-white transition-transform active:scale-95 shadow-lg shadow-red-900/20">
+                        Shop Collection
+                    </button>
+</div>
+</div>
+<!-- Card 2 -->
+<div class="relative flex h-[380px] w-full min-w-[85%] shrink-0 snap-center flex-col justify-end rounded-2xl overflow-hidden shadow-lg shadow-orange-900/10 dark:shadow-black/40">
+<div class="absolute inset-0 bg-cover bg-center transition-transform duration-700 hover:scale-105" data-alt="Healthy bowl of salad with grains, avocado, and vegetables" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCjm1uHbEs-AxrzPTiFgaCso_B16QfEOZ08FHxxAzAUIxizYS_Xri47RAI_p_bQAR_u-peTQ7coMhUiLRMwu_dF96BrTWwqjBhCDEEpaqfT8DtUCHW0lM3kcJWbgpGicPrVHICkbs872gfZCz7I7PzgpWUH4C-O_2U7MoolVt1tPhKLEM76yIPerpkOgyxz856bq3JkHuagZq_OXIwAFj6QnDYsk6UHIeufU5BPRN7ka2yMzTUIvadfXbpdgPBoXmfF3fjb5Cpr9dYQ');">
+</div>
+<div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent"></div>
+<div class="relative z-10 p-5 flex flex-col items-start gap-3">
+<span class="inline-flex items-center rounded-md bg-white/20 backdrop-blur-sm px-2.5 py-1 text-xs font-bold text-white uppercase tracking-wider">
+                        New Arrival
+                    </span>
+<h2 class="font-headline text-3xl font-bold text-white leading-tight">
+                        Fresh Organic<br/>Plantains
+                    </h2>
+<p class="text-gray-200 text-sm line-clamp-2 max-w-[90%]">
+                        Straight from the farm to your doorstep. Sweet, ripe, and ready to fry.
+                    </p>
+<button class="mt-2 flex cursor-pointer items-center justify-center rounded-lg bg-white text-primary px-6 py-3 text-sm font-bold transition-transform active:scale-95">
+                        Order Now
+                    </button>
+</div>
+</div>
+</div>
+</div>
+<!-- Shop by Region -->
+<section class="py-4">
+<div class="flex items-center justify-between px-4 mb-4">
+<h2 class="font-headline text-xl font-bold text-gray-900 dark:text-white">Shop by Region</h2>
+<a class="text-sm font-semibold text-primary" href="#">See All</a>
+</div>
+<div class="flex gap-4 overflow-x-auto px-4 pb-2 no-scrollbar">
+<!-- Item 1 -->
+<div class="flex flex-col items-center gap-2 shrink-0">
+<div class="h-[72px] w-[72px] rounded-full border-[3px] border-primary p-0.5 shadow-md dark:shadow-none">
+<div class="h-full w-full rounded-full bg-cover bg-center" data-alt="Abstract vibrant pattern representing West African textiles" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuD_jR67qXgh-EaWszNByc0el5IgM11_Dzy_JEdnkvrzJWBfzifsBfDRkVeSfATB1Ci_ab89dJp2enwZ6N-PV9YkrSs7ZlocKBM_iLjHt_ciSw07PNaRLeyE4WpjO6vkLo2DcclMaojRq0u3t8CLEhtzUTrG-YPjBUdf0cY4FbzoNYkVPwroK32ni6epqMERzIm9hMulrtR_CO5gQzxTLZ0jsZqHKp4WwgG79W3ailVnykytgFNCSXW3pq-LENcFwk71ropQ-TWNlk8U');"></div>
+</div>
+<span class="text-xs font-semibold text-gray-700 dark:text-gray-300">West Africa</span>
+</div>
+<!-- Item 2 -->
+<div class="flex flex-col items-center gap-2 shrink-0">
+<div class="h-[72px] w-[72px] rounded-full border-[3px] border-transparent dark:border-[#342418] border-gray-200 p-0.5">
+<div class="h-full w-full rounded-full bg-cover bg-center" data-alt="East African landscape with mountains and savanna tones" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAARb1b5zJEk6GLJoVsfW08pktEJKngVK_jWyuMVIX0DB7LK28mMnsgY3gEF5-FduBTxVJx_VpoRenwxXpJ9_jJPbT8WHFzpboifBhjDOGm0ZUOQ3b3D3upcuesE4sD-hd-xg9ii7ysLDPesMWPDRWZSDuBC4G8sGSx9N4_71h5fGIKWSJQjfz8bpWpLJN35mz4YqSOZL5wpK6t7olKUesotdIYtc-vnyWqBqHlCh1ipXNrjBs7Sa3VJIF2KX01couKLuaJ6nW8_L-7');"></div>
+</div>
+<span class="text-xs font-semibold text-gray-700 dark:text-gray-300">East Africa</span>
+</div>
+<!-- Item 3 -->
+<div class="flex flex-col items-center gap-2 shrink-0">
+<div class="h-[72px] w-[72px] rounded-full border-[3px] border-transparent dark:border-[#342418] border-gray-200 p-0.5">
+<div class="h-full w-full rounded-full bg-cover bg-center" data-alt="Colorful spices market scene representing North Africa" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuA9YzWdXZBf0-RfiaiAvtSSzW8b3-LzS-DQzAxa_oaXypefJbm_8gEWLNX1ZQSRrTTOHOmICXpZOy-CbQBKogsI02-JyuFV1B19yfo9D-NylVtZphGjTCx44NjDRMyssF1NpLNhGjjs059_N9rrSCgKXeH6oZb6jMWFF1_AqWbUBLYdrmCZpVBTidBJ7jGIncuCfXZxxoXGVsbZPrdyVfiYw6Y_DEHUwPwYdoMPPeL9_88uUYEnZqPn6ybn1Vrqo_HEyT94vw6Zr97A');"></div>
+</div>
+<span class="text-xs font-semibold text-gray-700 dark:text-gray-300">North Africa</span>
+</div>
+<!-- Item 4 -->
+<div class="flex flex-col items-center gap-2 shrink-0">
+<div class="h-[72px] w-[72px] rounded-full border-[3px] border-transparent dark:border-[#342418] border-gray-200 p-0.5">
+<div class="h-full w-full rounded-full bg-cover bg-center" data-alt="South African vibrant street art and colors" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAzttRu3N8GAHGr3uStWwXIP0Jve2qZKBT9BU6WijhcI4QZTlDrIla9jqFLy2N59X26-g145jklQdeQDJzVaMEjYFqn7yfuaXTjR3kcIKqMo6afCSlVYnKWkOsfI27-6u2AxbcZQDIJVgPVDovJ7FhCYKH2CEflDAFANJ_fiD9rk1QqNMYHU2poq_SMOyzdJSrW60UNrn6Q7uzMYX3yabEN0hp5zrhi98aO8Hb0-24vfblZyq-21MMBM-UJNVmRZsnQUlg3HHSFbfIx');"></div>
+</div>
+<span class="text-xs font-semibold text-gray-700 dark:text-gray-300">South Africa</span>
+</div>
+<!-- Item 5 -->
+<div class="flex flex-col items-center gap-2 shrink-0">
+<div class="h-[72px] w-[72px] rounded-full border-[3px] border-transparent dark:border-[#342418] border-gray-200 p-0.5">
+<div class="h-full w-full rounded-full bg-cover bg-center" data-alt="Central African rainforest greenery texture" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuD5wfcmVK1mM-Ct9BZNTaSGWfhNJJohrcq8hfzAQa1XGwQjkcPZDbPRYh49heVWzddiNXzPD1Z7lm6Vz03_fVygyHN0kAg8ZFqEJbq1ZoikmKBTmK-Wk2r7mrlm5SBNcA8_QbYD2A5ruxh05ykUlJHSdYHnRaB6nH0oXZeSric4PmWQhvsyGukeKJDct7iNUG957pj0g-vd3a9vgw1DqKAa4snKbH-DOjA20tAmtPT81XWyvuJyrMdNndns7VdUxjsVAfXr-gO0sXnE');"></div>
+</div>
+<span class="text-xs font-semibold text-gray-700 dark:text-gray-300">Central</span>
+</div>
+</div>
+</section>
+<!-- Featured Vendors -->
+<section class="py-6">
+<div class="flex items-center justify-between px-4 mb-4">
+<h2 class="font-headline text-xl font-bold text-gray-900 dark:text-white">Featured Vendors</h2>
+<a class="text-sm font-semibold text-primary" href="#">See All</a>
+</div>
+<div class="flex gap-4 overflow-x-auto px-4 pb-2 no-scrollbar">
+<!-- Vendor Card 1 -->
+<div class="w-[260px] shrink-0 flex flex-col rounded-xl bg-white dark:bg-[#342418] shadow-md dark:shadow-lg dark:shadow-black/20 overflow-hidden group cursor-pointer">
+<div class="relative h-32 w-full overflow-hidden">
+<div class="absolute top-2 left-2 z-10 bg-primary text-white text-[10px] font-bold px-2 py-0.5 rounded shadow-sm">
+                        POPULAR
+                    </div>
+<div class="h-full w-full bg-cover bg-center group-hover:scale-105 transition-transform duration-500" data-alt="Warmly lit kitchen shelf with jars of spices and grains" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAQH0ZfoxFIuOn7G-3EYNl_G7tioGWWpqLs38s9VmDluocG8WBaVp0L4RX83QBsexhdkrYlWkrMRszdCMXY3R7lPO4hVKIxMZ73JaSQhaXILIMLG39OXEpduwfwAVBqi7MaqFOiffivzELj0ZWpAUvg58UkN2kYnXvUe9dvXbQiEF9aGoOYrPsD2kV2VL3eVogc0KvReaRx1KTXmxlBGUAP5SClH27EDzGniFAyheD6lCRwvpdVDGezW48ovTdSRMARSNtA6vbRqTKl');"></div>
+<!-- Gradient for text overlay visibility if needed -->
+<div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-60"></div>
+</div>
+<div class="p-3 flex flex-col gap-1">
+<div class="flex items-center justify-between">
+<h3 class="font-bold text-gray-900 dark:text-white text-base truncate">Mama's Kitchen</h3>
+<div class="flex items-center gap-0.5 text-yellow-500 bg-yellow-500/10 dark:bg-yellow-500/20 px-1.5 py-0.5 rounded">
+<span class="material-symbols-outlined text-[14px] fill-1">star</span>
+<span class="text-xs font-bold">4.8</span>
+</div>
+</div>
+<p class="text-xs text-gray-500 dark:text-[#bc9a9a]">Spices &amp; Grains • Afro-Caribbean</p>
+<div class="mt-2 flex items-center gap-2 text-xs font-medium text-gray-600 dark:text-gray-300">
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">schedule</span>
+<span>20-30 min</span>
+</div>
+<span class="text-gray-300 dark:text-gray-600">•</span>
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">local_shipping</span>
+<span>$2.99</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Vendor Card 2 -->
+<div class="w-[260px] shrink-0 flex flex-col rounded-xl bg-white dark:bg-[#342418] shadow-md dark:shadow-lg dark:shadow-black/20 overflow-hidden group cursor-pointer">
+<div class="relative h-32 w-full overflow-hidden">
+<div class="absolute top-2 right-2 z-10 bg-white/90 dark:bg-black/60 backdrop-blur-sm p-1 rounded-full">
+<span class="material-symbols-outlined text-primary text-[16px] fill-1 block">favorite</span>
+</div>
+<div class="h-full w-full bg-cover bg-center group-hover:scale-105 transition-transform duration-500" data-alt="Display of fresh organic vegetables and fruits at a market stall" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDiMco4rYS6zD0Ps-KrVa_0SJbRKUY1GIdIIOTk29P_yJfqLJTXCoXjGbgRBGnTJyxUTO0PDmFWZibvdjWWy5Vcf0A86karSZATgnLwEL_9xEUAFaW6InjOuR8ddN23otIFGK8sKds6vfzaAsO3dVhUf5aagRiODJ92jvNjgPox4cnB3JPmkqFPwrdzSC1aMCGEZt1fAh8M8Get3JWSK5xtVorAUO10WnpJ4hkxOQm4oa3_vU-FvdT3f-swEagTvUQCvyWUwbDHGDxH');"></div>
+</div>
+<div class="p-3 flex flex-col gap-1">
+<div class="flex items-center justify-between">
+<h3 class="font-bold text-gray-900 dark:text-white text-base truncate">Lagos Fresh Mart</h3>
+<div class="flex items-center gap-0.5 text-yellow-500 bg-yellow-500/10 dark:bg-yellow-500/20 px-1.5 py-0.5 rounded">
+<span class="material-symbols-outlined text-[14px] fill-1">star</span>
+<span class="text-xs font-bold">4.6</span>
+</div>
+</div>
+<p class="text-xs text-gray-500 dark:text-[#bc9a9a]">Fresh Produce • Imported Goods</p>
+<div class="mt-2 flex items-center gap-2 text-xs font-medium text-gray-600 dark:text-gray-300">
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">schedule</span>
+<span>45-55 min</span>
+</div>
+<span class="text-gray-300 dark:text-gray-600">•</span>
+<div class="flex items-center gap-1">
+<span class="text-primary font-bold">Free Delivery</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Vendor Card 3 -->
+<div class="w-[260px] shrink-0 flex flex-col rounded-xl bg-white dark:bg-[#342418] shadow-md dark:shadow-lg dark:shadow-black/20 overflow-hidden group cursor-pointer">
+<div class="relative h-32 w-full overflow-hidden">
+<div class="absolute top-2 left-2 z-10 bg-gray-900 text-white text-[10px] font-bold px-2 py-0.5 rounded shadow-sm">
+                        NEW
+                    </div>
+<div class="h-full w-full bg-cover bg-center group-hover:scale-105 transition-transform duration-500" data-alt="Shelf stocked with various African beauty and haircare products" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDceWdNKhW9Fho8vS8OEQLOYHTw-pxlfZiM3o9WP6k0QL2E6hQO96IAvCvOYxRu-NrjlGTdD6O9bHOoCG7t_PmLYeXOtLpOJe3vVItxur7WxotXgea_FFmez93XF46kknGHDwAHsHHj5HDfjaX5EFamqGKRF3AFzgwIeMX-5h8vXaAGOOr2VxX2KKtXnmBnDRl-hbBYtX3jV0_nvI3bY16dtLj1ohs7l7RlNMV21SrYZQykiKWCLkYv4BNqqfTKSJo_a8mWQ1VpfDyQ');"></div>
+</div>
+<div class="p-3 flex flex-col gap-1">
+<div class="flex items-center justify-between">
+<h3 class="font-bold text-gray-900 dark:text-white text-base truncate">Zuri Beauty Supply</h3>
+<div class="flex items-center gap-0.5 text-yellow-500 bg-yellow-500/10 dark:bg-yellow-500/20 px-1.5 py-0.5 rounded">
+<span class="material-symbols-outlined text-[14px] fill-1">star</span>
+<span class="text-xs font-bold">5.0</span>
+</div>
+</div>
+<p class="text-xs text-gray-500 dark:text-[#bc9a9a]">Haircare • Skincare</p>
+<div class="mt-2 flex items-center gap-2 text-xs font-medium text-gray-600 dark:text-gray-300">
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">schedule</span>
+<span>15-25 min</span>
+</div>
+<span class="text-gray-300 dark:text-gray-600">•</span>
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">local_shipping</span>
+<span>$1.99</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Spacer for Bottom Nav -->
+<div class="h-24"></div>
+<!-- Bottom Navigation -->
+<nav class="fixed bottom-0 left-0 right-0 z-50 bg-white dark:bg-[#1F1610] border-t border-gray-100 dark:border-white/5 pb-5 pt-3 px-6 shadow-[0_-5px_10px_-5px_rgba(0,0,0,0.1)]">
+<div class="flex items-center justify-between">
+<button class="group flex flex-col items-center gap-1 text-primary">
+<span class="material-symbols-outlined text-[26px] fill-1 group-active:scale-90 transition-transform">home</span>
+<span class="text-[10px] font-bold">Home</span>
+</button>
+<button class="group flex flex-col items-center gap-1 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors">
+<span class="material-symbols-outlined text-[26px] group-active:scale-90 transition-transform">explore</span>
+<span class="text-[10px] font-medium">Explore</span>
+</button>
+<button class="group flex flex-col items-center gap-1 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors">
+<span class="material-symbols-outlined text-[26px] group-active:scale-90 transition-transform">receipt_long</span>
+<span class="text-[10px] font-medium">Orders</span>
+</button>
+<button class="group flex flex-col items-center gap-1 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors">
+<div class="relative">
+<span class="material-symbols-outlined text-[26px] group-active:scale-90 transition-transform">shopping_cart</span>
+<span class="absolute -top-1 -right-1 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-primary text-[8px] font-bold text-white border-2 border-white dark:border-[#1F1610]">2</span>
+</div>
+<span class="text-[10px] font-medium">Cart</span>
+</button>
+<button class="group flex flex-col items-center gap-1 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors">
+<span class="material-symbols-outlined text-[26px] group-active:scale-90 transition-transform">person</span>
+<span class="text-[10px] font-medium">Profile</span>
+</button>
+</div>
+</nav>
+</body></html>

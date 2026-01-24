@@ -1,67 +1,95 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   ScrollView,
-  Image,
   TouchableOpacity,
+  Image,
   ActivityIndicator,
-  Dimensions,
+  Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useLocalSearchParams, useRouter } from 'expo-router';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useRouter, useLocalSearchParams } from 'expo-router';
+import {
+  ArrowLeft,
+  Heart,
+  ShareNetwork,
+  Star,
+  Leaf,
+  Recycle,
+  ShieldCheck,
+  Truck,
+  Clock,
+  CaretDown,
+  CaretUp,
+  Plus,
+  Minus,
+  Basket,
+} from 'phosphor-react-native';
 import { Colors } from '../../constants/colors';
 import { Spacing, BorderRadius } from '../../constants/spacing';
 import { FontSize, FontWeight } from '../../constants/typography';
-import { Button } from '../../components/ui';
-import { productService } from '../../services/dataService';
-import { Product } from '../../types';
+import { productService, vendorService, type Product, type Vendor } from '../../services/mockDataService';
 import { useCartStore } from '../../stores/cartStore';
 
-const { width } = Dimensions.get('window');
+type CollapsibleSection = 'description' | 'nutrition' | 'heritage';
 
-export default function ProductDetailScreen() {
-  const { id } = useLocalSearchParams<{ id: string }>();
+export default function ProductScreen() {
   const router = useRouter();
-  const [product, setProduct] = useState<Product | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [quantity, setQuantity] = useState(1);
-  const [activeTab, setActiveTab] = useState('description');
+  const { id } = useLocalSearchParams<{ id: string }>();
   const addToCart = useCartStore((state) => state.addItem);
 
-  useEffect(() => {
-    if (id) {
-      fetchProduct();
-    }
-  }, [id]);
+  const [product, setProduct] = useState<Product | null>(null);
+  const [vendor, setVendor] = useState<Vendor | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [quantity, setQuantity] = useState(1);
+  const [isFavorite, setIsFavorite] = useState(false);
+  const [expandedSections, setExpandedSections] = useState<CollapsibleSection[]>(['description']);
 
-  const fetchProduct = async () => {
+  const fetchData = useCallback(async () => {
+    if (!id) return;
     try {
-      const data = await productService.getById(id!);
-      setProduct(data);
+      // Use mock data service
+      const productData = productService.getById(id);
+      if (productData) {
+        setProduct(productData);
+        
+        if (productData.vendor_id) {
+          const vendorData = vendorService.getById(productData.vendor_id);
+          setVendor(vendorData || null);
+        }
+      }
     } catch (error) {
       console.error('Error fetching product:', error);
     } finally {
       setLoading(false);
     }
+  }, [id]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  const toggleSection = (section: CollapsibleSection) => {
+    setExpandedSections((prev) =>
+      prev.includes(section)
+        ? prev.filter((s) => s !== section)
+        : [...prev, section]
+    );
   };
 
-  const handleAddToCart = () => {
+  const handleAddToBasket = () => {
     if (product) {
       addToCart(product, quantity);
       router.back();
     }
   };
 
-  const handleVendorPress = () => {
-    if (product?.vendor_id) {
-      router.push(`/vendor/${product.vendor_id}`);
-    }
-  };
+  const incrementQuantity = () => setQuantity((prev) => prev + 1);
+  const decrementQuantity = () => setQuantity((prev) => Math.max(1, prev - 1));
 
-  if (loading) {
+  if (loading || !product) {
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.loadingContainer}>
@@ -71,170 +99,268 @@ export default function ProductDetailScreen() {
     );
   }
 
-  if (!product) {
-    return (
-      <SafeAreaView style={styles.container}>
-        <View style={styles.loadingContainer}>
-          <Text style={styles.errorText}>Product not found</Text>
-        </View>
-      </SafeAreaView>
-    );
-  }
-
-  const getBadgeStyle = (cert: string) => {
-    switch (cert.toUpperCase()) {
-      case 'ORGANIC':
-        return { bg: '#22C55E20', color: Colors.success, icon: 'leaf' };
-      case 'TOP RATED':
-        return { bg: '#FFCC0020', color: Colors.secondary, icon: 'star' };
-      case 'ECO-FRIENDLY':
-        return { bg: '#14B8A620', color: '#14B8A6', icon: 'recycle' };
-      default:
-        return { bg: '#CC000020', color: Colors.primary, icon: 'tag' };
-    }
-  };
+  const totalPrice = (product.price * quantity).toFixed(2);
+  const hasDiscount = false; // Mock data doesn't have original_price field
 
   return (
     <View style={styles.container}>
-      <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
-        {/* Hero Image */}
+      <ScrollView
+        style={styles.scrollView}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.scrollContent}
+      >
+        {/* Product Image */}
         <View style={styles.imageContainer}>
           <Image
-            source={{ uri: product.image_url }}
-            style={styles.heroImage}
+            source={{ uri: product.image_urls?.[0] || '' }}
+            style={styles.productImage}
             resizeMode="cover"
           />
-          {/* Overlay Navigation */}
-          <SafeAreaView style={styles.overlayNav}>
-            <TouchableOpacity style={styles.navButton} onPress={() => router.back()}>
-              <MaterialCommunityIcons name="arrow-left" size={24} color={Colors.textPrimary} />
+          
+          {/* Navigation Header */}
+          <SafeAreaView style={styles.headerOverlay} edges={['top']}>
+            <TouchableOpacity style={styles.headerButton} onPress={() => router.back()}>
+              <ArrowLeft size={24} color={Colors.textPrimary} weight="bold" />
             </TouchableOpacity>
-            <TouchableOpacity style={styles.navButton}>
-              <MaterialCommunityIcons name="heart-outline" size={24} color={Colors.textPrimary} />
-            </TouchableOpacity>
+            <View style={styles.headerActions}>
+              <TouchableOpacity style={styles.headerButton}>
+                <ShareNetwork size={22} color={Colors.textPrimary} weight="duotone" />
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.headerButton, isFavorite && styles.headerButtonActive]}
+                onPress={() => setIsFavorite(!isFavorite)}
+              >
+                <Heart
+                  size={22}
+                  color={isFavorite ? Colors.primary : Colors.textPrimary}
+                  weight={isFavorite ? 'fill' : 'duotone'}
+                />
+              </TouchableOpacity>
+            </View>
           </SafeAreaView>
         </View>
 
-        {/* Content */}
-        <View style={styles.content}>
-          {/* Title & Price */}
+        {/* Product Info */}
+        <View style={styles.productInfo}>
+          {/* Region Tag */}
+          {product.cultural_region && (
+            <Text style={styles.regionTag}>{product.cultural_region.replace('-', ' ')}</Text>
+          )}
+
+          {/* Product Name */}
           <Text style={styles.productName}>{product.name}</Text>
+
+          {/* Weight */}
+          {product.weight && (
+            <Text style={styles.productWeight}>{product.weight}</Text>
+          )}
+
+          {/* Price */}
           <View style={styles.priceRow}>
             <Text style={styles.price}>£{product.price.toFixed(2)}</Text>
+            {hasDiscount && (
+              <Text style={styles.originalPrice}>£{product.original_price?.toFixed(2)}</Text>
+            )}
             {product.weight && (
               <Text style={styles.unitPrice}>
-                £{(product.price / parseFloat(product.weight)).toFixed(2)}/{product.unit || 'kg'}
+                (£{(product.price / (parseInt(product.weight) / 1000 || 1)).toFixed(2)}/kg)
               </Text>
             )}
           </View>
 
-          {/* Certifications */}
-          {product.certifications && product.certifications.length > 0 && (
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              style={styles.certificationsContainer}
-            >
-              {product.certifications.map((cert, index) => {
-                const style = getBadgeStyle(cert);
-                return (
-                  <View key={index} style={[styles.certBadge, { backgroundColor: style.bg }]}>
-                    <MaterialCommunityIcons name={style.icon as any} size={14} color={style.color} />
-                    <Text style={[styles.certText, { color: style.color }]}>{cert}</Text>
-                  </View>
-                );
-              })}
-            </ScrollView>
+          {/* Badges */}
+          <View style={styles.badgesRow}>
+            {product.certifications?.includes('organic') && (
+              <View style={[styles.badge, styles.badgeOrganic]}>
+                <Leaf size={14} color={Colors.success} weight="fill" />
+                <Text style={[styles.badgeText, { color: Colors.success }]}>Organic</Text>
+              </View>
+            )}
+            {product.rating >= 4.5 && (
+              <View style={[styles.badge, styles.badgeTopRated]}>
+                <Star size={14} color={Colors.rating} weight="fill" />
+                <Text style={[styles.badgeText, { color: Colors.rating }]}>Top Rated</Text>
+              </View>
+            )}
+            {product.certifications?.includes('eco-friendly') && (
+              <View style={[styles.badge, styles.badgeEco]}>
+                <Recycle size={14} color="#14B8A6" weight="fill" />
+                <Text style={[styles.badgeText, { color: '#14B8A6' }]}>Eco-Friendly</Text>
+              </View>
+            )}
+          </View>
+
+          {/* Rating */}
+          <View style={styles.ratingRow}>
+            <View style={styles.stars}>
+              {[1, 2, 3, 4, 5].map((star) => (
+                <Star
+                  key={star}
+                  size={16}
+                  color={star <= Math.floor(product.rating) ? Colors.rating : Colors.textMuted}
+                  weight={star <= Math.floor(product.rating) ? 'fill' : 'regular'}
+                />
+              ))}
+            </View>
+            <Text style={styles.ratingText}>{product.rating.toFixed(1)}</Text>
+            <Text style={styles.reviewCount}>({product.review_count} reviews)</Text>
+          </View>
+        </View>
+
+        {/* Vendor Card */}
+        {vendor && (
+          <TouchableOpacity
+            style={styles.vendorCard}
+            onPress={() => router.push(`/vendor/${vendor.id}`)}
+            activeOpacity={0.8}
+          >
+            <View style={styles.vendorAvatarContainer}>
+              <Image
+                source={{ uri: vendor.logo_url }}
+                style={styles.vendorAvatar}
+                resizeMode="cover"
+              />
+            </View>
+            <View style={styles.vendorInfo}>
+              <Text style={styles.vendorLabel}>Sold by</Text>
+              <View style={styles.vendorNameRow}>
+                <Text style={styles.vendorName}>{vendor.shop_name}</Text>
+                {vendor.is_verified && (
+                  <ShieldCheck size={16} color={Colors.success} weight="fill" />
+                )}
+              </View>
+            </View>
+            <CaretDown size={20} color={Colors.textMuted} weight="bold" style={{ transform: [{ rotate: '-90deg' }] }} />
+          </TouchableOpacity>
+        )}
+
+        {/* Collapsible Sections */}
+        <View style={styles.sectionsContainer}>
+          {/* Description Section */}
+          <TouchableOpacity
+            style={styles.sectionHeader}
+            onPress={() => toggleSection('description')}
+          >
+            <Text style={styles.sectionTitle}>Product Description</Text>
+            {expandedSections.includes('description') ? (
+              <CaretUp size={20} color={Colors.textMuted} weight="bold" />
+            ) : (
+              <CaretDown size={20} color={Colors.textMuted} weight="bold" />
+            )}
+          </TouchableOpacity>
+          {expandedSections.includes('description') && (
+            <View style={styles.sectionContent}>
+              <Text style={styles.sectionText}>
+                {product.description || `Premium ${product.name} sourced directly from trusted African suppliers. Perfect for traditional recipes and authentic cuisine. Our products undergo strict quality checks to ensure you receive only the best.`}
+              </Text>
+            </View>
           )}
 
-          {/* Vendor Card */}
-          {product.vendor && (
-            <TouchableOpacity style={styles.vendorCard} onPress={handleVendorPress}>
-              <Image
-                source={{ uri: product.vendor.logo_url }}
-                style={styles.vendorLogo}
-              />
-              <View style={styles.vendorInfo}>
-                <Text style={styles.soldBy}>SOLD BY</Text>
-                <View style={styles.vendorNameRow}>
-                  <Text style={styles.vendorName}>{product.vendor.name}</Text>
-                  {product.vendor.is_verified && (
-                    <MaterialCommunityIcons name="check-decagram" size={16} color="#3B82F6" />
-                  )}
+          {/* Nutrition Section */}
+          <TouchableOpacity
+            style={styles.sectionHeader}
+            onPress={() => toggleSection('nutrition')}
+          >
+            <Text style={styles.sectionTitle}>Nutrition</Text>
+            {expandedSections.includes('nutrition') ? (
+              <CaretUp size={20} color={Colors.textMuted} weight="bold" />
+            ) : (
+              <CaretDown size={20} color={Colors.textMuted} weight="bold" />
+            )}
+          </TouchableOpacity>
+          {expandedSections.includes('nutrition') && (
+            <View style={styles.sectionContent}>
+              <View style={styles.nutritionGrid}>
+                <View style={styles.nutritionItem}>
+                  <Text style={styles.nutritionValue}>120</Text>
+                  <Text style={styles.nutritionLabel}>Calories</Text>
+                </View>
+                <View style={styles.nutritionItem}>
+                  <Text style={styles.nutritionValue}>4g</Text>
+                  <Text style={styles.nutritionLabel}>Protein</Text>
+                </View>
+                <View style={styles.nutritionItem}>
+                  <Text style={styles.nutritionValue}>25g</Text>
+                  <Text style={styles.nutritionLabel}>Carbs</Text>
+                </View>
+                <View style={styles.nutritionItem}>
+                  <Text style={styles.nutritionValue}>2g</Text>
+                  <Text style={styles.nutritionLabel}>Fat</Text>
                 </View>
               </View>
-              <MaterialCommunityIcons name="chevron-right" size={24} color={Colors.textMuted} />
-            </TouchableOpacity>
+            </View>
           )}
 
-          {/* Tabs */}
-          <View style={styles.tabs}>
-            {['description', 'nutrition', 'heritage'].map((tab) => (
-              <TouchableOpacity
-                key={tab}
-                style={[styles.tab, activeTab === tab && styles.tabActive]}
-                onPress={() => setActiveTab(tab)}
-              >
-                <Text style={[styles.tabText, activeTab === tab && styles.tabTextActive]}>
-                  {tab === 'description' ? 'Product Description' :
-                   tab === 'nutrition' ? 'Nutrition' : 'Heritage Story'}
-                </Text>
-                <MaterialCommunityIcons
-                  name={activeTab === tab ? 'chevron-up' : 'chevron-down'}
-                  size={20}
-                  color={activeTab === tab ? Colors.textPrimary : Colors.textMuted}
-                />
-              </TouchableOpacity>
-            ))}
+          {/* Heritage Story Section */}
+          <TouchableOpacity
+            style={styles.sectionHeader}
+            onPress={() => toggleSection('heritage')}
+          >
+            <Text style={styles.sectionTitle}>Heritage Story</Text>
+            {expandedSections.includes('heritage') ? (
+              <CaretUp size={20} color={Colors.textMuted} weight="bold" />
+            ) : (
+              <CaretDown size={20} color={Colors.textMuted} weight="bold" />
+            )}
+          </TouchableOpacity>
+          {expandedSections.includes('heritage') && (
+            <View style={styles.sectionContent}>
+              <Text style={styles.sectionText}>
+                {product.heritage_story || `This product represents generations of African culinary tradition. Sourced from family-owned farms in ${product.cultural_region?.replace('-', ' ') || 'West Africa'}, it carries the authentic flavors that have been cherished for centuries. By purchasing this product, you're supporting local African communities and preserving cultural heritage.`}
+              </Text>
+            </View>
+          )}
+        </View>
+
+        {/* Delivery & Quality Cards */}
+        <View style={styles.infoCardsRow}>
+          <View style={styles.infoCard}>
+            <Truck size={24} color={Colors.primary} weight="duotone" />
+            <Text style={styles.infoCardTitle}>2-3 Day Delivery</Text>
+            <Text style={styles.infoCardSubtitle}>Tracked shipping</Text>
           </View>
-
-          {/* Tab Content */}
-          {activeTab === 'description' && (
-            <View style={styles.tabContent}>
-              <Text style={styles.descriptionText}>{product.description}</Text>
-            </View>
-          )}
-
-          {/* Delivery Info */}
-          <View style={styles.deliveryInfo}>
-            <View style={styles.deliveryCard}>
-              <MaterialCommunityIcons name="truck-delivery" size={24} color={Colors.primary} />
-              <Text style={styles.deliveryTitle}>2-3 Day Delivery</Text>
-              <Text style={styles.deliverySubtitle}>Tracked shipping</Text>
-            </View>
-            <View style={styles.deliveryCard}>
-              <MaterialCommunityIcons name="shield-check" size={24} color={Colors.primary} />
-              <Text style={styles.deliveryTitle}>Quality Guaranteed</Text>
-              <Text style={styles.deliverySubtitle}>Premium grade</Text>
-            </View>
+          <View style={styles.infoCard}>
+            <ShieldCheck size={24} color={Colors.success} weight="duotone" />
+            <Text style={styles.infoCardTitle}>Quality Guaranteed</Text>
+            <Text style={styles.infoCardSubtitle}>100% authentic</Text>
           </View>
         </View>
 
-        <View style={{ height: 150 }} />
+        {/* Bottom spacing */}
+        <View style={{ height: 120 }} />
       </ScrollView>
 
-      {/* Sticky Footer */}
-      <View style={styles.footer}>
-        <View style={styles.quantitySelector}>
+      {/* Fixed Bottom Bar */}
+      <View style={styles.bottomBar}>
+        <SafeAreaView edges={['bottom']} style={styles.bottomBarInner}>
+          {/* Quantity Selector */}
+          <View style={styles.quantitySelector}>
+            <TouchableOpacity
+              style={styles.quantityButton}
+              onPress={decrementQuantity}
+            >
+              <Minus size={18} color={Colors.textPrimary} weight="bold" />
+            </TouchableOpacity>
+            <Text style={styles.quantityText}>{quantity}</Text>
+            <TouchableOpacity
+              style={styles.quantityButton}
+              onPress={incrementQuantity}
+            >
+              <Plus size={18} color={Colors.textPrimary} weight="bold" />
+            </TouchableOpacity>
+          </View>
+
+          {/* Add to Basket Button */}
           <TouchableOpacity
-            style={styles.quantityButton}
-            onPress={() => setQuantity(Math.max(1, quantity - 1))}
+            style={styles.addToBasketButton}
+            onPress={handleAddToBasket}
+            activeOpacity={0.8}
           >
-            <MaterialCommunityIcons name="minus" size={20} color={Colors.textPrimary} />
+            <Basket size={22} color={Colors.textPrimary} weight="duotone" />
+            <Text style={styles.addToBasketText}>ADD TO BASKET</Text>
+            <Text style={styles.addToBasketPrice}>£{totalPrice}</Text>
           </TouchableOpacity>
-          <Text style={styles.quantityText}>{quantity}</Text>
-          <TouchableOpacity
-            style={styles.quantityButton}
-            onPress={() => setQuantity(quantity + 1)}
-          >
-            <MaterialCommunityIcons name="plus" size={20} color={Colors.textPrimary} />
-          </TouchableOpacity>
-        </View>
-        <Button
-          title="ADD TO BASKET"
-          onPress={handleAddToCart}
-          style={styles.addButton}
-        />
+        </SafeAreaView>
       </View>
     </View>
   );
@@ -250,22 +376,22 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  errorText: {
-    color: Colors.textMuted,
-    fontSize: FontSize.body,
-  },
   scrollView: {
     flex: 1,
   },
+  scrollContent: {
+    paddingBottom: 20,
+  },
   imageContainer: {
+    height: 300,
     position: 'relative',
   },
-  heroImage: {
-    width: width,
-    height: width * 0.8,
+  productImage: {
+    width: '100%',
+    height: '100%',
     backgroundColor: Colors.cardDark,
   },
-  overlayNav: {
+  headerOverlay: {
     position: 'absolute',
     top: 0,
     left: 0,
@@ -273,23 +399,44 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     paddingHorizontal: Spacing.base,
+    paddingTop: Spacing.sm,
   },
-  navButton: {
-    width: 40,
-    height: 40,
+  headerButton: {
+    width: 44,
+    height: 44,
     borderRadius: BorderRadius.full,
-    backgroundColor: 'rgba(0, 0, 0, 0.3)',
-    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.4)',
     justifyContent: 'center',
+    alignItems: 'center',
   },
-  content: {
+  headerButtonActive: {
+    backgroundColor: 'rgba(204, 0, 0, 0.2)',
+  },
+  headerActions: {
+    flexDirection: 'row',
+    gap: Spacing.sm,
+  },
+  productInfo: {
     padding: Spacing.base,
   },
+  regionTag: {
+    color: Colors.primary,
+    fontSize: FontSize.caption,
+    fontWeight: FontWeight.semiBold,
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+    marginBottom: Spacing.xs,
+  },
   productName: {
-    color: Colors.textPrimary,
-    fontSize: FontSize.h3,
+    fontSize: FontSize.h2,
     fontWeight: FontWeight.bold,
-    marginBottom: Spacing.sm,
+    color: Colors.textPrimary,
+    marginBottom: Spacing.xs,
+  },
+  productWeight: {
+    fontSize: FontSize.body,
+    color: Colors.textMuted,
+    marginBottom: Spacing.md,
   },
   priceRow: {
     flexDirection: 'row',
@@ -298,52 +445,88 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.md,
   },
   price: {
-    color: Colors.secondary,
-    fontSize: FontSize.h2,
+    fontSize: FontSize.h1,
     fontWeight: FontWeight.bold,
+    color: Colors.secondary,
+  },
+  originalPrice: {
+    fontSize: FontSize.body,
+    color: Colors.textMuted,
+    textDecorationLine: 'line-through',
   },
   unitPrice: {
-    color: Colors.textMuted,
     fontSize: FontSize.small,
+    color: Colors.textMuted,
   },
-  certificationsContainer: {
+  badgesRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: Spacing.sm,
     marginBottom: Spacing.md,
   },
-  certBadge: {
+  badge: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.sm,
     borderRadius: BorderRadius.full,
-    marginRight: Spacing.sm,
     gap: Spacing.xs,
   },
-  certText: {
-    fontSize: FontSize.caption,
+  badgeOrganic: {
+    backgroundColor: 'rgba(34, 197, 94, 0.1)',
+  },
+  badgeTopRated: {
+    backgroundColor: 'rgba(255, 204, 0, 0.1)',
+  },
+  badgeEco: {
+    backgroundColor: 'rgba(20, 184, 166, 0.1)',
+  },
+  badgeText: {
+    fontSize: FontSize.small,
     fontWeight: FontWeight.semiBold,
+  },
+  ratingRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.sm,
+  },
+  stars: {
+    flexDirection: 'row',
+    gap: 2,
+  },
+  ratingText: {
+    fontSize: FontSize.body,
+    fontWeight: FontWeight.bold,
+    color: Colors.textPrimary,
+  },
+  reviewCount: {
+    fontSize: FontSize.small,
+    color: Colors.textMuted,
   },
   vendorCard: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: Colors.cardDark,
+    marginHorizontal: Spacing.base,
     padding: Spacing.md,
     borderRadius: BorderRadius.lg,
-    marginBottom: Spacing.md,
+    marginBottom: Spacing.lg,
   },
-  vendorLogo: {
+  vendorAvatarContainer: {
+    marginRight: Spacing.md,
+  },
+  vendorAvatar: {
     width: 48,
     height: 48,
-    borderRadius: BorderRadius.full,
-    backgroundColor: Colors.backgroundDark,
+    borderRadius: 24,
   },
   vendorInfo: {
     flex: 1,
-    marginLeft: Spacing.md,
   },
-  soldBy: {
-    color: Colors.primary,
-    fontSize: FontSize.tiny,
-    fontWeight: FontWeight.bold,
+  vendorLabel: {
+    fontSize: FontSize.caption,
+    color: Colors.textMuted,
+    marginBottom: 2,
   },
   vendorNameRow: {
     flexDirection: 'row',
@@ -351,96 +534,148 @@ const styles = StyleSheet.create({
     gap: Spacing.xs,
   },
   vendorName: {
-    color: Colors.textPrimary,
     fontSize: FontSize.body,
-    fontWeight: FontWeight.semiBold,
+    fontWeight: FontWeight.bold,
+    color: Colors.textPrimary,
   },
-  tabs: {
-    marginBottom: Spacing.md,
+  sectionsContainer: {
+    marginHorizontal: Spacing.base,
+    marginBottom: Spacing.lg,
   },
-  tab: {
+  sectionHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingVertical: Spacing.md,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.borderDark,
+    backgroundColor: Colors.cardDark,
+    padding: Spacing.base,
+    borderRadius: BorderRadius.lg,
+    marginBottom: Spacing.sm,
   },
-  tabActive: {
-    borderBottomColor: Colors.primary,
-  },
-  tabText: {
-    color: Colors.textMuted,
+  sectionTitle: {
     fontSize: FontSize.body,
-    fontWeight: FontWeight.semiBold,
-  },
-  tabTextActive: {
+    fontWeight: FontWeight.bold,
     color: Colors.textPrimary,
   },
-  tabContent: {
-    marginBottom: Spacing.md,
+  sectionContent: {
+    backgroundColor: Colors.cardDark,
+    padding: Spacing.base,
+    borderRadius: BorderRadius.lg,
+    marginBottom: Spacing.sm,
+    marginTop: -Spacing.sm,
   },
-  descriptionText: {
-    color: Colors.textMuted,
+  sectionText: {
     fontSize: FontSize.body,
+    color: Colors.textSecondary,
     lineHeight: 24,
   },
-  deliveryInfo: {
+  nutritionGrid: {
     flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  nutritionItem: {
+    alignItems: 'center',
+  },
+  nutritionValue: {
+    fontSize: FontSize.h3,
+    fontWeight: FontWeight.bold,
+    color: Colors.textPrimary,
+  },
+  nutritionLabel: {
+    fontSize: FontSize.caption,
+    color: Colors.textMuted,
+    marginTop: 2,
+  },
+  infoCardsRow: {
+    flexDirection: 'row',
+    paddingHorizontal: Spacing.base,
     gap: Spacing.md,
   },
-  deliveryCard: {
+  infoCard: {
     flex: 1,
     backgroundColor: Colors.cardDark,
-    padding: Spacing.md,
+    padding: Spacing.base,
     borderRadius: BorderRadius.lg,
     alignItems: 'center',
   },
-  deliveryTitle: {
-    color: Colors.textPrimary,
+  infoCardTitle: {
     fontSize: FontSize.small,
-    fontWeight: FontWeight.semiBold,
+    fontWeight: FontWeight.bold,
+    color: Colors.textPrimary,
     marginTop: Spacing.sm,
+    textAlign: 'center',
   },
-  deliverySubtitle: {
-    color: Colors.textMuted,
+  infoCardSubtitle: {
     fontSize: FontSize.caption,
+    color: Colors.textMuted,
     marginTop: 2,
+    textAlign: 'center',
   },
-  footer: {
+  bottomBar: {
     position: 'absolute',
     bottom: 0,
     left: 0,
     right: 0,
+    backgroundColor: Colors.cardDark,
+    borderTopLeftRadius: BorderRadius.xl,
+    borderTopRightRadius: BorderRadius.xl,
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: -4 },
+        shadowOpacity: 0.2,
+        shadowRadius: 8,
+      },
+      android: {
+        elevation: 16,
+      },
+    }),
+  },
+  bottomBarInner: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.backgroundDark,
-    padding: Spacing.base,
-    paddingBottom: Spacing.xl,
-    borderTopWidth: 1,
-    borderTopColor: Colors.borderDark,
+    paddingHorizontal: Spacing.base,
+    paddingTop: Spacing.base,
     gap: Spacing.md,
   },
   quantitySelector: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.cardDark,
-    borderRadius: BorderRadius.md,
+    backgroundColor: Colors.backgroundDark,
+    borderRadius: BorderRadius.lg,
+    padding: 4,
   },
   quantityButton: {
-    width: 44,
-    height: 44,
-    alignItems: 'center',
+    width: 40,
+    height: 40,
     justifyContent: 'center',
+    alignItems: 'center',
   },
   quantityText: {
+    fontSize: FontSize.h4,
+    fontWeight: FontWeight.bold,
     color: Colors.textPrimary,
-    fontSize: FontSize.body,
-    fontWeight: FontWeight.semiBold,
-    minWidth: 30,
+    minWidth: 32,
     textAlign: 'center',
   },
-  addButton: {
+  addToBasketButton: {
     flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: Colors.primary,
+    borderRadius: BorderRadius.lg,
+    paddingVertical: Spacing.md,
+    gap: Spacing.sm,
+  },
+  addToBasketText: {
+    fontSize: FontSize.body,
+    fontWeight: FontWeight.bold,
+    color: Colors.textPrimary,
+  },
+  addToBasketPrice: {
+    fontSize: FontSize.body,
+    fontWeight: FontWeight.bold,
+    color: Colors.textPrimary,
+    opacity: 0.8,
   },
 });

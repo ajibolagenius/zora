@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Zora African Market - Vendor Discovery</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet"/>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#CC0000", // Zora Red
+                        "background-light": "#FFF9F2", // Warm cream for light mode
+                        "background-dark": "#221710", // Dark Brown
+                        "card-light": "#FFFFFF",
+                        "card-dark": "#342418", // Lighter Brown
+                        "text-light": "#4A3B32",
+                        "text-dark": "#EAE0D5",
+                        "zora-yellow": "#FFC107",
+                        "zora-green": "#4CAF50"
+                    },
+                    fontFamily: {
+                        display: ["Montserrat", "sans-serif"],
+                    },
+                    borderRadius: {
+                        DEFAULT: "12px",
+                    },
+                    boxShadow: {
+                        'up': '0 -4px 6px -1px rgba(0, 0, 0, 0.1), 0 -2px 4px -1px rgba(0, 0, 0, 0.06)',
+                    }
+                },
+            },
+        };
+    </script>
+<style>.no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }@keyframes pulse-blue {
+            0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(59, 130, 246, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
+        }
+        .user-dot {
+            animation: pulse-blue 2s infinite;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display text-gray-800 dark:text-text-dark antialiased h-screen w-full overflow-hidden flex flex-col relative dark">
+<div class="absolute inset-0 w-full h-full z-0 bg-gray-200 dark:bg-gray-800 overflow-hidden">
+<img alt="Map Background of City Streets" class="w-full h-full object-cover opacity-60 dark:opacity-40 filter grayscale contrast-125" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCs5hGWUqszQkUiI2YdWf2wJOn9Pfl9JzjA73X_eFUh7u7tJbZzkZpyJWGvsUcoljUjWT6bFh6wy163NkejOshSgzdHBr1Dy6BrXs7JL0mRzYYIz66UzYkKiRzUtCL3khpz8shMHj4oHmaBx-h_W7UMydRrFHqMBLjrBCwY9rA0yCR0G9RV7yFAPrk1XQWc2eEsLvna6v2jxTlQDqalZAGqopGJC48dLJgSYN52MChbtTjyat7d_A1FUaT5uuOPKJLZ_TwYRXBZuXvK"/>
+<div class="absolute top-1/3 left-1/4 transform -translate-x-1/2 -translate-y-1/2 flex flex-col items-center">
+<div class="bg-primary text-white p-2 rounded-full shadow-lg transform transition hover:scale-110">
+<span class="material-icons-round text-lg">shopping_bag</span>
+</div>
+<div class="w-1 h-3 bg-primary rounded-full mt-[-2px]"></div>
+<div class="w-2 h-1 bg-black opacity-30 rounded-full blur-[1px]"></div>
+</div>
+<div class="absolute top-[40%] right-1/4 transform -translate-x-1/2 -translate-y-1/2 flex flex-col items-center">
+<div class="bg-primary text-white w-10 h-10 flex items-center justify-center rounded-full shadow-lg border-2 border-white dark:border-background-dark font-bold text-sm">
+                3
+            </div>
+</div>
+<div class="absolute top-[25%] right-[10%] transform -translate-x-1/2 -translate-y-1/2 flex flex-col items-center">
+<div class="bg-primary text-white p-2 rounded-full shadow-lg">
+<span class="material-icons-round text-lg">restaurant</span>
+</div>
+<div class="w-1 h-3 bg-primary rounded-full mt-[-2px]"></div>
+</div>
+<div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+<div class="w-4 h-4 bg-blue-500 rounded-full border-2 border-white dark:border-gray-900 shadow-md user-dot"></div>
+</div>
+</div>
+<header class="absolute top-0 left-0 w-full z-20 pt-12 pb-4 bg-gradient-to-b from-background-light via-background-light to-transparent dark:from-background-dark dark:via-background-dark dark:to-transparent">
+<div class="px-4 flex items-center gap-4 mb-4">
+<button class="bg-white/80 dark:bg-card-dark/80 backdrop-blur-sm p-2 rounded-full shadow-sm text-gray-800 dark:text-white hover:bg-white dark:hover:bg-card-dark transition">
+<span class="material-icons-round">arrow_back</span>
+</button>
+<h1 class="text-xl font-bold tracking-tight text-gray-900 dark:text-white flex-1">Find Vendors</h1>
+<button class="bg-white/80 dark:bg-card-dark/80 backdrop-blur-sm p-2 rounded-full shadow-sm text-gray-800 dark:text-white">
+<span class="material-icons-round">tune</span>
+</button>
+</div>
+<div class="flex gap-3 overflow-x-auto px-4 pb-2 no-scrollbar snap-x">
+<button class="snap-start shrink-0 px-4 py-2 bg-primary text-white text-sm font-semibold rounded-full shadow-md transition transform active:scale-95">
+                Open Now
+            </button>
+<button class="snap-start shrink-0 px-4 py-2 bg-white dark:bg-card-dark text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 text-sm font-medium rounded-full shadow-sm whitespace-nowrap">
+                Delivery
+            </button>
+<button class="snap-start shrink-0 px-4 py-2 bg-white dark:bg-card-dark text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 text-sm font-medium rounded-full shadow-sm whitespace-nowrap">
+                Pickup
+            </button>
+<button class="snap-start shrink-0 px-4 py-2 bg-white dark:bg-card-dark text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 text-sm font-medium rounded-full shadow-sm whitespace-nowrap">
+                Top Rated
+            </button>
+<button class="snap-start shrink-0 px-4 py-2 bg-white dark:bg-card-dark text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 text-sm font-medium rounded-full shadow-sm whitespace-nowrap">
+                African Spices
+            </button>
+</div>
+</header>
+<div class="absolute bottom-28 left-1/2 transform -translate-x-1/2 z-30">
+<button class="flex items-center gap-2 bg-primary hover:bg-red-700 text-white px-6 py-3 rounded-full shadow-xl transition-all active:scale-95">
+<span class="font-bold text-sm">List View</span>
+<span class="material-icons-round text-sm">format_list_bulleted</span>
+</button>
+</div>
+<div class="absolute bottom-[80px] left-0 w-full z-20 flex flex-col justify-end pointer-events-none h-[60%]">
+<div class="pointer-events-auto bg-card-light dark:bg-card-dark rounded-t-[24px] shadow-up flex flex-col h-full transition-transform transform translate-y-[20%]">
+<div class="w-full flex justify-center pt-3 pb-2 cursor-grab active:cursor-grabbing">
+<div class="w-12 h-1.5 bg-gray-300 dark:bg-gray-600 rounded-full"></div>
+</div>
+<div class="px-5 pb-4 flex-1 overflow-y-auto no-scrollbar">
+<div class="flex justify-between items-end mb-4">
+<h2 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">12 vendors nearby</h2>
+</div>
+<div class="flex flex-col gap-4 pb-20">
+<div class="flex gap-4 p-3 bg-gray-50 dark:bg-[#2A1D15] rounded-xl border border-gray-100 dark:border-none shadow-sm active:bg-gray-100 dark:active:bg-[#3E2D23] transition cursor-pointer">
+<div class="w-20 h-20 shrink-0 rounded-lg overflow-hidden bg-gray-300">
+<img alt="Spices Market" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBv2NPy7TRLyIl5-B0yRnRIfdGj9tZ2SLiAbL_CfJi1OdLY9w61hUl0QF-5yFw0RRboovae4S7t49NzuaFIr_8wnJzkVV3ekUybC0ZSK6M5c8xjZOJ4RFuSY2DIV6BRo5NIm6375_eFx88ZWdo34CY8GdcfpqvtOUiwtPn1Wdz61Kqc29uWG51u8O9amAZFXJ06eLWqVj-fqTdYW9CsyAMp_T5DIeLS_qZMNDOEtdSIH5YEefKyFQakUgB5t2x9G24ueakladENDskb"/>
+</div>
+<div class="flex flex-col flex-1 justify-between">
+<div>
+<h3 class="font-bold text-lg text-gray-900 dark:text-white leading-tight">Mama Zora's Spices</h3>
+<p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Spices • Dry Goods • Authentic</p>
+</div>
+<div class="flex items-center justify-between mt-2">
+<div class="flex items-center gap-3 text-xs font-medium">
+<span class="flex items-center text-zora-yellow">
+<span class="material-icons-round text-[14px] mr-0.5">star</span>
+                                        4.8
+                                    </span>
+<span class="text-gray-400 dark:text-gray-500">•</span>
+<span class="text-gray-600 dark:text-gray-300">0.8 km</span>
+<span class="text-gray-400 dark:text-gray-500">•</span>
+<span class="text-gray-600 dark:text-gray-300">15 min</span>
+</div>
+</div>
+<div class="mt-1">
+<span class="text-[10px] uppercase font-bold text-zora-green tracking-wide">Open until 8pm</span>
+</div>
+</div>
+</div>
+<div class="flex gap-4 p-3 bg-gray-50 dark:bg-[#2A1D15] rounded-xl border border-gray-100 dark:border-none shadow-sm active:bg-gray-100 dark:active:bg-[#3E2D23] transition cursor-pointer">
+<div class="w-20 h-20 shrink-0 rounded-lg overflow-hidden bg-gray-300">
+<img alt="Fabrics" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBbznIydy1RQdWBbv8Q8_sdHH6PzOoFBwFjF-e5PEStdJyJKXQYiwTlxg5S-d7QGcdIglf16jnZrOS7odVzX3zByk-hRJvK4mCkSaMdFVgFTFa9-vR0MtlPHmIZKKHvY_mjZx15DXWAlhNFm2LD1-BZu6Nd7--YNN94N0eRXU7XGEEyxhKAWNhsWVOtWMyLYwHypqxpj7odJwg-thOD-Vkn7j-pkK197vSufzAdXhplqOd6aQ-rJDsHvGEWi-R4KdbGRm8ixqwESDD6"/>
+</div>
+<div class="flex flex-col flex-1 justify-between">
+<div>
+<h3 class="font-bold text-lg text-gray-900 dark:text-white leading-tight">Lagos Textiles</h3>
+<p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Fabrics • Clothing • Accessories</p>
+</div>
+<div class="flex items-center justify-between mt-2">
+<div class="flex items-center gap-3 text-xs font-medium">
+<span class="flex items-center text-zora-yellow">
+<span class="material-icons-round text-[14px] mr-0.5">star</span>
+                                        4.5
+                                    </span>
+<span class="text-gray-400 dark:text-gray-500">•</span>
+<span class="text-gray-600 dark:text-gray-300">1.2 km</span>
+<span class="text-gray-400 dark:text-gray-500">•</span>
+<span class="text-gray-600 dark:text-gray-300">22 min</span>
+</div>
+</div>
+<div class="mt-1">
+<span class="text-[10px] uppercase font-bold text-zora-green tracking-wide">Open until 9pm</span>
+</div>
+</div>
+</div>
+<div class="flex gap-4 p-3 bg-gray-50 dark:bg-[#2A1D15] rounded-xl border border-gray-100 dark:border-none shadow-sm active:bg-gray-100 dark:active:bg-[#3E2D23] transition cursor-pointer">
+<div class="w-20 h-20 shrink-0 rounded-lg overflow-hidden bg-gray-300">
+<img alt="Fruits" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBD6CRTP9o_tXWtnxZ-i_1M3T-IlcoHx1JFrExERNVfF3DJgdmK19V7YaH-LKDpOUbWvZuKRJ3Gd__1Bul6IUthEzpV04WjMHlITiws2B9BrfxfUs_esLdIRHNVIwzl03apCFhj9t_OHKP2WxDo2ucHsVJXgScSV9EtlOakdhKb-E0cSnVhyz1VMuHTa48ov7qUnBwK1n2xri7kWb07zH85skrmMP8FvNmUEjNNC2lq1XMfm9P6Ueib4jKyfsH6gokfYn_3UbvUiEwn"/>
+</div>
+<div class="flex flex-col flex-1 justify-between">
+<div>
+<h3 class="font-bold text-lg text-gray-900 dark:text-white leading-tight">Fresh Roots Market</h3>
+<p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Produce • Organic • Fruits</p>
+</div>
+<div class="flex items-center justify-between mt-2">
+<div class="flex items-center gap-3 text-xs font-medium">
+<span class="flex items-center text-zora-yellow">
+<span class="material-icons-round text-[14px] mr-0.5">star</span>
+                                        4.9
+                                    </span>
+<span class="text-gray-400 dark:text-gray-500">•</span>
+<span class="text-gray-600 dark:text-gray-300">0.5 km</span>
+<span class="text-gray-400 dark:text-gray-500">•</span>
+<span class="text-gray-600 dark:text-gray-300">10 min</span>
+</div>
+</div>
+<div class="mt-1">
+<span class="text-[10px] uppercase font-bold text-orange-500 tracking-wide">Closing Soon</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<nav class="absolute bottom-0 left-0 w-full bg-white dark:bg-background-dark border-t border-gray-200 dark:border-[#3E2D23] px-6 py-3 flex justify-between items-center z-40 pb-6">
+<button class="flex flex-col items-center gap-1 group w-1/5">
+<span class="material-icons-round text-gray-400 group-hover:text-primary transition">home</span>
+<span class="text-[10px] font-medium text-gray-400 group-hover:text-primary transition">Home</span>
+</button>
+<button class="flex flex-col items-center gap-1 group w-1/5">
+<span class="material-icons-round text-primary transition">explore</span>
+<span class="text-[10px] font-medium text-primary transition">Explore</span>
+</button>
+<button class="flex flex-col items-center gap-1 group w-1/5">
+<span class="material-icons-round text-gray-400 group-hover:text-primary transition">receipt_long</span>
+<span class="text-[10px] font-medium text-gray-400 group-hover:text-primary transition">Orders</span>
+</button>
+<button class="flex flex-col items-center gap-1 group w-1/5 relative">
+<span class="material-icons-round text-gray-400 group-hover:text-primary transition">shopping_cart</span>
+<span class="absolute top-0 right-3 w-2 h-2 bg-primary rounded-full"></span>
+<span class="text-[10px] font-medium text-gray-400 group-hover:text-primary transition">Cart</span>
+</button>
+<button class="flex flex-col items-center gap-1 group w-1/5">
+<span class="material-icons-round text-gray-400 group-hover:text-primary transition">person</span>
+<span class="text-[10px] font-medium text-gray-400 group-hover:text-primary transition">Profile</span>
+</button>
+</nav>
+
+</body></html>

@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Zora African Market - Login</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&amp;family=Open+Sans:wght@400&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#CC0000",
+                        background: "#221710",
+                        surface: "#342418",
+                        accent: "#CBA990",
+                    },
+                    fontFamily: {
+                        display: ["Montserrat", "sans-serif"],
+                        body: ["Open Sans", "sans-serif"],
+                    },
+                    borderRadius: {
+                        'field': '8px',
+                        'btn': '12px',
+                    },
+                    boxShadow: {
+                        'glow': '0 0 20px rgba(204, 0, 0, 0.15)',
+                    }
+                },
+            },
+        };
+    </script>
+<style>
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }input[type="checkbox"]:checked {
+            background-color: #CC0000;
+            border-color: #CC0000;
+        }
+        input[type="checkbox"] {
+            background-color: #342418;
+            border-color: #342418;}
+        input:-webkit-autofill,
+        input:-webkit-autofill:hover, 
+        input:-webkit-autofill:focus, 
+        input:-webkit-autofill:active{
+            -webkit-box-shadow: 0 0 0 30px #342418 inset !important;
+            -webkit-text-fill-color: white !important;
+            caret-color: white !important;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background font-display text-white min-h-screen flex flex-col antialiased">
+<header class="sticky top-0 z-50 bg-background px-6 py-4">
+<div class="flex items-center justify-between mb-6">
+<button aria-label="Go back" class="w-10 h-10 rounded-full bg-surface flex items-center justify-center hover:bg-opacity-80 transition-colors group">
+<span class="material-symbols-outlined text-white text-[20px] group-hover:-translate-x-0.5 transition-transform">arrow_back</span>
+</button>
+<div class="w-8 h-8 rounded-full overflow-hidden">
+<img alt="Zora African Market Icon" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAkBOvjfrhJHw2SYJaO_wk0vYgUOv71tQx2Hzdyd2mAoSXfP2VOmAOOw6bD_xkbq-lLPGFdODsmSwa4Gr6JevA5rSBfFGfpSrFyPGrHY3mifeerx5P5v39tcAD89KcsNn3-rHzws4JumhhyVn8RgWTxD-hFj03r_JAWDyjlV_D-alNokPKs3k1KNpkkPq2RbZJ9qPUCwX6zMLfY7RWHWBGu0buipwmzwcZ-TpsGAsK2WPKEwDYenOWxVubhYECwxjBgJ4U9nfNTYVfM"/>
+</div>
+</div>
+<div class="w-full bg-surface p-1 rounded-full flex relative">
+<button class="flex-1 py-3 text-sm font-semibold font-display rounded-full bg-primary text-white shadow-md transition-all text-center">
+                Sign In
+            </button>
+<button class="flex-1 py-3 text-sm font-semibold font-display rounded-full text-accent hover:text-white transition-colors text-center">
+                Sign Up
+            </button>
+</div>
+</header>
+<main class="flex-1 px-6 pt-6 pb-8 flex flex-col w-full max-w-md mx-auto">
+<div class="mb-8">
+<h1 class="text-[32px] leading-tight font-bold font-display text-white mb-2">Welcome Back</h1>
+<p class="text-accent font-body text-[16px] leading-relaxed">
+                Enter your details below to access your account and start shopping.
+            </p>
+</div>
+<form class="flex flex-col gap-5">
+<div class="relative group">
+<div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+<span class="material-symbols-outlined text-accent group-focus-within:text-white transition-colors">mail</span>
+</div>
+<input class="w-full h-14 pl-12 pr-4 bg-surface rounded-field border-none focus:ring-1 focus:ring-accent text-white placeholder-accent transition-all outline-none font-body" placeholder="Email Address" required="" type="email"/>
+</div>
+<div class="relative group">
+<div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+<span class="material-symbols-outlined text-accent group-focus-within:text-white transition-colors">lock</span>
+</div>
+<input class="w-full h-14 pl-12 pr-12 bg-surface rounded-field border-none focus:ring-1 focus:ring-accent text-white placeholder-accent transition-all outline-none font-body" placeholder="Password" required="" type="password"/>
+<button class="absolute inset-y-0 right-0 pr-4 flex items-center text-accent hover:text-white transition-colors" type="button">
+<span class="material-symbols-outlined text-[20px]">visibility_off</span>
+</button>
+</div>
+<div class="flex items-center justify-between mt-1">
+<label class="flex items-center gap-3 cursor-pointer group">
+<div class="relative flex items-center">
+<input class="peer h-5 w-5 rounded border-none bg-surface text-primary focus:ring-offset-0 focus:ring-0 cursor-pointer" type="checkbox"/>
+</div>
+<span class="text-sm font-medium font-body text-accent group-hover:text-white transition-colors">Remember me</span>
+</label>
+<a class="text-sm font-semibold font-display text-primary hover:text-red-400 transition-colors" href="#">Forgot Password?</a>
+</div>
+<button class="w-full h-[56px] bg-primary hover:bg-red-700 text-white font-bold font-display rounded-btn shadow-glow transform active:scale-[0.98] transition-all flex items-center justify-center gap-2 mt-4" type="submit">
+                Sign In
+            </button>
+</form>
+<div class="relative my-8">
+<div class="absolute inset-0 flex items-center">
+<div class="w-full border-t border-surface"></div>
+</div>
+<div class="relative flex justify-center text-sm">
+<span class="px-4 bg-background text-accent font-medium font-body">Or continue with</span>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<button class="h-[56px] flex items-center justify-center gap-3 bg-white hover:bg-gray-100 rounded-btn transition-colors shadow-sm">
+<svg class="w-6 h-6" viewBox="0 0 24 24">
+<path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"></path>
+<path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"></path>
+<path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"></path>
+<path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"></path>
+</svg>
+<span class="font-bold font-display text-black">Google</span>
+</button>
+<button class="h-[56px] flex items-center justify-center gap-3 bg-white hover:bg-gray-100 rounded-btn transition-colors shadow-sm">
+<svg class="w-6 h-6 text-black" fill="currentColor" viewBox="0 0 24 24">
+<path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.74 1.18 0 2.21-1.23 3.96-1.14 1.3.05 2.19.61 2.77 1.42-2.52 1.34-2.02 5.09.43 6.13-.51 1.62-1.31 3.05-2.24 5.82zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"></path>
+</svg>
+<span class="font-bold font-display text-black">Apple</span>
+</button>
+</div>
+<div class="mt-auto pt-8 text-center text-xs font-body text-accent leading-relaxed">
+            By signing in, you agree to our 
+            <a class="text-primary hover:underline font-semibold" href="#">Terms of Service</a> 
+            and 
+            <a class="text-primary hover:underline font-semibold" href="#">Privacy Policy</a>.
+        </div>
+</main>
+
+</body></html>

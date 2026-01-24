@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Notification Center - Zora African Market</title>
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;700;800&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Theme Configuration -->
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "primary": "#cc0000",
+              "background-light": "#f8f5f5",
+              "background-dark": "#221710", /* Overridden to match prompt specifically */
+              "card-dark": "#342418",
+              "text-muted": "#bc9a9a",
+              "zora-yellow": "#FFCC00",
+              "zora-green": "#22C55E",
+            },
+            fontFamily: {
+              "display": ["Plus Jakarta Sans", "sans-serif"]
+            },
+            borderRadius: {
+              "DEFAULT": "0.5rem", 
+              "lg": "1rem", 
+              "xl": "0.75rem", /* 12px specifically */
+              "full": "9999px"
+            },
+          },
+        },
+      }
+    </script>
+<style>
+        /* Custom scrollbar hiding for clean mobile look */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-dark font-display antialiased min-h-screen relative overflow-x-hidden selection:bg-primary selection:text-white">
+<!-- Sticky Header -->
+<header class="sticky top-0 z-50 bg-[#221710]/95 backdrop-blur-md border-b border-[#3a2727] pt-safe-top">
+<!-- Safe Area Spacer (Simulated for iOS) -->
+<div class="h-4 w-full"></div>
+<div class="flex items-center justify-between px-5 py-4">
+<h1 class="text-white text-2xl font-bold tracking-tight">Notifications</h1>
+<button class="text-primary text-sm font-bold tracking-wide active:opacity-70 transition-opacity">
+                Mark all read
+            </button>
+</div>
+<!-- Filter Tabs -->
+<div class="px-5 pb-0 overflow-x-auto no-scrollbar">
+<div class="flex gap-8 border-b border-[#3a2727] min-w-max">
+<button class="group flex flex-col items-center pb-3 border-b-[3px] border-primary px-1">
+<span class="text-white text-sm font-bold">All</span>
+</button>
+<button class="group flex flex-col items-center pb-3 border-b-[3px] border-transparent hover:border-[#3a2727] px-1 transition-colors">
+<span class="text-text-muted group-hover:text-white text-sm font-bold transition-colors">Orders</span>
+</button>
+<button class="group flex flex-col items-center pb-3 border-b-[3px] border-transparent hover:border-[#3a2727] px-1 transition-colors">
+<span class="text-text-muted group-hover:text-white text-sm font-bold transition-colors">Promos</span>
+</button>
+<button class="group flex flex-col items-center pb-3 border-b-[3px] border-transparent hover:border-[#3a2727] px-1 transition-colors">
+<span class="text-text-muted group-hover:text-white text-sm font-bold transition-colors">Updates</span>
+</button>
+</div>
+</div>
+</header>
+<!-- Main Content -->
+<main class="flex flex-col px-4 pt-6 pb-20 max-w-md mx-auto w-full">
+<!-- TODAY SECTION -->
+<div class="mb-8">
+<h3 class="text-white text-sm font-bold uppercase tracking-wider mb-4 px-1 opacity-80">Today</h3>
+<div class="flex flex-col gap-3">
+<!-- Item 1: Order (Blue) -->
+<article class="bg-card-dark rounded-xl p-4 flex gap-4 items-start relative group active:scale-[0.98] transition-transform duration-200">
+<!-- Icon -->
+<div class="shrink-0 size-12 rounded-full bg-blue-600 flex items-center justify-center text-white shadow-lg shadow-blue-900/20">
+<span class="material-symbols-outlined" style="font-size: 24px;">package_2</span>
+</div>
+<!-- Content -->
+<div class="flex-1 min-w-0 pr-6">
+<div class="flex justify-between items-start mb-1">
+<h4 class="text-white text-[15px] font-bold leading-tight truncate pr-2">Order #2938 Shipped</h4>
+<span class="text-text-muted text-xs font-medium whitespace-nowrap shrink-0">2h ago</span>
+</div>
+<p class="text-text-muted text-sm leading-snug line-clamp-2">Your jollof rice spices are on the way! Track your package to see arrival time.</p>
+</div>
+<!-- Unread Dot -->
+<div class="absolute top-5 right-4 size-2.5 rounded-full bg-primary shadow-[0_0_8px_rgba(204,0,0,0.6)]"></div>
+</article>
+<!-- Item 2: Promo (Yellow) -->
+<article class="bg-card-dark rounded-xl p-4 flex gap-4 items-start relative group active:scale-[0.98] transition-transform duration-200">
+<!-- Icon -->
+<div class="shrink-0 size-12 rounded-full bg-zora-yellow flex items-center justify-center text-[#221710] shadow-lg shadow-yellow-900/20">
+<span class="material-symbols-outlined" style="font-size: 24px;">celebration</span>
+</div>
+<!-- Content -->
+<div class="flex-1 min-w-0 pr-6">
+<div class="flex justify-between items-start mb-1">
+<h4 class="text-white text-[15px] font-bold leading-tight truncate pr-2">Flash Sale!</h4>
+<span class="text-text-muted text-xs font-medium whitespace-nowrap shrink-0">5h ago</span>
+</div>
+<p class="text-text-muted text-sm leading-snug line-clamp-2">20% off all plantain chips for the next hour. Don't miss out on the crunch!</p>
+</div>
+<!-- Unread Dot -->
+<div class="absolute top-5 right-4 size-2.5 rounded-full bg-primary shadow-[0_0_8px_rgba(204,0,0,0.6)]"></div>
+</article>
+</div>
+</div>
+<!-- YESTERDAY SECTION -->
+<div>
+<h3 class="text-white text-sm font-bold uppercase tracking-wider mb-4 px-1 opacity-80">Yesterday</h3>
+<div class="flex flex-col gap-3">
+<!-- Item 3: Review (Green) -->
+<article class="bg-card-dark rounded-xl p-4 flex gap-4 items-start relative group active:scale-[0.98] transition-transform duration-200">
+<!-- Icon -->
+<div class="shrink-0 size-12 rounded-full bg-zora-green flex items-center justify-center text-white shadow-lg shadow-green-900/20">
+<span class="material-symbols-outlined" style="font-size: 24px;">star</span>
+</div>
+<!-- Content -->
+<div class="flex-1 min-w-0 pr-6">
+<div class="flex justify-between items-start mb-1">
+<h4 class="text-white text-[15px] font-bold leading-tight truncate pr-2">Rate your purchase</h4>
+<span class="text-text-muted text-xs font-medium whitespace-nowrap shrink-0">1d ago</span>
+</div>
+<p class="text-text-muted text-sm leading-snug line-clamp-2">How was the Fufu flour you bought? Share your thoughts with the community.</p>
+</div>
+</article>
+<!-- Item 4: Reward (Purple) -->
+<article class="bg-card-dark rounded-xl p-4 flex gap-4 items-start relative group active:scale-[0.98] transition-transform duration-200">
+<!-- Icon -->
+<div class="shrink-0 size-12 rounded-full bg-purple-600 flex items-center justify-center text-white shadow-lg shadow-purple-900/20">
+<span class="material-symbols-outlined" style="font-size: 24px;">savings</span>
+</div>
+<!-- Content -->
+<div class="flex-1 min-w-0 pr-6">
+<div class="flex justify-between items-start mb-1">
+<h4 class="text-white text-[15px] font-bold leading-tight truncate pr-2">You earned 50 pts</h4>
+<span class="text-text-muted text-xs font-medium whitespace-nowrap shrink-0">1d ago</span>
+</div>
+<p class="text-text-muted text-sm leading-snug line-clamp-2">Thanks for referring a friend to Zora! Use your points on your next checkout.</p>
+</div>
+</article>
+<!-- Item 5: Order (Blue) - Read -->
+<article class="bg-card-dark rounded-xl p-4 flex gap-4 items-start relative opacity-80 group active:scale-[0.98] transition-transform duration-200">
+<!-- Icon -->
+<div class="shrink-0 size-12 rounded-full bg-blue-600/50 flex items-center justify-center text-white/70">
+<span class="material-symbols-outlined" style="font-size: 24px;">local_shipping</span>
+</div>
+<!-- Content -->
+<div class="flex-1 min-w-0 pr-6">
+<div class="flex justify-between items-start mb-1">
+<h4 class="text-white text-[15px] font-bold leading-tight truncate pr-2">Order #2910 Delivered</h4>
+<span class="text-text-muted text-xs font-medium whitespace-nowrap shrink-0">1d ago</span>
+</div>
+<p class="text-text-muted text-sm leading-snug line-clamp-2">Your package was left at the front door.</p>
+</div>
+</article>
+</div>
+</div>
+</main>
+<!-- Simple Bottom Nav Placeholder (Visual Context Only) -->
+<div class="fixed bottom-0 w-full bg-[#221710]/95 backdrop-blur border-t border-[#3a2727] h-20 flex items-center justify-around z-40 pb-4">
+<div class="flex flex-col items-center gap-1 opacity-50">
+<span class="material-symbols-outlined text-white">home</span>
+<span class="text-[10px] font-bold text-white">Home</span>
+</div>
+<div class="flex flex-col items-center gap-1 opacity-50">
+<span class="material-symbols-outlined text-white">search</span>
+<span class="text-[10px] font-bold text-white">Explore</span>
+</div>
+<div class="flex flex-col items-center gap-1 text-primary">
+<span class="material-symbols-outlined fill-current">notifications</span>
+<span class="text-[10px] font-bold">Alerts</span>
+</div>
+<div class="flex flex-col items-center gap-1 opacity-50">
+<span class="material-symbols-outlined text-white">person</span>
+<span class="text-[10px] font-bold text-white">Profile</span>
+</div>
+</div>
+</body></html>

@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Order History Overview</title>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Config -->
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#cc0000",
+                        "zora-dark": "#221710",
+                        "zora-card": "#342418",
+                        "zora-yellow": "#FFCC00",
+                        "zora-green": "#22C55E",
+                        "zora-text-muted": "#bc9a9a",
+                    },
+                    fontFamily: {
+                        "display": ["Plus Jakarta Sans", "sans-serif"],
+                        "body": ["Plus Jakarta Sans", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "card": "12px",
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #221710; /* Zora Dark Background */
+        }
+        /* Custom scrollbar hiding for cleaner mobile look */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-zora-dark text-white min-h-screen flex flex-col antialiased selection:bg-primary selection:text-white pb-24">
+<!-- Header Section -->
+<header class="sticky top-0 z-50 bg-zora-dark shadow-[0_4px_20px_rgba(0,0,0,0.2)]">
+<!-- Top Bar -->
+<div class="flex items-center justify-between px-4 pt-6 pb-2">
+<button class="flex items-center justify-center w-10 h-10 rounded-full hover:bg-white/5 transition-colors text-white">
+<span class="material-symbols-outlined">arrow_back</span>
+</button>
+<h1 class="text-lg font-bold tracking-tight">My Orders</h1>
+<button class="flex items-center justify-center w-10 h-10 rounded-full hover:bg-white/5 transition-colors text-white">
+<span class="material-symbols-outlined">help</span>
+</button>
+</div>
+<!-- Filter Tabs -->
+<div class="flex items-center px-2">
+<button class="flex-1 flex flex-col items-center justify-center py-3 group">
+<span class="text-sm font-bold text-white mb-3">Active</span>
+<div class="h-[3px] w-full bg-primary rounded-t-full"></div>
+</button>
+<button class="flex-1 flex flex-col items-center justify-center py-3 group">
+<span class="text-sm font-bold text-zora-text-muted mb-3 group-hover:text-white transition-colors">Completed</span>
+<div class="h-[3px] w-full bg-transparent group-hover:bg-white/10 rounded-t-full transition-colors"></div>
+</button>
+<button class="flex-1 flex flex-col items-center justify-center py-3 group">
+<span class="text-sm font-bold text-zora-text-muted mb-3 group-hover:text-white transition-colors">Cancelled</span>
+<div class="h-[3px] w-full bg-transparent group-hover:bg-white/10 rounded-t-full transition-colors"></div>
+</button>
+</div>
+</header>
+<!-- Content Area -->
+<main class="flex-1 px-4 py-6 space-y-5">
+<!-- Card 1: Preparing -->
+<div class="bg-zora-card rounded-card p-4 shadow-lg flex flex-col gap-4">
+<!-- Header -->
+<div class="flex justify-between items-start">
+<div class="flex flex-col">
+<span class="text-white text-base font-bold">Order #29384</span>
+<span class="text-zora-text-muted text-xs mt-0.5">Oct 24, 2023 at 10:30 AM</span>
+</div>
+<span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-zora-yellow text-black shadow-sm">
+                    Preparing
+                </span>
+</div>
+<!-- Vendor & Items Preview -->
+<div class="flex items-center gap-3">
+<div class="flex -space-x-3 overflow-hidden">
+<img alt="Spice Product" class="inline-block h-10 w-10 rounded-full ring-2 ring-zora-card object-cover bg-gray-800" data-alt="Jar of red spices" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD_SUdLbr6yYLRAZAtInsbS7PTCVVvz00C470DPOVuEvAx9Uixur6BPC1SeKBhKYRyN6Cjm0dKTSIH4AmFJEA-611v94tZ0ktAm2uyn48kDkHam76QBCVp25RqkIpRiuBGszaP2G2VBCME82eA5qVeoTmW1x3nxKlaW5gjKvmSVq48XjgXIzGvSrAVD_iiSXAuC_RCZq00CtZvZ1MdAQin45XxsXb9CSuPhCfOxF4i8WFZl9wjs7yaXcrDql273K9HyuVl-3DEsQ_J2"/>
+<img alt="Grains Product" class="inline-block h-10 w-10 rounded-full ring-2 ring-zora-card object-cover bg-gray-800" data-alt="Bag of grains" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDlor7Iu1e6MXn9aDlDH_kyVE7TH5v33YfNU0EU-ZzREzQXoJgeYFtzQYNZMRxA6T7OtbNgbY5Sk6jxyXL4uF7UA63q3d818J_Jo0zneAm0gaysRRxW-6PrGi4NtsONpBPU2A3F1MBwGxy1icQesLALNFg4XOmocZCD6IulIbCe2zbWXB0PhEzl38BUNKq-GuRgqg4BQFrrRe8egr0_25IFbH0yU-EHRjzO_pDA8RaFpv5gI1CnMDXtUwkpfkgZYUDMZFWaH_BJqv0K"/>
+<img alt="Vegetable Product" class="inline-block h-10 w-10 rounded-full ring-2 ring-zora-card object-cover bg-gray-800" data-alt="Vegetables basket" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBLk1UUJ62PjbjT1SknyELoJlqH19pBQ_W1Xbo1XsB-FZzstaDz8zNqBfcHkVfI6emxRmTyldTAFF0xb6JHGUz_dM-nb_9ryJ-S0HsuhZIp5CzxHSvi8smHCtVeM_KpYyeGxiboCANZZy3MzgVE2J0v12MlVBnraDbqZpIBgNqs5oquwINjZu_b46QP4FGdmNmFIJ6jwmoJfOzZ4hkZrvQbXO05uW1oEhSNPFHfxRU3AO7QNXaUxY6jp1uuuDaX9HIZZsFoPq1dTB5Q"/>
+</div>
+<div class="flex flex-col ml-1">
+<span class="text-sm font-medium text-white">Zora's Spices</span>
+<span class="text-xs text-zora-text-muted">3 Items</span>
+</div>
+</div>
+<div class="h-px bg-white/5 w-full"></div>
+<!-- Footer: Price & Action -->
+<div class="flex justify-between items-center">
+<span class="text-lg font-bold text-white">$45.50</span>
+<button class="text-primary font-bold text-sm flex items-center gap-1 hover:text-red-400 transition-colors">
+                    Track Order
+                    <span class="material-symbols-outlined text-lg">chevron_right</span>
+</button>
+</div>
+</div>
+<!-- Card 2: Out for Delivery -->
+<div class="bg-zora-card rounded-card p-4 shadow-lg flex flex-col gap-4">
+<!-- Header -->
+<div class="flex justify-between items-start">
+<div class="flex flex-col">
+<span class="text-white text-base font-bold">Order #29312</span>
+<span class="text-zora-text-muted text-xs mt-0.5">Oct 23, 2023 at 4:15 PM</span>
+</div>
+<span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-blue-500 text-white shadow-sm">
+                    Out for Delivery
+                </span>
+</div>
+<!-- Vendor & Items Preview -->
+<div class="flex items-center gap-3">
+<div class="flex -space-x-3 overflow-hidden">
+<img alt="Market Goods" class="inline-block h-10 w-10 rounded-full ring-2 ring-zora-card object-cover bg-gray-800" data-alt="Fresh vegetables market" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBRcZHy7iWIxCjoCU79p8zu9TuWOrpXkR8CXRKxyTVQAx9eTA2DryauVQK-LuNZwbZoe8RtqOJQt2BBMEJXwDTtTk0ePEOdZmTQkseZUmFuS_ata7-KlIH2Wpo3q7XbEdCoVOyB-dx0llqhYA2TkUOFANFkeJpFtinKR-BeTvod9MBpKLSuS9ZBS8r59xdO4GU7KG6xDIs6Q7W-DsX1cR62t_WI0G6_XaEpiIUKXX-NHhivZltOhBzUBGkZQxmFlvcyflcS_vSGU2rq"/>
+<img alt="Oil Product" class="inline-block h-10 w-10 rounded-full ring-2 ring-zora-card object-cover bg-gray-800" data-alt="Bottle of palm oil" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDRSPaOJ_APMPL_u9GGZwkRP3vW6MTFWJ7tCz_MKQ-i4HrNcGrhEJQ19sIgvH5F5odcsUgqySZWvX2kOkbrWWILz51eibi-8qJ31rsXy-hPrzdBb4KiUFWxqQry4s3mfkC8icYd__68aK1aXlOtKJREoFCIffVqL5Icl4WIymkIDnLpjzbKeKFQSycyVKTprCJfkIVzJfOQdr4d38pvOsfNGFLOjlT6mSR5n1uWIhurifKeT522YQMa9prWDORE_xRkR4vMV-5i30Pi"/>
+</div>
+<div class="flex flex-col ml-1">
+<span class="text-sm font-medium text-white">Lagos Market Direct</span>
+<span class="text-xs text-zora-text-muted">2 Items</span>
+</div>
+</div>
+<div class="h-px bg-white/5 w-full"></div>
+<!-- Footer: Price & Action -->
+<div class="flex justify-between items-center">
+<span class="text-lg font-bold text-white">$22.00</span>
+<button class="text-primary font-bold text-sm flex items-center gap-1 hover:text-red-400 transition-colors">
+                    Track Order
+                    <span class="material-symbols-outlined text-lg">chevron_right</span>
+</button>
+</div>
+</div>
+<!-- Card 3: Delivered (Visual Demo) -->
+<div class="bg-zora-card rounded-card p-4 shadow-lg flex flex-col gap-4 opacity-90">
+<!-- Header -->
+<div class="flex justify-between items-start">
+<div class="flex flex-col">
+<span class="text-white text-base font-bold">Order #28100</span>
+<span class="text-zora-text-muted text-xs mt-0.5">Oct 20, 2023 at 1:00 PM</span>
+</div>
+<span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-zora-green text-white shadow-sm">
+                    Delivered
+                </span>
+</div>
+<!-- Vendor & Items Preview -->
+<div class="flex items-center gap-3">
+<div class="flex -space-x-3 overflow-hidden">
+<img alt="Coffee Product" class="inline-block h-10 w-10 rounded-full ring-2 ring-zora-card object-cover bg-gray-800" data-alt="Bag of coffee beans" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDSbXtEbC-2JcflkgBfODzOXPk4y-dIGi6eCQgCT_OT-3MiLGdjdNcSSkTZdQHaYk6WJMHeBxVgiTci_qggXVw3tE8EpYPDRiFo5AN-HnypKQpLZyJqRpdQDGPVaHzqJKuF72kfi6bdcX_Y0x2PZU-Fs259ubU8Qy3ecXH0naMuLJ30MTV5zU9iCrEZPcTk8_cxMcGuxdNXHyKNrS_M89taOUxHWoAavVdEqMM_VNpHs7y8yLpfYvqeoW730P90-4XT3_o4FPOt3oK8"/>
+</div>
+<div class="flex flex-col ml-1">
+<span class="text-sm font-medium text-white">African Beauty Store</span>
+<span class="text-xs text-zora-text-muted">1 Item</span>
+</div>
+</div>
+<div class="h-px bg-white/5 w-full"></div>
+<!-- Footer: Price & Action -->
+<div class="flex justify-between items-center">
+<span class="text-lg font-bold text-white">$15.00</span>
+<button class="text-primary font-bold text-sm flex items-center gap-1 hover:text-red-400 transition-colors">
+                    Reorder
+                    <span class="material-symbols-outlined text-lg">replay</span>
+</button>
+</div>
+</div>
+<!-- Card 4: Cancelled (Visual Demo) -->
+<div class="bg-zora-card rounded-card p-4 shadow-lg flex flex-col gap-4 opacity-75 grayscale-[0.3]">
+<!-- Header -->
+<div class="flex justify-between items-start">
+<div class="flex flex-col">
+<span class="text-white text-base font-bold">Order #27999</span>
+<span class="text-zora-text-muted text-xs mt-0.5">Oct 18, 2023 at 9:00 AM</span>
+</div>
+<span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-primary text-white shadow-sm">
+                    Cancelled
+                </span>
+</div>
+<!-- Vendor & Items Preview -->
+<div class="flex items-center gap-3">
+<div class="flex -space-x-3 overflow-hidden">
+<img alt="Shea Butter" class="inline-block h-10 w-10 rounded-full ring-2 ring-zora-card object-cover bg-gray-800" data-alt="Bowl of shea butter" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAStqpAg-C-WNYGcCROOBmc3OS6ycx638hoZ8umjHE-giFAXiKk1nrw7tQFlG5MdlBlw-0zQcg_MTm2tFeXE-7SOvVF0rHy6EnI2ie492a57BUwcAaW0sBorGGb0eAs7eFrj-zZauQ_syQhaYmt12tQlyGM53ZD5-RSAciiO2VLtZJb8QVYWJQomUXbLRNrtN_E_g7_tNjezWgLAAeLTEX7moZKE5NeOW4xrN0-ITkSt-fJNLhvNN6NbujNI7jabxOtmU-erPLhuYFw"/>
+<img alt="Soap Product" class="inline-block h-10 w-10 rounded-full ring-2 ring-zora-card object-cover bg-gray-800" data-alt="Black soap bar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDoyHvWoPgoLGO1_BlBhCVw--aWzXYQncwl7NCTqlnKcSYQnuCL_u_HEy3mlmc1fiZnCUp53pWqJiiWBTGCilulWUv2uXy34nxVK4mAK_oCocecjhBpG6j_MInknedn_uTRcXQ2LXkxn-k4NToMzSnegAOURoMwF9sIalcbF4yY0gp_-_wQY4Q-FcQqk_OQaeSqTJ4BREf43T4I4WlEEqFc0C0BVeFzZahRkAGa78Y_l07acg2XxjVsB5g1hqqp-9khgYlWSgPtyZET"/>
+<img alt="Vegetable Product" class="inline-block h-10 w-10 rounded-full ring-2 ring-zora-card object-cover bg-gray-800" data-alt="Vegetables basket" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAmQFTyiaHM1C4FSqsjR2PV1q6CrAgEd8a7eJZwl1xmnZezsjBMNJuklSX9zgERCMso_hmjvcY--4bY7gsPhGIu5ujMH7VscDI31PnBaaCRwgGRo0hsWY-IDIvVFKzGYOM0gc5VherXcWUmBNGfA9TnPg74XGEVwFzto8tlxuDS31t3w3bdcLn-TFeCDdNNGWZrKvoykE1OTnuP2zAwYN0kPcfcJh08YfQph8xyNuQjspvhUN7sHx5fynkejGyqTRjVaqBIji5dI3v6"/>
+</div>
+<div class="flex flex-col ml-1">
+<span class="text-sm font-medium text-white">Shea Butter Co</span>
+<span class="text-xs text-zora-text-muted">4 Items</span>
+</div>
+</div>
+<div class="h-px bg-white/5 w-full"></div>
+<!-- Footer: Price & Action -->
+<div class="flex justify-between items-center">
+<span class="text-lg font-bold text-white">$30.00</span>
+<button class="text-primary font-bold text-sm flex items-center gap-1 hover:text-red-400 transition-colors">
+                    Reorder
+                    <span class="material-symbols-outlined text-lg">replay</span>
+</button>
+</div>
+</div>
+</main>
+<!-- Bottom Navigation -->
+<nav class="fixed bottom-0 left-0 w-full bg-zora-card border-t border-white/5 pb-5 pt-3 px-4 z-50">
+<div class="flex justify-between items-center">
+<button class="flex flex-col items-center gap-1 w-12 text-zora-text-muted hover:text-white transition-colors">
+<span class="material-symbols-outlined" data-icon="Home" style="font-variation-settings: 'FILL' 0, 'wght' 400;">home</span>
+<span class="text-[10px] font-medium">Home</span>
+</button>
+<button class="flex flex-col items-center gap-1 w-12 text-zora-text-muted hover:text-white transition-colors">
+<span class="material-symbols-outlined" data-icon="Search" style="font-variation-settings: 'FILL' 0, 'wght' 400;">search</span>
+<span class="text-[10px] font-medium">Search</span>
+</button>
+<button class="flex flex-col items-center gap-1 w-12 text-primary">
+<span class="material-symbols-outlined" data-icon="Orders" style="font-variation-settings: 'FILL' 1, 'wght' 400;">receipt_long</span>
+<span class="text-[10px] font-bold">Orders</span>
+</button>
+<button class="flex flex-col items-center gap-1 w-12 text-zora-text-muted hover:text-white transition-colors">
+<span class="material-symbols-outlined" data-icon="Profile" style="font-variation-settings: 'FILL' 0, 'wght' 400;">person</span>
+<span class="text-[10px] font-medium">Profile</span>
+</button>
+<button class="flex flex-col items-center gap-1 w-12 text-zora-text-muted hover:text-white transition-colors">
+<span class="material-symbols-outlined" data-icon="Cart" style="font-variation-settings: 'FILL' 0, 'wght' 400;">shopping_cart</span>
+<span class="text-[10px] font-medium">Cart</span>
+</button>
+</div>
+</nav>
+</body></html>
