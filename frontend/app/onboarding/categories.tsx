@@ -5,7 +5,6 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
-  Dimensions,
   useWindowDimensions,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -52,7 +51,7 @@ export default function CategoriesScreen() {
   const router = useRouter();
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const { width } = useWindowDimensions();
-  const cardWidth = (width - Spacing.base * 2 - Spacing.md) / 2;
+  const cardWidth = Math.max(140, (width - Spacing.base * 2 - Spacing.md) / 2);
 
   const toggleCategory = (categoryId: string) => {
     setSelectedCategories((prev) =>
@@ -131,36 +130,6 @@ export default function CategoriesScreen() {
               </TouchableOpacity>
             );
           })}
-              <TouchableOpacity
-                key={category.id}
-                style={[
-                  styles.categoryCard,
-                  isSelected && styles.categoryCardSelected,
-                ]}
-                onPress={() => toggleCategory(category.id)}
-                activeOpacity={0.8}
-              >
-                {/* Selection Indicator */}
-                {isSelected && (
-                  <View style={styles.checkmark}>
-                    <MaterialCommunityIcons name="check" size={14} color={Colors.textPrimary} />
-                  </View>
-                )}
-                
-                {/* Icon */}
-                <View style={styles.iconContainer}>
-                  <MaterialCommunityIcons
-                    name={category.icon as any}
-                    size={32}
-                    color={Colors.primary}
-                  />
-                </View>
-                
-                {/* Name */}
-                <Text style={styles.categoryName}>{category.name}</Text>
-              </TouchableOpacity>
-            );
-          })}
         </View>
       </ScrollView>
 
@@ -173,6 +142,7 @@ export default function CategoriesScreen() {
           ]}
           onPress={handleContinue}
           disabled={selectedCategories.length === 0}
+          activeOpacity={0.8}
         >
           <Text style={styles.continueButtonText}>Continue</Text>
           <MaterialCommunityIcons name="arrow-right" size={20} color={Colors.textPrimary} />
@@ -251,8 +221,6 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   categoryCard: {
-    width: CARD_WIDTH,
-    height: CARD_WIDTH, // Use fixed height instead of aspectRatio for web compatibility
     backgroundColor: Colors.cardDark,
     borderRadius: BorderRadius.lg,
     padding: Spacing.base,
