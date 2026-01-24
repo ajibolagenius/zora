@@ -7,54 +7,55 @@ import {
   TouchableOpacity,
   Image,
   ActivityIndicator,
-  Platform,
+  useWindowDimensions,
+  ImageBackground,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { LinearGradient } from 'expo-linear-gradient';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import {
   ArrowLeft,
   Heart,
-  ShareNetwork,
-  Star,
   Leaf,
+  Star,
   Recycle,
-  ShieldCheck,
-  Truck,
-  Clock,
   CaretDown,
   CaretUp,
-  Plus,
+  Truck,
+  ShieldCheck,
+  SealCheck,
+  CaretRight,
   Minus,
-  Basket,
+  Plus,
 } from 'phosphor-react-native';
 import { Colors } from '../../constants/colors';
-import { Spacing, BorderRadius } from '../../constants/spacing';
-import { FontSize, FontWeight } from '../../constants/typography';
+import { Spacing, BorderRadius, TouchTarget } from '../../constants/spacing';
+import { FontSize, FontWeight, LetterSpacing } from '../../constants/typography';
 import { productService, vendorService, type Product, type Vendor } from '../../services/mockDataService';
 import { useCartStore } from '../../stores/cartStore';
 
-type CollapsibleSection = 'description' | 'nutrition' | 'heritage';
+type SectionType = 'description' | 'nutrition' | 'heritage';
 
 export default function ProductScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const { id } = useLocalSearchParams<{ id: string }>();
+  const { height: screenHeight } = useWindowDimensions();
   const addToCart = useCartStore((state) => state.addItem);
 
   const [product, setProduct] = useState<Product | null>(null);
   const [vendor, setVendor] = useState<Vendor | null>(null);
   const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
+  const [expandedSections, setExpandedSections] = useState<SectionType[]>(['description']);
   const [isFavorite, setIsFavorite] = useState(false);
-  const [expandedSections, setExpandedSections] = useState<CollapsibleSection[]>(['description']);
 
   const fetchData = useCallback(async () => {
     if (!id) return;
     try {
-      // Use mock data service
       const productData = productService.getById(id);
       if (productData) {
         setProduct(productData);
-        
         if (productData.vendor_id) {
           const vendorData = vendorService.getById(productData.vendor_id);
           setVendor(vendorData || null);
@@ -71,7 +72,7 @@ export default function ProductScreen() {
     fetchData();
   }, [fetchData]);
 
-  const toggleSection = (section: CollapsibleSection) => {
+  const toggleSection = (section: SectionType) => {
     setExpandedSections((prev) =>
       prev.includes(section)
         ? prev.filter((s) => s !== section)
@@ -79,288 +80,278 @@ export default function ProductScreen() {
     );
   };
 
-  const handleAddToBasket = () => {
+  const incrementQuantity = () => setQuantity((q) => q + 1);
+  const decrementQuantity = () => setQuantity((q) => Math.max(1, q - 1));
+
+  const handleAddToCart = () => {
     if (product) {
-      addToCart(product, quantity);
+      addToCart(product as any, quantity);
       router.back();
     }
   };
 
-  const incrementQuantity = () => setQuantity((prev) => prev + 1);
-  const decrementQuantity = () => setQuantity((prev) => Math.max(1, prev - 1));
-
-  if (loading || !product) {
+  if (loading) {
     return (
-      <SafeAreaView style={styles.container}>
+      <View style={styles.container}>
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={Colors.primary} />
         </View>
-      </SafeAreaView>
+      </View>
+    );
+  }
+
+  if (!product) {
+    return (
+      <View style={styles.container}>
+        <View style={styles.loadingContainer}>
+          <Text style={styles.errorText}>Product not found</Text>
+        </View>
+      </View>
     );
   }
 
   const totalPrice = (product.price * quantity).toFixed(2);
-  const hasDiscount = false; // Mock data doesn't have original_price field
 
   return (
     <View style={styles.container}>
       <ScrollView
         style={styles.scrollView}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
+        bounces={false}
       >
-        {/* Product Image */}
-        <View style={styles.imageContainer}>
-          <Image
+        {/* Hero Image Section - 45vh */}
+        <View style={[styles.heroSection, { height: screenHeight * 0.45 }]}>
+          <ImageBackground
             source={{ uri: product.image_urls?.[0] || '' }}
-            style={styles.productImage}
+            style={styles.heroImage}
             resizeMode="cover"
-          />
-          
-          {/* Navigation Header */}
-          <SafeAreaView style={styles.headerOverlay} edges={['top']}>
-            <TouchableOpacity style={styles.headerButton} onPress={() => router.back()}>
-              <ArrowLeft size={24} color={Colors.textPrimary} weight="bold" />
-            </TouchableOpacity>
-            <View style={styles.headerActions}>
-              <TouchableOpacity style={styles.headerButton}>
-                <ShareNetwork size={22} color={Colors.textPrimary} weight="duotone" />
+          >
+            <LinearGradient
+              colors={['rgba(0,0,0,0.4)', 'transparent', 'rgba(0,0,0,0.6)']}
+              style={styles.heroGradient}
+            />
+            
+            {/* Header Buttons */}
+            <View style={[styles.heroHeader, { paddingTop: insets.top + 12 }]}>
+              <TouchableOpacity
+                style={styles.heroButton}
+                onPress={() => router.back()}
+              >
+                <ArrowLeft size={20} color="#FFFFFF" weight="bold" />
               </TouchableOpacity>
               <TouchableOpacity
-                style={[styles.headerButton, isFavorite && styles.headerButtonActive]}
+                style={styles.heroButton}
                 onPress={() => setIsFavorite(!isFavorite)}
               >
-                <Heart
-                  size={22}
-                  color={isFavorite ? Colors.primary : Colors.textPrimary}
-                  weight={isFavorite ? 'fill' : 'duotone'}
+                <Heart 
+                  size={20} 
+                  color="#FFFFFF" 
+                  weight={isFavorite ? 'fill' : 'regular'} 
                 />
               </TouchableOpacity>
             </View>
-          </SafeAreaView>
+          </ImageBackground>
         </View>
 
-        {/* Product Info */}
-        <View style={styles.productInfo}>
-          {/* Region Tag */}
-          {product.cultural_region && (
-            <Text style={styles.regionTag}>{product.cultural_region.replace('-', ' ')}</Text>
-          )}
+        {/* Content Card - Overlapping hero */}
+        <View style={styles.contentCard}>
+          {/* Drag Handle */}
+          <View style={styles.dragHandle} />
 
-          {/* Product Name */}
-          <Text style={styles.productName}>{product.name}</Text>
-
-          {/* Weight */}
-          {product.weight && (
-            <Text style={styles.productWeight}>{product.weight}</Text>
-          )}
-
-          {/* Price */}
-          <View style={styles.priceRow}>
-            <Text style={styles.price}>£{product.price.toFixed(2)}</Text>
-            {hasDiscount && (
-              <Text style={styles.originalPrice}>£{product.original_price?.toFixed(2)}</Text>
-            )}
-            {product.weight && (
-              <Text style={styles.unitPrice}>
-                (£{(product.price / (parseInt(product.weight) / 1000 || 1)).toFixed(2)}/kg)
-              </Text>
-            )}
+          {/* Product Title & Price */}
+          <View style={styles.titleSection}>
+            <Text style={styles.productTitle}>{product.name}</Text>
+            <View style={styles.priceRow}>
+              <Text style={styles.priceMain}>£{product.price.toFixed(2)}</Text>
+              <Text style={styles.priceUnit}>{product.unit_price_label || `£${(product.price / parseFloat(product.weight || '1')).toFixed(2)}/kg`}</Text>
+            </View>
           </View>
 
-          {/* Badges */}
-          <View style={styles.badgesRow}>
-            {product.certifications?.includes('organic') && (
+          {/* Badges Row */}
+          <ScrollView 
+            horizontal 
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.badgesContainer}
+          >
+            {product.certifications?.includes('Organic') && (
               <View style={[styles.badge, styles.badgeOrganic]}>
-                <Leaf size={14} color={Colors.success} weight="fill" />
-                <Text style={[styles.badgeText, { color: Colors.success }]}>Organic</Text>
+                <Leaf size={16} color="#4ADE80" weight="fill" />
+                <Text style={[styles.badgeText, styles.badgeTextOrganic]}>Organic</Text>
               </View>
             )}
             {product.rating >= 4.5 && (
               <View style={[styles.badge, styles.badgeTopRated]}>
-                <Star size={14} color={Colors.rating} weight="fill" />
-                <Text style={[styles.badgeText, { color: Colors.rating }]}>Top Rated</Text>
+                <Star size={16} color="#FACC15" weight="fill" />
+                <Text style={[styles.badgeText, styles.badgeTextTopRated]}>Top Rated</Text>
               </View>
             )}
-            {product.certifications?.includes('eco-friendly') && (
+            {product.certifications?.includes('Eco-friendly') && (
               <View style={[styles.badge, styles.badgeEco]}>
-                <Recycle size={14} color="#14B8A6" weight="fill" />
-                <Text style={[styles.badgeText, { color: '#14B8A6' }]}>Eco-Friendly</Text>
+                <Recycle size={16} color="#2DD4BF" weight="fill" />
+                <Text style={[styles.badgeText, styles.badgeTextEco]}>Eco-friendly</Text>
               </View>
             )}
-          </View>
+          </ScrollView>
 
-          {/* Rating */}
-          <View style={styles.ratingRow}>
-            <View style={styles.stars}>
-              {[1, 2, 3, 4, 5].map((star) => (
-                <Star
-                  key={star}
-                  size={16}
-                  color={star <= Math.floor(product.rating) ? Colors.rating : Colors.textMuted}
-                  weight={star <= Math.floor(product.rating) ? 'fill' : 'regular'}
-                />
-              ))}
-            </View>
-            <Text style={styles.ratingText}>{product.rating.toFixed(1)}</Text>
-            <Text style={styles.reviewCount}>({product.review_count} reviews)</Text>
-          </View>
-        </View>
-
-        {/* Vendor Card */}
-        {vendor && (
-          <TouchableOpacity
-            style={styles.vendorCard}
-            onPress={() => router.push(`/vendor/${vendor.id}`)}
-            activeOpacity={0.8}
-          >
-            <View style={styles.vendorAvatarContainer}>
+          {/* Vendor Card */}
+          {vendor && (
+            <TouchableOpacity
+              style={styles.vendorCard}
+              onPress={() => router.push(`/vendor/${vendor.id}`)}
+              activeOpacity={0.8}
+            >
               <Image
                 source={{ uri: vendor.logo_url }}
                 style={styles.vendorAvatar}
-                resizeMode="cover"
               />
-            </View>
-            <View style={styles.vendorInfo}>
-              <Text style={styles.vendorLabel}>Sold by</Text>
-              <View style={styles.vendorNameRow}>
+              <View style={styles.vendorInfo}>
+                <View style={styles.vendorLabelRow}>
+                  <Text style={styles.vendorLabel}>Sold by</Text>
+                  {vendor.is_verified && (
+                    <SealCheck size={14} color="#3B82F6" weight="fill" />
+                  )}
+                </View>
                 <Text style={styles.vendorName}>{vendor.shop_name}</Text>
-                {vendor.is_verified && (
-                  <ShieldCheck size={16} color={Colors.success} weight="fill" />
-                )}
+              </View>
+              <View style={styles.vendorArrow}>
+                <CaretRight size={20} color="#FFFFFF" weight="bold" />
+              </View>
+            </TouchableOpacity>
+          )}
+
+          {/* Expandable Sections */}
+          <View style={styles.sectionsContainer}>
+            {/* Product Description */}
+            <TouchableOpacity
+              style={styles.sectionHeader}
+              onPress={() => toggleSection('description')}
+              activeOpacity={0.7}
+            >
+              <Text style={styles.sectionTitle}>Product Description</Text>
+              {expandedSections.includes('description') ? (
+                <CaretUp size={20} color={Colors.textMuted} weight="bold" />
+              ) : (
+                <CaretDown size={20} color={Colors.textMuted} weight="bold" />
+              )}
+            </TouchableOpacity>
+            {expandedSections.includes('description') && (
+              <View style={styles.sectionContent}>
+                <Text style={styles.sectionText}>
+                  {product.description || 'Premium quality product sourced from the finest ingredients. Perfect for traditional African dishes and modern fusion cuisine.'}
+                </Text>
+              </View>
+            )}
+
+            {/* Nutrition */}
+            <TouchableOpacity
+              style={styles.sectionHeader}
+              onPress={() => toggleSection('nutrition')}
+              activeOpacity={0.7}
+            >
+              <Text style={styles.sectionTitle}>Nutrition</Text>
+              {expandedSections.includes('nutrition') ? (
+                <CaretUp size={20} color={Colors.textMuted} weight="bold" />
+              ) : (
+                <CaretDown size={20} color={Colors.textMuted} weight="bold" />
+              )}
+            </TouchableOpacity>
+            {expandedSections.includes('nutrition') && (
+              <View style={styles.sectionContent}>
+                <View style={styles.nutritionGrid}>
+                  <View style={styles.nutritionItem}>
+                    <Text style={styles.nutritionLabel}>Calories</Text>
+                    <Text style={styles.nutritionValue}>{product.nutrition?.calories || '350 kcal / 100g'}</Text>
+                  </View>
+                  <View style={styles.nutritionItem}>
+                    <Text style={styles.nutritionLabel}>Protein</Text>
+                    <Text style={styles.nutritionValue}>{product.nutrition?.protein || '8.5g'}</Text>
+                  </View>
+                  <View style={styles.nutritionItem}>
+                    <Text style={styles.nutritionLabel}>Carbs</Text>
+                    <Text style={styles.nutritionValue}>{product.nutrition?.carbs || '78g'}</Text>
+                  </View>
+                  <View style={styles.nutritionItem}>
+                    <Text style={styles.nutritionLabel}>Fat</Text>
+                    <Text style={styles.nutritionValue}>{product.nutrition?.fat || '0.5g'}</Text>
+                  </View>
+                </View>
+              </View>
+            )}
+
+            {/* Heritage Story */}
+            <TouchableOpacity
+              style={[styles.sectionHeader, styles.sectionHeaderLast]}
+              onPress={() => toggleSection('heritage')}
+              activeOpacity={0.7}
+            >
+              <Text style={styles.sectionTitle}>Heritage Story</Text>
+              {expandedSections.includes('heritage') ? (
+                <CaretUp size={20} color={Colors.textMuted} weight="bold" />
+              ) : (
+                <CaretDown size={20} color={Colors.textMuted} weight="bold" />
+              )}
+            </TouchableOpacity>
+            {expandedSections.includes('heritage') && (
+              <View style={styles.sectionContent}>
+                <Text style={styles.sectionText}>
+                  {product.heritage_story || 'Sourced directly from family-owned farms that have practiced sustainable cultivation for generations. Every product tells a story of tradition and respect for the land.'}
+                </Text>
+              </View>
+            )}
+          </View>
+
+          {/* Info Cards */}
+          <View style={styles.infoCardsRow}>
+            <View style={styles.infoCard}>
+              <Truck size={28} color={Colors.primary} weight="duotone" />
+              <View style={styles.infoCardText}>
+                <Text style={styles.infoCardTitle}>2-3 Day Delivery</Text>
+                <Text style={styles.infoCardSubtitle}>Tracked shipping</Text>
               </View>
             </View>
-            <CaretDown size={20} color={Colors.textMuted} weight="bold" style={{ transform: [{ rotate: '-90deg' }] }} />
-          </TouchableOpacity>
-        )}
-
-        {/* Collapsible Sections */}
-        <View style={styles.sectionsContainer}>
-          {/* Description Section */}
-          <TouchableOpacity
-            style={styles.sectionHeader}
-            onPress={() => toggleSection('description')}
-          >
-            <Text style={styles.sectionTitle}>Product Description</Text>
-            {expandedSections.includes('description') ? (
-              <CaretUp size={20} color={Colors.textMuted} weight="bold" />
-            ) : (
-              <CaretDown size={20} color={Colors.textMuted} weight="bold" />
-            )}
-          </TouchableOpacity>
-          {expandedSections.includes('description') && (
-            <View style={styles.sectionContent}>
-              <Text style={styles.sectionText}>
-                {product.description || `Premium ${product.name} sourced directly from trusted African suppliers. Perfect for traditional recipes and authentic cuisine. Our products undergo strict quality checks to ensure you receive only the best.`}
-              </Text>
-            </View>
-          )}
-
-          {/* Nutrition Section */}
-          <TouchableOpacity
-            style={styles.sectionHeader}
-            onPress={() => toggleSection('nutrition')}
-          >
-            <Text style={styles.sectionTitle}>Nutrition</Text>
-            {expandedSections.includes('nutrition') ? (
-              <CaretUp size={20} color={Colors.textMuted} weight="bold" />
-            ) : (
-              <CaretDown size={20} color={Colors.textMuted} weight="bold" />
-            )}
-          </TouchableOpacity>
-          {expandedSections.includes('nutrition') && (
-            <View style={styles.sectionContent}>
-              <View style={styles.nutritionGrid}>
-                <View style={styles.nutritionItem}>
-                  <Text style={styles.nutritionValue}>120</Text>
-                  <Text style={styles.nutritionLabel}>Calories</Text>
-                </View>
-                <View style={styles.nutritionItem}>
-                  <Text style={styles.nutritionValue}>4g</Text>
-                  <Text style={styles.nutritionLabel}>Protein</Text>
-                </View>
-                <View style={styles.nutritionItem}>
-                  <Text style={styles.nutritionValue}>25g</Text>
-                  <Text style={styles.nutritionLabel}>Carbs</Text>
-                </View>
-                <View style={styles.nutritionItem}>
-                  <Text style={styles.nutritionValue}>2g</Text>
-                  <Text style={styles.nutritionLabel}>Fat</Text>
-                </View>
+            <View style={styles.infoCard}>
+              <ShieldCheck size={28} color={Colors.primary} weight="duotone" />
+              <View style={styles.infoCardText}>
+                <Text style={styles.infoCardTitle}>Quality Guaranteed</Text>
+                <Text style={styles.infoCardSubtitle}>Premium grade</Text>
               </View>
             </View>
-          )}
-
-          {/* Heritage Story Section */}
-          <TouchableOpacity
-            style={styles.sectionHeader}
-            onPress={() => toggleSection('heritage')}
-          >
-            <Text style={styles.sectionTitle}>Heritage Story</Text>
-            {expandedSections.includes('heritage') ? (
-              <CaretUp size={20} color={Colors.textMuted} weight="bold" />
-            ) : (
-              <CaretDown size={20} color={Colors.textMuted} weight="bold" />
-            )}
-          </TouchableOpacity>
-          {expandedSections.includes('heritage') && (
-            <View style={styles.sectionContent}>
-              <Text style={styles.sectionText}>
-                {product.heritage_story || `This product represents generations of African culinary tradition. Sourced from family-owned farms in ${product.cultural_region?.replace('-', ' ') || 'West Africa'}, it carries the authentic flavors that have been cherished for centuries. By purchasing this product, you're supporting local African communities and preserving cultural heritage.`}
-              </Text>
-            </View>
-          )}
-        </View>
-
-        {/* Delivery & Quality Cards */}
-        <View style={styles.infoCardsRow}>
-          <View style={styles.infoCard}>
-            <Truck size={24} color={Colors.primary} weight="duotone" />
-            <Text style={styles.infoCardTitle}>2-3 Day Delivery</Text>
-            <Text style={styles.infoCardSubtitle}>Tracked shipping</Text>
           </View>
-          <View style={styles.infoCard}>
-            <ShieldCheck size={24} color={Colors.success} weight="duotone" />
-            <Text style={styles.infoCardTitle}>Quality Guaranteed</Text>
-            <Text style={styles.infoCardSubtitle}>100% authentic</Text>
-          </View>
-        </View>
 
-        {/* Bottom spacing */}
-        <View style={{ height: 120 }} />
+          {/* Bottom spacer */}
+          <View style={{ height: 140 }} />
+        </View>
       </ScrollView>
 
       {/* Fixed Bottom Bar */}
-      <View style={styles.bottomBar}>
-        <SafeAreaView edges={['bottom']} style={styles.bottomBarInner}>
+      <View style={[styles.bottomBar, { paddingBottom: insets.bottom + 16 }]}>
+        <View style={styles.bottomBarContent}>
           {/* Quantity Selector */}
           <View style={styles.quantitySelector}>
             <TouchableOpacity
               style={styles.quantityButton}
               onPress={decrementQuantity}
             >
-              <Minus size={18} color={Colors.textPrimary} weight="bold" />
+              <Minus size={20} color={Colors.textMuted} weight="bold" />
             </TouchableOpacity>
             <Text style={styles.quantityText}>{quantity}</Text>
             <TouchableOpacity
               style={styles.quantityButton}
               onPress={incrementQuantity}
             >
-              <Plus size={18} color={Colors.textPrimary} weight="bold" />
+              <Plus size={20} color={Colors.textMuted} weight="bold" />
             </TouchableOpacity>
           </View>
 
           {/* Add to Basket Button */}
           <TouchableOpacity
             style={styles.addToBasketButton}
-            onPress={handleAddToBasket}
-            activeOpacity={0.8}
+            onPress={handleAddToCart}
+            activeOpacity={0.9}
           >
-            <Basket size={22} color={Colors.textPrimary} weight="duotone" />
-            <Text style={styles.addToBasketText}>ADD TO BASKET</Text>
-            <Text style={styles.addToBasketPrice}>£{totalPrice}</Text>
+            <Text style={styles.addToBasketText}>Add to Basket</Text>
           </TouchableOpacity>
-        </SafeAreaView>
+        </View>
       </View>
     </View>
   );
@@ -369,313 +360,325 @@ export default function ProductScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.backgroundDark,
+    backgroundColor: '#000000',
   },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
   },
+  errorText: {
+    color: Colors.textPrimary,
+    fontSize: FontSize.body,
+  },
   scrollView: {
     flex: 1,
   },
-  scrollContent: {
-    paddingBottom: 20,
-  },
-  imageContainer: {
-    height: 300,
+
+  // Hero Section
+  heroSection: {
+    width: '100%',
     position: 'relative',
   },
-  productImage: {
+  heroImage: {
     width: '100%',
     height: '100%',
-    backgroundColor: Colors.cardDark,
   },
-  headerOverlay: {
+  heroGradient: {
+    ...StyleSheet.absoluteFillObject,
+  },
+  heroHeader: {
     position: 'absolute',
     top: 0,
     left: 0,
     right: 0,
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingHorizontal: Spacing.base,
-    paddingTop: Spacing.sm,
+    paddingHorizontal: Spacing.lg,
   },
-  headerButton: {
-    width: 44,
-    height: 44,
-    borderRadius: BorderRadius.full,
-    backgroundColor: 'rgba(0, 0, 0, 0.4)',
+  heroButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.05)',
     justifyContent: 'center',
     alignItems: 'center',
   },
-  headerButtonActive: {
-    backgroundColor: 'rgba(204, 0, 0, 0.2)',
+
+  // Content Card
+  contentCard: {
+    backgroundColor: Colors.cardDark,
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    marginTop: -48,
+    paddingHorizontal: Spacing.lg,
+    paddingTop: 32,
+    minHeight: 500,
   },
-  headerActions: {
-    flexDirection: 'row',
-    gap: Spacing.sm,
+  dragHandle: {
+    width: 48,
+    height: 4,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    borderRadius: 2,
+    alignSelf: 'center',
+    position: 'absolute',
+    top: 12,
   },
-  productInfo: {
-    padding: Spacing.base,
+
+  // Title Section
+  titleSection: {
+    marginBottom: Spacing.lg,
   },
-  regionTag: {
-    color: Colors.primary,
-    fontSize: FontSize.caption,
-    fontWeight: FontWeight.semiBold,
-    textTransform: 'uppercase',
-    letterSpacing: 1,
-    marginBottom: Spacing.xs,
-  },
-  productName: {
+  productTitle: {
     fontSize: FontSize.h2,
     fontWeight: FontWeight.bold,
     color: Colors.textPrimary,
-    marginBottom: Spacing.xs,
-  },
-  productWeight: {
-    fontSize: FontSize.body,
-    color: Colors.textMuted,
-    marginBottom: Spacing.md,
+    lineHeight: 32,
+    marginBottom: Spacing.sm,
   },
   priceRow: {
     flexDirection: 'row',
-    alignItems: 'baseline',
-    gap: Spacing.sm,
-    marginBottom: Spacing.md,
+    alignItems: 'flex-end',
+    gap: Spacing.md,
   },
-  price: {
-    fontSize: FontSize.h1,
+  priceMain: {
+    fontSize: 30,
     fontWeight: FontWeight.bold,
     color: Colors.secondary,
   },
-  originalPrice: {
-    fontSize: FontSize.body,
+  priceUnit: {
+    fontSize: FontSize.bodyLarge,
     color: Colors.textMuted,
-    textDecorationLine: 'line-through',
+    marginBottom: 4,
   },
-  unitPrice: {
-    fontSize: FontSize.small,
-    color: Colors.textMuted,
-  },
-  badgesRow: {
+
+  // Badges
+  badgesContainer: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: Spacing.sm,
-    marginBottom: Spacing.md,
+    gap: Spacing.md,
+    marginBottom: Spacing.lg,
   },
   badge: {
     flexDirection: 'row',
     alignItems: 'center',
+    gap: 6,
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.sm,
     borderRadius: BorderRadius.full,
-    gap: Spacing.xs,
+    borderWidth: 1,
   },
   badgeOrganic: {
-    backgroundColor: 'rgba(34, 197, 94, 0.1)',
+    backgroundColor: 'rgba(74, 222, 128, 0.1)',
+    borderColor: 'rgba(74, 222, 128, 0.2)',
   },
   badgeTopRated: {
-    backgroundColor: 'rgba(255, 204, 0, 0.1)',
+    backgroundColor: 'rgba(250, 204, 21, 0.1)',
+    borderColor: 'rgba(250, 204, 21, 0.2)',
   },
   badgeEco: {
-    backgroundColor: 'rgba(20, 184, 166, 0.1)',
+    backgroundColor: 'rgba(45, 212, 191, 0.1)',
+    borderColor: 'rgba(45, 212, 191, 0.2)',
   },
   badgeText: {
-    fontSize: FontSize.small,
+    fontSize: FontSize.caption,
     fontWeight: FontWeight.semiBold,
+    textTransform: 'uppercase',
+    letterSpacing: LetterSpacing.wide,
   },
-  ratingRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.sm,
+  badgeTextOrganic: {
+    color: '#86EFAC',
   },
-  stars: {
-    flexDirection: 'row',
-    gap: 2,
+  badgeTextTopRated: {
+    color: '#FDE047',
   },
-  ratingText: {
-    fontSize: FontSize.body,
-    fontWeight: FontWeight.bold,
-    color: Colors.textPrimary,
+  badgeTextEco: {
+    color: '#5EEAD4',
   },
-  reviewCount: {
-    fontSize: FontSize.small,
-    color: Colors.textMuted,
-  },
+
+  // Vendor Card
   vendorCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.cardDark,
-    marginHorizontal: Spacing.base,
-    padding: Spacing.md,
+    padding: Spacing.base,
     borderRadius: BorderRadius.lg,
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.05)',
     marginBottom: Spacing.lg,
-  },
-  vendorAvatarContainer: {
-    marginRight: Spacing.md,
+    gap: Spacing.base,
   },
   vendorAvatar: {
     width: 48,
     height: 48,
     borderRadius: 24,
+    backgroundColor: Colors.backgroundDark,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.1)',
   },
   vendorInfo: {
     flex: 1,
   },
-  vendorLabel: {
-    fontSize: FontSize.caption,
-    color: Colors.textMuted,
-    marginBottom: 2,
-  },
-  vendorNameRow: {
+  vendorLabelRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: Spacing.xs,
+    marginBottom: 2,
+  },
+  vendorLabel: {
+    fontSize: FontSize.tiny,
+    fontWeight: FontWeight.bold,
+    color: Colors.primary,
+    textTransform: 'uppercase',
+    letterSpacing: LetterSpacing.wider,
   },
   vendorName: {
     fontSize: FontSize.body,
     fontWeight: FontWeight.bold,
     color: Colors.textPrimary,
   },
+  vendorArrow: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+
+  // Sections
   sectionsContainer: {
-    marginHorizontal: Spacing.base,
-    marginBottom: Spacing.lg,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(255, 255, 255, 0.1)',
   },
   sectionHeader: {
     flexDirection: 'row',
-    alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: Colors.cardDark,
-    padding: Spacing.base,
-    borderRadius: BorderRadius.lg,
-    marginBottom: Spacing.sm,
+    alignItems: 'center',
+    paddingVertical: Spacing.base,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  sectionHeaderLast: {
+    borderBottomWidth: 0,
   },
   sectionTitle: {
-    fontSize: FontSize.body,
+    fontSize: FontSize.bodyLarge,
     fontWeight: FontWeight.bold,
     color: Colors.textPrimary,
   },
   sectionContent: {
-    backgroundColor: Colors.cardDark,
-    padding: Spacing.base,
-    borderRadius: BorderRadius.lg,
-    marginBottom: Spacing.sm,
-    marginTop: -Spacing.sm,
+    paddingBottom: Spacing.base,
   },
   sectionText: {
-    fontSize: FontSize.body,
+    fontSize: FontSize.small,
     color: Colors.textSecondary,
-    lineHeight: 24,
+    lineHeight: 22,
   },
+
+  // Nutrition Grid
   nutritionGrid: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexWrap: 'wrap',
+    gap: Spacing.base,
   },
   nutritionItem: {
-    alignItems: 'center',
-  },
-  nutritionValue: {
-    fontSize: FontSize.h3,
-    fontWeight: FontWeight.bold,
-    color: Colors.textPrimary,
+    width: '45%',
   },
   nutritionLabel: {
     fontSize: FontSize.caption,
     color: Colors.textMuted,
-    marginTop: 2,
+    textTransform: 'uppercase',
+    marginBottom: 4,
   },
+  nutritionValue: {
+    fontSize: FontSize.small,
+    fontWeight: FontWeight.medium,
+    color: Colors.textPrimary,
+  },
+
+  // Info Cards
   infoCardsRow: {
     flexDirection: 'row',
-    paddingHorizontal: Spacing.base,
-    gap: Spacing.md,
+    gap: Spacing.base,
+    marginTop: Spacing.lg,
   },
   infoCard: {
     flex: 1,
-    backgroundColor: Colors.cardDark,
-    padding: Spacing.base,
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.05)',
     borderRadius: BorderRadius.lg,
-    alignItems: 'center',
+    padding: Spacing.base,
+    gap: Spacing.md,
+  },
+  infoCardText: {
+    gap: 2,
   },
   infoCardTitle: {
     fontSize: FontSize.small,
     fontWeight: FontWeight.bold,
     color: Colors.textPrimary,
-    marginTop: Spacing.sm,
-    textAlign: 'center',
   },
   infoCardSubtitle: {
     fontSize: FontSize.caption,
     color: Colors.textMuted,
-    marginTop: 2,
-    textAlign: 'center',
   },
+
+  // Bottom Bar
   bottomBar: {
     position: 'absolute',
     bottom: 0,
     left: 0,
     right: 0,
-    backgroundColor: Colors.cardDark,
-    borderTopLeftRadius: BorderRadius.xl,
-    borderTopRightRadius: BorderRadius.xl,
-    ...Platform.select({
-      ios: {
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: -4 },
-        shadowOpacity: 0.2,
-        shadowRadius: 8,
-      },
-      android: {
-        elevation: 16,
-      },
-    }),
+    backgroundColor: 'rgba(34, 23, 16, 0.9)',
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(255, 255, 255, 0.05)',
+    paddingHorizontal: Spacing.lg,
+    paddingTop: Spacing.lg,
   },
-  bottomBarInner: {
+  bottomBarContent: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: Spacing.base,
-    paddingTop: Spacing.base,
-    gap: Spacing.md,
+    gap: Spacing.base,
   },
   quantitySelector: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.backgroundDark,
-    borderRadius: BorderRadius.lg,
-    padding: 4,
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    borderRadius: BorderRadius.full,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.1)',
+    height: 48,
+    paddingHorizontal: Spacing.xs,
   },
   quantityButton: {
-    width: 40,
-    height: 40,
+    width: 32,
+    height: 32,
     justifyContent: 'center',
     alignItems: 'center',
   },
   quantityText: {
-    fontSize: FontSize.h4,
+    fontSize: FontSize.small,
     fontWeight: FontWeight.bold,
     color: Colors.textPrimary,
-    minWidth: 32,
+    minWidth: 24,
     textAlign: 'center',
   },
   addToBasketButton: {
     flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
+    height: 48,
     backgroundColor: Colors.primary,
-    borderRadius: BorderRadius.lg,
-    paddingVertical: Spacing.md,
-    gap: Spacing.sm,
+    borderRadius: BorderRadius.full,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   addToBasketText: {
-    fontSize: FontSize.body,
+    fontSize: FontSize.small,
     fontWeight: FontWeight.bold,
     color: Colors.textPrimary,
-  },
-  addToBasketPrice: {
-    fontSize: FontSize.body,
-    fontWeight: FontWeight.bold,
-    color: Colors.textPrimary,
-    opacity: 0.8,
+    textTransform: 'uppercase',
+    letterSpacing: LetterSpacing.wide,
   },
 });
