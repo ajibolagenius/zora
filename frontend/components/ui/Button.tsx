@@ -10,7 +10,7 @@ import {
 import { IconProps } from 'phosphor-react-native';
 import { Colors } from '../../constants/colors';
 import { BorderRadius, Spacing, Heights } from '../../constants/spacing';
-import { FontSize, FontWeight } from '../../constants/typography';
+import { FontSize, FontWeight, FontFamily } from '../../constants/typography';
 
 interface ButtonProps extends TouchableOpacityProps {
   title: string;
