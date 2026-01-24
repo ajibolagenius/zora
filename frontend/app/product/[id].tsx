@@ -663,8 +663,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   quantityText: {
+    fontFamily: FontFamily.bodyBold,
     fontSize: FontSize.small,
-    fontWeight: FontWeight.bold,
     color: Colors.textPrimary,
     minWidth: 24,
     textAlign: 'center',
@@ -678,8 +678,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   addToBasketText: {
+    fontFamily: FontFamily.bodyBold,
     fontSize: FontSize.small,
-    fontWeight: FontWeight.bold,
     color: Colors.textPrimary,
     textTransform: 'uppercase',
     letterSpacing: LetterSpacing.wide,
