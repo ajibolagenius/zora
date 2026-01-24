@@ -142,8 +142,8 @@ export default function ProductScreen() {
         {/* Product Info */}
         <View style={styles.productInfo}>
           {/* Region Tag */}
-          {product.region && (
-            <Text style={styles.regionTag}>{product.region.replace('-', ' ')}</Text>
+          {product.cultural_region && (
+            <Text style={styles.regionTag}>{product.cultural_region.replace('-', ' ')}</Text>
           )}
 
           {/* Product Name */}
