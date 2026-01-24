@@ -187,12 +187,13 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.md,
   },
   emptyTitle: {
+    fontFamily: FontFamily.displayMedium,
     color: Colors.textPrimary,
     fontSize: FontSize.h4,
-    fontWeight: FontWeight.bold,
     marginTop: Spacing.md,
   },
   emptySubtitle: {
+    fontFamily: FontFamily.body,
     color: Colors.textMuted,
     fontSize: FontSize.body,
     marginTop: Spacing.sm,
