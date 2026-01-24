@@ -17,7 +17,7 @@ import {
 } from 'phosphor-react-native';
 import { Colors } from '../../constants/colors';
 import { Spacing, BorderRadius, TouchTarget } from '../../constants/spacing';
-import { FontSize, FontWeight, FontFamily } from '../../constants/typography';
+import { FontSize, FontFamily } from '../../constants/typography';
 import { orderService } from '../../services/dataService';
 import { Order } from '../../types';
 import { useAuthStore } from '../../stores/authStore';
@@ -223,9 +223,9 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.md,
   },
   title: {
+    fontFamily: FontFamily.display,
     color: Colors.textPrimary,
     fontSize: FontSize.h2,
-    fontWeight: FontWeight.bold,
   },
   tabsContainer: {
     paddingHorizontal: Spacing.base,
@@ -244,9 +244,9 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.primary,
   },
   tabText: {
+    fontFamily: FontFamily.bodySemiBold,
     color: Colors.textMuted,
     fontSize: FontSize.small,
-    fontWeight: FontWeight.semiBold,
   },
   tabTextSelected: {
     color: Colors.textPrimary,
@@ -272,9 +272,9 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.md,
   },
   emptyTitle: {
+    fontFamily: FontFamily.displayMedium,
     color: Colors.textPrimary,
     fontSize: FontSize.h4,
-    fontWeight: FontWeight.bold,
     marginTop: Spacing.md,
   },
   emptySubtitle: {
@@ -302,9 +302,9 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.md,
   },
   orderNumber: {
+    fontFamily: FontFamily.bodyBold,
     color: Colors.textPrimary,
     fontSize: FontSize.body,
-    fontWeight: FontWeight.bold,
   },
   orderDate: {
     color: Colors.textMuted,
@@ -317,8 +317,8 @@ const styles = StyleSheet.create({
     borderRadius: BorderRadius.sm,
   },
   statusText: {
+    fontFamily: FontFamily.bodyBold,
     fontSize: FontSize.tiny,
-    fontWeight: FontWeight.bold,
   },
   orderItems: {
     flexDirection: 'row',
@@ -340,9 +340,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   moreItemsText: {
+    fontFamily: FontFamily.bodySemiBold,
     color: Colors.textMuted,
     fontSize: FontSize.caption,
-    fontWeight: FontWeight.semiBold,
   },
   orderFooter: {
     flexDirection: 'row',
@@ -357,8 +357,8 @@ const styles = StyleSheet.create({
     fontSize: FontSize.small,
   },
   orderTotal: {
+    fontFamily: FontFamily.bodyBold,
     color: Colors.secondary,
     fontSize: FontSize.body,
-    fontWeight: FontWeight.bold,
   },
 });
