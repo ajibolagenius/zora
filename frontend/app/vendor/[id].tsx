@@ -26,6 +26,8 @@ import {
   SealCheck,
 } from 'phosphor-react-native';
 import { Colors } from '../../constants/colors';
+import { Spacing, BorderRadius } from '../../constants/spacing';
+import { FontSize, FontWeight } from '../../constants/typography';
 import { vendorService, productService, type Vendor, type Product } from '../../services/mockDataService';
 import { useCartStore } from '../../stores/cartStore';
 
@@ -121,17 +123,17 @@ export default function VendorScreen() {
           style={styles.appBarButton}
           onPress={() => router.back()}
         >
-          <ArrowLeft size={24} color="#FFFFFF" weight="bold" />
+          <ArrowLeft size={24} color={Colors.textPrimary} weight="bold" />
         </TouchableOpacity>
         <View style={styles.appBarActions}>
           <TouchableOpacity style={styles.appBarButton}>
-            <MagnifyingGlass size={22} color="#FFFFFF" weight="bold" />
+            <MagnifyingGlass size={22} color={Colors.textPrimary} weight="bold" />
           </TouchableOpacity>
           <TouchableOpacity 
             style={styles.appBarButton}
             onPress={() => router.push('/(tabs)/cart')}
           >
-            <ShoppingBag size={22} color="#FFFFFF" weight="bold" />
+            <ShoppingBag size={22} color={Colors.textPrimary} weight="bold" />
             {cartItemCount > 0 && (
               <View style={styles.cartBadge} />
             )}
@@ -167,7 +169,7 @@ export default function VendorScreen() {
               />
               {vendor.is_verified && (
                 <View style={styles.verifiedBadge}>
-                  <SealCheck size={14} color="#FFFFFF" weight="fill" />
+                  <SealCheck size={14} color={Colors.textPrimary} weight="fill" />
                 </View>
               )}
             </View>
@@ -184,10 +186,10 @@ export default function VendorScreen() {
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity style={styles.iconButton} activeOpacity={0.8}>
-                <ChatCircle size={20} color="#FFFFFF" weight="regular" />
+                <ChatCircle size={20} color={Colors.textPrimary} weight="regular" />
               </TouchableOpacity>
               <TouchableOpacity style={styles.iconButton} activeOpacity={0.8}>
-                <ShareNetwork size={20} color="#FFFFFF" weight="regular" />
+                <ShareNetwork size={20} color={Colors.textPrimary} weight="regular" />
               </TouchableOpacity>
             </View>
           </View>
@@ -198,7 +200,7 @@ export default function VendorScreen() {
             
             {/* Location */}
             <View style={styles.infoRow}>
-              <MapPin size={14} color="#9CA3AF" weight="fill" />
+              <MapPin size={14} color={Colors.textMuted} weight="fill" />
               <Text style={styles.locationText}>
                 {vendor.address.split(',').slice(0, 2).join(',')} • Verified Vendor
               </Text>
@@ -206,7 +208,7 @@ export default function VendorScreen() {
 
             {/* Rating */}
             <View style={styles.infoRow}>
-              <Star size={16} color="#FFCC00" weight="fill" />
+              <Star size={16} color={Colors.secondary} weight="fill" />
               <Text style={styles.ratingValue}>{vendor.rating}</Text>
               <Text style={styles.ratingCount}>({vendor.review_count.toLocaleString()} reviews)</Text>
             </View>
@@ -274,7 +276,7 @@ export default function VendorScreen() {
                     
                     {/* Favorite Button */}
                     <TouchableOpacity style={styles.favoriteButton}>
-                      <Heart size={16} color="#FFFFFF" weight="regular" />
+                      <Heart size={16} color={Colors.textPrimary} weight="regular" />
                     </TouchableOpacity>
                   </View>
 
@@ -292,7 +294,7 @@ export default function VendorScreen() {
                         style={styles.addButton}
                         onPress={() => handleAddToCart(product)}
                       >
-                        <Plus size={16} color="#FFFFFF" weight="bold" />
+                        <Plus size={16} color={Colors.textPrimary} weight="bold" />
                       </TouchableOpacity>
                     </View>
                   </View>
@@ -312,7 +314,7 @@ export default function VendorScreen() {
                   <Star
                     key={star}
                     size={24}
-                    color={star <= Math.floor(vendor.rating) ? '#FFCC00' : '#4B4B4B'}
+                    color={star <= Math.floor(vendor.rating) ? Colors.secondary : Colors.cardDark}
                     weight="fill"
                   />
                 ))}
@@ -332,7 +334,7 @@ export default function VendorScreen() {
                   <Text style={styles.reviewerName}>Amara O.</Text>
                   <View style={styles.reviewStarsSmall}>
                     {[1, 2, 3, 4, 5].map((star) => (
-                      <Star key={star} size={12} color="#FFCC00" weight="fill" />
+                      <Star key={star} size={12} color={Colors.secondary} weight="fill" />
                     ))}
                   </View>
                 </View>
@@ -398,7 +400,7 @@ export default function VendorScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#1A1A1A',
+    backgroundColor: Colors.backgroundDark,
   },
   loadingContainer: {
     flex: 1,
@@ -406,8 +408,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   errorText: {
-    color: '#FFFFFF',
-    fontSize: 16,
+    color: Colors.textPrimary,
+    fontSize: FontSize.body,
   },
   scrollView: {
     flex: 1,
@@ -422,21 +424,21 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingBottom: 8,
-    backgroundColor: 'rgba(26, 26, 26, 0.95)',
+    paddingHorizontal: Spacing.base,
+    paddingBottom: Spacing.sm,
+    backgroundColor: 'rgba(34, 23, 16, 0.95)',
   },
   appBarButton: {
     width: 40,
     height: 40,
-    borderRadius: 20,
+    borderRadius: BorderRadius.full,
     backgroundColor: 'transparent',
     justifyContent: 'center',
     alignItems: 'center',
   },
   appBarActions: {
     flexDirection: 'row',
-    gap: 8,
+    gap: Spacing.sm,
   },
   cartBadge: {
     position: 'absolute',
@@ -459,11 +461,12 @@ const styles = StyleSheet.create({
   },
   headerOverlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0, 0, 0, 0.3)',
+    backgroundColor: Colors.overlay,
+    opacity: 0.3,
   },
   // Profile Section
   profileSection: {
-    paddingHorizontal: 16,
+    paddingHorizontal: Spacing.base,
     marginTop: -56,
     position: 'relative',
     zIndex: 10,
@@ -481,8 +484,8 @@ const styles = StyleSheet.create({
     height: 112,
     borderRadius: 56,
     borderWidth: 4,
-    borderColor: '#1A1A1A',
-    backgroundColor: '#2D2D2D',
+    borderColor: Colors.backgroundDark,
+    backgroundColor: Colors.cardDark,
   },
   verifiedBadge: {
     position: 'absolute',
@@ -491,21 +494,21 @@ const styles = StyleSheet.create({
     width: 24,
     height: 24,
     borderRadius: 12,
-    backgroundColor: '#3B82F6',
+    backgroundColor: Colors.info,
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 2,
-    borderColor: '#1A1A1A',
+    borderColor: Colors.backgroundDark,
   },
   actionButtons: {
     flexDirection: 'row',
-    gap: 8,
-    marginBottom: 8,
+    gap: Spacing.sm,
+    marginBottom: Spacing.sm,
   },
   followButton: {
     height: 36,
     paddingHorizontal: 20,
-    borderRadius: 18,
+    borderRadius: BorderRadius.full,
     backgroundColor: Colors.primary,
     justifyContent: 'center',
     alignItems: 'center',
@@ -516,28 +519,28 @@ const styles = StyleSheet.create({
     borderColor: Colors.primary,
   },
   followButtonText: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: '#FFFFFF',
+    fontSize: FontSize.small,
+    fontWeight: FontWeight.bold,
+    color: Colors.textPrimary,
   },
   iconButton: {
     width: 36,
     height: 36,
-    borderRadius: 18,
-    backgroundColor: '#2D2D2D',
+    borderRadius: BorderRadius.full,
+    backgroundColor: Colors.cardDark,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.1)',
+    borderColor: Colors.borderDark,
     justifyContent: 'center',
     alignItems: 'center',
   },
   vendorInfo: {
-    marginTop: 16,
+    marginTop: Spacing.base,
   },
   vendorName: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: '#FFFFFF',
-    marginBottom: 8,
+    fontSize: FontSize.h2,
+    fontWeight: FontWeight.bold,
+    color: Colors.textPrimary,
+    marginBottom: Spacing.sm,
   },
   infoRow: {
     flexDirection: 'row',
@@ -546,46 +549,46 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   locationText: {
-    fontSize: 14,
-    color: '#9CA3AF',
+    fontSize: FontSize.small,
+    color: Colors.textMuted,
   },
   ratingValue: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#FFFFFF',
+    fontSize: FontSize.small,
+    fontWeight: FontWeight.semiBold,
+    color: Colors.textPrimary,
   },
   ratingCount: {
-    fontSize: 14,
-    color: '#9CA3AF',
+    fontSize: FontSize.small,
+    color: Colors.textMuted,
   },
   description: {
-    fontSize: 14,
-    color: '#D1D5DB',
+    fontSize: FontSize.small,
+    color: Colors.textSecondary,
     lineHeight: 20,
-    marginTop: 12,
+    marginTop: Spacing.md,
   },
   // Tabs
   tabsContainer: {
     flexDirection: 'row',
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
-    marginTop: 16,
-    paddingHorizontal: 16,
+    borderBottomColor: Colors.borderDark,
+    marginTop: Spacing.base,
+    paddingHorizontal: Spacing.base,
   },
   tab: {
     flex: 1,
     alignItems: 'center',
-    paddingVertical: 12,
+    paddingVertical: Spacing.md,
     position: 'relative',
   },
   tabText: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: '#9CA3AF',
+    fontSize: FontSize.small,
+    fontWeight: FontWeight.medium,
+    color: Colors.textMuted,
   },
   tabTextActive: {
     color: Colors.primary,
-    fontWeight: '700',
+    fontWeight: FontWeight.bold,
   },
   tabIndicator: {
     position: 'absolute',
@@ -601,38 +604,38 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingTop: 24,
-    paddingBottom: 16,
+    paddingHorizontal: Spacing.base,
+    paddingTop: Spacing.lg,
+    paddingBottom: Spacing.base,
   },
   sectionTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: '#FFFFFF',
+    fontSize: FontSize.h4,
+    fontWeight: FontWeight.bold,
+    color: Colors.textPrimary,
   },
   seeAllText: {
-    fontSize: 14,
-    fontWeight: '600',
+    fontSize: FontSize.small,
+    fontWeight: FontWeight.semiBold,
     color: Colors.primary,
   },
   // Product Grid
   productGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    paddingHorizontal: 16,
-    gap: 16,
+    paddingHorizontal: Spacing.base,
+    gap: Spacing.base,
   },
   // Product Card
   productCard: {
-    backgroundColor: '#2D2D2D',
-    borderRadius: 12,
+    backgroundColor: Colors.cardDark,
+    borderRadius: BorderRadius.lg,
     overflow: 'hidden',
   },
   productImageContainer: {
     aspectRatio: 1,
     width: '100%',
     position: 'relative',
-    backgroundColor: '#3D3D3D',
+    backgroundColor: Colors.backgroundDark,
   },
   productImage: {
     width: '100%',
@@ -640,44 +643,44 @@ const styles = StyleSheet.create({
   },
   productBadge: {
     position: 'absolute',
-    top: 8,
-    left: 8,
-    backgroundColor: '#EF4444',
-    paddingHorizontal: 8,
+    top: Spacing.sm,
+    left: Spacing.sm,
+    backgroundColor: Colors.badgeHot,
+    paddingHorizontal: Spacing.sm,
     paddingVertical: 2,
-    borderRadius: 4,
+    borderRadius: BorderRadius.sm,
   },
   productBadgeText: {
-    color: '#FFFFFF',
+    color: Colors.textPrimary,
     fontSize: 10,
-    fontWeight: '700',
+    fontWeight: FontWeight.bold,
     textTransform: 'uppercase',
   },
   favoriteButton: {
     position: 'absolute',
-    top: 8,
-    right: 8,
+    top: Spacing.sm,
+    right: Spacing.sm,
     width: 28,
     height: 28,
-    borderRadius: 14,
+    borderRadius: BorderRadius.full,
     backgroundColor: 'rgba(255, 255, 255, 0.2)',
     justifyContent: 'center',
     alignItems: 'center',
   },
   productInfo: {
-    padding: 12,
+    padding: Spacing.md,
   },
   productName: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: '#FFFFFF',
+    fontSize: FontSize.small,
+    fontWeight: FontWeight.bold,
+    color: Colors.textPrimary,
     marginBottom: 4,
     lineHeight: 18,
   },
   productWeight: {
-    fontSize: 12,
-    color: '#9CA3AF',
-    marginBottom: 8,
+    fontSize: FontSize.caption,
+    color: Colors.textMuted,
+    marginBottom: Spacing.sm,
   },
   productFooter: {
     flexDirection: 'row',
@@ -685,78 +688,78 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   productPrice: {
-    fontSize: 16,
-    fontWeight: '700',
+    fontSize: FontSize.body,
+    fontWeight: FontWeight.bold,
     color: Colors.primary,
   },
   addButton: {
     width: 28,
     height: 28,
-    borderRadius: 14,
+    borderRadius: BorderRadius.full,
     backgroundColor: Colors.primary,
     justifyContent: 'center',
     alignItems: 'center',
   },
   // Tab Content
   tabContent: {
-    paddingHorizontal: 16,
-    paddingTop: 24,
+    paddingHorizontal: Spacing.base,
+    paddingTop: Spacing.lg,
   },
   // Review Summary
   reviewSummary: {
     alignItems: 'center',
-    backgroundColor: '#2D2D2D',
-    borderRadius: 16,
-    padding: 24,
-    marginBottom: 16,
+    backgroundColor: Colors.cardDark,
+    borderRadius: BorderRadius.lg,
+    padding: Spacing.lg,
+    marginBottom: Spacing.base,
   },
   reviewScore: {
     fontSize: 48,
-    fontWeight: '700',
-    color: '#FFFFFF',
+    fontWeight: FontWeight.bold,
+    color: Colors.textPrimary,
   },
   reviewStars: {
     flexDirection: 'row',
     gap: 4,
-    marginVertical: 8,
+    marginVertical: Spacing.sm,
   },
   reviewCountText: {
-    fontSize: 14,
-    color: '#9CA3AF',
+    fontSize: FontSize.small,
+    color: Colors.textMuted,
   },
   // Review Card
   reviewCard: {
-    backgroundColor: '#2D2D2D',
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 12,
+    backgroundColor: Colors.cardDark,
+    borderRadius: BorderRadius.lg,
+    padding: Spacing.base,
+    marginBottom: Spacing.md,
   },
   reviewHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: Spacing.md,
   },
   reviewerAvatar: {
     width: 40,
     height: 40,
-    borderRadius: 20,
+    borderRadius: BorderRadius.full,
     backgroundColor: Colors.primary,
     justifyContent: 'center',
     alignItems: 'center',
   },
   reviewerInitial: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: '700',
+    color: Colors.textPrimary,
+    fontSize: FontSize.body,
+    fontWeight: FontWeight.bold,
   },
   reviewerInfo: {
     flex: 1,
-    marginLeft: 12,
+    marginLeft: Spacing.md,
   },
   reviewerName: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#FFFFFF',
+    fontSize: FontSize.small,
+    fontWeight: FontWeight.semiBold,
+    color: Colors.textPrimary,
   },
   reviewStarsSmall: {
     flexDirection: 'row',
@@ -764,49 +767,49 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   reviewDate: {
-    fontSize: 12,
-    color: '#9CA3AF',
+    fontSize: FontSize.caption,
+    color: Colors.textMuted,
   },
   reviewText: {
-    fontSize: 14,
-    color: '#D1D5DB',
+    fontSize: FontSize.small,
+    color: Colors.textSecondary,
     lineHeight: 22,
   },
   // About Section
   aboutSection: {
-    marginBottom: 24,
+    marginBottom: Spacing.lg,
   },
   aboutTitle: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#FFFFFF',
-    marginBottom: 12,
+    fontSize: FontSize.body,
+    fontWeight: FontWeight.bold,
+    color: Colors.textPrimary,
+    marginBottom: Spacing.md,
   },
   aboutText: {
-    fontSize: 14,
-    color: '#D1D5DB',
+    fontSize: FontSize.small,
+    color: Colors.textSecondary,
     lineHeight: 22,
     marginBottom: 4,
   },
   contactRow: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    gap: 8,
+    gap: Spacing.sm,
   },
   specialtiesList: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 8,
+    gap: Spacing.sm,
   },
   specialtyBadge: {
-    backgroundColor: '#2D2D2D',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 16,
+    backgroundColor: Colors.cardDark,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.sm,
+    borderRadius: BorderRadius.full,
   },
   specialtyText: {
-    fontSize: 12,
-    color: '#FFFFFF',
-    fontWeight: '500',
+    fontSize: FontSize.caption,
+    color: Colors.textPrimary,
+    fontWeight: FontWeight.medium,
   },
 });
