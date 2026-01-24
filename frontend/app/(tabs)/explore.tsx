@@ -23,7 +23,7 @@ import {
 } from 'phosphor-react-native';
 import { Colors } from '../../constants/colors';
 import { Spacing, BorderRadius } from '../../constants/spacing';
-import { FontSize, FontWeight, FontFamily } from '../../constants/typography';
+import { FontSize, FontFamily } from '../../constants/typography';
 import { vendorService, type Vendor } from '../../services/mockDataService';
 
 type FilterType = 'open' | 'delivery' | 'pickup' | 'topRated';
@@ -301,9 +301,9 @@ const styles = StyleSheet.create({
     }),
   },
   clusterText: {
+    fontFamily: FontFamily.bodyBold,
     color: '#FFFFFF',
     fontSize: 14,
-    fontWeight: FontWeight.bold,
   },
   userDot: {
     position: 'absolute',
@@ -347,8 +347,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   headerTitle: {
+    fontFamily: FontFamily.displayMedium,
     fontSize: FontSize.h3,
-    fontWeight: FontWeight.bold,
     color: Colors.textPrimary,
   },
   // Filters Styles
@@ -370,9 +370,9 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.primary,
   },
   filterChipText: {
+    fontFamily: FontFamily.bodySemiBold,
     color: Colors.textPrimary,
     fontSize: FontSize.small,
-    fontWeight: FontWeight.semiBold,
   },
   filterChipTextActive: {
     color: Colors.textPrimary,
@@ -414,8 +414,8 @@ const styles = StyleSheet.create({
     paddingBottom: 16,
   },
   vendorCountText: {
+    fontFamily: FontFamily.bodySemiBold,
     fontSize: 12,
-    fontWeight: FontWeight.semiBold,
     color: '#9CA3AF',
     letterSpacing: 1,
     textTransform: 'uppercase',
@@ -454,8 +454,8 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   vendorName: {
+    fontFamily: FontFamily.displayMedium,
     fontSize: 18,
-    fontWeight: FontWeight.bold,
     color: Colors.textPrimary,
     lineHeight: 22,
   },
@@ -475,9 +475,9 @@ const styles = StyleSheet.create({
     gap: 2,
   },
   ratingText: {
+    fontFamily: FontFamily.bodySemiBold,
     color: '#FFCC00',
     fontSize: 12,
-    fontWeight: FontWeight.semiBold,
   },
   metaDivider: {
     color: '#6B7280',
@@ -485,13 +485,13 @@ const styles = StyleSheet.create({
     fontSize: 12,
   },
   metaText: {
+    fontFamily: FontFamily.bodyMedium,
     color: '#D1D5DB',
     fontSize: 12,
-    fontWeight: FontWeight.medium,
   },
   statusText: {
+    fontFamily: FontFamily.bodyBold,
     fontSize: 10,
-    fontWeight: FontWeight.bold,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
     marginTop: 4,
@@ -525,8 +525,8 @@ const styles = StyleSheet.create({
     }),
   },
   floatingButtonText: {
+    fontFamily: FontFamily.bodyBold,
     color: '#FFFFFF',
     fontSize: 14,
-    fontWeight: FontWeight.bold,
   },
 });
