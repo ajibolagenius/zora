@@ -8,6 +8,7 @@ import {
   RefreshControl,
   ActivityIndicator,
   Dimensions,
+  Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -27,6 +28,8 @@ import { HomeData, Product, Vendor, Region } from '../../types';
 import { useCartStore } from '../../stores/cartStore';
 
 const { width } = Dimensions.get('window');
+const PRODUCT_GAP = 10; // Reduced gap between products
+const PRODUCT_CARD_WIDTH = (width - Spacing.base * 2 - PRODUCT_GAP) / 2;
 
 export default function HomeScreen() {
   const router = useRouter();
@@ -90,19 +93,9 @@ export default function HomeScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
-      <ScrollView
-        style={styles.scrollView}
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-            tintColor={Colors.primary}
-          />
-        }
-      >
-        {/* Header */}
+      {/* Sticky Header Section */}
+      <View style={styles.stickyHeader}>
+        {/* Header Row */}
         <View style={styles.header}>
           <TouchableOpacity style={styles.locationButton}>
             <MapPin size={20} color={Colors.primary} weight="fill" />
@@ -131,7 +124,21 @@ export default function HomeScreen() {
             </View>
           </View>
         </TouchableOpacity>
+      </View>
 
+      {/* Scrollable Content */}
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor={Colors.primary}
+          />
+        }
+      >
         {/* Hero Banner */}
         {homeData?.banners && homeData.banners.length > 0 && (
           <View style={styles.bannerContainer}>
@@ -198,12 +205,13 @@ export default function HomeScreen() {
           </View>
           <View style={styles.productsGrid}>
             {filteredProducts?.map((product) => (
-              <ProductCard
-                key={product.id}
-                product={product}
-                onPress={() => handleProductPress(product)}
-                onAddToCart={() => handleAddToCart(product)}
-              />
+              <View key={product.id} style={styles.productCardWrapper}>
+                <ProductCard
+                  product={product}
+                  onPress={() => handleProductPress(product)}
+                  onAddToCart={() => handleAddToCart(product)}
+                />
+              </View>
             ))}
           </View>
         </View>
@@ -225,18 +233,27 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  scrollView: {
-    flex: 1,
-  },
-  scrollContent: {
-    paddingBottom: 20,
+  stickyHeader: {
+    backgroundColor: Colors.backgroundDark,
+    zIndex: 10,
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+      },
+      android: {
+        elevation: 4,
+      },
+    }),
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: Spacing.base,
-    paddingVertical: Spacing.md,
+    paddingVertical: Spacing.sm,
   },
   locationButton: {
     flexDirection: 'row',
@@ -267,7 +284,7 @@ const styles = StyleSheet.create({
   },
   searchContainer: {
     paddingHorizontal: Spacing.base,
-    marginBottom: Spacing.base,
+    paddingBottom: Spacing.md,
   },
   searchBar: {
     flexDirection: 'row',
@@ -275,7 +292,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.cardDark,
     borderRadius: BorderRadius.lg,
     paddingHorizontal: Spacing.md,
-    height: 52,
+    height: 48,
     gap: Spacing.sm,
   },
   searchPlaceholder: {
@@ -284,25 +301,31 @@ const styles = StyleSheet.create({
     fontSize: FontSize.body,
   },
   filterButton: {
-    width: 40,
-    height: 40,
+    width: 36,
+    height: 36,
     borderRadius: BorderRadius.md,
     backgroundColor: Colors.backgroundDark,
     justifyContent: 'center',
     alignItems: 'center',
   },
+  scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
+    paddingBottom: 20,
+  },
   bannerContainer: {
-    marginBottom: Spacing.xl,
+    marginBottom: Spacing.lg,
   },
   section: {
-    marginBottom: Spacing.xl,
+    marginBottom: Spacing.lg,
   },
   sectionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: Spacing.base,
-    marginBottom: Spacing.md,
+    marginBottom: Spacing.sm,
   },
   sectionTitle: {
     color: Colors.textPrimary,
@@ -326,7 +349,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     paddingHorizontal: Spacing.base,
-    gap: Spacing.md,
-    justifyContent: 'space-between',
+    gap: PRODUCT_GAP,
+  },
+  productCardWrapper: {
+    width: PRODUCT_CARD_WIDTH,
+    marginBottom: Spacing.xs,
   },
 });
