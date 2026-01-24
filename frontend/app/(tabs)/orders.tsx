@@ -10,9 +10,13 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { 
+  SignIn, 
+  ClipboardText, 
+  Package,
+} from 'phosphor-react-native';
 import { Colors } from '../../constants/colors';
-import { Spacing, BorderRadius } from '../../constants/spacing';
+import { Spacing, BorderRadius, TouchTarget } from '../../constants/spacing';
 import { FontSize, FontWeight } from '../../constants/typography';
 import { orderService } from '../../services/dataService';
 import { Order } from '../../types';
@@ -98,7 +102,9 @@ export default function OrdersScreen() {
           <Text style={styles.title}>My Orders</Text>
         </View>
         <View style={styles.emptyContainer}>
-          <MaterialCommunityIcons name="login" size={64} color={Colors.textMuted} />
+          <View style={styles.emptyIconContainer}>
+            <SignIn size={48} color={Colors.textMuted} weight="duotone" />
+          </View>
           <Text style={styles.emptyTitle}>Sign in to view orders</Text>
           <Text style={styles.emptySubtitle}>Track your orders and view history</Text>
           <Button
@@ -144,7 +150,9 @@ export default function OrdersScreen() {
         </View>
       ) : filteredOrders.length === 0 ? (
         <View style={styles.emptyContainer}>
-          <MaterialCommunityIcons name="clipboard-text-outline" size={64} color={Colors.textMuted} />
+          <View style={styles.emptyIconContainer}>
+            <ClipboardText size={48} color={Colors.textMuted} weight="duotone" />
+          </View>
           <Text style={styles.emptyTitle}>No orders yet</Text>
           <Text style={styles.emptySubtitle}>Start shopping to see your orders here</Text>
           <Button
@@ -222,13 +230,15 @@ const styles = StyleSheet.create({
   tabsContainer: {
     paddingHorizontal: Spacing.base,
     marginBottom: Spacing.md,
+    gap: Spacing.sm,
   },
   tab: {
     paddingHorizontal: Spacing.base,
     paddingVertical: Spacing.sm,
-    marginRight: Spacing.sm,
     borderRadius: BorderRadius.full,
     backgroundColor: Colors.cardDark,
+    height: 36,
+    justifyContent: 'center',
   },
   tabSelected: {
     backgroundColor: Colors.primary,
@@ -236,7 +246,7 @@ const styles = StyleSheet.create({
   tabText: {
     color: Colors.textMuted,
     fontSize: FontSize.small,
-    fontWeight: FontWeight.medium,
+    fontWeight: FontWeight.semiBold,
   },
   tabTextSelected: {
     color: Colors.textPrimary,
@@ -251,6 +261,15 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: Spacing.xl,
+  },
+  emptyIconContainer: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    backgroundColor: Colors.cardDark,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: Spacing.md,
   },
   emptyTitle: {
     color: Colors.textPrimary,
@@ -304,12 +323,12 @@ const styles = StyleSheet.create({
   orderItems: {
     flexDirection: 'row',
     marginBottom: Spacing.md,
+    gap: Spacing.sm,
   },
   itemImage: {
     width: 48,
     height: 48,
     borderRadius: BorderRadius.md,
-    marginRight: Spacing.sm,
     backgroundColor: Colors.backgroundDark,
   },
   moreItems: {
