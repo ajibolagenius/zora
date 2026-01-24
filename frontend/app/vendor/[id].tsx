@@ -530,8 +530,8 @@ const styles = StyleSheet.create({
     marginTop: Spacing.base,
   },
   vendorName: {
+    fontFamily: FontFamily.display,
     fontSize: FontSize.h2,
-    fontWeight: FontWeight.bold,
     color: Colors.textPrimary,
     marginBottom: Spacing.sm,
   },
@@ -542,12 +542,15 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   locationText: {
+    fontFamily: FontFamily.body,
     fontSize: FontSize.small,
     color: Colors.textMuted,
   },
   ratingValue: {
+    fontFamily: FontFamily.bodySemiBold,
     fontSize: FontSize.small,
-    fontWeight: FontWeight.semiBold,
+    color: Colors.textPrimary,
+  },
     color: Colors.textPrimary,
   },
   ratingCount: {
