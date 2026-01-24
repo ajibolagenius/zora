@@ -272,14 +272,16 @@ const styles = StyleSheet.create({
     gap: Spacing.xs,
   },
   price: {
+    fontFamily: FontFamily.bodyBold,
     color: Colors.secondary,
     fontSize: FontSize.body,
-    fontWeight: FontWeight.bold,
   },
   originalPrice: {
+    fontFamily: FontFamily.body,
     color: Colors.textMuted,
     fontSize: FontSize.caption,
     textDecorationLine: 'line-through',
+  },
   },
   addButton: {
     width: 32,
