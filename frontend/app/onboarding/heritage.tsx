@@ -142,8 +142,9 @@ export default function HeritageScreen() {
           ]}
           onPress={handleContinue}
           disabled={selectedRegions.length === 0}
+          activeOpacity={0.8}
         >
-          <Text style={styles.continueButtonText}>Start Shopping</Text>
+          <Text style={styles.continueButtonText}>Continue</Text>
           <MaterialCommunityIcons name="arrow-right" size={20} color={Colors.textPrimary} />
         </TouchableOpacity>
       </View>
