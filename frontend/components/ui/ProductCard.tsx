@@ -1,10 +1,10 @@
 import React from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
+import { Heart, Plus, Star, ShieldCheck } from 'phosphor-react-native';
 import { Colors } from '../../constants/colors';
 import { BorderRadius, Spacing, Shadows } from '../../constants/spacing';
 import { FontSize, FontWeight } from '../../constants/typography';
 import { Product } from '../../types';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 interface ProductCardProps {
   product: Product;
@@ -31,10 +31,17 @@ export const ProductCard: React.FC<ProductCardProps> = ({
         return Colors.badgeTopRated;
       case 'ORGANIC':
         return Colors.badgeOrganic;
+      case 'VERIFIED':
+        return Colors.success;
       default:
         return Colors.primary;
     }
   };
+
+  const hasDiscount = product.original_price && product.original_price > product.price;
+  const discountPercent = hasDiscount 
+    ? Math.round((1 - product.price / product.original_price!) * 100)
+    : 0;
 
   return (
     <TouchableOpacity
@@ -48,27 +55,68 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           style={[styles.image, compact && styles.imageCompact]}
           resizeMode="cover"
         />
-        {product.badge && (
-          <View style={[styles.badge, { backgroundColor: getBadgeColor(product.badge) }]}>
-            <Text style={styles.badgeText}>{product.badge}</Text>
+        
+        {/* Badges */}
+        <View style={styles.badgeContainer}>
+          {product.badge && (
+            <View style={[styles.badge, { backgroundColor: getBadgeColor(product.badge) }]}>
+              <Text style={styles.badgeText}>{product.badge}</Text>
+            </View>
+          )}
+          {hasDiscount && (
+            <View style={[styles.badge, styles.discountBadge]}>
+              <Text style={styles.badgeText}>-{discountPercent}%</Text>
+            </View>
+          )}
+        </View>
+        
+        {/* Favorite Button */}
+        <TouchableOpacity style={styles.favoriteButton}>
+          <Heart size={18} color={Colors.textPrimary} weight="duotone" />
+        </TouchableOpacity>
+
+        {/* Trust Badge */}
+        {product.certifications && product.certifications.length > 0 && (
+          <View style={styles.trustBadge}>
+            <ShieldCheck size={14} color={Colors.success} weight="fill" />
           </View>
         )}
-        <TouchableOpacity style={styles.favoriteButton}>
-          <MaterialCommunityIcons name="heart-outline" size={20} color={Colors.textPrimary} />
-        </TouchableOpacity>
       </View>
       
       <View style={styles.content}>
+        {/* Region Tag */}
+        {product.region && (
+          <Text style={styles.regionTag}>{product.region.replace('-', ' ')}</Text>
+        )}
+        
         <Text style={styles.name} numberOfLines={2}>
           {product.name}
         </Text>
+        
         {product.weight && (
           <Text style={styles.weight}>{product.weight}</Text>
         )}
+
+        {/* Rating */}
+        {product.rating > 0 && (
+          <View style={styles.ratingContainer}>
+            <Star size={12} color={Colors.rating} weight="fill" />
+            <Text style={styles.rating}>{product.rating.toFixed(1)}</Text>
+            {product.review_count > 0 && (
+              <Text style={styles.reviewCount}>({product.review_count})</Text>
+            )}
+          </View>
+        )}
+        
         <View style={styles.footer}>
-          <Text style={styles.price}>£{product.price.toFixed(2)}</Text>
+          <View style={styles.priceContainer}>
+            <Text style={styles.price}>£{product.price.toFixed(2)}</Text>
+            {hasDiscount && (
+              <Text style={styles.originalPrice}>£{product.original_price?.toFixed(2)}</Text>
+            )}
+          </View>
           <TouchableOpacity style={styles.addButton} onPress={onAddToCart}>
-            <MaterialCommunityIcons name="plus" size={18} color={Colors.textPrimary} />
+            <Plus size={18} color={Colors.textPrimary} weight="bold" />
           </TouchableOpacity>
         </View>
       </View>
@@ -98,13 +146,19 @@ const styles = StyleSheet.create({
   imageCompact: {
     height: 120,
   },
-  badge: {
+  badgeContainer: {
     position: 'absolute',
     top: Spacing.sm,
     left: Spacing.sm,
+    gap: 4,
+  },
+  badge: {
     paddingHorizontal: Spacing.sm,
     paddingVertical: 2,
     borderRadius: BorderRadius.sm,
+  },
+  discountBadge: {
+    backgroundColor: Colors.success,
   },
   badgeText: {
     color: Colors.textPrimary,
@@ -115,15 +169,34 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: Spacing.sm,
     right: Spacing.sm,
-    width: 28,
-    height: 28,
+    width: 32,
+    height: 32,
     borderRadius: BorderRadius.full,
-    backgroundColor: 'rgba(0, 0, 0, 0.3)',
+    backgroundColor: 'rgba(0, 0, 0, 0.4)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  trustBadge: {
+    position: 'absolute',
+    bottom: Spacing.sm,
+    right: Spacing.sm,
+    width: 24,
+    height: 24,
+    borderRadius: BorderRadius.full,
+    backgroundColor: Colors.backgroundDark,
     alignItems: 'center',
     justifyContent: 'center',
   },
   content: {
     padding: Spacing.md,
+  },
+  regionTag: {
+    color: Colors.primary,
+    fontSize: FontSize.tiny,
+    fontWeight: FontWeight.semiBold,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+    marginBottom: Spacing.xs,
   },
   name: {
     color: Colors.textPrimary,
@@ -134,17 +207,42 @@ const styles = StyleSheet.create({
   weight: {
     color: Colors.textMuted,
     fontSize: FontSize.caption,
+    marginBottom: Spacing.xs,
+  },
+  ratingContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 2,
     marginBottom: Spacing.sm,
+  },
+  rating: {
+    color: Colors.rating,
+    fontSize: FontSize.caption,
+    fontWeight: FontWeight.semiBold,
+  },
+  reviewCount: {
+    color: Colors.textMuted,
+    fontSize: FontSize.caption,
   },
   footer: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
   },
+  priceContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.xs,
+  },
   price: {
     color: Colors.secondary,
     fontSize: FontSize.body,
     fontWeight: FontWeight.bold,
+  },
+  originalPrice: {
+    color: Colors.textMuted,
+    fontSize: FontSize.caption,
+    textDecorationLine: 'line-through',
   },
   addButton: {
     width: 32,
