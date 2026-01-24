@@ -512,8 +512,8 @@ const styles = StyleSheet.create({
     borderColor: Colors.primary,
   },
   followButtonText: {
+    fontFamily: FontFamily.bodyBold,
     fontSize: FontSize.small,
-    fontWeight: FontWeight.bold,
     color: Colors.textPrimary,
   },
   iconButton: {
