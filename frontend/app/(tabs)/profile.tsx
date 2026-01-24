@@ -25,7 +25,7 @@ import {
 } from 'phosphor-react-native';
 import { Colors } from '../../constants/colors';
 import { Spacing, BorderRadius, TouchTarget } from '../../constants/spacing';
-import { FontSize, FontWeight } from '../../constants/typography';
+import { FontSize, FontWeight, FontFamily } from '../../constants/typography';
 import { Button } from '../../components/ui';
 import { useAuthStore } from '../../stores/authStore';
 

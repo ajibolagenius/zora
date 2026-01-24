@@ -17,7 +17,7 @@ import {
 } from 'phosphor-react-native';
 import { Colors } from '../../constants/colors';
 import { Spacing, BorderRadius, TouchTarget } from '../../constants/spacing';
-import { FontSize, FontWeight } from '../../constants/typography';
+import { FontSize, FontWeight, FontFamily } from '../../constants/typography';
 import { orderService } from '../../services/dataService';
 import { Order } from '../../types';
 import { useAuthStore } from '../../stores/authStore';
