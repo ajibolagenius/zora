@@ -528,15 +528,15 @@ const styles = StyleSheet.create({
     marginBottom: 2,
   },
   vendorLabel: {
+    fontFamily: FontFamily.bodySemiBold,
     fontSize: FontSize.tiny,
-    fontWeight: FontWeight.bold,
     color: Colors.primary,
     textTransform: 'uppercase',
     letterSpacing: LetterSpacing.wider,
   },
   vendorName: {
+    fontFamily: FontFamily.bodyBold,
     fontSize: FontSize.body,
-    fontWeight: FontWeight.bold,
     color: Colors.textPrimary,
   },
   vendorArrow: {
