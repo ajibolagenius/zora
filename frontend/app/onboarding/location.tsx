@@ -22,7 +22,7 @@ import {
 import { Colors } from '../../constants/colors';
 import { Spacing, BorderRadius } from '../../constants/spacing';
 import { FontSize, FontWeight } from '../../constants/typography';
-import useAuthStore from '../../stores/authStore';
+import { useAuthStore } from '../../stores/authStore';
 
 const SAVED_LOCATIONS = [
   {
