@@ -8,6 +8,8 @@ import {
   RefreshControl,
   ActivityIndicator,
   Dimensions,
+  Platform,
+  useWindowDimensions,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -26,10 +28,13 @@ import { homeService } from '../../services/dataService';
 import { HomeData, Product, Vendor, Region } from '../../types';
 import { useCartStore } from '../../stores/cartStore';
 
-const { width } = Dimensions.get('window');
+const PRODUCT_GAP = 8;
 
 export default function HomeScreen() {
   const router = useRouter();
+  const { width: screenWidth } = useWindowDimensions();
+  const productCardWidth = (screenWidth - 32 - PRODUCT_GAP) / 2; // 16px padding on each side
+  
   const [homeData, setHomeData] = useState<HomeData | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -90,19 +95,9 @@ export default function HomeScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
-      <ScrollView
-        style={styles.scrollView}
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-            tintColor={Colors.primary}
-          />
-        }
-      >
-        {/* Header */}
+      {/* Sticky Header Section */}
+      <View style={styles.stickyHeader}>
+        {/* Header Row */}
         <View style={styles.header}>
           <TouchableOpacity style={styles.locationButton}>
             <MapPin size={20} color={Colors.primary} weight="fill" />
@@ -131,7 +126,21 @@ export default function HomeScreen() {
             </View>
           </View>
         </TouchableOpacity>
+      </View>
 
+      {/* Scrollable Content */}
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor={Colors.primary}
+          />
+        }
+      >
         {/* Hero Banner */}
         {homeData?.banners && homeData.banners.length > 0 && (
           <View style={styles.bannerContainer}>
@@ -197,13 +206,21 @@ export default function HomeScreen() {
             </TouchableOpacity>
           </View>
           <View style={styles.productsGrid}>
-            {filteredProducts?.map((product) => (
-              <ProductCard
-                key={product.id}
-                product={product}
-                onPress={() => handleProductPress(product)}
-                onAddToCart={() => handleAddToCart(product)}
-              />
+            {filteredProducts?.map((product, index) => (
+              <View 
+                key={product.id} 
+                style={{
+                  width: productCardWidth,
+                  marginRight: index % 2 === 0 ? PRODUCT_GAP : 0,
+                  marginBottom: PRODUCT_GAP,
+                }}
+              >
+                <ProductCard
+                  product={product}
+                  onPress={() => handleProductPress(product)}
+                  onAddToCart={() => handleAddToCart(product)}
+                />
+              </View>
             ))}
           </View>
         </View>
@@ -225,18 +242,27 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  scrollView: {
-    flex: 1,
-  },
-  scrollContent: {
-    paddingBottom: 20,
+  stickyHeader: {
+    backgroundColor: Colors.backgroundDark,
+    zIndex: 10,
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+      },
+      android: {
+        elevation: 4,
+      },
+    }),
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: Spacing.base,
-    paddingVertical: Spacing.md,
+    paddingVertical: Spacing.sm,
   },
   locationButton: {
     flexDirection: 'row',
@@ -267,7 +293,7 @@ const styles = StyleSheet.create({
   },
   searchContainer: {
     paddingHorizontal: Spacing.base,
-    marginBottom: Spacing.base,
+    paddingBottom: Spacing.md,
   },
   searchBar: {
     flexDirection: 'row',
@@ -275,7 +301,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.cardDark,
     borderRadius: BorderRadius.lg,
     paddingHorizontal: Spacing.md,
-    height: 52,
+    height: 48,
     gap: Spacing.sm,
   },
   searchPlaceholder: {
@@ -284,25 +310,31 @@ const styles = StyleSheet.create({
     fontSize: FontSize.body,
   },
   filterButton: {
-    width: 40,
-    height: 40,
+    width: 36,
+    height: 36,
     borderRadius: BorderRadius.md,
     backgroundColor: Colors.backgroundDark,
     justifyContent: 'center',
     alignItems: 'center',
   },
+  scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
+    paddingBottom: 20,
+  },
   bannerContainer: {
-    marginBottom: Spacing.xl,
+    marginBottom: Spacing.lg,
   },
   section: {
-    marginBottom: Spacing.xl,
+    marginBottom: Spacing.lg,
   },
   sectionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: Spacing.base,
-    marginBottom: Spacing.md,
+    marginBottom: Spacing.sm,
   },
   sectionTitle: {
     color: Colors.textPrimary,
@@ -326,7 +358,5 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     paddingHorizontal: Spacing.base,
-    gap: Spacing.md,
-    justifyContent: 'space-between',
   },
 });

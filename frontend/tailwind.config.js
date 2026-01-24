@@ -41,10 +41,10 @@ module.exports = {
         rating: '#FFCC00',
       },
       fontFamily: {
-        'display': ['Montserrat-Bold', 'sans-serif'],
-        'display-medium': ['Montserrat-SemiBold', 'sans-serif'],
-        'body': ['OpenSans-Regular', 'sans-serif'],
-        'body-medium': ['OpenSans-SemiBold', 'sans-serif'],
+        'display': ['System', 'sans-serif'],
+        'display-medium': ['System', 'sans-serif'],
+        'body': ['System', 'sans-serif'],
+        'body-medium': ['System', 'sans-serif'],
       },
       fontSize: {
         'display': ['56px', { lineHeight: '62px', fontWeight: '800' }],

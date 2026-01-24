@@ -22,7 +22,7 @@ import {
 import { Colors } from '../../constants/colors';
 import { Spacing, BorderRadius } from '../../constants/spacing';
 import { FontSize, FontWeight } from '../../constants/typography';
-import useAuthStore from '../../stores/authStore';
+import { useAuthStore } from '../../stores/authStore';
 
 const SAVED_LOCATIONS = [
   {
@@ -41,12 +41,12 @@ const SAVED_LOCATIONS = [
 
 export default function LocationScreen() {
   const router = useRouter();
-  const { setHasCompletedOnboarding } = useAuthStore();
+  const { setOnboardingComplete } = useAuthStore();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedLocation, setSelectedLocation] = useState<string | null>(null);
 
   const handleComplete = () => {
-    setHasCompletedOnboarding(true);
+    setOnboardingComplete(true);
     router.replace('/(tabs)');
   };
 
