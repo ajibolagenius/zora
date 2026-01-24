@@ -10,20 +10,32 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { 
+  UserCircle,
+  Gear,
+  ClipboardText,
+  MapPin,
+  CreditCard,
+  Bell,
+  Question,
+  Info,
+  SignOut,
+  CaretRight,
+  Crown,
+} from 'phosphor-react-native';
 import { Colors } from '../../constants/colors';
-import { Spacing, BorderRadius } from '../../constants/spacing';
+import { Spacing, BorderRadius, TouchTarget } from '../../constants/spacing';
 import { FontSize, FontWeight } from '../../constants/typography';
 import { Button } from '../../components/ui';
 import { useAuthStore } from '../../stores/authStore';
 
 const MENU_ITEMS = [
-  { id: 'orders', icon: 'clipboard-text-outline', label: 'My Orders', route: '/(tabs)/orders' },
-  { id: 'addresses', icon: 'map-marker-outline', label: 'Saved Addresses', route: '/addresses' },
-  { id: 'payments', icon: 'credit-card-outline', label: 'Payment Methods', route: '/payments' },
-  { id: 'notifications', icon: 'bell-outline', label: 'Notifications', route: '/notifications' },
-  { id: 'help', icon: 'help-circle-outline', label: 'Help & Support', route: '/help' },
-  { id: 'about', icon: 'information-outline', label: 'About Zora', route: '/about' },
+  { id: 'orders', icon: ClipboardText, label: 'My Orders', route: '/(tabs)/orders' },
+  { id: 'addresses', icon: MapPin, label: 'Saved Addresses', route: '/addresses' },
+  { id: 'payments', icon: CreditCard, label: 'Payment Methods', route: '/payments' },
+  { id: 'notifications', icon: Bell, label: 'Notifications', route: '/notifications' },
+  { id: 'help', icon: Question, label: 'Help & Support', route: '/help' },
+  { id: 'about', icon: Info, label: 'About Zora', route: '/about' },
 ];
 
 export default function ProfileScreen() {
@@ -55,7 +67,9 @@ export default function ProfileScreen() {
           <Text style={styles.title}>Profile</Text>
         </View>
         <View style={styles.loginPrompt}>
-          <MaterialCommunityIcons name="account-circle-outline" size={80} color={Colors.textMuted} />
+          <View style={styles.emptyIconContainer}>
+            <UserCircle size={48} color={Colors.textMuted} weight="duotone" />
+          </View>
           <Text style={styles.loginTitle}>Sign in to your account</Text>
           <Text style={styles.loginSubtitle}>Manage orders, save addresses, and more</Text>
           <Button
@@ -87,8 +101,8 @@ export default function ProfileScreen() {
         {/* Header */}
         <View style={styles.header}>
           <Text style={styles.title}>Profile</Text>
-          <TouchableOpacity>
-            <MaterialCommunityIcons name="cog-outline" size={24} color={Colors.textPrimary} />
+          <TouchableOpacity style={styles.settingsButton}>
+            <Gear size={24} color={Colors.textPrimary} weight="duotone" />
           </TouchableOpacity>
         </View>
 
@@ -102,7 +116,7 @@ export default function ProfileScreen() {
             <Text style={styles.userName}>{user?.name}</Text>
             <Text style={styles.userEmail}>{user?.email}</Text>
             <View style={[styles.tierBadge, { backgroundColor: `${getTierColor(user?.membership_tier || 'bronze')}20` }]}>
-              <MaterialCommunityIcons name="crown" size={14} color={getTierColor(user?.membership_tier || 'bronze')} />
+              <Crown size={14} color={getTierColor(user?.membership_tier || 'bronze')} weight="fill" />
               <Text style={[styles.tierText, { color: getTierColor(user?.membership_tier || 'bronze') }]}>
                 {user?.membership_tier?.toUpperCase()} MEMBER
               </Text>
@@ -130,24 +144,30 @@ export default function ProfileScreen() {
 
         {/* Menu Items */}
         <View style={styles.menuSection}>
-          {MENU_ITEMS.map((item) => (
-            <TouchableOpacity
-              key={item.id}
-              style={styles.menuItem}
-              onPress={() => router.push(item.route as any)}
-            >
-              <View style={styles.menuItemLeft}>
-                <MaterialCommunityIcons name={item.icon as any} size={24} color={Colors.textMuted} />
-                <Text style={styles.menuItemLabel}>{item.label}</Text>
-              </View>
-              <MaterialCommunityIcons name="chevron-right" size={24} color={Colors.textMuted} />
-            </TouchableOpacity>
-          ))}
+          {MENU_ITEMS.map((item, index) => {
+            const IconComponent = item.icon;
+            return (
+              <TouchableOpacity
+                key={item.id}
+                style={[
+                  styles.menuItem,
+                  index === MENU_ITEMS.length - 1 && styles.menuItemLast,
+                ]}
+                onPress={() => router.push(item.route as any)}
+              >
+                <View style={styles.menuItemLeft}>
+                  <IconComponent size={24} color={Colors.textMuted} weight="duotone" />
+                  <Text style={styles.menuItemLabel}>{item.label}</Text>
+                </View>
+                <CaretRight size={20} color={Colors.textMuted} weight="bold" />
+              </TouchableOpacity>
+            );
+          })}
         </View>
 
         {/* Logout */}
         <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-          <MaterialCommunityIcons name="logout" size={24} color={Colors.primary} />
+          <SignOut size={24} color={Colors.primary} weight="duotone" />
           <Text style={styles.logoutText}>Log Out</Text>
         </TouchableOpacity>
 
@@ -174,11 +194,26 @@ const styles = StyleSheet.create({
     fontSize: FontSize.h2,
     fontWeight: FontWeight.bold,
   },
+  settingsButton: {
+    width: TouchTarget.min,
+    height: TouchTarget.min,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   loginPrompt: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: Spacing.xl,
+  },
+  emptyIconContainer: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    backgroundColor: Colors.cardDark,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: Spacing.md,
   },
   loginTitle: {
     color: Colors.textPrimary,
@@ -201,9 +236,9 @@ const styles = StyleSheet.create({
     borderRadius: BorderRadius.lg,
   },
   avatar: {
-    width: 72,
-    height: 72,
-    borderRadius: BorderRadius.full,
+    width: 80,
+    height: 80,
+    borderRadius: 40,
     backgroundColor: Colors.backgroundDark,
   },
   profileInfo: {
@@ -275,6 +310,10 @@ const styles = StyleSheet.create({
     padding: Spacing.base,
     borderBottomWidth: 1,
     borderBottomColor: Colors.borderDark,
+    minHeight: 56,
+  },
+  menuItemLast: {
+    borderBottomWidth: 0,
   },
   menuItemLeft: {
     flexDirection: 'row',
@@ -295,6 +334,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.cardDark,
     borderRadius: BorderRadius.lg,
     gap: Spacing.sm,
+    height: 56,
   },
   logoutText: {
     color: Colors.primary,
