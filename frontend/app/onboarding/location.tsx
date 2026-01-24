@@ -41,12 +41,12 @@ const SAVED_LOCATIONS = [
 
 export default function LocationScreen() {
   const router = useRouter();
-  const { setHasCompletedOnboarding } = useAuthStore();
+  const { setOnboardingComplete } = useAuthStore();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedLocation, setSelectedLocation] = useState<string | null>(null);
 
   const handleComplete = () => {
-    setHasCompletedOnboarding(true);
+    setOnboardingComplete(true);
     router.replace('/(tabs)');
   };
 
