@@ -196,9 +196,9 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.success,
   },
   badgeText: {
+    fontFamily: FontFamily.bodySemiBold,
     color: Colors.textPrimary,
     fontSize: FontSize.tiny,
-    fontWeight: FontWeight.bold,
   },
   favoriteButton: {
     position: 'absolute',
