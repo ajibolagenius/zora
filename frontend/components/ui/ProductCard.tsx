@@ -226,20 +226,21 @@ const styles = StyleSheet.create({
     padding: Spacing.sm,
   },
   regionTag: {
+    fontFamily: FontFamily.bodySemiBold,
     color: Colors.primary,
     fontSize: FontSize.tiny,
-    fontWeight: FontWeight.semiBold,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
     marginBottom: 2,
   },
   name: {
+    fontFamily: FontFamily.bodySemiBold,
     color: Colors.textPrimary,
     fontSize: FontSize.small,
-    fontWeight: FontWeight.semiBold,
     marginBottom: 2,
   },
   weight: {
+    fontFamily: FontFamily.body,
     color: Colors.textMuted,
     fontSize: FontSize.caption,
     marginBottom: 2,
@@ -251,11 +252,12 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.xs,
   },
   rating: {
+    fontFamily: FontFamily.bodySemiBold,
     color: Colors.rating,
     fontSize: FontSize.caption,
-    fontWeight: FontWeight.semiBold,
   },
   reviewCount: {
+    fontFamily: FontFamily.body,
     color: Colors.textMuted,
     fontSize: FontSize.caption,
   },
