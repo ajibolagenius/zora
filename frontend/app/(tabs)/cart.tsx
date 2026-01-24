@@ -158,18 +158,18 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.md,
   },
   title: {
+    fontFamily: FontFamily.display,
     color: Colors.textPrimary,
     fontSize: FontSize.h2,
-    fontWeight: FontWeight.bold,
   },
   clearButton: {
     paddingVertical: Spacing.sm,
     paddingHorizontal: Spacing.md,
   },
   clearText: {
+    fontFamily: FontFamily.bodySemiBold,
     color: Colors.primary,
     fontSize: FontSize.small,
-    fontWeight: FontWeight.semiBold,
   },
   emptyContainer: {
     flex: 1,
