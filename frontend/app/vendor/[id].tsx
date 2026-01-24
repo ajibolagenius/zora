@@ -9,6 +9,7 @@ import {
   ActivityIndicator,
   useWindowDimensions,
   Platform,
+  ImageBackground,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
@@ -21,6 +22,7 @@ import {
   Star,
   Heart,
   Plus,
+  MapPin,
 } from 'phosphor-react-native';
 import { Colors } from '../../constants/colors';
 import { Spacing, BorderRadius } from '../../constants/spacing';
@@ -39,7 +41,6 @@ const SAMPLE_PRODUCTS = [
     weight: '100g Pack',
     price: 5.99,
     image: 'https://images.unsplash.com/photo-1596040033229-a9821ebd058d?w=400',
-    badge: 'HOT',
   },
   {
     id: 'prod-2',
@@ -47,7 +48,6 @@ const SAMPLE_PRODUCTS = [
     weight: '250g Jar',
     price: 12.50,
     image: 'https://images.unsplash.com/photo-1599909533706-07f97c6e4e43?w=400',
-    badge: null,
   },
   {
     id: 'prod-3',
@@ -55,7 +55,6 @@ const SAMPLE_PRODUCTS = [
     weight: '150g Pack',
     price: 8.99,
     image: 'https://images.unsplash.com/photo-1532336414038-cf19250c5757?w=400',
-    badge: null,
   },
   {
     id: 'prod-4',
@@ -63,23 +62,6 @@ const SAMPLE_PRODUCTS = [
     weight: '500g Bulk',
     price: 15.00,
     image: 'https://images.unsplash.com/photo-1615485290382-441e4d049cb5?w=400',
-    badge: 'HOT',
-  },
-  {
-    id: 'prod-5',
-    name: 'Dried Peppers',
-    weight: '100g Bag',
-    price: 4.50,
-    image: 'https://images.unsplash.com/photo-1583119022894-919a68a3d0e3?w=400',
-    badge: null,
-  },
-  {
-    id: 'prod-6',
-    name: 'Turmeric Powder',
-    weight: '200g Jar',
-    price: 7.25,
-    image: 'https://images.unsplash.com/photo-1615485290382-441e4d049cb5?w=400',
-    badge: null,
   },
 ];
 
@@ -149,6 +131,7 @@ export default function VendorScreen() {
     is_verified: true,
     cover_image: 'https://images.unsplash.com/photo-1596040033229-a9821ebd058d?w=800',
     avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=200',
+    description: 'Authentic African spices and seasonings sourced directly from local farmers. Bringing the flavors of Africa to your kitchen.',
   };
 
   return (
@@ -156,17 +139,14 @@ export default function VendorScreen() {
       <ScrollView
         style={styles.scrollView}
         showsVerticalScrollIndicator={false}
-        stickyHeaderIndices={[1]}
       >
-        {/* Header Image Section */}
-        <View style={styles.headerImageSection}>
-          <Image
-            source={{ uri: vendorData.cover_image }}
-            style={styles.coverImage}
-            resizeMode="cover"
-          />
-          {/* Gradient Overlay */}
-          <View style={styles.gradientOverlay} />
+        {/* Header with Blurred Background */}
+        <ImageBackground
+          source={{ uri: vendorData.cover_image }}
+          style={styles.headerBackground}
+          blurRadius={Platform.OS === 'ios' ? 20 : 10}
+        >
+          <View style={styles.headerOverlay} />
           
           {/* Top App Bar */}
           <SafeAreaView style={styles.topAppBar} edges={['top']}>
@@ -178,54 +158,61 @@ export default function VendorScreen() {
             </TouchableOpacity>
             <View style={styles.appBarActions}>
               <TouchableOpacity style={styles.appBarButton}>
-                <MagnifyingGlass size={24} color="#FFFFFF" weight="bold" />
+                <MagnifyingGlass size={22} color="#FFFFFF" weight="bold" />
               </TouchableOpacity>
               <TouchableOpacity style={styles.appBarButton}>
-                <ShoppingCart size={24} color="#FFFFFF" weight="bold" />
+                <ShoppingCart size={22} color="#FFFFFF" weight="bold" />
                 {cartItemCount > 0 && (
-                  <View style={styles.cartBadge} />
+                  <View style={styles.cartBadge}>
+                    <Text style={styles.cartBadgeText}>{cartItemCount}</Text>
+                  </View>
                 )}
               </TouchableOpacity>
             </View>
           </SafeAreaView>
-        </View>
 
-        {/* Profile Info Section - Will be sticky */}
-        <View style={styles.profileSection}>
-          {/* Avatar */}
-          <View style={styles.avatarContainer}>
-            <Image
-              source={{ uri: vendorData.avatar }}
-              style={styles.avatar}
-              resizeMode="cover"
-            />
-          </View>
-
-          {/* Vendor Details */}
-          <View style={styles.vendorDetails}>
-            <View style={styles.vendorNameRow}>
-              <Text style={styles.vendorName}>{vendorData.name}</Text>
+          {/* Vendor Profile Card */}
+          <View style={styles.profileCard}>
+            {/* Avatar */}
+            <View style={styles.avatarContainer}>
+              <Image
+                source={{ uri: vendorData.avatar }}
+                style={styles.avatar}
+                resizeMode="cover"
+              />
               {vendorData.is_verified && (
                 <View style={styles.verifiedBadge}>
                   <Text style={styles.verifiedCheckmark}>✓</Text>
                 </View>
               )}
             </View>
-            
-            <View style={styles.vendorMeta}>
-              <Text style={styles.verifiedText}>Verified Vendor</Text>
-              <View style={styles.metaDot} />
+
+            {/* Vendor Info */}
+            <View style={styles.vendorInfo}>
+              <Text style={styles.vendorName}>{vendorData.name}</Text>
+              
+              {/* Location */}
+              <View style={styles.locationRow}>
+                <MapPin size={14} color="#9CA3AF" weight="fill" />
+                <Text style={styles.locationText}>London, UK</Text>
+              </View>
+
+              {/* Rating */}
               <View style={styles.ratingRow}>
                 <Star size={14} color="#FFCC00" weight="fill" />
-                <Text style={styles.ratingValue}>{vendorData.rating}</Text>
-                <Text style={styles.ratingCount}>
-                  ({vendorData.review_count >= 1000 
-                    ? `${(vendorData.review_count / 1000).toFixed(1)}k` 
-                    : vendorData.review_count})
-                </Text>
+                <Text style={styles.ratingValue}>4.8</Text>
+                <Text style={styles.ratingCount}>(1.2k reviews)</Text>
               </View>
             </View>
           </View>
+        </ImageBackground>
+
+        {/* Main Content */}
+        <View style={styles.mainContent}>
+          {/* Description */}
+          <Text style={styles.description}>
+            {vendorData.description || 'Authentic African spices and seasonings sourced directly from local farmers. Bringing the flavors of Africa to your kitchen.'}
+          </Text>
 
           {/* Action Buttons */}
           <View style={styles.actionButtons}>
@@ -260,105 +247,142 @@ export default function VendorScreen() {
                 ]}>
                   {tab.charAt(0).toUpperCase() + tab.slice(1)}
                 </Text>
-                <View style={[
-                  styles.tabIndicator,
-                  activeTab === tab && styles.tabIndicatorActive,
-                ]} />
+                {activeTab === tab && <View style={styles.tabIndicator} />}
               </TouchableOpacity>
             ))}
           </View>
-        </View>
 
-        {/* Product Grid */}
-        {activeTab === 'products' && (
-          <View style={styles.productGridContainer}>
-            <View style={styles.productGrid}>
-              {products.map((product, index) => (
-                <TouchableOpacity
-                  key={product.id}
-                  style={[styles.productCard, { width: productCardWidth }]}
-                  onPress={() => handleProductPress(product.id)}
-                  activeOpacity={0.95}
-                >
-                  {/* Product Image */}
-                  <View style={styles.productImageContainer}>
-                    <Image
-                      source={{ uri: product.image }}
-                      style={styles.productImage}
-                      resizeMode="cover"
-                    />
-                    
-                    {/* HOT Badge */}
-                    {product.badge && (
-                      <View style={styles.hotBadge}>
-                        <Text style={styles.hotBadgeText}>{product.badge}</Text>
-                      </View>
-                    )}
-                    
-                    {/* Favorite Button */}
-                    <TouchableOpacity style={styles.favoriteButton}>
-                      <Heart size={16} color="#FFFFFF" weight="regular" />
-                    </TouchableOpacity>
-                  </View>
+          {/* Products Tab Content */}
+          {activeTab === 'products' && (
+            <>
+              {/* Featured Products Header */}
+              <View style={styles.sectionHeader}>
+                <Text style={styles.sectionTitle}>Featured Products</Text>
+                <TouchableOpacity>
+                  <Text style={styles.seeAllText}>See all</Text>
+                </TouchableOpacity>
+              </View>
 
-                  {/* Product Info */}
-                  <View style={styles.productInfo}>
-                    <Text style={styles.productName} numberOfLines={1}>
-                      {product.name}
-                    </Text>
-                    <Text style={styles.productWeight}>{product.weight}</Text>
-                    <View style={styles.productFooter}>
-                      <Text style={styles.productPrice}>
-                        ${product.price.toFixed(2)}
-                      </Text>
-                      <TouchableOpacity
-                        style={styles.addButton}
-                        onPress={() => handleAddToCart(product)}
-                      >
-                        <Plus size={18} color="#FFFFFF" weight="bold" />
+              {/* Product Grid */}
+              <View style={styles.productGrid}>
+                {products.map((product) => (
+                  <TouchableOpacity
+                    key={product.id}
+                    style={[styles.productCard, { width: productCardWidth }]}
+                    onPress={() => handleProductPress(product.id)}
+                    activeOpacity={0.95}
+                  >
+                    {/* Product Image */}
+                    <View style={styles.productImageContainer}>
+                      <Image
+                        source={{ uri: product.image }}
+                        style={styles.productImage}
+                        resizeMode="cover"
+                      />
+                      
+                      {/* Favorite Button */}
+                      <TouchableOpacity style={styles.favoriteButton}>
+                        <Heart size={18} color="#FFFFFF" weight="regular" />
                       </TouchableOpacity>
                     </View>
-                  </View>
-                </TouchableOpacity>
-              ))}
-            </View>
-          </View>
-        )}
 
-        {/* Reviews Tab Content */}
-        {activeTab === 'reviews' && (
-          <View style={styles.tabContent}>
-            <View style={styles.reviewSummary}>
-              <Text style={styles.reviewScore}>{vendorData.rating}</Text>
-              <View style={styles.reviewStars}>
-                {[1, 2, 3, 4, 5].map((star) => (
-                  <Star
-                    key={star}
-                    size={20}
-                    color={star <= Math.floor(vendorData.rating) ? '#FFCC00' : '#4B4B4B'}
-                    weight="fill"
-                  />
+                    {/* Product Info */}
+                    <View style={styles.productInfo}>
+                      <Text style={styles.productName} numberOfLines={1}>
+                        {product.name}
+                      </Text>
+                      <Text style={styles.productWeight}>{product.weight}</Text>
+                      <View style={styles.productFooter}>
+                        <Text style={styles.productPrice}>
+                          £{product.price.toFixed(2)}
+                        </Text>
+                        <TouchableOpacity
+                          style={styles.addButton}
+                          onPress={() => handleAddToCart(product)}
+                        >
+                          <Plus size={18} color="#FFFFFF" weight="bold" />
+                        </TouchableOpacity>
+                      </View>
+                    </View>
+                  </TouchableOpacity>
                 ))}
               </View>
-              <Text style={styles.reviewCount}>
-                {vendorData.review_count >= 1000 
-                  ? `${(vendorData.review_count / 1000).toFixed(1)}k reviews` 
-                  : `${vendorData.review_count} reviews`}
-              </Text>
-            </View>
-          </View>
-        )}
+            </>
+          )}
 
-        {/* About Tab Content */}
-        {activeTab === 'about' && (
-          <View style={styles.tabContent}>
-            <Text style={styles.aboutText}>
-              Welcome to {vendorData.name}! We bring you the finest authentic African spices 
-              sourced directly from local farmers across West Africa. Our mission is to share 
-              the rich flavors of African cuisine with the world while supporting local communities.
-            </Text>
-          </View>
-        )}
+          {/* Reviews Tab Content */}
+          {activeTab === 'reviews' && (
+            <View style={styles.tabContent}>
+              <View style={styles.reviewSummary}>
+                <Text style={styles.reviewScore}>{vendorData.rating}</Text>
+                <View style={styles.reviewStars}>
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <Star
+                      key={star}
+                      size={24}
+                      color={star <= Math.floor(vendorData.rating) ? '#FFCC00' : '#4B4B4B'}
+                      weight="fill"
+                    />
+                  ))}
+                </View>
+                <Text style={styles.reviewCountText}>
+                  Based on {vendorData.review_count >= 1000 
+                    ? `${(vendorData.review_count / 1000).toFixed(1)}k` 
+                    : vendorData.review_count} reviews
+                </Text>
+              </View>
+
+              {/* Sample Review */}
+              <View style={styles.reviewCard}>
+                <View style={styles.reviewHeader}>
+                  <View style={styles.reviewerAvatar}>
+                    <Text style={styles.reviewerInitial}>J</Text>
+                  </View>
+                  <View style={styles.reviewerInfo}>
+                    <Text style={styles.reviewerName}>John D.</Text>
+                    <View style={styles.reviewStarsSmall}>
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <Star key={star} size={12} color="#FFCC00" weight="fill" />
+                      ))}
+                    </View>
+                  </View>
+                  <Text style={styles.reviewDate}>2 days ago</Text>
+                </View>
+                <Text style={styles.reviewText}>
+                  Amazing quality spices! The jollof seasoning is absolutely perfect. 
+                  Fast delivery and great packaging.
+                </Text>
+              </View>
+            </View>
+          )}
+
+          {/* About Tab Content */}
+          {activeTab === 'about' && (
+            <View style={styles.tabContent}>
+              <View style={styles.aboutSection}>
+                <Text style={styles.aboutTitle}>About Us</Text>
+                <Text style={styles.aboutText}>
+                  {vendorData.description || 'Authentic African spices and seasonings sourced directly from local farmers. Bringing the flavors of Africa to your kitchen.'}
+                </Text>
+              </View>
+
+              <View style={styles.aboutSection}>
+                <Text style={styles.aboutTitle}>Business Hours</Text>
+                <Text style={styles.aboutText}>Monday - Friday: 9:00 AM - 6:00 PM</Text>
+                <Text style={styles.aboutText}>Saturday: 10:00 AM - 4:00 PM</Text>
+                <Text style={styles.aboutText}>Sunday: Closed</Text>
+              </View>
+
+              <View style={styles.aboutSection}>
+                <Text style={styles.aboutTitle}>Contact</Text>
+                <View style={styles.contactRow}>
+                  <MapPin size={16} color={Colors.primary} weight="fill" />
+                  <Text style={styles.aboutText}>123 Market Street, London, UK</Text>
+                </View>
+              </View>
+            </View>
+          )}
+        </View>
 
         {/* Bottom padding */}
         <View style={{ height: 100 }} />
@@ -380,36 +404,27 @@ const styles = StyleSheet.create({
   scrollView: {
     flex: 1,
   },
-  // Header Image Section
-  headerImageSection: {
-    height: 200,
+  // Header Section
+  headerBackground: {
+    height: 280,
     position: 'relative',
   },
-  coverImage: {
-    width: '100%',
-    height: '100%',
-  },
-  gradientOverlay: {
+  headerOverlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'transparent',
-    // Simulating gradient with multiple layers
+    backgroundColor: 'rgba(34, 23, 16, 0.7)',
   },
   topAppBar: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 16,
-    paddingTop: 12,
+    paddingTop: 8,
   },
   appBarButton: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: 'rgba(0, 0, 0, 0.2)',
+    backgroundColor: 'rgba(255, 255, 255, 0.15)',
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -419,77 +434,75 @@ const styles = StyleSheet.create({
   },
   cartBadge: {
     position: 'absolute',
-    top: 8,
-    right: 8,
-    width: 10,
-    height: 10,
-    borderRadius: 5,
+    top: -4,
+    right: -4,
+    minWidth: 18,
+    height: 18,
+    borderRadius: 9,
     backgroundColor: Colors.primary,
-    borderWidth: 2,
-    borderColor: '#221710',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 4,
   },
-  // Profile Section
-  profileSection: {
-    backgroundColor: '#221710',
-    paddingHorizontal: 16,
-    marginTop: -56,
-    paddingTop: 0,
+  cartBadgeText: {
+    color: '#FFFFFF',
+    fontSize: 10,
+    fontWeight: '700',
   },
-  avatarContainer: {
-    width: 112,
-    height: 112,
-    borderRadius: 56,
-    borderWidth: 4,
-    borderColor: Colors.primary,
-    overflow: 'hidden',
-    backgroundColor: '#342418',
-  },
-  avatar: {
-    width: '100%',
-    height: '100%',
-  },
-  vendorDetails: {
-    marginTop: 12,
-  },
-  vendorNameRow: {
+  // Profile Card
+  profileCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    paddingHorizontal: 16,
+    marginTop: 24,
+    gap: 16,
   },
-  vendorName: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: '#FFFFFF',
-    letterSpacing: -0.5,
+  avatarContainer: {
+    position: 'relative',
+  },
+  avatar: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    borderWidth: 3,
+    borderColor: '#FFFFFF',
   },
   verifiedBadge: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
+    position: 'absolute',
+    bottom: 0,
+    right: 0,
+    width: 24,
+    height: 24,
+    borderRadius: 12,
     backgroundColor: '#3B82F6',
     justifyContent: 'center',
     alignItems: 'center',
+    borderWidth: 2,
+    borderColor: '#221710',
   },
   verifiedCheckmark: {
     color: '#FFFFFF',
     fontSize: 12,
     fontWeight: '700',
   },
-  vendorMeta: {
+  vendorInfo: {
+    flex: 1,
+  },
+  vendorName: {
+    fontSize: 22,
+    fontWeight: '700',
+    color: '#FFFFFF',
+    marginBottom: 4,
+  },
+  locationRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
-    marginTop: 4,
+    gap: 4,
+    marginBottom: 4,
   },
-  verifiedText: {
-    fontSize: 14,
+  locationText: {
+    fontSize: 13,
     color: '#9CA3AF',
-  },
-  metaDot: {
-    width: 4,
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: '#9CA3AF',
   },
   ratingRow: {
     flexDirection: 'row',
@@ -497,24 +510,39 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   ratingValue: {
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: '700',
     color: '#FFCC00',
   },
   ratingCount: {
-    fontSize: 14,
+    fontSize: 13,
     color: '#9CA3AF',
+  },
+  // Main Content
+  mainContent: {
+    backgroundColor: '#221710',
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    marginTop: -24,
+    paddingHorizontal: 16,
+    paddingTop: 24,
+  },
+  description: {
+    fontSize: 14,
+    color: '#D1D5DB',
+    lineHeight: 22,
+    marginBottom: 20,
   },
   // Action Buttons
   actionButtons: {
     flexDirection: 'row',
     gap: 12,
-    marginTop: 20,
+    marginBottom: 24,
   },
   followButton: {
     flex: 1,
     height: 48,
-    borderRadius: 12,
+    borderRadius: 24,
     backgroundColor: Colors.primary,
     justifyContent: 'center',
     alignItems: 'center',
@@ -536,14 +564,14 @@ const styles = StyleSheet.create({
     borderColor: Colors.primary,
   },
   followButtonText: {
-    fontSize: 14,
+    fontSize: 15,
     fontWeight: '700',
     color: '#FFFFFF',
   },
   iconButton: {
     width: 48,
     height: 48,
-    borderRadius: 12,
+    borderRadius: 24,
     backgroundColor: '#342418',
     justifyContent: 'center',
     alignItems: 'center',
@@ -551,18 +579,19 @@ const styles = StyleSheet.create({
   // Tabs
   tabsContainer: {
     flexDirection: 'row',
-    marginTop: 24,
     borderBottomWidth: 1,
     borderBottomColor: 'rgba(255, 255, 255, 0.1)',
+    marginBottom: 20,
   },
   tab: {
     flex: 1,
     alignItems: 'center',
     paddingBottom: 12,
+    position: 'relative',
   },
   tabText: {
     fontSize: 14,
-    fontWeight: '700',
+    fontWeight: '600',
     color: '#9CA3AF',
   },
   tabTextActive: {
@@ -571,19 +600,30 @@ const styles = StyleSheet.create({
   tabIndicator: {
     position: 'absolute',
     bottom: 0,
-    left: 0,
-    right: 0,
-    height: 2,
-    backgroundColor: 'transparent',
-    borderRadius: 1,
-  },
-  tabIndicatorActive: {
+    left: '25%',
+    right: '25%',
+    height: 3,
     backgroundColor: Colors.primary,
+    borderRadius: 2,
+  },
+  // Section Header
+  sectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#FFFFFF',
+  },
+  seeAllText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: Colors.primary,
   },
   // Product Grid
-  productGridContainer: {
-    padding: 16,
-  },
   productGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -592,72 +632,52 @@ const styles = StyleSheet.create({
   // Product Card
   productCard: {
     backgroundColor: '#342418',
-    borderRadius: 12,
-    padding: 12,
+    borderRadius: 16,
     overflow: 'hidden',
   },
   productImageContainer: {
     aspectRatio: 1,
     width: '100%',
-    borderRadius: 8,
-    overflow: 'hidden',
-    backgroundColor: '#221710',
     position: 'relative',
   },
   productImage: {
     width: '100%',
     height: '100%',
   },
-  hotBadge: {
-    position: 'absolute',
-    top: 8,
-    left: 8,
-    backgroundColor: Colors.primary,
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 4,
-  },
-  hotBadgeText: {
-    fontSize: 10,
-    fontWeight: '700',
-    color: '#FFFFFF',
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-  },
   favoriteButton: {
     position: 'absolute',
-    top: 8,
-    right: 8,
-    width: 28,
-    height: 28,
-    borderRadius: 14,
+    top: 10,
+    right: 10,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
     backgroundColor: 'rgba(0, 0, 0, 0.4)',
     justifyContent: 'center',
     alignItems: 'center',
   },
   productInfo: {
-    marginTop: 12,
+    padding: 12,
   },
   productName: {
     fontSize: 14,
-    fontWeight: '700',
+    fontWeight: '600',
     color: '#FFFFFF',
+    marginBottom: 4,
   },
   productWeight: {
     fontSize: 12,
     color: '#9CA3AF',
-    marginTop: 4,
+    marginBottom: 8,
   },
   productFooter: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginTop: 8,
   },
   productPrice: {
     fontSize: 16,
     fontWeight: '700',
-    color: '#FFCC00',
+    color: Colors.primary,
   },
   addButton: {
     width: 32,
@@ -666,27 +686,18 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.primary,
     justifyContent: 'center',
     alignItems: 'center',
-    ...Platform.select({
-      ios: {
-        shadowColor: Colors.primary,
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.3,
-        shadowRadius: 4,
-      },
-      android: {
-        elevation: 4,
-      },
-    }),
   },
   // Tab Content
   tabContent: {
-    padding: 16,
+    paddingTop: 8,
   },
+  // Review Summary
   reviewSummary: {
     alignItems: 'center',
     backgroundColor: '#342418',
-    borderRadius: 12,
+    borderRadius: 16,
     padding: 24,
+    marginBottom: 16,
   },
   reviewScore: {
     fontSize: 48,
@@ -696,15 +707,79 @@ const styles = StyleSheet.create({
   reviewStars: {
     flexDirection: 'row',
     gap: 4,
-    marginVertical: 12,
+    marginVertical: 8,
   },
-  reviewCount: {
+  reviewCountText: {
     fontSize: 14,
     color: '#9CA3AF',
   },
-  aboutText: {
+  // Review Card
+  reviewCard: {
+    backgroundColor: '#342418',
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 12,
+  },
+  reviewHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  reviewerAvatar: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: Colors.primary,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  reviewerInitial: {
+    color: '#FFFFFF',
     fontSize: 16,
+    fontWeight: '700',
+  },
+  reviewerInfo: {
+    flex: 1,
+    marginLeft: 12,
+  },
+  reviewerName: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#FFFFFF',
+  },
+  reviewStarsSmall: {
+    flexDirection: 'row',
+    gap: 2,
+    marginTop: 4,
+  },
+  reviewDate: {
+    fontSize: 12,
+    color: '#9CA3AF',
+  },
+  reviewText: {
+    fontSize: 14,
     color: '#D1D5DB',
-    lineHeight: 26,
+    lineHeight: 22,
+  },
+  // About Section
+  aboutSection: {
+    marginBottom: 24,
+  },
+  aboutTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#FFFFFF',
+    marginBottom: 12,
+  },
+  aboutText: {
+    fontSize: 14,
+    color: '#D1D5DB',
+    lineHeight: 22,
+    marginBottom: 4,
+  },
+  contactRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
   },
 });
