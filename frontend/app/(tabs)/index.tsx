@@ -24,9 +24,24 @@ import { Colors } from '../../constants/colors';
 import { Spacing, BorderRadius } from '../../constants/spacing';
 import { FontSize, FontWeight } from '../../constants/typography';
 import { HeroBanner, RegionCard, VendorCard, ProductCard } from '../../components/ui';
-import { homeService } from '../../services/dataService';
-import { HomeData, Product, Vendor, Region } from '../../types';
+import { 
+  vendorService, 
+  productService, 
+  regionService, 
+  bannerService,
+  type Vendor,
+  type Product,
+  type Region,
+  type Banner,
+} from '../../services/mockDataService';
 import { useCartStore } from '../../stores/cartStore';
+
+interface HomeData {
+  banners: Banner[];
+  regions: Region[];
+  featured_vendors: Vendor[];
+  popular_products: Product[];
+}
 
 const PRODUCT_GAP = 8;
 
@@ -44,8 +59,18 @@ export default function HomeScreen() {
 
   const fetchHomeData = async () => {
     try {
-      const data = await homeService.getHomeData();
-      setHomeData(data);
+      // Use mock data service instead of API
+      const banners = bannerService.getActive();
+      const regions = regionService.getAll();
+      const featured_vendors = vendorService.getFeatured();
+      const popular_products = productService.getFeatured();
+      
+      setHomeData({
+        banners,
+        regions,
+        featured_vendors,
+        popular_products,
+      });
     } catch (error) {
       console.error('Error fetching home data:', error);
     } finally {

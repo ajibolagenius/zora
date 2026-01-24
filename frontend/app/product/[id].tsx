@@ -30,8 +30,7 @@ import {
 import { Colors } from '../../constants/colors';
 import { Spacing, BorderRadius } from '../../constants/spacing';
 import { FontSize, FontWeight } from '../../constants/typography';
-import { productService, vendorService } from '../../services/dataService';
-import { Product, Vendor } from '../../types';
+import { productService, vendorService, type Product, type Vendor } from '../../services/mockDataService';
 import { useCartStore } from '../../stores/cartStore';
 
 type CollapsibleSection = 'description' | 'nutrition' | 'heritage';
@@ -51,12 +50,15 @@ export default function ProductScreen() {
   const fetchData = useCallback(async () => {
     if (!id) return;
     try {
-      const productData = await productService.getById(id);
-      setProduct(productData);
-      
-      if (productData?.vendor_id) {
-        const vendorData = await vendorService.getById(productData.vendor_id);
-        setVendor(vendorData);
+      // Use mock data service
+      const productData = productService.getById(id);
+      if (productData) {
+        setProduct(productData);
+        
+        if (productData.vendor_id) {
+          const vendorData = vendorService.getById(productData.vendor_id);
+          setVendor(vendorData || null);
+        }
       }
     } catch (error) {
       console.error('Error fetching product:', error);
@@ -98,7 +100,7 @@ export default function ProductScreen() {
   }
 
   const totalPrice = (product.price * quantity).toFixed(2);
-  const hasDiscount = product.original_price && product.original_price > product.price;
+  const hasDiscount = false; // Mock data doesn't have original_price field
 
   return (
     <View style={styles.container}>
@@ -110,7 +112,7 @@ export default function ProductScreen() {
         {/* Product Image */}
         <View style={styles.imageContainer}>
           <Image
-            source={{ uri: product.image_url }}
+            source={{ uri: product.image_urls?.[0] || '' }}
             style={styles.productImage}
             resizeMode="cover"
           />
@@ -141,8 +143,8 @@ export default function ProductScreen() {
         {/* Product Info */}
         <View style={styles.productInfo}>
           {/* Region Tag */}
-          {product.region && (
-            <Text style={styles.regionTag}>{product.region.replace('-', ' ')}</Text>
+          {product.cultural_region && (
+            <Text style={styles.regionTag}>{product.cultural_region.replace('-', ' ')}</Text>
           )}
 
           {/* Product Name */}
@@ -214,7 +216,7 @@ export default function ProductScreen() {
           >
             <View style={styles.vendorAvatarContainer}>
               <Image
-                source={{ uri: vendor.avatar }}
+                source={{ uri: vendor.logo_url }}
                 style={styles.vendorAvatar}
                 resizeMode="cover"
               />
@@ -222,7 +224,7 @@ export default function ProductScreen() {
             <View style={styles.vendorInfo}>
               <Text style={styles.vendorLabel}>Sold by</Text>
               <View style={styles.vendorNameRow}>
-                <Text style={styles.vendorName}>{vendor.name}</Text>
+                <Text style={styles.vendorName}>{vendor.shop_name}</Text>
                 {vendor.is_verified && (
                   <ShieldCheck size={16} color={Colors.success} weight="fill" />
                 )}
@@ -304,7 +306,7 @@ export default function ProductScreen() {
           {expandedSections.includes('heritage') && (
             <View style={styles.sectionContent}>
               <Text style={styles.sectionText}>
-                This product represents generations of African culinary tradition. Sourced from family-owned farms in {product.region?.replace('-', ' ') || 'West Africa'}, it carries the authentic flavors that have been cherished for centuries. By purchasing this product, you're supporting local African communities and preserving cultural heritage.
+                {product.heritage_story || `This product represents generations of African culinary tradition. Sourced from family-owned farms in ${product.cultural_region?.replace('-', ' ') || 'West Africa'}, it carries the authentic flavors that have been cherished for centuries. By purchasing this product, you're supporting local African communities and preserving cultural heritage.`}
               </Text>
             </View>
           )}

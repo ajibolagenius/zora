@@ -5,309 +5,220 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
-  TextInput,
+  Image,
   ActivityIndicator,
-  RefreshControl,
-  useWindowDimensions,
   Platform,
+  Animated,
+  useWindowDimensions,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import {
   ArrowLeft,
   Sliders,
-  MagnifyingGlass,
-  MapPin,
-  Clock,
   Star,
   ShoppingBag,
+  ForkKnife,
   ListBullets,
-  MapTrifold,
 } from 'phosphor-react-native';
 import { Colors } from '../../constants/colors';
 import { Spacing, BorderRadius } from '../../constants/spacing';
 import { FontSize, FontWeight } from '../../constants/typography';
-import { VendorCard, ProductCard } from '../../components/ui';
-import { vendorService, productService } from '../../services/dataService';
-import { Vendor, Product } from '../../types';
+import { vendorService, type Vendor } from '../../services/mockDataService';
 
-type FilterType = 'all' | 'open' | 'delivery' | 'pickup' | 'topRated';
-type ViewMode = 'list' | 'map';
+type FilterType = 'open' | 'delivery' | 'pickup' | 'topRated';
 
-const FILTER_OPTIONS = [
-  { id: 'all', label: 'All' },
+const FILTERS: { id: FilterType; label: string }[] = [
   { id: 'open', label: 'Open Now' },
   { id: 'delivery', label: 'Delivery' },
   { id: 'pickup', label: 'Pickup' },
   { id: 'topRated', label: 'Top Rated' },
 ];
 
+// Transform vendor data for display
+const transformVendorForDisplay = (vendor: Vendor) => ({
+  id: vendor.id,
+  name: vendor.shop_name,
+  category: vendor.categories.join(' • '),
+  image: vendor.cover_image_url,
+  rating: vendor.rating,
+  distance: `${(Math.random() * 2 + 0.5).toFixed(1)} km`,
+  deliveryTime: `${vendor.delivery_time_min} min`,
+  status: 'Open until 8pm',
+  statusColor: '#22C55E',
+});
+
 export default function ExploreScreen() {
   const router = useRouter();
-  const { width: screenWidth } = useWindowDimensions();
-  const productCardWidth = (screenWidth - 32 - 8) / 2;
+  const { height: screenHeight } = useWindowDimensions();
+  const [activeFilter, setActiveFilter] = useState<FilterType>('open');
+  const [loading, setLoading] = useState(false);
   
-  const [vendors, setVendors] = useState<Vendor[]>([]);
-  const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [activeFilter, setActiveFilter] = useState<FilterType>('all');
-  const [viewMode, setViewMode] = useState<ViewMode>('list');
-  const [showProducts, setShowProducts] = useState(false);
+  // Get vendors from mock database
+  const allVendors = vendorService.getAll();
+  const vendors = allVendors.map(transformVendorForDisplay);
 
-  const fetchData = useCallback(async () => {
-    try {
-      const [vendorsData, productsData] = await Promise.all([
-        vendorService.getAll(),
-        productService.getAll(),
-      ]);
-      setVendors(vendorsData);
-      setProducts(productsData);
-    } catch (error) {
-      console.error('Error fetching data:', error);
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchData();
-  }, [fetchData]);
-
-  const onRefresh = () => {
-    setRefreshing(true);
-    fetchData();
+  const handleVendorPress = (vendorId: string) => {
+    router.push(`/vendor/${vendorId}`);
   };
-
-  const filteredVendors = vendors.filter((vendor) => {
-    // Search filter
-    if (searchQuery && !vendor.name.toLowerCase().includes(searchQuery.toLowerCase())) {
-      return false;
-    }
-    
-    // Type filter
-    switch (activeFilter) {
-      case 'open':
-        return vendor.is_open;
-      case 'topRated':
-        return vendor.rating >= 4.5;
-      case 'delivery':
-      case 'pickup':
-        return true; // All vendors support delivery/pickup in this demo
-      default:
-        return true;
-    }
-  });
-
-  const filteredProducts = products.filter((product) => {
-    if (searchQuery) {
-      return (
-        product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        product.category.toLowerCase().includes(searchQuery.toLowerCase())
-      );
-    }
-    return true;
-  });
-
-  const handleVendorPress = (vendor: Vendor) => {
-    router.push(`/vendor/${vendor.id}`);
-  };
-
-  const handleProductPress = (product: Product) => {
-    router.push(`/product/${product.id}`);
-  };
-
-  if (loading) {
-    return (
-      <SafeAreaView style={styles.container}>
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={Colors.primary} />
-        </View>
-      </SafeAreaView>
-    );
-  }
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
+    <View style={styles.container}>
+      {/* Map Background */}
+      <View style={styles.mapContainer}>
+        <Image
+          source={{ uri: 'https://images.unsplash.com/photo-1524661135-423995f22d0b?w=800&q=60' }}
+          style={styles.mapImage}
+          resizeMode="cover"
+        />
+        <View style={styles.mapOverlay} />
+        
+        {/* Map Markers */}
+        <View style={[styles.mapMarker, { top: '30%', left: '25%' }]}>
+          <View style={styles.markerIcon}>
+            <ShoppingBag size={16} color="#FFFFFF" weight="fill" />
+          </View>
+          <View style={styles.markerPin} />
+          <View style={styles.markerShadow} />
+        </View>
+        
+        <View style={[styles.mapMarker, { top: '25%', right: '15%' }]}>
+          <View style={styles.markerIcon}>
+            <ForkKnife size={16} color="#FFFFFF" weight="fill" />
+          </View>
+          <View style={styles.markerPin} />
+        </View>
+        
+        {/* Cluster Marker */}
+        <View style={[styles.clusterMarker, { top: '35%', right: '30%' }]}>
+          <Text style={styles.clusterText}>3</Text>
+        </View>
+        
+        {/* User Location Dot */}
+        <View style={styles.userDot} />
+      </View>
+
       {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+      <SafeAreaView style={styles.header} edges={['top']}>
+        <TouchableOpacity style={styles.headerButton} onPress={() => router.back()}>
           <ArrowLeft size={24} color={Colors.textPrimary} weight="bold" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Find Vendors</Text>
-        <TouchableOpacity style={styles.filterIconButton}>
+        <TouchableOpacity style={styles.headerButton}>
           <Sliders size={24} color={Colors.textPrimary} weight="duotone" />
         </TouchableOpacity>
-      </View>
-
-      {/* Search Bar */}
-      <View style={styles.searchContainer}>
-        <View style={styles.searchBar}>
-          <MagnifyingGlass size={20} color={Colors.textMuted} weight="duotone" />
-          <TextInput
-            style={styles.searchInput}
-            placeholder="Search vendors, products..."
-            placeholderTextColor={Colors.textMuted}
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-          />
-        </View>
-      </View>
+      </SafeAreaView>
 
       {/* Filter Chips */}
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.filterContainer}
-      >
-        {FILTER_OPTIONS.map((filter) => (
-          <TouchableOpacity
-            key={filter.id}
-            style={[
-              styles.filterChip,
-              activeFilter === filter.id && styles.filterChipActive,
-            ]}
-            onPress={() => setActiveFilter(filter.id as FilterType)}
-          >
-            <Text
+      <View style={styles.filtersContainer}>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.filtersContent}
+        >
+          {FILTERS.map((filter) => (
+            <TouchableOpacity
+              key={filter.id}
               style={[
-                styles.filterChipText,
-                activeFilter === filter.id && styles.filterChipTextActive,
+                styles.filterChip,
+                activeFilter === filter.id && styles.filterChipActive,
               ]}
+              onPress={() => setActiveFilter(filter.id)}
+              activeOpacity={0.8}
             >
-              {filter.label}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </ScrollView>
+              <Text
+                style={[
+                  styles.filterChipText,
+                  activeFilter === filter.id && styles.filterChipTextActive,
+                ]}
+              >
+                {filter.label}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+      </View>
 
-      {/* Map Placeholder */}
-      <View style={styles.mapContainer}>
-        <View style={styles.mapPlaceholder}>
-          <MapTrifold size={48} color={Colors.primary} weight="duotone" />
-          <Text style={styles.mapPlaceholderText}>Map View Coming Soon</Text>
-          <Text style={styles.mapPlaceholderSubtext}>
-            {filteredVendors.length} vendors in your area
+      {/* Bottom Sheet - Vendors List */}
+      <View style={styles.bottomSheet}>
+        {/* Handle */}
+        <View style={styles.sheetHandle}>
+          <View style={styles.handleBar} />
+        </View>
+
+        {/* Vendor Count */}
+        <View style={styles.vendorCountContainer}>
+          <Text style={styles.vendorCountText}>
+            {vendors.length} VENDORS NEARBY
           </Text>
         </View>
-      </View>
 
-      {/* Toggle View Mode */}
-      <View style={styles.viewToggleContainer}>
-        <TouchableOpacity
-          style={[styles.viewToggleButton, !showProducts && styles.viewToggleButtonActive]}
-          onPress={() => setShowProducts(false)}
+        {/* Vendors List */}
+        <ScrollView
+          style={styles.vendorsList}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.vendorsListContent}
         >
-          <ShoppingBag size={18} color={!showProducts ? Colors.textPrimary : Colors.textMuted} weight="duotone" />
-          <Text style={[styles.viewToggleText, !showProducts && styles.viewToggleTextActive]}>
-            Vendors ({filteredVendors.length})
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.viewToggleButton, showProducts && styles.viewToggleButtonActive]}
-          onPress={() => setShowProducts(true)}
-        >
-          <ListBullets size={18} color={showProducts ? Colors.textPrimary : Colors.textMuted} weight="duotone" />
-          <Text style={[styles.viewToggleText, showProducts && styles.viewToggleTextActive]}>
-            Products ({filteredProducts.length})
-          </Text>
-        </TouchableOpacity>
-      </View>
-
-      {/* Results List */}
-      <ScrollView
-        style={styles.resultsContainer}
-        contentContainerStyle={styles.resultsContent}
-        showsVerticalScrollIndicator={false}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={Colors.primary} />
-        }
-      >
-        {!showProducts ? (
-          // Vendors List
-          <View style={styles.vendorsList}>
-            {filteredVendors.map((vendor) => (
-              <TouchableOpacity
-                key={vendor.id}
-                style={styles.vendorListItem}
-                onPress={() => handleVendorPress(vendor)}
-                activeOpacity={0.8}
-              >
-                <View style={styles.vendorImagePlaceholder}>
-                  <ShoppingBag size={32} color={Colors.primary} weight="duotone" />
-                </View>
-                <View style={styles.vendorInfo}>
-                  <View style={styles.vendorHeader}>
-                    <Text style={styles.vendorName} numberOfLines={1}>{vendor.name}</Text>
-                    {vendor.is_verified && (
-                      <View style={styles.verifiedBadge}>
-                        <Text style={styles.verifiedText}>✓</Text>
-                      </View>
-                    )}
-                  </View>
-                  <Text style={styles.vendorCategory}>{vendor.category}</Text>
-                  <View style={styles.vendorMeta}>
-                    <View style={styles.metaItem}>
-                      <Star size={14} color={Colors.rating} weight="fill" />
-                      <Text style={styles.metaText}>{vendor.rating}</Text>
-                    </View>
-                    <View style={styles.metaItem}>
-                      <MapPin size={14} color={Colors.textMuted} weight="duotone" />
-                      <Text style={styles.metaText}>{vendor.distance}</Text>
-                    </View>
-                    <View style={styles.metaItem}>
-                      <Clock size={14} color={Colors.textMuted} weight="duotone" />
-                      <Text style={styles.metaText}>{vendor.delivery_time}</Text>
-                    </View>
-                  </View>
-                  <View style={[
-                    styles.statusBadge,
-                    { backgroundColor: vendor.is_open ? Colors.success : Colors.error }
-                  ]}>
-                    <Text style={styles.statusText}>
-                      {vendor.is_open ? 'OPEN' : 'CLOSED'}
-                    </Text>
-                  </View>
-                </View>
-              </TouchableOpacity>
-            ))}
-          </View>
-        ) : (
-          // Products Grid
-          <View style={styles.productsGrid}>
-            {filteredProducts.map((product, index) => (
-              <View
-                key={product.id}
-                style={{
-                  width: productCardWidth,
-                  marginRight: index % 2 === 0 ? 8 : 0,
-                  marginBottom: 8,
-                }}
-              >
-                <ProductCard
-                  product={product}
-                  onPress={() => handleProductPress(product)}
+          {vendors.map((vendor) => (
+            <TouchableOpacity
+              key={vendor.id}
+              style={styles.vendorCard}
+              onPress={() => handleVendorPress(vendor.id)}
+              activeOpacity={0.8}
+            >
+              {/* Vendor Image */}
+              <View style={styles.vendorImageContainer}>
+                <Image
+                  source={{ uri: vendor.image }}
+                  style={styles.vendorImage}
+                  resizeMode="cover"
                 />
               </View>
-            ))}
-          </View>
-        )}
 
-        {/* Bottom padding for tab bar */}
-        <View style={{ height: 100 }} />
-      </ScrollView>
+              {/* Vendor Info */}
+              <View style={styles.vendorInfo}>
+                <View style={styles.vendorHeader}>
+                  <Text style={styles.vendorName} numberOfLines={1}>
+                    {vendor.name}
+                  </Text>
+                  <Text style={styles.vendorCategory} numberOfLines={1}>
+                    {vendor.category}
+                  </Text>
+                </View>
+
+                {/* Rating and Meta */}
+                <View style={styles.vendorMeta}>
+                  <View style={styles.ratingContainer}>
+                    <Star size={14} color="#FFCC00" weight="fill" />
+                    <Text style={styles.ratingText}>{vendor.rating}</Text>
+                  </View>
+                  <Text style={styles.metaDivider}>•</Text>
+                  <Text style={styles.metaText}>{vendor.distance}</Text>
+                  <Text style={styles.metaDivider}>•</Text>
+                  <Text style={styles.metaText}>{vendor.deliveryTime}</Text>
+                </View>
+
+                {/* Status */}
+                <Text style={[styles.statusText, { color: vendor.statusColor }]}>
+                  {vendor.status}
+                </Text>
+              </View>
+            </TouchableOpacity>
+          ))}
+
+          {/* Bottom padding for tab bar */}
+          <View style={{ height: 120 }} />
+        </ScrollView>
+      </View>
 
       {/* Floating List View Button */}
-      <TouchableOpacity
-        style={styles.floatingButton}
-        onPress={() => setViewMode(viewMode === 'list' ? 'map' : 'list')}
-      >
-        <ListBullets size={20} color={Colors.textPrimary} weight="bold" />
-        <Text style={styles.floatingButtonText}>List View</Text>
-      </TouchableOpacity>
-    </SafeAreaView>
+      <View style={styles.floatingButtonContainer}>
+        <TouchableOpacity style={styles.floatingButton} activeOpacity={0.9}>
+          <Text style={styles.floatingButtonText}>List View</Text>
+          <ListBullets size={18} color="#FFFFFF" weight="bold" />
+        </TouchableOpacity>
+      </View>
+    </View>
   );
 }
 
@@ -316,19 +227,118 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Colors.backgroundDark,
   },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
+  // Map Styles
+  mapContainer: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: '55%',
+  },
+  mapImage: {
+    width: '100%',
+    height: '100%',
+    opacity: 0.4,
+  },
+  mapOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(128, 128, 128, 0.3)',
+  },
+  mapMarker: {
+    position: 'absolute',
     alignItems: 'center',
   },
+  markerIcon: {
+    backgroundColor: Colors.primary,
+    padding: 8,
+    borderRadius: BorderRadius.full,
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.3,
+        shadowRadius: 4,
+      },
+      android: {
+        elevation: 4,
+      },
+    }),
+  },
+  markerPin: {
+    width: 4,
+    height: 12,
+    backgroundColor: Colors.primary,
+    borderRadius: 2,
+    marginTop: -2,
+  },
+  markerShadow: {
+    width: 8,
+    height: 4,
+    backgroundColor: 'rgba(0, 0, 0, 0.2)',
+    borderRadius: BorderRadius.full,
+    marginTop: 2,
+  },
+  clusterMarker: {
+    position: 'absolute',
+    width: 40,
+    height: 40,
+    backgroundColor: Colors.primary,
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: Colors.backgroundDark,
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.3,
+        shadowRadius: 4,
+      },
+      android: {
+        elevation: 4,
+      },
+    }),
+  },
+  clusterText: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: FontWeight.bold,
+  },
+  userDot: {
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    width: 16,
+    height: 16,
+    backgroundColor: '#3B82F6',
+    borderRadius: 8,
+    borderWidth: 2,
+    borderColor: '#FFFFFF',
+    marginLeft: -8,
+    marginTop: -8,
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.3,
+        shadowRadius: 4,
+      },
+      android: {
+        elevation: 4,
+      },
+    }),
+  },
+  // Header Styles
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: Spacing.base,
-    paddingVertical: Spacing.md,
+    paddingTop: Spacing.sm,
+    paddingBottom: Spacing.md,
   },
-  backButton: {
+  headerButton: {
     width: 44,
     height: 44,
     borderRadius: BorderRadius.full,
@@ -341,204 +351,167 @@ const styles = StyleSheet.create({
     fontWeight: FontWeight.bold,
     color: Colors.textPrimary,
   },
-  filterIconButton: {
-    width: 44,
-    height: 44,
-    borderRadius: BorderRadius.full,
-    backgroundColor: Colors.cardDark,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  searchContainer: {
-    paddingHorizontal: Spacing.base,
-    marginBottom: Spacing.md,
-  },
-  searchBar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: Colors.cardDark,
-    borderRadius: BorderRadius.lg,
-    paddingHorizontal: Spacing.md,
-    height: 48,
-    gap: Spacing.sm,
-  },
-  searchInput: {
-    flex: 1,
-    color: Colors.textPrimary,
-    fontSize: FontSize.body,
-  },
-  filterContainer: {
-    paddingHorizontal: Spacing.base,
+  // Filters Styles
+  filtersContainer: {
     paddingBottom: Spacing.md,
+  },
+  filtersContent: {
+    paddingHorizontal: Spacing.base,
     gap: Spacing.sm,
   },
   filterChip: {
     paddingHorizontal: Spacing.base,
     paddingVertical: Spacing.sm,
     borderRadius: BorderRadius.full,
-    backgroundColor: Colors.cardDark,
+    backgroundColor: '#2A1D15',
     marginRight: Spacing.sm,
   },
   filterChipActive: {
     backgroundColor: Colors.primary,
   },
   filterChipText: {
-    color: Colors.textMuted,
+    color: Colors.textPrimary,
     fontSize: FontSize.small,
-    fontWeight: FontWeight.medium,
+    fontWeight: FontWeight.semiBold,
   },
   filterChipTextActive: {
     color: Colors.textPrimary,
   },
-  mapContainer: {
-    marginHorizontal: Spacing.base,
-    height: 160,
-    marginBottom: Spacing.md,
-  },
-  mapPlaceholder: {
-    flex: 1,
+  // Bottom Sheet Styles
+  bottomSheet: {
+    position: 'absolute',
+    bottom: 80,
+    left: 0,
+    right: 0,
+    height: '55%',
     backgroundColor: Colors.cardDark,
-    borderRadius: BorderRadius.lg,
-    justifyContent: 'center',
-    alignItems: 'center',
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: -4 },
+        shadowOpacity: 0.2,
+        shadowRadius: 8,
+      },
+      android: {
+        elevation: 16,
+      },
+    }),
   },
-  mapPlaceholderText: {
-    color: Colors.textPrimary,
-    fontSize: FontSize.body,
+  sheetHandle: {
+    alignItems: 'center',
+    paddingVertical: 12,
+  },
+  handleBar: {
+    width: 48,
+    height: 6,
+    backgroundColor: '#4B4B4B',
+    borderRadius: 3,
+  },
+  vendorCountContainer: {
+    paddingHorizontal: 20,
+    paddingBottom: 16,
+  },
+  vendorCountText: {
+    fontSize: 12,
     fontWeight: FontWeight.semiBold,
-    marginTop: Spacing.sm,
-  },
-  mapPlaceholderSubtext: {
-    color: Colors.textMuted,
-    fontSize: FontSize.small,
-    marginTop: Spacing.xs,
-  },
-  viewToggleContainer: {
-    flexDirection: 'row',
-    marginHorizontal: Spacing.base,
-    backgroundColor: Colors.cardDark,
-    borderRadius: BorderRadius.lg,
-    padding: 4,
-    marginBottom: Spacing.md,
-  },
-  viewToggleButton: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: Spacing.sm,
-    borderRadius: BorderRadius.md,
-    gap: Spacing.xs,
-  },
-  viewToggleButtonActive: {
-    backgroundColor: Colors.primary,
-  },
-  viewToggleText: {
-    color: Colors.textMuted,
-    fontSize: FontSize.small,
-    fontWeight: FontWeight.medium,
-  },
-  viewToggleTextActive: {
-    color: Colors.textPrimary,
-  },
-  resultsContainer: {
-    flex: 1,
-  },
-  resultsContent: {
-    paddingHorizontal: Spacing.base,
+    color: '#9CA3AF',
+    letterSpacing: 1,
+    textTransform: 'uppercase',
   },
   vendorsList: {
-    gap: Spacing.md,
+    flex: 1,
   },
-  vendorListItem: {
+  vendorsListContent: {
+    paddingHorizontal: 20,
+  },
+  // Vendor Card Styles
+  vendorCard: {
     flexDirection: 'row',
-    backgroundColor: Colors.cardDark,
-    borderRadius: BorderRadius.lg,
-    padding: Spacing.md,
-    gap: Spacing.md,
+    backgroundColor: '#2A1D15',
+    borderRadius: 12,
+    padding: 12,
+    marginBottom: 16,
+    gap: 16,
   },
-  vendorImagePlaceholder: {
+  vendorImageContainer: {
     width: 80,
     height: 80,
-    borderRadius: BorderRadius.md,
-    backgroundColor: 'rgba(204, 0, 0, 0.1)',
-    justifyContent: 'center',
-    alignItems: 'center',
+    borderRadius: 8,
+    overflow: 'hidden',
+    backgroundColor: '#3E3E3E',
+  },
+  vendorImage: {
+    width: '100%',
+    height: '100%',
   },
   vendorInfo: {
     flex: 1,
+    justifyContent: 'space-between',
   },
   vendorHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.xs,
-    marginBottom: 2,
+    marginBottom: 4,
   },
   vendorName: {
-    fontSize: FontSize.body,
+    fontSize: 18,
     fontWeight: FontWeight.bold,
     color: Colors.textPrimary,
-    flex: 1,
-  },
-  verifiedBadge: {
-    width: 18,
-    height: 18,
-    borderRadius: BorderRadius.full,
-    backgroundColor: Colors.success,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  verifiedText: {
-    color: Colors.textPrimary,
-    fontSize: 10,
-    fontWeight: FontWeight.bold,
+    lineHeight: 22,
   },
   vendorCategory: {
-    fontSize: FontSize.small,
-    color: Colors.textMuted,
-    marginBottom: Spacing.sm,
+    fontSize: 12,
+    color: '#9CA3AF',
+    marginTop: 4,
   },
   vendorMeta: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: Spacing.md,
-    marginBottom: Spacing.sm,
+    marginTop: 8,
   },
-  metaItem: {
+  ratingContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
+    gap: 2,
+  },
+  ratingText: {
+    color: '#FFCC00',
+    fontSize: 12,
+    fontWeight: FontWeight.semiBold,
+  },
+  metaDivider: {
+    color: '#6B7280',
+    marginHorizontal: 8,
+    fontSize: 12,
   },
   metaText: {
-    fontSize: FontSize.caption,
-    color: Colors.textMuted,
-  },
-  statusBadge: {
-    alignSelf: 'flex-start',
-    paddingHorizontal: Spacing.sm,
-    paddingVertical: 2,
-    borderRadius: BorderRadius.sm,
+    color: '#D1D5DB',
+    fontSize: 12,
+    fontWeight: FontWeight.medium,
   },
   statusText: {
-    color: Colors.textPrimary,
-    fontSize: FontSize.tiny,
+    fontSize: 10,
     fontWeight: FontWeight.bold,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+    marginTop: 4,
   },
-  productsGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
+  // Floating Button Styles
+  floatingButtonContainer: {
+    position: 'absolute',
+    bottom: 120,
+    left: 0,
+    right: 0,
+    alignItems: 'center',
   },
   floatingButton: {
-    position: 'absolute',
-    bottom: 100,
-    alignSelf: 'center',
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: Colors.primary,
-    paddingHorizontal: Spacing.xl,
-    paddingVertical: Spacing.md,
+    paddingHorizontal: 24,
+    paddingVertical: 14,
     borderRadius: BorderRadius.full,
-    gap: Spacing.sm,
+    gap: 8,
     ...Platform.select({
       ios: {
         shadowColor: '#000',
@@ -552,8 +525,8 @@ const styles = StyleSheet.create({
     }),
   },
   floatingButtonText: {
-    color: Colors.textPrimary,
-    fontSize: FontSize.body,
+    color: '#FFFFFF',
+    fontSize: 14,
     fontWeight: FontWeight.bold,
   },
 });

@@ -4,7 +4,38 @@ import { Heart, Plus, Star, ShieldCheck } from 'phosphor-react-native';
 import { Colors } from '../../constants/colors';
 import { BorderRadius, Spacing, Shadows } from '../../constants/spacing';
 import { FontSize, FontWeight } from '../../constants/typography';
-import { Product } from '../../types';
+
+// Updated Product interface for mock database
+interface Product {
+  id: string;
+  name: string;
+  description?: string;
+  price: number;
+  original_price?: number;
+  unit_price_label?: string;
+  stock_quantity?: number;
+  category?: string;
+  cultural_region?: string;
+  region?: string;
+  image_urls?: string[];
+  image_url?: string;
+  weight?: string;
+  certifications?: string[];
+  nutrition?: {
+    calories?: string;
+    protein?: string;
+    carbs?: string;
+    fat?: string;
+  };
+  heritage_story?: string;
+  is_active?: boolean;
+  is_featured?: boolean;
+  badge?: string | null;
+  rating: number;
+  review_count: number;
+  vendor_id?: string;
+  in_stock?: boolean;
+}
 
 interface ProductCardProps {
   product: Product;
@@ -19,6 +50,10 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   onAddToCart,
   compact = false,
 }) => {
+  // Normalize image_url for both old and new schemas
+  const imageUrl = product.image_urls?.[0] || product.image_url || '';
+  const region = product.cultural_region || product.region;
+
   const getBadgeColor = (badge: string) => {
     switch (badge?.toUpperCase()) {
       case 'HOT':
@@ -51,7 +86,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
     >
       <View style={styles.imageContainer}>
         <Image
-          source={{ uri: product.image_url }}
+          source={{ uri: imageUrl }}
           style={[styles.image, compact && styles.imageCompact]}
           resizeMode="cover"
         />
@@ -85,8 +120,8 @@ export const ProductCard: React.FC<ProductCardProps> = ({
       
       <View style={styles.content}>
         {/* Region Tag */}
-        {product.region && (
-          <Text style={styles.regionTag}>{product.region.replace('-', ' ')}</Text>
+        {region && (
+          <Text style={styles.regionTag}>{region.replace('-', ' ')}</Text>
         )}
         
         <Text style={styles.name} numberOfLines={2}>
