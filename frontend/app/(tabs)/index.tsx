@@ -204,8 +204,14 @@ export default function HomeScreen() {
             </TouchableOpacity>
           </View>
           <View style={styles.productsGrid}>
-            {filteredProducts?.map((product) => (
-              <View key={product.id} style={styles.productCardWrapper}>
+            {filteredProducts?.map((product, index) => (
+              <View 
+                key={product.id} 
+                style={[
+                  styles.productCardWrapper,
+                  index % 2 === 0 ? styles.productCardLeft : styles.productCardRight
+                ]}
+              >
                 <ProductCard
                   product={product}
                   onPress={() => handleProductPress(product)}
