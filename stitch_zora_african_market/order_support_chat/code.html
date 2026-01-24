@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Order Support Chat</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#cc0000",
+                        "background-light": "#f8f5f5",
+                        "background-dark": "#221710", /* Updated to match user request */
+                        "surface-dark": "#342418", /* Added for bot bubbles/inputs */
+                        "text-muted": "#bc9a9a",
+                    },
+                    fontFamily: {
+                        "display": ["Plus Jakarta Sans", "sans-serif"],
+                        "body": ["Plus Jakarta Sans", "sans-serif"],
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.5rem",
+                        "lg": "1rem",
+                        "xl": "1.5rem",
+                        "input": "8px",
+                        "bubble": "12px",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        /* Hide scrollbar for Chrome, Safari and Opera */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        /* Hide scrollbar for IE, Edge and Firefox */
+        .no-scrollbar {
+            -ms-overflow-style: none;  /* IE and Edge */
+            scrollbar-width: none;  /* Firefox */
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display antialiased h-screen flex flex-col overflow-hidden">
+<!-- Header -->
+<header class="shrink-0 flex items-center justify-between p-4 pt-6 bg-background-dark border-b border-surface-dark/50 z-10">
+<button class="text-white flex items-center justify-center size-10 hover:bg-surface-dark rounded-full transition-colors">
+<span class="material-symbols-outlined">arrow_back_ios_new</span>
+</button>
+<div class="flex flex-col items-center">
+<h1 class="text-white text-lg font-bold leading-tight">Order Support</h1>
+<p class="text-text-muted text-xs font-medium">Ref: #ORD-99281</p>
+</div>
+<div class="size-10"></div> <!-- Spacer for alignment -->
+</header>
+<!-- Chat Area -->
+<main class="flex-1 overflow-y-auto p-4 flex flex-col gap-6 no-scrollbar relative bg-background-dark">
+<!-- Timestamp -->
+<div class="flex justify-center w-full">
+<span class="text-text-muted text-xs font-medium bg-surface-dark/50 px-3 py-1 rounded-full">Today, 10:23 AM</span>
+</div>
+<!-- Bot Message -->
+<div class="flex items-end gap-3 self-start max-w-[85%]">
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full w-8 h-8 shrink-0 border border-surface-dark" data-alt="Support bot avatar showing a friendly abstract robot face" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCxRg9ET3m3_AQMLNEZQgFgd4XWRkdKavycYg01zEoQujIOyPpkOPMpWJMa8m4eF3ukpw_JV7LNeXF4Y92QPoNNbklHZD9PLdKQ5LV_J8Qq1tnyQJ0VYgT8fGfwmWoFgA9WtXeKnC8M18Hep8XXMu9wYCx_AL3mLHkWtxUC5BIkC5-FnrS11-BSDrGrhhd4TSrVjZbN7Ae6YzaxLrYba2F2sE5HUYieMLgiky14hUH26lwLteI0_xq4HD4w0GN6B7LNJfTWMoZPxnEV");'>
+</div>
+<div class="flex flex-col gap-1 items-start">
+<div class="p-3 bg-surface-dark rounded-bubble rounded-bl-none text-white text-[15px] font-normal leading-relaxed shadow-sm">
+<p>Hello! I see you have a question about your recent order of Jollof Rice spices. How can I help you today?</p>
+</div>
+<span class="text-text-muted text-[11px] ml-1">Zora Bot • 10:23 AM</span>
+</div>
+</div>
+<!-- User Message -->
+<div class="flex items-end gap-3 self-end max-w-[85%] flex-row-reverse">
+<!-- Optional User Avatar could go here, omitting for cleaner chat look as per standard iOS -->
+<div class="flex flex-col gap-1 items-end">
+<div class="p-3 bg-primary rounded-bubble rounded-br-none text-white text-[15px] font-normal leading-relaxed shadow-sm">
+<p>My package says delivered but I don't see it on my porch.</p>
+</div>
+<span class="text-text-muted text-[11px] mr-1">10:25 AM</span>
+</div>
+</div>
+<!-- Bot Message (Follow up) -->
+<div class="flex items-end gap-3 self-start max-w-[85%]">
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full w-8 h-8 shrink-0 border border-surface-dark" data-alt="Support bot avatar showing a friendly abstract robot face" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBeXFfUNx6DA13hI-_0eeLVKCAMPgxJEnx61o-G97R-KMzK3J9Dtb1xLXgdYChNbpj8ICqrFQpslBIigjWZe6URCjhIc5ootJDtyuNAGYYMyk1TmsNVtVHNn99D51k6bBw53QBKqgeGIdgFscJZoxHWapoMxHZQC_SrwT-IwfoLRYmOCsbZmbytRVVdJCmGAbGCgmUeVywtVMaQkVzk7RekVCCGWf-bVS65Okar16YphYL39LbH7IjrqvYq6lOf0Z-01Q0nuIRkAnUp");'>
+</div>
+<div class="flex flex-col gap-1 items-start">
+<div class="p-3 bg-surface-dark rounded-bubble rounded-bl-none text-white text-[15px] font-normal leading-relaxed shadow-sm">
+<p>I'm sorry to hear that. Sometimes carriers mark packages as delivered a few hours early. Would you like me to open an investigation with the carrier?</p>
+</div>
+<span class="text-text-muted text-[11px] ml-1">Zora Bot • 10:25 AM</span>
+</div>
+</div>
+<!-- Typing Indicator -->
+<div class="flex items-center gap-2 ml-11">
+<div class="flex space-x-1 h-2">
+<div class="w-1.5 h-1.5 bg-text-muted rounded-full animate-bounce [animation-delay:-0.3s]"></div>
+<div class="w-1.5 h-1.5 bg-text-muted rounded-full animate-bounce [animation-delay:-0.15s]"></div>
+<div class="w-1.5 h-1.5 bg-text-muted rounded-full animate-bounce"></div>
+</div>
+<span class="text-text-muted text-xs">Support Agent is typing...</span>
+</div>
+<!-- Space filler for bottom scrolling -->
+<div class="h-2"></div>
+</main>
+<!-- Bottom Section: Quick Replies + Input -->
+<footer class="shrink-0 bg-background-dark pb-6 pt-2">
+<!-- Quick Replies Chips -->
+<div class="flex gap-2 px-4 pb-3 overflow-x-auto no-scrollbar w-full">
+<button class="shrink-0 h-9 flex items-center justify-center px-4 rounded-full bg-surface-dark border border-white/5 active:bg-surface-dark/80 transition-colors">
+<p class="text-white text-sm font-medium whitespace-nowrap">Where's my order?</p>
+</button>
+<button class="shrink-0 h-9 flex items-center justify-center px-4 rounded-full bg-surface-dark border border-white/5 active:bg-surface-dark/80 transition-colors">
+<p class="text-white text-sm font-medium whitespace-nowrap">Request Refund</p>
+</button>
+<button class="shrink-0 h-9 flex items-center justify-center px-4 rounded-full bg-surface-dark border border-white/5 active:bg-surface-dark/80 transition-colors">
+<p class="text-white text-sm font-medium whitespace-nowrap">Wrong Item</p>
+</button>
+<button class="shrink-0 h-9 flex items-center justify-center px-4 rounded-full bg-surface-dark border border-white/5 active:bg-surface-dark/80 transition-colors">
+<p class="text-white text-sm font-medium whitespace-nowrap">Speak to Agent</p>
+</button>
+</div>
+<!-- Input Bar -->
+<div class="px-4 flex items-end gap-3">
+<button class="text-text-muted hover:text-white transition-colors pb-3">
+<span class="material-symbols-outlined text-[28px] rotate-45">attach_file</span>
+</button>
+<div class="flex-1 relative">
+<textarea class="w-full bg-surface-dark text-white placeholder-text-muted/70 text-base rounded-[8px] border-none focus:ring-1 focus:ring-primary/50 py-3 px-4 resize-none min-h-[48px] max-h-32 overflow-y-auto" placeholder="Type a message..." rows="1"></textarea>
+</div>
+<button class="bg-primary hover:bg-primary/90 text-white rounded-[8px] size-12 flex items-center justify-center shrink-0 transition-all shadow-lg shadow-primary/20">
+<span class="material-symbols-outlined text-[20px]">send</span>
+</button>
+</div>
+</footer>
+</body></html>

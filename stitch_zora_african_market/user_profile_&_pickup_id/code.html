@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Zora African Market - User Profile</title>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&amp;family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#cc0000", // Zora Red
+                        "accent": "#FFCC00",  // Zora Yellow
+                        "background-light": "#f8f5f5",
+                        "background-dark": "#221710", // Deep brown background
+                        "surface-dark": "#342418",    // Card surface
+                        "text-dim": "#bc9a9a",
+                    },
+                    fontFamily: {
+                        "display": ["Plus Jakarta Sans", "sans-serif"],
+                        "header": ["Montserrat", "sans-serif"],
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.5rem",
+                        "lg": "0.75rem", // 12px
+                        "xl": "1rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        /* Custom scrollbar hiding for clean UI */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display text-white antialiased overflow-x-hidden">
+<div class="relative flex h-full min-h-screen w-full flex-col max-w-md mx-auto shadow-2xl overflow-hidden">
+<!-- Sticky Header -->
+<header class="sticky top-0 z-50 bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-sm px-4 pt-6 pb-4 flex items-center justify-between border-b border-[#3a2727]/30">
+<h1 class="text-white text-xl font-bold leading-tight tracking-tight font-header">My Profile</h1>
+<button class="flex items-center justify-center text-white hover:text-accent transition-colors p-2 rounded-full active:bg-[#342418]">
+<span class="material-symbols-outlined" style="font-size: 24px;">settings</span>
+</button>
+</header>
+<!-- Main Content -->
+<main class="flex-1 flex flex-col gap-6 p-4 pb-24 overflow-y-auto no-scrollbar">
+<!-- Profile Info -->
+<section class="flex flex-col items-center gap-3">
+<div class="relative group cursor-pointer">
+<div class="h-[100px] w-[100px] rounded-full bg-cover bg-center border-4 border-[#342418]" data-alt="Portrait of Adaeze Johnson African woman smiling" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAm905wAiJREVqbspNwKgHp-73IB27ApmHoAMYYEPx8ic9MkoLK4SeSyomhCAPSJKyCmOc7wT0ut5yJ-RRlU9_qY-oxrOgzTLCgQbFeAJHzRA9a_jjTVM2NuPhDXgD3_BIrmV29kYIujs8Nt1siGJCuGe4961W4GiZiOElpbQRse_LFDvZ3rQ5SFX7qbc2gcS2NMdSyylpN_pXSUD-Bvwt3D-baxCE9jiJLN_R5NV5vqiOBWgwOrO7FBJiULet4m_4HDTvWKhpMMcDg');"></div>
+<div class="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined text-white">edit</span>
+</div>
+<button class="absolute bottom-0 right-0 bg-[#342418] text-white p-1.5 rounded-full border border-[#221710] flex items-center justify-center">
+<span class="material-symbols-outlined text-sm" style="font-size: 16px;">photo_camera</span>
+</button>
+</div>
+<div class="flex flex-col items-center gap-1">
+<h2 class="text-white text-[22px] font-bold leading-tight">Adaeze Johnson</h2>
+<div class="bg-[#342418] px-3 py-1 rounded-full border border-accent/20">
+<p class="text-accent text-xs font-bold uppercase tracking-wider flex items-center gap-1">
+                            Gold Member <span>⭐</span>
+</p>
+</div>
+</div>
+</section>
+<!-- Stats Row -->
+<section class="grid grid-cols-3 gap-3">
+<div class="flex flex-col items-center justify-center bg-surface-dark p-3 rounded-lg border border-[#4a3535]/30">
+<p class="text-accent text-2xl font-bold font-header">24</p>
+<p class="text-text-dim text-xs font-medium">Orders</p>
+</div>
+<div class="flex flex-col items-center justify-center bg-surface-dark p-3 rounded-lg border border-[#4a3535]/30">
+<p class="text-accent text-2xl font-bold font-header">12</p>
+<p class="text-text-dim text-xs font-medium">Reviews</p>
+</div>
+<div class="flex flex-col items-center justify-center bg-surface-dark p-3 rounded-lg border border-[#4a3535]/30">
+<p class="text-accent text-2xl font-bold font-header">8</p>
+<p class="text-text-dim text-xs font-medium">Saved</p>
+</div>
+</section>
+<!-- QR Pickup Card -->
+<section class="bg-surface-dark rounded-lg p-5 shadow-lg flex flex-col items-center gap-4 border border-[#4a3535]/50 relative overflow-hidden">
+<!-- Decorative background elements -->
+<div class="absolute -top-10 -right-10 w-32 h-32 bg-primary/5 rounded-full blur-2xl pointer-events-none"></div>
+<div class="absolute -bottom-10 -left-10 w-32 h-32 bg-accent/5 rounded-full blur-2xl pointer-events-none"></div>
+<div class="flex flex-col items-center gap-1 z-10">
+<h3 class="text-white text-lg font-bold">Pickup ID</h3>
+<p class="text-text-dim text-sm text-center">Show this code at the counter</p>
+</div>
+<div class="bg-white p-3 rounded-xl shadow-inner mx-auto">
+<!-- Placeholder for QR Code using a pattern div -->
+<div class="w-40 h-40 bg-white flex items-center justify-center overflow-hidden" data-alt="High contrast QR code pattern for pickup">
+<img alt="Pickup QR Code" class="w-full h-full object-contain mix-blend-multiply opacity-90" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDAfoShumF3YuwuQHQ9KlTROA3hEGKiSsIAB_hvZOm-lnt1kmRdrRmX17QhEdPyqulU_bz2U4JGatc962ZElrTbQyo2Jcym-g0wXLhBYFdNZW7k2NkgF5soNVpMZloSlPnF9bE66vZLosNsBcsLBqmNMAGNdauKViLt4lJMl7vMgeeIiFj7_pjmtkwua1ooiLRqfcyQmw1q8gIKz_KEsr6Rb6OWNWsWfs7QlOSBnT-25OgL6mKcmfM8NPFwK0QOBPK-UMz4jubb5EV-"/>
+</div>
+</div>
+<button class="text-primary text-sm font-bold flex items-center gap-2 hover:text-red-400 transition-colors py-1 px-3 rounded-lg hover:bg-primary/10">
+<span class="material-symbols-outlined text-lg animate-spin-slow">refresh</span>
+                    Refresh Code
+                </button>
+</section>
+<!-- Menu List -->
+<section class="flex flex-col gap-2">
+<!-- Item 1 -->
+<button class="flex items-center gap-4 bg-surface-dark px-4 py-4 rounded-lg active:bg-[#453232] transition-colors group">
+<div class="flex items-center justify-center rounded-lg bg-[#221710] text-text-dim group-hover:text-white shrink-0 size-10 transition-colors">
+<span class="material-symbols-outlined">person</span>
+</div>
+<p class="text-white text-base font-medium flex-1 text-left">Personal Information</p>
+<span class="material-symbols-outlined text-text-dim">chevron_right</span>
+</button>
+<!-- Item 2 -->
+<button class="flex items-center gap-4 bg-surface-dark px-4 py-4 rounded-lg active:bg-[#453232] transition-colors group">
+<div class="flex items-center justify-center rounded-lg bg-[#221710] text-text-dim group-hover:text-white shrink-0 size-10 transition-colors">
+<span class="material-symbols-outlined">credit_card</span>
+</div>
+<p class="text-white text-base font-medium flex-1 text-left">Payment Methods</p>
+<span class="material-symbols-outlined text-text-dim">chevron_right</span>
+</button>
+<!-- Item 3 -->
+<button class="flex items-center gap-4 bg-surface-dark px-4 py-4 rounded-lg active:bg-[#453232] transition-colors group">
+<div class="flex items-center justify-center rounded-lg bg-[#221710] text-text-dim group-hover:text-white shrink-0 size-10 transition-colors">
+<span class="material-symbols-outlined">location_on</span>
+</div>
+<p class="text-white text-base font-medium flex-1 text-left">Saved Addresses</p>
+<span class="material-symbols-outlined text-text-dim">chevron_right</span>
+</button>
+<!-- Item 4 -->
+<button class="flex items-center gap-4 bg-surface-dark px-4 py-4 rounded-lg active:bg-[#453232] transition-colors group">
+<div class="flex items-center justify-center rounded-lg bg-[#221710] text-text-dim group-hover:text-white shrink-0 size-10 transition-colors">
+<span class="material-symbols-outlined">receipt_long</span>
+</div>
+<p class="text-white text-base font-medium flex-1 text-left">Order History</p>
+<span class="material-symbols-outlined text-text-dim">chevron_right</span>
+</button>
+<!-- Logout -->
+<button class="flex items-center gap-4 bg-transparent px-4 py-4 mt-2 rounded-lg active:bg-primary/10 transition-colors group w-full justify-center">
+<span class="material-symbols-outlined text-primary">logout</span>
+<p class="text-primary text-base font-bold text-left">Log Out</p>
+</button>
+</section>
+</main>
+<!-- Bottom Navigation -->
+<nav class="fixed bottom-0 left-0 right-0 z-50 bg-[#221710]/95 backdrop-blur-md border-t border-[#3a2727] max-w-md mx-auto">
+<div class="flex justify-between items-center px-2 py-1">
+<button class="flex flex-col items-center justify-center w-full py-3 gap-1 text-text-dim hover:text-white transition-colors">
+<span class="material-symbols-outlined text-[24px]">home</span>
+<span class="text-[10px] font-medium">Home</span>
+</button>
+<button class="flex flex-col items-center justify-center w-full py-3 gap-1 text-text-dim hover:text-white transition-colors">
+<span class="material-symbols-outlined text-[24px]">search</span>
+<span class="text-[10px] font-medium">Explore</span>
+</button>
+<button class="flex flex-col items-center justify-center w-full py-3 gap-1 text-text-dim hover:text-white transition-colors relative">
+<div class="absolute top-2 right-4 w-2 h-2 bg-accent rounded-full"></div>
+<span class="material-symbols-outlined text-[24px]">shopping_bag</span>
+<span class="text-[10px] font-medium">Cart</span>
+</button>
+<button class="flex flex-col items-center justify-center w-full py-3 gap-1 text-text-dim hover:text-white transition-colors">
+<span class="material-symbols-outlined text-[24px]">favorite</span>
+<span class="text-[10px] font-medium">Saved</span>
+</button>
+<button class="flex flex-col items-center justify-center w-full py-3 gap-1 text-primary transition-colors">
+<span class="material-symbols-outlined text-[24px] font-variation-settings-fill">person</span>
+<span class="text-[10px] font-bold">Profile</span>
+</button>
+</div>
+</nav>
+</div>
+<style>
+        .font-variation-settings-fill {
+            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        @keyframes spin-slow {
+            from {
+                transform: rotate(0deg);
+            }
+            to {
+                transform: rotate(360deg);
+            }
+        }
+        .animate-spin-slow {
+            animation: spin-slow 3s linear infinite;
+        }
+    </style>
+</body></html>

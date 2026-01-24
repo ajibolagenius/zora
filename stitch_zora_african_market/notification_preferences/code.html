@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Notification Preferences</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&amp;family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<!-- Icons -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#cc0000", // Zora Red
+                        secondary: "#F4B400", // Zora Yellow (Assumed accent)
+                        "background-dark": "#181010", // Deep dark brown/black
+                        "surface-card": "#342418", // Card brown from prompt
+                        "surface-elevated": "#463225", // Slightly lighter for contrast
+                    },
+                    fontFamily: {
+                        sans: ["Plus Jakarta Sans", "sans-serif"],
+                        display: ["Montserrat", "sans-serif"],
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.5rem",
+                        "lg": "1rem",
+                        "xl": "1.5rem",
+                        "2xl": "1.75rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-dark text-white font-sans overflow-x-hidden antialiased min-h-screen">
+<div class="relative flex h-full w-full flex-col max-w-md mx-auto">
+<!-- Header -->
+<header class="sticky top-0 z-50 bg-[#181010]/95 backdrop-blur-md px-4 py-3 flex items-center gap-4">
+<button class="size-10 flex items-center justify-center rounded-full text-white hover:bg-white/10 active:scale-95 transition-all">
+<span class="material-symbols-outlined">arrow_back</span>
+</button>
+<h1 class="text-lg font-display font-bold tracking-tight text-white flex-1 text-center pr-10">Notification Preferences</h1>
+</header>
+<main class="p-4 space-y-8 pb-12">
+<!-- Master Push Notifications Section -->
+<section>
+<div class="relative overflow-hidden bg-surface-card rounded-2xl p-5 flex items-center justify-between shadow-lg ring-1 ring-white/5 group">
+<!-- Decorative subtle gradient -->
+<div class="absolute -right-10 -top-10 w-32 h-32 bg-primary/10 rounded-full blur-3xl pointer-events-none"></div>
+<div class="flex items-center gap-4 relative z-10">
+<div class="size-12 shrink-0 rounded-full bg-secondary/10 flex items-center justify-center text-secondary border border-secondary/20">
+<span class="material-symbols-outlined text-[26px]">notifications_active</span>
+</div>
+<div>
+<h2 class="font-display font-bold text-base leading-tight">Push Notifications</h2>
+<p class="text-sm text-white/60 mt-0.5">Pause all incoming alerts</p>
+</div>
+</div>
+<!-- Master Toggle -->
+<label class="relative inline-flex items-center cursor-pointer z-10">
+<input checked="" class="sr-only peer" type="checkbox" value=""/>
+<div class="w-[52px] h-[32px] bg-[#231515] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-[28px] after:w-[28px] after:transition-all peer-checked:bg-primary shadow-inner"></div>
+</label>
+</div>
+</section>
+<!-- Categories Section -->
+<section class="space-y-4">
+<h3 class="font-display font-bold text-xs uppercase tracking-wider text-white/40 px-2 flex items-center gap-2">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+                    Categories
+                </h3>
+<div class="space-y-3">
+<!-- Order Updates -->
+<div class="bg-surface-card rounded-xl p-4 flex items-center justify-between shadow-sm border border-white/5 transition-transform active:scale-[0.99]">
+<div class="flex items-center gap-3">
+<div class="size-9 rounded-lg bg-white/5 flex items-center justify-center text-secondary/90">
+<span class="material-symbols-outlined text-[20px]">local_shipping</span>
+</div>
+<span class="text-base font-medium">Order Updates</span>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox" value=""/>
+<div class="w-11 h-6 bg-[#231515] rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+</label>
+</div>
+<!-- Delivery Status -->
+<div class="bg-surface-card rounded-xl p-4 flex items-center justify-between shadow-sm border border-white/5 transition-transform active:scale-[0.99]">
+<div class="flex items-center gap-3">
+<div class="size-9 rounded-lg bg-white/5 flex items-center justify-center text-secondary/90">
+<span class="material-symbols-outlined text-[20px]">package_2</span>
+</div>
+<span class="text-base font-medium">Delivery Status</span>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox" value=""/>
+<div class="w-11 h-6 bg-[#231515] rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+</label>
+</div>
+<!-- Promotions -->
+<div class="bg-surface-card rounded-xl p-4 flex items-center justify-between shadow-sm border border-white/5 transition-transform active:scale-[0.99]">
+<div class="flex items-center gap-3">
+<div class="size-9 rounded-lg bg-white/5 flex items-center justify-center text-secondary/90">
+<span class="material-symbols-outlined text-[20px]">percent</span>
+</div>
+<span class="text-base font-medium">Promotions</span>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input class="sr-only peer" type="checkbox" value=""/>
+<div class="w-11 h-6 bg-[#231515] rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+</label>
+</div>
+<!-- Price Drops -->
+<div class="bg-surface-card rounded-xl p-4 flex items-center justify-between shadow-sm border border-white/5 transition-transform active:scale-[0.99]">
+<div class="flex items-center gap-3">
+<div class="size-9 rounded-lg bg-white/5 flex items-center justify-center text-secondary/90">
+<span class="material-symbols-outlined text-[20px]">trending_down</span>
+</div>
+<span class="text-base font-medium">Price Drops</span>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input class="sr-only peer" type="checkbox" value=""/>
+<div class="w-11 h-6 bg-[#231515] rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+</label>
+</div>
+</div>
+</section>
+<!-- Email Section -->
+<section class="space-y-4">
+<h3 class="font-display font-bold text-xs uppercase tracking-wider text-white/40 px-2 flex items-center gap-2">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+                    Email
+                 </h3>
+<div class="bg-surface-card rounded-xl overflow-hidden divide-y divide-white/5 shadow-sm border border-white/5">
+<!-- Newsletter -->
+<div class="p-4 flex items-center justify-between hover:bg-white/5 transition-colors">
+<div class="flex items-center gap-3">
+<span class="text-base font-medium pl-1">Weekly Newsletter</span>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox" value=""/>
+<div class="w-11 h-6 bg-[#231515] rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+</label>
+</div>
+<!-- Order Receipts -->
+<div class="p-4 flex items-center justify-between hover:bg-white/5 transition-colors">
+<div class="flex items-center gap-3">
+<span class="text-base font-medium pl-1">Order Receipts</span>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" disabled="" type="checkbox" value=""/>
+<div class="w-11 h-6 bg-[#231515]/50 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white/50 after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary/50 cursor-not-allowed"></div>
+</label>
+</div>
+</div>
+</section>
+<!-- Quiet Hours Section -->
+<section class="space-y-4">
+<h3 class="font-display font-bold text-xs uppercase tracking-wider text-white/40 px-2 flex items-center gap-2">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+                    Quiet Hours
+                </h3>
+<div class="bg-surface-card rounded-xl p-5 shadow-sm border border-white/5">
+<div class="flex items-start gap-4 mb-6">
+<div class="size-10 rounded-full bg-secondary/10 flex items-center justify-center text-secondary shrink-0 border border-secondary/20">
+<span class="material-symbols-outlined">dark_mode</span>
+</div>
+<div>
+<p class="text-sm font-medium leading-relaxed text-white/80">Pause notifications during these times. Critical alerts will still arrive.</p>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<div class="flex-1 space-y-2">
+<label class="text-[10px] font-bold text-white/40 uppercase tracking-widest pl-1">From</label>
+<button class="h-14 w-full bg-[#181010] rounded-xl border border-white/10 flex items-center justify-between px-4 hover:border-primary/50 focus:border-primary focus:ring-1 focus:ring-primary transition-all group">
+<span class="font-display font-bold text-lg tracking-tight">10:00 <span class="text-sm font-medium text-white/40 ml-0.5">PM</span></span>
+</button>
+</div>
+<div class="flex flex-col items-center justify-center pt-5">
+<div class="w-6 h-[1px] bg-white/10"></div>
+</div>
+<div class="flex-1 space-y-2">
+<label class="text-[10px] font-bold text-white/40 uppercase tracking-widest pl-1">To</label>
+<button class="h-14 w-full bg-[#181010] rounded-xl border border-white/10 flex items-center justify-between px-4 hover:border-primary/50 focus:border-primary focus:ring-1 focus:ring-primary transition-all group">
+<span class="font-display font-bold text-lg tracking-tight">07:00 <span class="text-sm font-medium text-white/40 ml-0.5">AM</span></span>
+</button>
+</div>
+</div>
+</div>
+</section>
+</main>
+</div>
+</body></html>

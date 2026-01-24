@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Delivery Options - Zora African Market</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#ec1313",
+                        "background-light": "#f8f6f6",
+                        "background-dark": "#221010",
+                        "card-dark": "#342418",
+                        "text-muted": "#b99d9d",
+                    },
+                    fontFamily: {
+                        "display": ["Plus Jakarta Sans", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.5rem", // 8px
+                        "lg": "0.75rem", // 12px
+                        "xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                    boxShadow: {
+                        "warm": "0 10px 15px -3px rgba(52, 36, 24, 0.5), 0 4px 6px -2px rgba(52, 36, 24, 0.3)",
+                        "glow": "0 0 15px rgba(236, 19, 19, 0.15)"
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        /* Custom scrollbar hiding for horizontal scroll areas */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display text-gray-900 dark:text-white min-h-screen flex flex-col antialiased selection:bg-primary selection:text-white">
+<!-- Header -->
+<header class="fixed top-0 left-0 right-0 z-50 bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-md border-b border-[#342418]/50">
+<div class="flex items-center justify-between px-4 h-16 max-w-md mx-auto w-full">
+<button class="p-2 -ml-2 rounded-full hover:bg-black/5 dark:hover:bg-white/10 transition-colors">
+<span class="material-symbols-outlined text-gray-900 dark:text-white">arrow_back</span>
+</button>
+<h1 class="text-lg font-bold tracking-tight">Delivery Options</h1>
+<div class="flex items-center gap-1">
+<span class="text-xs font-bold text-primary bg-primary/10 px-2 py-1 rounded-full">Step 1/3</span>
+</div>
+</div>
+</header>
+<!-- Main Content -->
+<main class="flex-1 w-full max-w-md mx-auto pt-20 pb-32 px-4 space-y-8">
+<!-- Address Section -->
+<section class="space-y-3">
+<h2 class="text-sm font-semibold text-text-muted uppercase tracking-wider ml-1">Delivering To</h2>
+<div class="group relative flex flex-col gap-3 rounded-lg bg-card-dark p-4 shadow-warm border border-white/5 transition-all">
+<div class="flex items-start justify-between">
+<div class="flex items-start gap-3">
+<div class="mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+<span class="material-symbols-outlined text-lg">location_on</span>
+</div>
+<div class="space-y-1">
+<p class="font-bold text-white leading-tight">Home</p>
+<p class="text-sm text-text-muted leading-relaxed">Jane Doe<br/>123 Zora Lane, Apartment 4B<br/>London, UK, SE1 7PB</p>
+</div>
+</div>
+<button class="text-sm font-bold text-primary hover:text-red-400 transition-colors px-2 py-1">
+                        Change
+                    </button>
+</div>
+</div>
+</section>
+<!-- Delivery Method Options -->
+<section class="space-y-3">
+<h2 class="text-sm font-semibold text-text-muted uppercase tracking-wider ml-1">Delivery Method</h2>
+<div class="flex flex-col gap-3">
+<!-- Option 1: Standard -->
+<label class="relative flex cursor-pointer items-center gap-4 rounded-lg border border-transparent bg-card-dark p-4 shadow-warm transition-all hover:bg-[#3d2b1d] has-[:checked]:border-primary has-[:checked]:shadow-glow">
+<input checked="" class="peer h-5 w-5 border-2 border-text-muted bg-transparent text-primary focus:ring-primary/50 focus:ring-offset-0 checked:border-primary" name="delivery_method" type="radio"/>
+<div class="flex grow flex-col">
+<div class="flex justify-between items-center">
+<p class="font-bold text-white">Standard Delivery</p>
+<p class="font-bold text-white">£3.99</p>
+</div>
+<p class="text-sm text-text-muted">2-3 business days</p>
+</div>
+</label>
+<!-- Option 2: Express -->
+<label class="relative flex cursor-pointer items-center gap-4 rounded-lg border border-transparent bg-card-dark p-4 shadow-warm transition-all hover:bg-[#3d2b1d] has-[:checked]:border-primary has-[:checked]:shadow-glow">
+<input class="peer h-5 w-5 border-2 border-text-muted bg-transparent text-primary focus:ring-primary/50 focus:ring-offset-0 checked:border-primary" name="delivery_method" type="radio"/>
+<div class="flex grow flex-col">
+<div class="flex justify-between items-center">
+<p class="font-bold text-white">Express</p>
+<p class="font-bold text-white">£6.99</p>
+</div>
+<p class="text-sm text-text-muted">Next day delivery</p>
+</div>
+</label>
+<!-- Option 3: Click & Collect -->
+<label class="relative flex cursor-pointer items-center gap-4 rounded-lg border border-transparent bg-card-dark p-4 shadow-warm transition-all hover:bg-[#3d2b1d] has-[:checked]:border-primary has-[:checked]:shadow-glow">
+<input class="peer h-5 w-5 border-2 border-text-muted bg-transparent text-primary focus:ring-primary/50 focus:ring-offset-0 checked:border-primary" name="delivery_method" type="radio"/>
+<div class="flex grow flex-col">
+<div class="flex justify-between items-center">
+<p class="font-bold text-white">Click &amp; Collect</p>
+<p class="font-bold text-green-400">Free</p>
+</div>
+<p class="text-sm text-text-muted">Ready within 2 hours</p>
+</div>
+</label>
+</div>
+</section>
+<!-- Slots (Date & Time) -->
+<section class="space-y-4">
+<h2 class="text-sm font-semibold text-text-muted uppercase tracking-wider ml-1">Preferred Time</h2>
+<!-- Date Scroller -->
+<div class="flex gap-3 overflow-x-auto no-scrollbar pb-2 -mx-4 px-4 scroll-smooth">
+<!-- Selected Date -->
+<button class="flex flex-col items-center justify-center min-w-[72px] h-[80px] rounded-lg bg-primary text-white shadow-glow flex-shrink-0 transition-transform active:scale-95">
+<span class="text-xs font-medium opacity-80">Today</span>
+<span class="text-xl font-bold">12</span>
+<span class="text-xs font-medium opacity-80">Oct</span>
+</button>
+<!-- Other Dates -->
+<button class="flex flex-col items-center justify-center min-w-[72px] h-[80px] rounded-lg bg-card-dark text-text-muted hover:text-white border border-transparent hover:border-white/10 flex-shrink-0 transition-all active:scale-95">
+<span class="text-xs font-medium">Sat</span>
+<span class="text-xl font-bold text-white">13</span>
+<span class="text-xs font-medium">Oct</span>
+</button>
+<button class="flex flex-col items-center justify-center min-w-[72px] h-[80px] rounded-lg bg-card-dark text-text-muted hover:text-white border border-transparent hover:border-white/10 flex-shrink-0 transition-all active:scale-95">
+<span class="text-xs font-medium">Sun</span>
+<span class="text-xl font-bold text-white">14</span>
+<span class="text-xs font-medium">Oct</span>
+</button>
+<button class="flex flex-col items-center justify-center min-w-[72px] h-[80px] rounded-lg bg-card-dark text-text-muted hover:text-white border border-transparent hover:border-white/10 flex-shrink-0 transition-all active:scale-95">
+<span class="text-xs font-medium">Mon</span>
+<span class="text-xl font-bold text-white">15</span>
+<span class="text-xs font-medium">Oct</span>
+</button>
+<button class="flex flex-col items-center justify-center min-w-[72px] h-[80px] rounded-lg bg-card-dark text-text-muted hover:text-white border border-transparent hover:border-white/10 flex-shrink-0 transition-all active:scale-95">
+<span class="text-xs font-medium">Tue</span>
+<span class="text-xl font-bold text-white">16</span>
+<span class="text-xs font-medium">Oct</span>
+</button>
+</div>
+<!-- Time Slots Grid -->
+<div class="grid grid-cols-3 gap-3">
+<label class="cursor-pointer">
+<input class="peer sr-only" name="time_slot" type="radio"/>
+<div class="flex flex-col items-center justify-center rounded py-3 bg-card-dark border-2 border-transparent text-text-muted peer-checked:border-primary peer-checked:text-white peer-checked:bg-primary/10 transition-all">
+<span class="material-symbols-outlined mb-1 text-xl">wb_twilight</span>
+<span class="text-xs font-bold">Morning</span>
+<span class="text-[10px] opacity-70">8am - 12pm</span>
+</div>
+</label>
+<label class="cursor-pointer">
+<input checked="" class="peer sr-only" name="time_slot" type="radio"/>
+<div class="flex flex-col items-center justify-center rounded py-3 bg-card-dark border-2 border-transparent text-text-muted peer-checked:border-primary peer-checked:text-white peer-checked:bg-primary/10 transition-all">
+<span class="material-symbols-outlined mb-1 text-xl">sunny</span>
+<span class="text-xs font-bold">Afternoon</span>
+<span class="text-[10px] opacity-70">12pm - 5pm</span>
+</div>
+</label>
+<label class="cursor-pointer">
+<input class="peer sr-only" name="time_slot" type="radio"/>
+<div class="flex flex-col items-center justify-center rounded py-3 bg-card-dark border-2 border-transparent text-text-muted peer-checked:border-primary peer-checked:text-white peer-checked:bg-primary/10 transition-all">
+<span class="material-symbols-outlined mb-1 text-xl">dark_mode</span>
+<span class="text-xs font-bold">Evening</span>
+<span class="text-[10px] opacity-70">5pm - 9pm</span>
+</div>
+</label>
+</div>
+</section>
+<!-- Delivery Instructions -->
+<section class="space-y-3">
+<h2 class="text-sm font-semibold text-text-muted uppercase tracking-wider ml-1">Instructions</h2>
+<div class="relative">
+<textarea class="w-full rounded-lg bg-card-dark border-0 p-4 text-white placeholder-text-muted/50 focus:ring-2 focus:ring-primary shadow-warm resize-none text-sm leading-relaxed" placeholder="Add delivery notes (e.g. Leave with neighbor, Gate code 1234)..." rows="3"></textarea>
+<div class="absolute bottom-3 right-3 text-text-muted/30">
+<span class="material-symbols-outlined text-lg">edit_note</span>
+</div>
+</div>
+</section>
+</main>
+<!-- Sticky Footer -->
+<footer class="fixed bottom-0 left-0 right-0 z-50 bg-background-dark/80 backdrop-blur-xl border-t border-white/5 pb-8 pt-4">
+<div class="max-w-md mx-auto px-4 w-full">
+<button class="w-full group relative flex items-center justify-center gap-2 rounded-lg bg-primary py-4 text-white shadow-lg shadow-primary/25 transition-all active:scale-[0.98] hover:bg-red-600">
+<span class="font-bold text-base tracking-wide">Continue to Payment</span>
+<span class="material-symbols-outlined text-xl transition-transform group-hover:translate-x-1">arrow_forward</span>
+</button>
+</div>
+</footer>
+</body></html>

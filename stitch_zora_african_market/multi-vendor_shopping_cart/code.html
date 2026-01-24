@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Zora African Market - Cart</title>
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&amp;family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Config -->
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#cc0000",
+                        "zora-yellow": "#FFCC00",
+                        "zora-bg": "#221710",
+                        "zora-card": "#2d1f18",
+                        "zora-input": "#342418",
+                        "background-light": "#f8f5f5", // Fallback
+                        "background-dark": "#221710", // Matching main background
+                    },
+                    fontFamily: {
+                        "display": ["Plus Jakarta Sans", "sans-serif"],
+                        "heading": ["Montserrat", "sans-serif"],
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.5rem", 
+                        "lg": "0.75rem", // 12px
+                        "xl": "1.5rem", 
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: "Plus Jakarta Sans", sans-serif;
+            background-color: #221710;
+        }
+        h1, h2, h3, h4, .font-heading {
+            font-family: "Montserrat", sans-serif;
+        }
+        /* Custom scrollbar hiding for cleaner look */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        /* Glassmorphism for header */
+        .glass-header {
+            background: rgba(34, 23, 16, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark text-white h-screen flex flex-col overflow-hidden">
+<!-- Sticky Header -->
+<header class="fixed top-0 left-0 right-0 z-50 glass-header border-b border-white/5">
+<div class="flex items-center justify-between px-4 py-4 pt-12 md:pt-4"> <!-- Added top padding for mobile status bar area -->
+<button class="flex items-center justify-center h-10 w-10 rounded-full hover:bg-white/5 transition-colors">
+<span class="material-symbols-outlined text-white">arrow_back</span>
+</button>
+<h1 class="text-lg font-bold font-heading text-white">Your Cart</h1>
+<button class="text-primary font-bold text-sm tracking-wide hover:opacity-80 transition-opacity">
+                Clear All
+            </button>
+</div>
+</header>
+<!-- Main Scrollable Content -->
+<main class="flex-1 overflow-y-auto no-scrollbar pt-28 pb-32 px-4 space-y-6">
+<!-- Vendor Section 1 -->
+<div class="space-y-3">
+<!-- Vendor Header -->
+<div class="flex items-center gap-3 pb-2 border-b border-white/5">
+<div class="h-10 w-10 rounded-full bg-cover bg-center border border-white/10" data-alt="Mama Africa Spices Logo" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuA85--1B6XksCflHSrEuDEWB-s3hVotTjsEuaMEOD9kl2VsDvI-bUG0lldUJ7eZL6D_yYyVgmRYDL92jjwtryyUYsx9jf2iyQkKMM4Bi0o1Y9YJ0NJT1zLXQfML4wYHPQc5JNj7IQ0x8oCNy99ELIIBlTX-Zk98lr8H5E4m3IGggeQg-99J8rQZCiNVn63pOf7EF-c7Z9bpZ1Hw9xWfkd2Y-8veWEq0y20NNOjMpzY3JZpAp4rUNNRvoXJiH8LMvn-qB7YZfKq4-lGk');"></div>
+<div class="flex-1">
+<h2 class="font-heading font-bold text-white text-base">Mama Africa Spices</h2>
+<div class="flex items-center gap-1 text-xs text-white/50 font-medium">
+<span class="material-symbols-outlined text-[14px]">local_shipping</span>
+                        Delivers in 2-3 days
+                    </div>
+</div>
+</div>
+<!-- Item 1 -->
+<div class="flex gap-4 items-start bg-zora-card/30 p-3 rounded-lg">
+<div class="h-[60px] w-[60px] shrink-0 rounded-lg bg-cover bg-center" data-alt="Pile of red berbere spice powder" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBQ-GgJC6QLP3FTS6c0fBzziU9Y35oyJNGkIg4fnZwMoMK_pu5FQ-LSHkpXsG3Mgtnw_TwsbvqimjLOBD7gd5HUPyTD34A-9jznkimiSpB3CJiSnUxtlUV6TOewP-loXZw79dwvVLYF5mpuB66sViCo6msmTVP4dLwZwOeeIqbnEjNFmGBn9ex33KNTM9KOcZ6Z6Gmk88p2YVKu-EuIcLMfomYUqrTVAc9Vgb6Xp2KOQbDmCKb0J1GCNgJ5DdHeM6e-hP_GVWJbMzlQ');"></div>
+<div class="flex-1 min-w-0 flex flex-col gap-1">
+<div class="flex justify-between items-start gap-2">
+<div>
+<p class="text-white font-medium text-sm leading-tight line-clamp-2">Ethiopian Berbere Spice</p>
+<p class="text-white/40 text-xs mt-0.5">500g Pouch</p>
+</div>
+<button class="text-white/30 hover:text-primary transition-colors shrink-0">
+<span class="material-symbols-outlined text-[20px]">delete</span>
+</button>
+</div>
+<div class="flex justify-between items-end mt-2">
+<div class="flex items-center bg-zora-input rounded-lg h-8">
+<button class="w-8 h-full flex items-center justify-center text-white hover:bg-white/10 rounded-l-lg transition-colors">
+<span class="material-symbols-outlined text-[16px]">remove</span>
+</button>
+<span class="text-sm font-medium w-6 text-center text-white">1</span>
+<button class="w-8 h-full flex items-center justify-center text-white hover:bg-white/10 rounded-r-lg transition-colors">
+<span class="material-symbols-outlined text-[16px]">add</span>
+</button>
+</div>
+<p class="font-bold text-zora-yellow text-base">$12.00</p>
+</div>
+</div>
+</div>
+<!-- Item 2 -->
+<div class="flex gap-4 items-start bg-zora-card/30 p-3 rounded-lg">
+<div class="h-[60px] w-[60px] shrink-0 rounded-lg bg-cover bg-center" data-alt="Dried green okra pieces" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBM0z0Al4eHUoW9A1GIaXBbVGkIEjNG_AisXH-_1Z638uipvq_NUgpdiwnIH98sVwl-adj6LWxT9fEAALsu8OtEXbENr8H-iAIFAcS-t2YPo5nlr8Uz2ld4h897h78HNQ-TAXpq1daElfnXG_HY07zEI06h7etI58H_C-6kvYQlo_lafYTbEXaoAGLXatttJhKayGFbRdmy2yLBiaIgAaC9pogotuTFgENJlMjTjT_aE9MyEZTrCaPz27zPac8i3ocQQxDfrUeaO57u');"></div>
+<div class="flex-1 min-w-0 flex flex-col gap-1">
+<div class="flex justify-between items-start gap-2">
+<div>
+<p class="text-white font-medium text-sm leading-tight line-clamp-2">Dried Okra Chips</p>
+<p class="text-white/40 text-xs mt-0.5">200g Pack</p>
+</div>
+<button class="text-white/30 hover:text-primary transition-colors shrink-0">
+<span class="material-symbols-outlined text-[20px]">delete</span>
+</button>
+</div>
+<div class="flex justify-between items-end mt-2">
+<div class="flex items-center bg-zora-input rounded-lg h-8">
+<button class="w-8 h-full flex items-center justify-center text-white hover:bg-white/10 rounded-l-lg transition-colors">
+<span class="material-symbols-outlined text-[16px]">remove</span>
+</button>
+<span class="text-sm font-medium w-6 text-center text-white">2</span>
+<button class="w-8 h-full flex items-center justify-center text-white hover:bg-white/10 rounded-r-lg transition-colors">
+<span class="material-symbols-outlined text-[16px]">add</span>
+</button>
+</div>
+<p class="font-bold text-zora-yellow text-base">$17.00</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Vendor Section 2 -->
+<div class="space-y-3 pt-2">
+<!-- Vendor Header -->
+<div class="flex items-center gap-3 pb-2 border-b border-white/5">
+<div class="h-10 w-10 rounded-full bg-cover bg-center border border-white/10" data-alt="Nairobi Textiles abstract pattern logo" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDpex5F8eiwSF4OJ4KNYixmujFVsJCZgvpMAV_CNA4QZ1r93Gpbe3_IDnoHkGGhx-DemfYGwwBaEE0utEkFOzegJ9dLHGwEwD8iDChUCJCVY9CrnFnYGNd_CdYlrnf_ug8Bwxo4wviTRh13y70rWI49oMvE7BSVqtH9DfRboeSDAAxMaf3bgehhj-zRdfnpH2tsxRrt83wCtyfgh_FlxvixkzRyncIImJRwzFAF0sbXiDDq8Rge6XD7L7NC3n8o5LDNmQg-jp4Qg-rG');"></div>
+<div class="flex-1">
+<h2 class="font-heading font-bold text-white text-base">Nairobi Textiles</h2>
+<div class="flex items-center gap-1 text-xs text-white/50 font-medium">
+<span class="material-symbols-outlined text-[14px]">local_shipping</span>
+                        Delivers in 5-7 days
+                    </div>
+</div>
+</div>
+<!-- Item 3 -->
+<div class="flex gap-4 items-start bg-zora-card/30 p-3 rounded-lg">
+<div class="h-[60px] w-[60px] shrink-0 rounded-lg bg-cover bg-center" data-alt="Colorful patterned african fabric cloth" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDTnbg5CBWKQBVjneFPlGNpNXTEpwOfbdGKww0RwyT97KV147gB9599FRdBsf9WDl_GPtUSkPTQewHBZ_Wvh4Uiy4vt59J2I1KpvfbcNibbOs46s1A3biCPTRvi9lcJGs4_avpFvsvZg82HftizvGamJqBmDXZQ7uOeGJkdHbC-ZIKApnHFRDIK8-MWpNL6075rtNkQOXdo8ch1AdYB1f6xS3EyvyHJdJE2K6jwvU2aabMLTp5G4jBFAkLuyVfgDlptnlHb0dM0z8sT');"></div>
+<div class="flex-1 min-w-0 flex flex-col gap-1">
+<div class="flex justify-between items-start gap-2">
+<div>
+<p class="text-white font-medium text-sm leading-tight line-clamp-2">Kente Cloth Pattern A</p>
+<p class="text-white/40 text-xs mt-0.5">3 Yards</p>
+</div>
+<button class="text-white/30 hover:text-primary transition-colors shrink-0">
+<span class="material-symbols-outlined text-[20px]">delete</span>
+</button>
+</div>
+<div class="flex justify-between items-end mt-2">
+<div class="flex items-center bg-zora-input rounded-lg h-8">
+<button class="w-8 h-full flex items-center justify-center text-white hover:bg-white/10 rounded-l-lg transition-colors">
+<span class="material-symbols-outlined text-[16px]">remove</span>
+</button>
+<span class="text-sm font-medium w-6 text-center text-white">1</span>
+<button class="w-8 h-full flex items-center justify-center text-white hover:bg-white/10 rounded-r-lg transition-colors">
+<span class="material-symbols-outlined text-[16px]">add</span>
+</button>
+</div>
+<p class="font-bold text-zora-yellow text-base">$45.00</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Promo Code -->
+<div class="bg-zora-card p-4 rounded-lg flex gap-3 mt-4">
+<div class="relative flex-1">
+<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+<span class="material-symbols-outlined text-white/40 text-lg">sell</span>
+</div>
+<input class="w-full bg-zora-input text-white text-sm rounded-lg border-none focus:ring-1 focus:ring-primary pl-10 py-2.5 placeholder-white/30" placeholder="Promo code" type="text"/>
+</div>
+<button class="border border-primary text-primary hover:bg-primary/10 font-bold text-sm px-5 rounded-lg transition-colors">
+                Apply
+            </button>
+</div>
+<!-- Order Summary -->
+<div class="bg-zora-card p-5 rounded-lg space-y-3 mb-8">
+<h3 class="font-heading font-bold text-white text-base mb-2">Order Summary</h3>
+<div class="flex justify-between items-center text-sm">
+<span class="text-white/60">Subtotal (3 items)</span>
+<span class="font-medium text-white">$74.00</span>
+</div>
+<div class="flex justify-between items-center text-sm">
+<span class="text-white/60">Delivery Fee</span>
+<span class="font-medium text-white">$12.50</span>
+</div>
+<div class="flex justify-between items-center text-sm">
+<span class="text-white/60 flex items-center gap-1">
+                    Service Fee 
+                    <span class="material-symbols-outlined text-[14px] text-white/40">info</span>
+</span>
+<span class="font-medium text-white">$2.50</span>
+</div>
+<div class="h-px bg-white/10 my-2"></div>
+<div class="flex justify-between items-center pt-1">
+<span class="font-heading font-bold text-lg text-white">Total</span>
+<span class="font-bold text-xl text-zora-yellow">$89.00</span>
+</div>
+</div>
+</main>
+<!-- Sticky Footer -->
+<footer class="fixed bottom-0 left-0 right-0 bg-zora-bg p-4 border-t border-white/5 backdrop-blur-md bg-opacity-95 z-50">
+<button class="w-full bg-primary hover:bg-red-700 text-white font-bold py-4 rounded-xl shadow-lg shadow-primary/20 flex items-center justify-between px-6 transition-all active:scale-[0.98]">
+<span class="text-base font-medium opacity-90">Proceed to Checkout</span>
+<span class="font-bold text-lg">$89.00</span>
+</button>
+<div class="flex justify-center mt-4 mb-2">
+<div class="w-1/3 h-1 bg-white/20 rounded-full"></div>
+</div>
+</footer>
+</body></html>

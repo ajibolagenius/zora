@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Dispute Status Tracker v2</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&amp;family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Theme Config -->
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#ffcc00", // Zora Yellow
+                        "zora-red": "#CC0000",
+                        "header-card": "#342418",
+                        "background-light": "#f8f8f5",
+                        "background-dark": "#181710", // Deep charcoal/black
+                        "surface-dark": "#231f0f",
+                    },
+                    fontFamily: {
+                        "display": ["Montserrat", "sans-serif"],
+                        "body": ["Plus Jakarta Sans", "sans-serif"],
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.5rem",
+                        "lg": "1rem",
+                        "xl": "1.5rem",
+                        "2xl": "2rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        /* Custom Utilities */
+        .font-display { font-family: 'Montserrat', sans-serif; }
+        .font-body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        
+        /* Timeline line styling */
+        .timeline-line {
+            position: absolute;
+            left: 15px;
+            top: 2rem;
+            bottom: -1rem;
+            width: 2px;
+            background-color: #3a3627;
+            z-index: 0;
+        }
+        .timeline-item:last-child .timeline-line {
+            display: none;
+        }
+        
+        /* Pulse animation for active step */
+        @keyframes subtle-pulse {
+            0% { box-shadow: 0 0 0 0 rgba(255, 204, 0, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(255, 204, 0, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(255, 204, 0, 0); }
+        }
+        .active-pulse {
+            animation: subtle-pulse 2s infinite;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark min-h-screen text-slate-900 dark:text-white font-body overflow-x-hidden selection:bg-primary selection:text-black">
+<div class="relative flex h-full min-h-screen w-full flex-col max-w-md mx-auto bg-background-light dark:bg-background-dark pb-6">
+<!-- Navigation Bar -->
+<div class="flex items-center p-4 justify-between sticky top-0 z-50 bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-sm">
+<button class="text-slate-900 dark:text-white flex size-10 shrink-0 items-center justify-center rounded-full hover:bg-black/5 dark:hover:bg-white/10 transition-colors">
+<span class="material-symbols-outlined">arrow_back_ios_new</span>
+</button>
+<h2 class="text-slate-900 dark:text-white text-lg font-display font-bold leading-tight tracking-tight flex-1 text-center pr-10">Dispute Status</h2>
+</div>
+<!-- Summary Header Card -->
+<div class="px-4 pt-2 pb-6">
+<div class="flex flex-col items-center justify-center rounded-2xl bg-header-card p-6 shadow-lg border border-white/5 relative overflow-hidden">
+<!-- Decorative background elements -->
+<div class="absolute top-0 right-0 -mr-8 -mt-8 w-32 h-32 bg-primary/5 rounded-full blur-3xl"></div>
+<div class="absolute bottom-0 left-0 -ml-8 -mb-8 w-32 h-32 bg-primary/5 rounded-full blur-3xl"></div>
+<h1 class="text-white text-3xl font-display font-bold leading-tight mb-2 tracking-tight">Dispute #88392</h1>
+<p class="text-gray-300 text-sm font-medium mb-5 tracking-wide uppercase opacity-80">Order #ZAM-9921</p>
+<div class="flex items-center justify-center rounded-full bg-primary px-5 py-2 shadow-md shadow-black/20">
+<span class="text-header-card text-sm font-bold font-display uppercase tracking-wider">Under Review</span>
+</div>
+</div>
+</div>
+<!-- Timeline Section -->
+<div class="px-5 mb-8">
+<h3 class="text-slate-900 dark:text-white text-sm font-display font-bold tracking-widest uppercase mb-6 opacity-70">Tracker</h3>
+<div class="flex flex-col gap-0 relative">
+<!-- Step 1: Completed -->
+<div class="timeline-item flex gap-4 pb-8 relative group">
+<div class="timeline-line"></div>
+<div class="flex flex-col items-center z-10">
+<div class="size-8 rounded-full bg-zora-red border-2 border-background-light dark:border-background-dark flex items-center justify-center shadow-lg shadow-zora-red/20">
+<span class="material-symbols-outlined text-white text-[18px] font-bold">check</span>
+</div>
+</div>
+<div class="flex flex-col pt-1">
+<h4 class="text-slate-900 dark:text-white font-display font-bold text-base leading-none mb-1">Dispute Raised</h4>
+<p class="text-slate-500 dark:text-gray-400 text-xs">Oct 24, 10:30 AM</p>
+</div>
+</div>
+<!-- Step 2: Completed -->
+<div class="timeline-item flex gap-4 pb-8 relative group">
+<div class="timeline-line"></div>
+<div class="flex flex-col items-center z-10">
+<div class="size-8 rounded-full bg-zora-red border-2 border-background-light dark:border-background-dark flex items-center justify-center shadow-lg shadow-zora-red/20">
+<span class="material-symbols-outlined text-white text-[18px] font-bold">check</span>
+</div>
+</div>
+<div class="flex flex-col pt-1">
+<h4 class="text-slate-900 dark:text-white font-display font-bold text-base leading-none mb-1">Evidence Received</h4>
+<p class="text-slate-500 dark:text-gray-400 text-xs">Oct 24, 10:45 AM</p>
+</div>
+</div>
+<!-- Step 3: Active -->
+<div class="timeline-item flex gap-4 pb-8 relative group">
+<div class="timeline-line bg-gray-700/30 dark:bg-gray-800"></div>
+<div class="flex flex-col items-center z-10">
+<div class="size-8 rounded-full bg-primary border-4 border-background-light dark:border-background-dark flex items-center justify-center active-pulse">
+<span class="material-symbols-outlined text-header-card text-[18px]">sync</span>
+</div>
+</div>
+<div class="flex flex-col pt-1">
+<h4 class="text-primary font-display font-bold text-base leading-none mb-1">Zora Team Review</h4>
+<p class="text-primary/80 text-xs">In Progress • Est. 24h</p>
+</div>
+</div>
+<!-- Step 4: Pending -->
+<div class="timeline-item flex gap-4 relative group opacity-50">
+<div class="flex flex-col items-center z-10">
+<div class="size-8 rounded-full bg-surface-dark border-2 border-gray-600 flex items-center justify-center">
+<div class="size-2 rounded-full bg-gray-500"></div>
+</div>
+</div>
+<div class="flex flex-col pt-1">
+<h4 class="text-slate-900 dark:text-white font-display font-bold text-base leading-none mb-1">Final Decision</h4>
+<p class="text-slate-500 dark:text-gray-400 text-xs">Pending</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Details Section -->
+<div class="px-4 mb-6">
+<h3 class="text-slate-900 dark:text-white text-sm font-display font-bold tracking-widest uppercase mb-4 opacity-70 px-1">Details</h3>
+<div class="bg-white dark:bg-surface-dark rounded-2xl p-5 shadow-sm border border-gray-200 dark:border-white/5">
+<!-- Issue Row -->
+<div class="flex justify-between items-start mb-4 pb-4 border-b border-gray-100 dark:border-white/5">
+<div class="flex items-center gap-3">
+<div class="p-2 bg-gray-100 dark:bg-white/5 rounded-lg text-slate-900 dark:text-white">
+<span class="material-symbols-outlined">report_problem</span>
+</div>
+<div>
+<p class="text-xs text-gray-500 dark:text-gray-400 font-medium uppercase tracking-wide">Issue Type</p>
+<p class="text-slate-900 dark:text-white font-semibold text-sm">Item Damaged</p>
+</div>
+</div>
+</div>
+<!-- Item Row -->
+<div class="flex justify-between items-start mb-6">
+<div class="flex items-center gap-3">
+<div class="p-2 bg-gray-100 dark:bg-white/5 rounded-lg text-slate-900 dark:text-white">
+<span class="material-symbols-outlined">shopping_bag</span>
+</div>
+<div>
+<p class="text-xs text-gray-500 dark:text-gray-400 font-medium uppercase tracking-wide">Product</p>
+<p class="text-slate-900 dark:text-white font-semibold text-sm">Spicy Plantain Chips x2</p>
+</div>
+</div>
+</div>
+<!-- Evidence Gallery -->
+<div class="space-y-3">
+<p class="text-xs text-gray-500 dark:text-gray-400 font-medium uppercase tracking-wide">Submitted Evidence</p>
+<div class="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
+<div class="shrink-0 size-20 rounded-xl overflow-hidden relative border border-gray-200 dark:border-white/10 group">
+<img alt="Damaged plantain chips packaging close up" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" data-alt="Close up of damaged product packaging" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCc_M_Sronrm66epPwWgw0KTapyUwkSC5pbnz5yjXa2MUk3Nep2RiyuGgXoyr_VUANPxoDGZvH8RFawopACdYmtbfwyp-ujgVkIkIC2SVJudwe1-3XxXlejlDxaoA4ZnJsXV09dvXJIf3wllXAuEiyvirBDahHz8i88p9uDRGS3ojpC9iBvEkFDAxgB64tGW48ltroLuPGQK0IVgfqIAdLpgxmYzEnVShmW0MFq1ZLHZ_r78wnDBmSy-oVhE2EWgmINDHsewCyLFReX"/>
+</div>
+<div class="shrink-0 size-20 rounded-xl overflow-hidden relative border border-gray-200 dark:border-white/10 group">
+<img alt="Shipping box showing dented corner" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" data-alt="Dented shipping box showing external damage" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAU5EoWp5hCeqBMwPAGPEdHxdQPyBLx6hqvGW08jpanMbucc4zyXUnbGOYPjF3ZneyHZY-pudincc1L-OT5Tlb8jVLYDM8qkF-_7iZF4oSRyLBMQcolt5aY5cyHLHr05Uc6dk-ORpBnx6Y1On3LL3F6VmI8G6EJov-mSUr-BAfc7ZEtM0GWbGZx_XZrtRF20GvKUFAYzeGbvKi-FlbU7-OP6SEH-N5Rnp6O0DwTyI1OCfSR89THbEmLgo45cxkUBd3GEVhgkDvlg8uq"/>
+</div>
+<!-- Add Photo Button Placeholder -->
+<div class="shrink-0 size-20 rounded-xl border-2 border-dashed border-gray-300 dark:border-white/20 flex flex-col items-center justify-center gap-1 cursor-pointer hover:bg-gray-50 dark:hover:bg-white/5 transition-colors">
+<span class="material-symbols-outlined text-gray-400 dark:text-gray-500 text-xl">add_a_photo</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Resolution Footer Card -->
+<div class="px-4 mt-auto">
+<div class="bg-white dark:bg-surface-dark rounded-2xl p-5 shadow-lg border-l-4 border-gray-300 dark:border-gray-600 flex gap-4 items-center">
+<div class="shrink-0 rounded-full bg-gray-100 dark:bg-white/10 p-3 flex items-center justify-center">
+<span class="material-symbols-outlined text-gray-500 dark:text-gray-400">hourglass_top</span>
+</div>
+<div class="flex-1">
+<h4 class="text-slate-900 dark:text-white font-display font-bold text-sm mb-1">Pending Decision</h4>
+<p class="text-gray-500 dark:text-gray-400 text-xs leading-relaxed">We're reviewing your case. Expect an update within 24 hours.</p>
+</div>
+</div>
+<div class="mt-4 flex justify-center">
+<button class="text-xs font-semibold text-gray-500 dark:text-gray-400 hover:text-primary transition-colors flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">help</span>
+                    Need help with this dispute?
+                </button>
+</div>
+</div>
+</div>
+</body></html>

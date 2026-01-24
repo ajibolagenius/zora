@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Help Center &amp; FAQs v2 - Zora African Market</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#cc0000",
+                        "background-light": "#f8f5f5",
+                        "background-dark": "#221710", // Updated to match request
+                        "surface-dark": "#342418", // Updated for cards/inputs
+                    },
+                    fontFamily: {
+                        "display": ["Plus Jakarta Sans", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.5rem",
+                        "lg": "1rem",
+                        "xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        /* Custom scrollbar hiding for clean UI */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display text-white overflow-x-hidden min-h-screen flex flex-col relative">
+<!-- Sticky Header Area -->
+<header class="sticky top-0 z-50 bg-[#221710]/95 backdrop-blur-sm border-b border-[#3a2727]">
+<!-- Top Bar -->
+<div class="flex items-center p-4 pb-2 justify-between">
+<button class="flex size-10 shrink-0 items-center justify-center rounded-full hover:bg-surface-dark transition-colors">
+<span class="material-symbols-outlined text-white" style="font-size: 24px;">arrow_back</span>
+</button>
+<h2 class="text-white text-lg font-bold leading-tight tracking-tight flex-1 text-center pr-10">Help Center</h2>
+</div>
+<!-- Search Bar -->
+<div class="px-4 pb-4 pt-1">
+<label class="flex flex-col h-12 w-full shadow-lg shadow-black/20">
+<div class="flex w-full flex-1 items-stretch rounded-xl h-full bg-surface-dark overflow-hidden group focus-within:ring-2 focus-within:ring-primary/50 transition-all">
+<div class="text-[#bc9a9a] flex items-center justify-center pl-4 pr-2">
+<span class="material-symbols-outlined" style="font-size: 24px;">search</span>
+</div>
+<input class="flex w-full min-w-0 flex-1 resize-none bg-transparent border-none text-white focus:outline-0 focus:ring-0 placeholder:text-[#bc9a9a] text-base font-normal leading-normal h-full" placeholder="How can we help?" value=""/>
+</div>
+</label>
+</div>
+</header>
+<!-- Main Content Scroll Area -->
+<main class="flex-1 flex flex-col gap-6 pb-28 pt-6">
+<!-- Quick Actions -->
+<section class="px-4">
+<h3 class="text-white text-lg font-bold leading-tight pb-4">Quick Actions</h3>
+<div class="@container">
+<div class="grid grid-cols-4 gap-3">
+<!-- Action 1: Track -->
+<button class="flex flex-col items-center gap-2 group">
+<div class="rounded-full bg-primary p-3.5 shadow-lg shadow-primary/20 transition-transform active:scale-95 group-hover:bg-red-700">
+<span class="material-symbols-outlined text-white block" style="font-size: 24px;">local_shipping</span>
+</div>
+<p class="text-white/90 text-xs font-medium text-center leading-tight">Track Order</p>
+</button>
+<!-- Action 2: Chat -->
+<button class="flex flex-col items-center gap-2 group">
+<div class="rounded-full bg-primary p-3.5 shadow-lg shadow-primary/20 transition-transform active:scale-95 group-hover:bg-red-700">
+<span class="material-symbols-outlined text-white block" style="font-size: 24px;">chat_bubble</span>
+</div>
+<p class="text-white/90 text-xs font-medium text-center leading-tight">Live Chat</p>
+</button>
+<!-- Action 3: Call -->
+<button class="flex flex-col items-center gap-2 group">
+<div class="rounded-full bg-primary p-3.5 shadow-lg shadow-primary/20 transition-transform active:scale-95 group-hover:bg-red-700">
+<span class="material-symbols-outlined text-white block" style="font-size: 24px;">call</span>
+</div>
+<p class="text-white/90 text-xs font-medium text-center leading-tight">Call Us</p>
+</button>
+<!-- Action 4: Email -->
+<button class="flex flex-col items-center gap-2 group">
+<div class="rounded-full bg-primary p-3.5 shadow-lg shadow-primary/20 transition-transform active:scale-95 group-hover:bg-red-700">
+<span class="material-symbols-outlined text-white block" style="font-size: 24px;">mail</span>
+</div>
+<p class="text-white/90 text-xs font-medium text-center leading-tight">Email</p>
+</button>
+</div>
+</div>
+</section>
+<!-- Browse by Topic (Accordion Style) -->
+<section class="px-4">
+<h3 class="text-white text-lg font-bold leading-tight pb-4">Browse by Topic</h3>
+<div class="flex flex-col gap-3">
+<!-- Topic Item 1 -->
+<div class="bg-surface-dark rounded-xl overflow-hidden">
+<button class="w-full flex items-center justify-between p-4 text-left group">
+<div class="flex items-center gap-3">
+<div class="bg-[#463222] p-2 rounded-lg text-[#bc9a9a]">
+<span class="material-symbols-outlined" style="font-size: 20px;">package_2</span>
+</div>
+<span class="text-white font-medium">Orders &amp; Shipping</span>
+</div>
+<span class="material-symbols-outlined text-primary group-hover:translate-x-1 transition-transform" style="font-size: 24px;">chevron_right</span>
+</button>
+</div>
+<!-- Topic Item 2 -->
+<div class="bg-surface-dark rounded-xl overflow-hidden">
+<button class="w-full flex items-center justify-between p-4 text-left group">
+<div class="flex items-center gap-3">
+<div class="bg-[#463222] p-2 rounded-lg text-[#bc9a9a]">
+<span class="material-symbols-outlined" style="font-size: 20px;">payments</span>
+</div>
+<span class="text-white font-medium">Payments &amp; Refunds</span>
+</div>
+<span class="material-symbols-outlined text-primary group-hover:translate-x-1 transition-transform" style="font-size: 24px;">chevron_right</span>
+</button>
+</div>
+<!-- Topic Item 3 -->
+<div class="bg-surface-dark rounded-xl overflow-hidden">
+<button class="w-full flex items-center justify-between p-4 text-left group">
+<div class="flex items-center gap-3">
+<div class="bg-[#463222] p-2 rounded-lg text-[#bc9a9a]">
+<span class="material-symbols-outlined" style="font-size: 20px;">person</span>
+</div>
+<span class="text-white font-medium">Account Settings</span>
+</div>
+<span class="material-symbols-outlined text-primary group-hover:translate-x-1 transition-transform" style="font-size: 24px;">chevron_right</span>
+</button>
+</div>
+<!-- Topic Item 4 -->
+<div class="bg-surface-dark rounded-xl overflow-hidden">
+<button class="w-full flex items-center justify-between p-4 text-left group">
+<div class="flex items-center gap-3">
+<div class="bg-[#463222] p-2 rounded-lg text-[#bc9a9a]">
+<span class="material-symbols-outlined" style="font-size: 20px;">card_membership</span>
+</div>
+<span class="text-white font-medium">Zora Rewards</span>
+</div>
+<span class="material-symbols-outlined text-primary group-hover:translate-x-1 transition-transform" style="font-size: 24px;">chevron_right</span>
+</button>
+</div>
+</div>
+</section>
+<!-- Popular Questions -->
+<section class="px-4">
+<h3 class="text-white text-lg font-bold leading-tight pb-4">Popular Questions</h3>
+<div class="flex flex-col gap-0 divide-y divide-[#463222] bg-surface-dark rounded-xl px-4">
+<button class="py-4 w-full text-left flex justify-between items-center group">
+<span class="text-sm font-medium text-white/90">Where is my order?</span>
+<span class="material-symbols-outlined text-[#bc9a9a] group-hover:text-primary transition-colors" style="font-size: 20px;">arrow_forward</span>
+</button>
+<button class="py-4 w-full text-left flex justify-between items-center group">
+<span class="text-sm font-medium text-white/90">How do I reset my password?</span>
+<span class="material-symbols-outlined text-[#bc9a9a] group-hover:text-primary transition-colors" style="font-size: 20px;">arrow_forward</span>
+</button>
+<button class="py-4 w-full text-left flex justify-between items-center group">
+<span class="text-sm font-medium text-white/90">Do you ship internationally?</span>
+<span class="material-symbols-outlined text-[#bc9a9a] group-hover:text-primary transition-colors" style="font-size: 20px;">arrow_forward</span>
+</button>
+</div>
+</section>
+</main>
+<!-- Bottom Contact Card -->
+<div class="fixed bottom-0 left-0 w-full p-4 bg-gradient-to-t from-[#221710] via-[#221710] to-transparent pt-8">
+<div class="bg-surface-dark rounded-xl p-4 flex items-center justify-between shadow-xl border border-[#463222]">
+<div class="flex flex-col gap-1">
+<p class="text-white font-bold text-sm">Still need help?</p>
+<p class="text-[#bc9a9a] text-xs">Our team is available 24/7.</p>
+</div>
+<button class="bg-primary text-white font-semibold text-sm px-6 py-2.5 rounded-lg shadow-lg shadow-primary/20 active:scale-95 transition-all">
+                Contact Us
+            </button>
+</div>
+</div>
+</body></html>

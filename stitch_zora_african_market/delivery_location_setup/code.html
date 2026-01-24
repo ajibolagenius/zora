@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Zora African Market - Delivery Location</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#CC0000", // Zora Red
+                        "background-dark": "#221710", // Main background
+                        "surface-dark": "#342418", // Inputs and Cards
+                        "zora-yellow": "#FFCC00",
+                        "success-green": "#22C55E",
+                        "text-secondary": "#AFAFAF",
+                    },
+                    fontFamily: {
+                        sans: ["Inter", "sans-serif"],
+                        montserrat: ["Montserrat", "sans-serif"],
+                    },
+                    borderRadius: {
+                        DEFAULT: "12px",
+                        "xl": "16px",
+                    },
+                },
+            },
+        };
+    </script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Montserrat:wght@600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet"/>
+<style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #221710;}
+        .map-pattern {
+            background-color: #2A201A;
+            background-image: 
+                radial-gradient(#3d3028 2px, transparent 2.5px),
+                radial-gradient(#3d3028 2px, transparent 2.5px);
+            background-size: 20px 20px;
+            background-position: 0 0, 10px 10px;
+        }
+    </style>
+<style>
+        body {
+            min-height: max(884px, 100dvh);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-dark min-h-screen text-white antialiased transition-colors duration-200">
+<div class="max-w-md mx-auto min-h-screen flex flex-col relative bg-background-dark">
+<div class="px-5 pt-12 pb-4 flex items-center justify-between">
+<button class="w-10 h-10 rounded-full bg-surface-dark flex items-center justify-center text-white hover:bg-surface-dark/80 transition border border-white/5">
+<span class="material-icons-round text-xl">arrow_back</span>
+</button>
+<div class="flex flex-col items-end">
+<span class="text-xs font-medium text-text-secondary mb-1">Step 3 of 3</span>
+<div class="w-24 h-1.5 bg-surface-dark rounded-full overflow-hidden">
+<div class="h-full bg-primary w-full rounded-full"></div>
+</div>
+</div>
+</div>
+<div class="flex-1 px-5 flex flex-col">
+<div class="mb-8 mt-2">
+<h1 class="text-3xl font-montserrat font-bold mb-3 tracking-tight text-white">Where Should We Deliver?</h1>
+<p class="text-text-secondary leading-relaxed">
+                    To show you the freshest ingredients and nearest vendors, we need to know your location.
+                </p>
+</div>
+<div class="space-y-4 mb-8">
+<div class="relative">
+<div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+<span class="material-icons-round text-gray-500">search</span>
+</div>
+<input class="w-full pl-11 pr-4 py-4 rounded-[8px] border border-white/10 bg-surface-dark text-white placeholder-gray-500 focus:ring-2 focus:ring-primary focus:border-primary shadow-sm" placeholder="Enter postcode (e.g., SW9 8HQ)" type="text"/>
+</div>
+<button class="w-full py-4 rounded-[8px] border border-primary text-primary font-semibold flex items-center justify-center space-x-2 hover:bg-primary/10 transition-colors">
+<span class="material-icons-round">my_location</span>
+<span>Use Current Location</span>
+</button>
+</div>
+<div class="relative w-full h-56 rounded-2xl overflow-hidden mb-8 shadow-inner border border-white/5">
+<div class="absolute inset-0 map-pattern"></div>
+<div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-40 h-40">
+<svg class="w-full h-full text-white/5 fill-current" viewBox="0 0 100 100">
+<path d="M45,85 C40,80 35,75 35,65 C35,60 30,55 35,45 C38,40 45,35 45,30 C45,20 50,15 55,10 C60,15 65,20 60,30 C58,35 60,40 65,45 C70,50 65,60 60,70 C55,80 50,85 45,85 Z"></path>
+</svg>
+</div>
+<div class="absolute top-1/3 left-1/2 transform -translate-x-1/2 w-32 h-32 rounded-full border border-primary/30 bg-primary/10 flex items-center justify-center animate-pulse">
+<div class="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center">
+<div class="w-3 h-3 bg-primary rounded-full shadow-[0_0_15px_#CC0000]"></div>
+</div>
+</div>
+<div class="absolute top-4 right-4 bg-surface-dark/95 backdrop-blur-sm px-3 py-1.5 rounded-lg shadow-lg border border-white/10 flex items-center space-x-2">
+<div class="w-2 h-2 rounded-full bg-success-green"></div>
+<span class="text-xs font-semibold text-white">Delivery Active</span>
+</div>
+</div>
+<div class="flex-1">
+<h3 class="text-sm font-semibold uppercase tracking-wider text-text-secondary mb-4">Popular Near Brixton</h3>
+<div class="flex space-x-4 overflow-x-auto pb-4 -mx-5 px-5 scrollbar-hide">
+<div class="flex-shrink-0 w-64 bg-surface-dark rounded-[12px] p-3 flex space-x-3 items-center border border-white/5 shadow-sm">
+<div class="w-12 h-12 rounded-lg bg-gray-800 overflow-hidden relative">
+<img alt="Market stall with fresh produce" class="object-cover w-full h-full opacity-80" src="https://lh3.googleusercontent.com/aida-public/AB6AXuALpDkGnMO0wjyuXk237CwQMOwxlNWSUzdP_CuUj3GUGpRG727l04F3duO2lifM4ODnI8SeMMlM5u0qOmStfPHblz9oynRfI90eBiKIJZ1oqflHHcG9K1a7oj_syyZfjQPk_pLXO9RA2H0IAXXBMQKo2kN71OFTbcDD6kBpgSzJg_nxLWPeXK0AOka3n7XLPHk-Y1xUGwntlJ7bKwjX3l00Z4OH9jo5ehK2jY7q-cyjoAHrHjaWiOw2u975MP9Mgk2q2801OJl9OCEJ"/>
+</div>
+<div>
+<h4 class="font-semibold text-sm text-white">Mama Africa's</h4>
+<div class="flex items-center space-x-1 text-xs text-text-secondary mt-0.5">
+<span class="material-icons-round text-[10px] text-zora-yellow">star</span>
+<span class="text-white">4.8</span>
+<span>•</span>
+<span>1.2 mi</span>
+</div>
+</div>
+</div>
+<div class="flex-shrink-0 w-64 bg-surface-dark rounded-[12px] p-3 flex space-x-3 items-center border border-white/5 shadow-sm">
+<div class="w-12 h-12 rounded-lg bg-gray-800 overflow-hidden relative">
+<img alt="Jars of spices on a shelf" class="object-cover w-full h-full opacity-80" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBfibA4cPpplxVeBtE5SXOUgfDuxjWyokg-z801zNezhbi5K9LAw9IShKkPKMuGPohhz1Q9-2bdSgXEdr9LRn_J4Z2WuYq4CfgE_NpW0HZvU3J3NkHeugXlr0W1MuwALPg6SYr2TEHR7SrPP5ZNzGccwMO-DkSNHxGc_wE_z0BlOIBytDkGvpP0IK3GGBKTvvp7T5t9x88tg_FvjPS63ROM36bSy7TgcwuU_GoQjlb80lR8ukTJgA6hmstoZHXQWj5U2-mTx_8BVSj8"/>
+</div>
+<div>
+<h4 class="font-semibold text-sm text-white">Lagos Grocery</h4>
+<div class="flex items-center space-x-1 text-xs text-text-secondary mt-0.5">
+<span class="material-icons-round text-[10px] text-zora-yellow">star</span>
+<span class="text-white">4.6</span>
+<span>•</span>
+<span>0.8 mi</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="p-5 bg-background-dark border-t border-white/5 mt-auto sticky bottom-0 z-10">
+<button class="w-full bg-primary text-white font-montserrat font-semibold text-lg py-4 rounded-xl shadow-lg shadow-primary/20 flex items-center justify-center space-x-2 active:scale-[0.98] transition-transform">
+<span>Start Shopping</span>
+<span class="material-icons-round">arrow_forward</span>
+</button>
+</div>
+</div>
+
+</body></html>
