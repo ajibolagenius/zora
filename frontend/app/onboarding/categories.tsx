@@ -22,7 +22,7 @@ import {
 } from 'phosphor-react-native';
 import { Colors } from '../../constants/colors';
 import { Spacing, BorderRadius } from '../../constants/spacing';
-import { FontSize, FontWeight } from '../../constants/typography';
+import { FontSize, FontFamily } from '../../constants/typography';
 
 const CATEGORIES = [
   {
@@ -199,6 +199,7 @@ const styles = StyleSheet.create({
     borderRadius: BorderRadius.full,
   },
   progressText: {
+    fontFamily: FontFamily.body,
     color: Colors.textMuted,
     fontSize: FontSize.caption,
     marginTop: Spacing.xs,
@@ -208,12 +209,13 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.lg,
   },
   title: {
+    fontFamily: FontFamily.display,
     fontSize: FontSize.h2,
-    fontWeight: FontWeight.bold,
     color: Colors.textPrimary,
     marginBottom: Spacing.sm,
   },
   subtitle: {
+    fontFamily: FontFamily.body,
     fontSize: FontSize.body,
     color: Colors.textMuted,
     lineHeight: 24,
@@ -265,9 +267,9 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.md,
   },
   categoryName: {
+    fontFamily: FontFamily.bodySemiBold,
     color: Colors.textPrimary,
     fontSize: FontSize.small,
-    fontWeight: FontWeight.semiBold,
     textAlign: 'center',
   },
   footer: {
@@ -277,7 +279,7 @@ const styles = StyleSheet.create({
   continueButton: {
     flexDirection: 'row',
     backgroundColor: Colors.primary,
-    borderRadius: BorderRadius.md,
+    borderRadius: BorderRadius.lg,
     height: 56,
     justifyContent: 'center',
     alignItems: 'center',
@@ -287,8 +289,8 @@ const styles = StyleSheet.create({
     opacity: 0.5,
   },
   continueButtonText: {
+    fontFamily: FontFamily.bodyBold,
     color: Colors.textPrimary,
     fontSize: FontSize.body,
-    fontWeight: FontWeight.bold,
   },
 });

@@ -21,7 +21,7 @@ import {
 } from 'phosphor-react-native';
 import { Colors } from '../../constants/colors';
 import { Spacing, BorderRadius } from '../../constants/spacing';
-import { FontSize, FontWeight } from '../../constants/typography';
+import { FontSize, FontFamily } from '../../constants/typography';
 import { useAuthStore } from '../../stores/authStore';
 
 const SAVED_LOCATIONS = [
@@ -232,6 +232,7 @@ const styles = StyleSheet.create({
     borderRadius: BorderRadius.full,
   },
   progressText: {
+    fontFamily: FontFamily.body,
     color: Colors.textMuted,
     fontSize: FontSize.caption,
     marginTop: Spacing.xs,
@@ -241,12 +242,13 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.lg,
   },
   title: {
+    fontFamily: FontFamily.display,
     fontSize: FontSize.h2,
-    fontWeight: FontWeight.bold,
     color: Colors.textPrimary,
     marginBottom: Spacing.sm,
   },
   subtitle: {
+    fontFamily: FontFamily.body,
     fontSize: FontSize.body,
     color: Colors.textMuted,
     lineHeight: 24,
@@ -259,13 +261,14 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: Colors.cardDark,
-    borderRadius: BorderRadius.md,
+    borderRadius: BorderRadius.lg,
     paddingHorizontal: Spacing.md,
     height: 52,
     gap: Spacing.sm,
   },
   searchInput: {
     flex: 1,
+    fontFamily: FontFamily.body,
     color: Colors.textPrimary,
     fontSize: FontSize.body,
   },
@@ -298,12 +301,13 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   locationTitle: {
+    fontFamily: FontFamily.bodySemiBold,
     color: Colors.textPrimary,
     fontSize: FontSize.body,
-    fontWeight: FontWeight.semiBold,
     marginBottom: 2,
   },
   locationSubtitle: {
+    fontFamily: FontFamily.body,
     color: Colors.textMuted,
     fontSize: FontSize.small,
   },
@@ -328,6 +332,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.borderDark,
   },
   dividerText: {
+    fontFamily: FontFamily.body,
     color: Colors.textMuted,
     fontSize: FontSize.small,
   },
@@ -358,6 +363,7 @@ const styles = StyleSheet.create({
     marginTop: Spacing.md,
   },
   mapPlaceholderText: {
+    fontFamily: FontFamily.body,
     color: Colors.textMuted,
     fontSize: FontSize.small,
     marginTop: Spacing.md,
@@ -368,7 +374,7 @@ const styles = StyleSheet.create({
   },
   completeButton: {
     backgroundColor: Colors.primary,
-    borderRadius: BorderRadius.md,
+    borderRadius: BorderRadius.lg,
     height: 56,
     justifyContent: 'center',
     alignItems: 'center',
@@ -377,8 +383,8 @@ const styles = StyleSheet.create({
     opacity: 0.5,
   },
   completeButtonText: {
+    fontFamily: FontFamily.bodyBold,
     color: Colors.textPrimary,
     fontSize: FontSize.body,
-    fontWeight: FontWeight.bold,
   },
 });

@@ -29,7 +29,7 @@ import {
 } from 'phosphor-react-native';
 import { Colors } from '../../constants/colors';
 import { Spacing, BorderRadius } from '../../constants/spacing';
-import { FontSize, FontWeight } from '../../constants/typography';
+import { FontSize, FontFamily } from '../../constants/typography';
 import { useAuthStore } from '../../stores/authStore';
 
 type AuthMode = 'signin' | 'signup';
@@ -88,17 +88,13 @@ export default function LoginScreen() {
   };
 
   const handleAppleLogin = async () => {
-    // Apple Sign In would be implemented here
     console.log('Apple login');
   };
 
   const handleEmailAuth = () => {
-    // Email authentication would be implemented here
     if (mode === 'signin') {
-      // Sign in logic
       router.replace('/onboarding/heritage');
     } else {
-      // Sign up logic
       router.replace('/onboarding/heritage');
     }
   };
@@ -340,9 +336,9 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.primary,
   },
   tabText: {
+    fontFamily: FontFamily.bodySemiBold,
     color: Colors.textMuted,
     fontSize: FontSize.body,
-    fontWeight: FontWeight.semiBold,
   },
   tabTextActive: {
     color: Colors.textPrimary,
@@ -352,12 +348,13 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.xl,
   },
   welcomeTitle: {
+    fontFamily: FontFamily.display,
     fontSize: FontSize.h1,
-    fontWeight: FontWeight.bold,
     color: Colors.textPrimary,
     marginBottom: Spacing.sm,
   },
   welcomeSubtitle: {
+    fontFamily: FontFamily.body,
     fontSize: FontSize.body,
     color: Colors.textMuted,
     lineHeight: 24,
@@ -376,6 +373,7 @@ const styles = StyleSheet.create({
   },
   input: {
     flex: 1,
+    fontFamily: FontFamily.body,
     color: Colors.textPrimary,
     fontSize: FontSize.body,
   },
@@ -405,26 +403,27 @@ const styles = StyleSheet.create({
     borderColor: Colors.primary,
   },
   checkboxLabel: {
+    fontFamily: FontFamily.body,
     color: Colors.textMuted,
     fontSize: FontSize.small,
   },
   forgotPassword: {
+    fontFamily: FontFamily.bodySemiBold,
     color: Colors.primary,
     fontSize: FontSize.small,
-    fontWeight: FontWeight.semiBold,
   },
   primaryButton: {
     backgroundColor: Colors.primary,
-    borderRadius: BorderRadius.md,
+    borderRadius: BorderRadius.lg,
     height: 56,
     justifyContent: 'center',
     alignItems: 'center',
     marginTop: Spacing.xl,
   },
   primaryButtonText: {
+    fontFamily: FontFamily.bodyBold,
     color: Colors.textPrimary,
     fontSize: FontSize.body,
-    fontWeight: FontWeight.bold,
   },
   divider: {
     flexDirection: 'row',
@@ -437,6 +436,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.borderDark,
   },
   dividerText: {
+    fontFamily: FontFamily.body,
     color: Colors.textMuted,
     fontSize: FontSize.small,
     marginHorizontal: Spacing.md,
@@ -451,16 +451,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: Colors.textPrimary,
-    borderRadius: BorderRadius.md,
+    borderRadius: BorderRadius.lg,
     height: 56,
     gap: Spacing.sm,
   },
   socialButtonText: {
+    fontFamily: FontFamily.bodySemiBold,
     color: Colors.backgroundDark,
     fontSize: FontSize.body,
-    fontWeight: FontWeight.semiBold,
   },
   terms: {
+    fontFamily: FontFamily.body,
     fontSize: FontSize.caption,
     color: Colors.textMuted,
     textAlign: 'center',
@@ -476,8 +477,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   skipButtonText: {
+    fontFamily: FontFamily.bodyMedium,
     color: Colors.textMuted,
     fontSize: FontSize.body,
-    fontWeight: FontWeight.medium,
   },
 });
