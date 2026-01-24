@@ -483,8 +483,8 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(45, 212, 191, 0.2)',
   },
   badgeText: {
+    fontFamily: FontFamily.bodySemiBold,
     fontSize: FontSize.caption,
-    fontWeight: FontWeight.semiBold,
     textTransform: 'uppercase',
     letterSpacing: LetterSpacing.wide,
   },
