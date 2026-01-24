@@ -432,8 +432,8 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.lg,
   },
   productTitle: {
+    fontFamily: FontFamily.display,
     fontSize: FontSize.h2,
-    fontWeight: FontWeight.bold,
     color: Colors.textPrimary,
     lineHeight: 32,
     marginBottom: Spacing.sm,
@@ -444,11 +444,12 @@ const styles = StyleSheet.create({
     gap: Spacing.md,
   },
   priceMain: {
+    fontFamily: FontFamily.display,
     fontSize: 30,
-    fontWeight: FontWeight.bold,
     color: Colors.secondary,
   },
   priceUnit: {
+    fontFamily: FontFamily.body,
     fontSize: FontSize.bodyLarge,
     color: Colors.textMuted,
     marginBottom: 4,
