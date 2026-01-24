@@ -179,9 +179,9 @@ const styles = StyleSheet.create({
     borderRadius: BorderRadius.sm,
   },
   statusText: {
+    fontFamily: FontFamily.bodySemiBold,
     color: Colors.textPrimary,
     fontSize: FontSize.caption,
-    fontWeight: FontWeight.semiBold,
   },
   content: {
     padding: Spacing.base,
