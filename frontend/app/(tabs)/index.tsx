@@ -331,6 +331,7 @@ const styles = StyleSheet.create({
   },
   searchPlaceholder: {
     flex: 1,
+    fontFamily: FontFamily.body,
     color: Colors.textMuted,
     fontSize: FontSize.body,
   },
