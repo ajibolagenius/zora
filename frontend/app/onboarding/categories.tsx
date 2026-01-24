@@ -51,6 +51,8 @@ const CATEGORIES = [
 export default function CategoriesScreen() {
   const router = useRouter();
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const { width } = useWindowDimensions();
+  const cardWidth = (width - Spacing.base * 2 - Spacing.md) / 2;
 
   const toggleCategory = (categoryId: string) => {
     setSelectedCategories((prev) =>
@@ -98,6 +100,37 @@ export default function CategoriesScreen() {
           {CATEGORIES.map((category) => {
             const isSelected = selectedCategories.includes(category.id);
             return (
+              <TouchableOpacity
+                key={category.id}
+                style={[
+                  styles.categoryCard,
+                  { width: cardWidth, height: cardWidth },
+                  isSelected && styles.categoryCardSelected,
+                ]}
+                onPress={() => toggleCategory(category.id)}
+                activeOpacity={0.8}
+              >
+                {/* Selection Indicator */}
+                {isSelected && (
+                  <View style={styles.checkmark}>
+                    <MaterialCommunityIcons name="check" size={14} color={Colors.textPrimary} />
+                  </View>
+                )}
+                
+                {/* Icon */}
+                <View style={styles.iconContainer}>
+                  <MaterialCommunityIcons
+                    name={category.icon as any}
+                    size={32}
+                    color={Colors.primary}
+                  />
+                </View>
+                
+                {/* Name */}
+                <Text style={styles.categoryName}>{category.name}</Text>
+              </TouchableOpacity>
+            );
+          })}
               <TouchableOpacity
                 key={category.id}
                 style={[
