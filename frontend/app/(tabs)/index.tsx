@@ -24,9 +24,24 @@ import { Colors } from '../../constants/colors';
 import { Spacing, BorderRadius } from '../../constants/spacing';
 import { FontSize, FontWeight } from '../../constants/typography';
 import { HeroBanner, RegionCard, VendorCard, ProductCard } from '../../components/ui';
-import { homeService } from '../../services/dataService';
-import { HomeData, Product, Vendor, Region } from '../../types';
+import { 
+  vendorService, 
+  productService, 
+  regionService, 
+  bannerService,
+  type Vendor,
+  type Product,
+  type Region,
+  type Banner,
+} from '../../services/mockDataService';
 import { useCartStore } from '../../stores/cartStore';
+
+interface HomeData {
+  banners: Banner[];
+  regions: Region[];
+  featured_vendors: Vendor[];
+  popular_products: Product[];
+}
 
 const PRODUCT_GAP = 8;
 
