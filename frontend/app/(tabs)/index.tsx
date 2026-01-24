@@ -7,18 +7,23 @@ import {
   TouchableOpacity,
   RefreshControl,
   ActivityIndicator,
-  FlatList,
   Dimensions,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import {
+  MapPin,
+  CaretDown,
+  Bell,
+  MagnifyingGlass,
+  Sliders,
+} from 'phosphor-react-native';
 import { Colors } from '../../constants/colors';
 import { Spacing, BorderRadius } from '../../constants/spacing';
 import { FontSize, FontWeight } from '../../constants/typography';
-import { SearchBar, HeroBanner, RegionCard, VendorCard, ProductCard } from '../../components/ui';
+import { HeroBanner, RegionCard, VendorCard, ProductCard } from '../../components/ui';
 import { homeService } from '../../services/dataService';
-import { HomeData, Product, Vendor, Region, Banner } from '../../types';
+import { HomeData, Product, Vendor, Region } from '../../types';
 import { useCartStore } from '../../stores/cartStore';
 
 const { width } = Dimensions.get('window');
@@ -100,24 +105,32 @@ export default function HomeScreen() {
         {/* Header */}
         <View style={styles.header}>
           <TouchableOpacity style={styles.locationButton}>
-            <MaterialCommunityIcons name="map-marker" size={20} color={Colors.primary} />
+            <MapPin size={20} color={Colors.primary} weight="fill" />
             <Text style={styles.locationText}>Brixton, London</Text>
-            <MaterialCommunityIcons name="chevron-down" size={18} color={Colors.textMuted} />
+            <CaretDown size={16} color={Colors.textMuted} weight="bold" />
           </TouchableOpacity>
           <TouchableOpacity style={styles.notificationButton}>
-            <MaterialCommunityIcons name="bell-outline" size={24} color={Colors.textPrimary} />
+            <Bell size={24} color={Colors.textPrimary} weight="duotone" />
             <View style={styles.notificationBadge} />
           </TouchableOpacity>
         </View>
 
         {/* Search Bar */}
-        <View style={styles.searchContainer}>
-          <SearchBar
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-            onFilterPress={() => {}}
-          />
-        </View>
+        <TouchableOpacity 
+          style={styles.searchContainer}
+          onPress={() => router.push('/(tabs)/explore')}
+          activeOpacity={0.8}
+        >
+          <View style={styles.searchBar}>
+            <MagnifyingGlass size={22} color={Colors.textMuted} weight="duotone" />
+            <Text style={styles.searchPlaceholder}>
+              Search for egusi, plantain, jollof...
+            </Text>
+            <View style={styles.filterButton}>
+              <Sliders size={20} color={Colors.textPrimary} weight="duotone" />
+            </View>
+          </View>
+        </TouchableOpacity>
 
         {/* Hero Banner */}
         {homeData?.banners && homeData.banners.length > 0 && (
@@ -232,12 +245,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.sm,
     borderRadius: BorderRadius.full,
+    gap: Spacing.xs,
   },
   locationText: {
     color: Colors.textPrimary,
     fontSize: FontSize.small,
     fontWeight: FontWeight.medium,
-    marginHorizontal: Spacing.xs,
   },
   notificationButton: {
     position: 'relative',
@@ -255,6 +268,28 @@ const styles = StyleSheet.create({
   searchContainer: {
     paddingHorizontal: Spacing.base,
     marginBottom: Spacing.base,
+  },
+  searchBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: Colors.cardDark,
+    borderRadius: BorderRadius.lg,
+    paddingHorizontal: Spacing.md,
+    height: 52,
+    gap: Spacing.sm,
+  },
+  searchPlaceholder: {
+    flex: 1,
+    color: Colors.textMuted,
+    fontSize: FontSize.body,
+  },
+  filterButton: {
+    width: 40,
+    height: 40,
+    borderRadius: BorderRadius.md,
+    backgroundColor: Colors.backgroundDark,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   bannerContainer: {
     marginBottom: Spacing.xl,
