@@ -7,12 +7,10 @@ import {
   ViewStyle,
   TouchableOpacityProps,
 } from 'react-native';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { IconProps } from 'phosphor-react-native';
 import { Colors } from '../../constants/colors';
-import { BorderRadius, Spacing } from '../../constants/spacing';
+import { BorderRadius, Spacing, Heights } from '../../constants/spacing';
 import { FontSize, FontWeight } from '../../constants/typography';
-
-type IconName = keyof typeof MaterialCommunityIcons.glyphMap;
 
 interface ButtonProps extends TouchableOpacityProps {
   title: string;
@@ -21,8 +19,8 @@ interface ButtonProps extends TouchableOpacityProps {
   loading?: boolean;
   disabled?: boolean;
   fullWidth?: boolean;
-  leftIcon?: IconName;
-  rightIcon?: IconName;
+  leftIcon?: React.ComponentType<IconProps>;
+  rightIcon?: React.ComponentType<IconProps>;
 }
 
 /**
@@ -46,8 +44,8 @@ export const Button: React.FC<ButtonProps> = ({
   loading = false,
   disabled = false,
   fullWidth = false,
-  leftIcon,
-  rightIcon,
+  leftIcon: LeftIcon,
+  rightIcon: RightIcon,
   style,
   ...props
 }) => {
@@ -99,7 +97,7 @@ export const Button: React.FC<ButtonProps> = ({
       case 'lg':
         return 56;
       default:
-        return 48;
+        return Heights.button; // 48px
     }
   };
 
@@ -132,12 +130,8 @@ export const Button: React.FC<ButtonProps> = ({
       case 'lg':
         return Spacing.xl;
       default:
-        return Spacing.xl;
+        return Spacing.lg;
     }
-  };
-
-  const getBorderRadius = (): number => {
-    return BorderRadius.md; // 8px as per design system
   };
 
   const buttonStyle: ViewStyle = {
@@ -147,7 +141,7 @@ export const Button: React.FC<ButtonProps> = ({
     borderWidth: variant === 'outline' ? 2 : 0,
     borderColor: disabled ? 'rgba(204, 0, 0, 0.5)' : Colors.primary,
     paddingHorizontal: getPadding(),
-    borderRadius: getBorderRadius(),
+    borderRadius: BorderRadius.lg, // 12px for consistency
   };
 
   const textColor = getTextColor();
@@ -164,11 +158,11 @@ export const Button: React.FC<ButtonProps> = ({
         <ActivityIndicator color={textColor} />
       ) : (
         <>
-          {leftIcon && (
-            <MaterialCommunityIcons
-              name={leftIcon}
+          {LeftIcon && (
+            <LeftIcon
               size={iconSize}
               color={textColor}
+              weight="bold"
               style={styles.leftIcon}
             />
           )}
@@ -183,11 +177,11 @@ export const Button: React.FC<ButtonProps> = ({
           >
             {title}
           </Text>
-          {rightIcon && (
-            <MaterialCommunityIcons
-              name={rightIcon}
+          {RightIcon && (
+            <RightIcon
               size={iconSize}
               color={textColor}
+              weight="bold"
               style={styles.rightIcon}
             />
           )}
@@ -202,15 +196,16 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
+    gap: Spacing.sm,
   },
   text: {
-    fontWeight: FontWeight.semiBold,
+    fontWeight: FontWeight.bold,
   },
   leftIcon: {
-    marginRight: Spacing.sm,
+    marginRight: Spacing.xs,
   },
   rightIcon: {
-    marginLeft: Spacing.sm,
+    marginLeft: Spacing.xs,
   },
 });
 
