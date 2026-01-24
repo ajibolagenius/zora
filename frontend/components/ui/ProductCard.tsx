@@ -129,22 +129,23 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.cardDark,
     borderRadius: BorderRadius.lg,
     overflow: 'hidden',
-    width: 160,
+    flex: 1, // Allow card to fill available width
+    maxWidth: '100%',
     ...Shadows.md,
   },
   containerCompact: {
-    width: 140,
+    maxWidth: 140,
   },
   imageContainer: {
     position: 'relative',
   },
   image: {
     width: '100%',
-    height: 140,
+    height: 130, // Slightly reduced image height
     backgroundColor: Colors.backgroundDark,
   },
   imageCompact: {
-    height: 120,
+    height: 110,
   },
   badgeContainer: {
     position: 'absolute',
