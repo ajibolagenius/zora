@@ -100,6 +100,7 @@ export default function ProductScreen() {
   }
 
   const totalPrice = (product.price * quantity).toFixed(2);
+  const hasDiscount = false; // Mock data doesn't have original_price field
 
   return (
     <View style={styles.container}>
