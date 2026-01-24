@@ -26,7 +26,7 @@ import {
 } from 'phosphor-react-native';
 import { Colors } from '../../constants/colors';
 import { Spacing, BorderRadius, TouchTarget, Heights } from '../../constants/spacing';
-import { FontSize, FontWeight } from '../../constants/typography';
+import { FontSize, FontWeight, FontFamily, LetterSpacing } from '../../constants/typography';
 import { vendorService, productService, type Vendor, type Product } from '../../services/mockDataService';
 import { useCartStore } from '../../stores/cartStore';
 
