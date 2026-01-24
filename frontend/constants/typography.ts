@@ -1,35 +1,35 @@
 // Zora African Market Design Tokens - Typography
 import { Platform } from 'react-native';
 
-// Font Families - Based on Design System
+// Font Families - Based on Design System (Using System Fonts)
 export const FontFamily = {
-  // Display & Headlines: Montserrat
+  // Display & Headlines: System fonts for now
   display: Platform.select({
-    ios: 'Montserrat-Bold',
-    android: 'Montserrat-Bold',
-    default: 'Montserrat, sans-serif',
+    ios: 'System',
+    android: 'sans-serif-medium',
+    default: 'system-ui, sans-serif',
   }),
   displayMedium: Platform.select({
-    ios: 'Montserrat-SemiBold',
-    android: 'Montserrat-SemiBold',
-    default: 'Montserrat, sans-serif',
+    ios: 'System',
+    android: 'sans-serif-medium',
+    default: 'system-ui, sans-serif',
   }),
-  // Body Text: Open Sans
+  // Body Text: System fonts
   body: Platform.select({
-    ios: 'OpenSans-Regular',
-    android: 'OpenSans-Regular',
-    default: 'Open Sans, sans-serif',
+    ios: 'System',
+    android: 'sans-serif',
+    default: 'system-ui, sans-serif',
   }),
   bodyMedium: Platform.select({
-    ios: 'OpenSans-SemiBold',
-    android: 'OpenSans-SemiBold',
-    default: 'Open Sans, sans-serif',
+    ios: 'System',
+    android: 'sans-serif-medium',
+    default: 'system-ui, sans-serif',
   }),
-  // Alternative: Plus Jakarta Sans for Mobile UI
+  // UI Text
   ui: Platform.select({
     ios: 'System',
-    android: 'System',
-    default: 'Plus Jakarta Sans, sans-serif',
+    android: 'sans-serif',
+    default: 'system-ui, sans-serif',
   }),
 };
 
