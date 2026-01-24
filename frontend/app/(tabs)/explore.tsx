@@ -24,8 +24,7 @@ import {
 import { Colors } from '../../constants/colors';
 import { Spacing, BorderRadius } from '../../constants/spacing';
 import { FontSize, FontWeight } from '../../constants/typography';
-import { vendorService } from '../../services/dataService';
-import { Vendor } from '../../types';
+import { vendorService, type Vendor } from '../../services/mockDataService';
 
 type FilterType = 'open' | 'delivery' | 'pickup' | 'topRated';
 
