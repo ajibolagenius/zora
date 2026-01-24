@@ -355,10 +355,15 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     paddingHorizontal: Spacing.base,
-    gap: PRODUCT_GAP,
   },
   productCardWrapper: {
-    width: '48.5%', // Slightly less than 50% to account for gap
-    marginBottom: 4,
+    width: '50%',
+    marginBottom: PRODUCT_GAP,
+  },
+  productCardLeft: {
+    paddingRight: PRODUCT_GAP / 2,
+  },
+  productCardRight: {
+    paddingLeft: PRODUCT_GAP / 2,
   },
 });
