@@ -129,8 +129,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.cardDark,
     borderRadius: BorderRadius.lg,
     overflow: 'hidden',
-    flex: 1, // Allow card to fill available width
-    maxWidth: '100%',
+    width: '100%',
     ...Shadows.md,
   },
   containerCompact: {
@@ -141,7 +140,7 @@ const styles = StyleSheet.create({
   },
   image: {
     width: '100%',
-    height: 130, // Slightly reduced image height
+    height: 130,
     backgroundColor: Colors.backgroundDark,
   },
   imageCompact: {
