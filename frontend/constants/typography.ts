@@ -7,67 +7,35 @@ import { Platform } from 'react-native';
  * Primary: Montserrat - For headlines, titles, and emphasis
  * Secondary: Inter - For body text, UI elements
  * 
- * Note: These fonts need to be loaded via expo-font or included in assets
- * Currently using system fonts as fallback
+ * Fonts are loaded via @expo-google-fonts in _layout.tsx
  */
 export const FontFamily = {
-  // Display & Headlines: Montserrat (Bold/SemiBold)
-  display: Platform.select({
-    ios: 'Montserrat-Bold',
-    android: 'Montserrat-Bold',
-    default: 'Montserrat, system-ui, sans-serif',
-  }),
-  displayMedium: Platform.select({
-    ios: 'Montserrat-SemiBold',
-    android: 'Montserrat-SemiBold',
-    default: 'Montserrat, system-ui, sans-serif',
-  }),
+  // Display & Headlines: Montserrat
+  display: 'Montserrat-Bold',
+  displayMedium: 'Montserrat-SemiBold',
+  displayExtraBold: 'Montserrat-ExtraBold',
   
   // Body Text: Inter
-  body: Platform.select({
-    ios: 'Inter-Regular',
-    android: 'Inter-Regular',
-    default: 'Inter, system-ui, sans-serif',
-  }),
-  bodyMedium: Platform.select({
-    ios: 'Inter-Medium',
-    android: 'Inter-Medium',
-    default: 'Inter, system-ui, sans-serif',
-  }),
-  bodySemiBold: Platform.select({
-    ios: 'Inter-SemiBold',
-    android: 'Inter-SemiBold',
-    default: 'Inter, system-ui, sans-serif',
-  }),
-  bodyBold: Platform.select({
-    ios: 'Inter-Bold',
-    android: 'Inter-Bold',
-    default: 'Inter, system-ui, sans-serif',
-  }),
+  body: 'Inter-Regular',
+  bodyMedium: 'Inter-Medium',
+  bodySemiBold: 'Inter-SemiBold',
+  bodyBold: 'Inter-Bold',
   
-  // UI Text: Inter
-  ui: Platform.select({
-    ios: 'Inter-Medium',
-    android: 'Inter-Medium',
-    default: 'Inter, system-ui, sans-serif',
-  }),
+  // UI Text: Inter Medium
+  ui: 'Inter-Medium',
   
-  // System fonts fallback (when custom fonts not loaded)
-  system: Platform.select({
-    ios: 'System',
-    android: 'sans-serif',
-    default: 'system-ui, sans-serif',
-  }),
-  systemMedium: Platform.select({
-    ios: 'System',
-    android: 'sans-serif-medium',
-    default: 'system-ui, sans-serif',
-  }),
-  systemBold: Platform.select({
-    ios: 'System',
-    android: 'sans-serif-medium',
-    default: 'system-ui, sans-serif',
-  }),
+  // Montserrat variants
+  montserratRegular: 'Montserrat-Regular',
+  montserratMedium: 'Montserrat-Medium',
+  montserratSemiBold: 'Montserrat-SemiBold',
+  montserratBold: 'Montserrat-Bold',
+  montserratExtraBold: 'Montserrat-ExtraBold',
+  
+  // Inter variants
+  interRegular: 'Inter-Regular',
+  interMedium: 'Inter-Medium',
+  interSemiBold: 'Inter-SemiBold',
+  interBold: 'Inter-Bold',
 };
 
 // Font Sizes - Based on Design System Type Scale
@@ -121,35 +89,30 @@ export const LetterSpacing = {
 export const Typography = {
   // Headlines (Montserrat)
   display: {
-    fontFamily: FontFamily.display,
+    fontFamily: FontFamily.displayExtraBold,
     fontSize: FontSize.display,
     lineHeight: LineHeight.display,
-    fontWeight: FontWeight.extraBold,
     letterSpacing: LetterSpacing.tight,
   },
   h1: {
     fontFamily: FontFamily.display,
     fontSize: FontSize.h1,
     lineHeight: LineHeight.h1,
-    fontWeight: FontWeight.bold,
   },
   h2: {
     fontFamily: FontFamily.display,
     fontSize: FontSize.h2,
     lineHeight: LineHeight.h2,
-    fontWeight: FontWeight.bold,
   },
   h3: {
     fontFamily: FontFamily.displayMedium,
     fontSize: FontSize.h3,
     lineHeight: LineHeight.h3,
-    fontWeight: FontWeight.semiBold,
   },
   h4: {
     fontFamily: FontFamily.displayMedium,
     fontSize: FontSize.h4,
     lineHeight: LineHeight.h4,
-    fontWeight: FontWeight.semiBold,
   },
   
   // Body Text (Inter)
@@ -157,55 +120,46 @@ export const Typography = {
     fontFamily: FontFamily.body,
     fontSize: FontSize.bodyLarge,
     lineHeight: LineHeight.bodyLarge,
-    fontWeight: FontWeight.regular,
   },
   body: {
     fontFamily: FontFamily.body,
     fontSize: FontSize.body,
     lineHeight: LineHeight.body,
-    fontWeight: FontWeight.regular,
   },
   bodyMedium: {
     fontFamily: FontFamily.bodyMedium,
     fontSize: FontSize.body,
     lineHeight: LineHeight.body,
-    fontWeight: FontWeight.medium,
   },
   bodyBold: {
     fontFamily: FontFamily.bodyBold,
     fontSize: FontSize.body,
     lineHeight: LineHeight.body,
-    fontWeight: FontWeight.bold,
   },
   small: {
     fontFamily: FontFamily.body,
     fontSize: FontSize.small,
     lineHeight: LineHeight.small,
-    fontWeight: FontWeight.regular,
   },
   smallMedium: {
     fontFamily: FontFamily.bodyMedium,
     fontSize: FontSize.small,
     lineHeight: LineHeight.small,
-    fontWeight: FontWeight.medium,
   },
   smallBold: {
     fontFamily: FontFamily.bodySemiBold,
     fontSize: FontSize.small,
     lineHeight: LineHeight.small,
-    fontWeight: FontWeight.semiBold,
   },
   caption: {
     fontFamily: FontFamily.body,
     fontSize: FontSize.caption,
     lineHeight: LineHeight.caption,
-    fontWeight: FontWeight.regular,
   },
   captionMedium: {
     fontFamily: FontFamily.bodyMedium,
     fontSize: FontSize.caption,
     lineHeight: LineHeight.caption,
-    fontWeight: FontWeight.medium,
   },
   
   // UI Labels
@@ -213,7 +167,6 @@ export const Typography = {
     fontFamily: FontFamily.bodySemiBold,
     fontSize: FontSize.tiny,
     lineHeight: LineHeight.tiny,
-    fontWeight: FontWeight.semiBold,
     textTransform: 'uppercase' as const,
     letterSpacing: LetterSpacing.wider,
   },
@@ -221,21 +174,18 @@ export const Typography = {
     fontFamily: FontFamily.bodySemiBold,
     fontSize: FontSize.tiny,
     lineHeight: LineHeight.tiny,
-    fontWeight: FontWeight.bold,
     textTransform: 'uppercase' as const,
     letterSpacing: LetterSpacing.wide,
   },
   button: {
     fontFamily: FontFamily.ui,
     fontSize: FontSize.small,
-    fontWeight: FontWeight.bold,
     textTransform: 'uppercase' as const,
     letterSpacing: LetterSpacing.wide,
   },
   buttonSmall: {
     fontFamily: FontFamily.ui,
     fontSize: FontSize.caption,
-    fontWeight: FontWeight.bold,
     textTransform: 'uppercase' as const,
     letterSpacing: LetterSpacing.wide,
   },
@@ -244,12 +194,10 @@ export const Typography = {
   priceMain: {
     fontFamily: FontFamily.display,
     fontSize: 30,
-    fontWeight: FontWeight.bold,
   },
   priceUnit: {
     fontFamily: FontFamily.body,
     fontSize: FontSize.bodyLarge,
-    fontWeight: FontWeight.regular,
   },
 };
 
