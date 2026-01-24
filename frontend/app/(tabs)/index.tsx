@@ -349,10 +349,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     paddingHorizontal: Spacing.base,
-    justifyContent: 'space-between',
+    gap: PRODUCT_GAP,
   },
   productCardWrapper: {
-    width: PRODUCT_CARD_WIDTH,
-    marginBottom: PRODUCT_GAP,
+    width: '48.5%', // Slightly less than 50% to account for gap
+    marginBottom: 4,
   },
 });
