@@ -100,7 +100,6 @@ export default function ProductScreen() {
   }
 
   const totalPrice = (product.price * quantity).toFixed(2);
-  const hasDiscount = product.original_price && product.original_price > product.price;
 
   return (
     <View style={styles.container}>
@@ -112,7 +111,7 @@ export default function ProductScreen() {
         {/* Product Image */}
         <View style={styles.imageContainer}>
           <Image
-            source={{ uri: product.image_url }}
+            source={{ uri: product.image_urls?.[0] || '' }}
             style={styles.productImage}
             resizeMode="cover"
           />
