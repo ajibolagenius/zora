@@ -15,7 +15,18 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import * as WebBrowser from 'expo-web-browser';
 import * as Linking from 'expo-linking';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import {
+  ArrowLeft,
+  UserCircle,
+  User,
+  Envelope,
+  Lock,
+  Eye,
+  EyeSlash,
+  Check,
+  GoogleLogo,
+  AppleLogo,
+} from 'phosphor-react-native';
 import { Colors } from '../../constants/colors';
 import { Spacing, BorderRadius } from '../../constants/spacing';
 import { FontSize, FontWeight } from '../../constants/typography';
@@ -110,10 +121,10 @@ export default function LoginScreen() {
           {/* Header */}
           <View style={styles.header}>
             <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
-              <MaterialCommunityIcons name="arrow-left" size={24} color={Colors.textPrimary} />
+              <ArrowLeft size={24} color={Colors.textPrimary} weight="bold" />
             </TouchableOpacity>
             <TouchableOpacity style={styles.avatarButton}>
-              <MaterialCommunityIcons name="account-circle" size={36} color={Colors.textMuted} />
+              <UserCircle size={36} color={Colors.textMuted} weight="duotone" />
             </TouchableOpacity>
           </View>
 
@@ -153,7 +164,7 @@ export default function LoginScreen() {
           <View style={styles.inputContainer}>
             {mode === 'signup' && (
               <View style={styles.inputWrapper}>
-                <MaterialCommunityIcons name="account-outline" size={22} color={Colors.textMuted} />
+                <User size={22} color={Colors.textMuted} weight="duotone" />
                 <TextInput
                   style={styles.input}
                   placeholder="Full Name"
@@ -166,7 +177,7 @@ export default function LoginScreen() {
             )}
 
             <View style={styles.inputWrapper}>
-              <MaterialCommunityIcons name="email-outline" size={22} color={Colors.textMuted} />
+              <Envelope size={22} color={Colors.textMuted} weight="duotone" />
               <TextInput
                 style={styles.input}
                 placeholder="Email Address"
@@ -179,7 +190,7 @@ export default function LoginScreen() {
             </View>
 
             <View style={styles.inputWrapper}>
-              <MaterialCommunityIcons name="lock-outline" size={22} color={Colors.textMuted} />
+              <Lock size={22} color={Colors.textMuted} weight="duotone" />
               <TextInput
                 style={styles.input}
                 placeholder="Password"
@@ -189,11 +200,11 @@ export default function LoginScreen() {
                 secureTextEntry={!showPassword}
               />
               <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
-                <MaterialCommunityIcons
-                  name={showPassword ? 'eye-outline' : 'eye-off-outline'}
-                  size={22}
-                  color={Colors.textMuted}
-                />
+                {showPassword ? (
+                  <Eye size={22} color={Colors.textMuted} weight="duotone" />
+                ) : (
+                  <EyeSlash size={22} color={Colors.textMuted} weight="duotone" />
+                )}
               </TouchableOpacity>
             </View>
           </View>
@@ -207,7 +218,7 @@ export default function LoginScreen() {
               >
                 <View style={[styles.checkbox, rememberMe && styles.checkboxChecked]}>
                   {rememberMe && (
-                    <MaterialCommunityIcons name="check" size={14} color={Colors.textPrimary} />
+                    <Check size={14} color={Colors.textPrimary} weight="bold" />
                   )}
                 </View>
                 <Text style={styles.checkboxLabel}>Remember me</Text>
@@ -247,7 +258,7 @@ export default function LoginScreen() {
               onPress={handleGoogleLogin}
               disabled={loading}
             >
-              <MaterialCommunityIcons name="google" size={24} color="#DB4437" />
+              <GoogleLogo size={24} color="#DB4437" weight="bold" />
               <Text style={styles.socialButtonText}>Google</Text>
             </TouchableOpacity>
 
@@ -256,7 +267,7 @@ export default function LoginScreen() {
               onPress={handleAppleLogin}
               disabled={loading}
             >
-              <MaterialCommunityIcons name="apple" size={24} color="#000000" />
+              <AppleLogo size={24} color="#000000" weight="fill" />
               <Text style={styles.socialButtonText}>Apple</Text>
             </TouchableOpacity>
           </View>
@@ -404,7 +415,7 @@ const styles = StyleSheet.create({
   },
   primaryButton: {
     backgroundColor: Colors.primary,
-    borderRadius: BorderRadius.lg,
+    borderRadius: BorderRadius.md,
     height: 56,
     justifyContent: 'center',
     alignItems: 'center',
@@ -440,7 +451,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: Colors.textPrimary,
-    borderRadius: BorderRadius.lg,
+    borderRadius: BorderRadius.md,
     height: 56,
     gap: Spacing.sm,
   },
