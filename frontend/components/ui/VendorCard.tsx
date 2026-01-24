@@ -157,9 +157,9 @@ const styles = StyleSheet.create({
     borderRadius: BorderRadius.sm,
   },
   tagText: {
+    fontFamily: FontFamily.bodySemiBold,
     color: Colors.textPrimary,
     fontSize: FontSize.caption,
-    fontWeight: FontWeight.bold,
     textTransform: 'uppercase',
   },
   verifiedBadge: {
