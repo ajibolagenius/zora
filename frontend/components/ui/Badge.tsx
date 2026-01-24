@@ -7,7 +7,7 @@ import {
 } from 'react-native';
 import { Colors } from '../../constants/colors';
 import { BorderRadius, Spacing } from '../../constants/spacing';
-import { FontSize, FontWeight } from '../../constants/typography';
+import { FontSize, FontFamily } from '../../constants/typography';
 
 type BadgeVariant = 'default' | 'success' | 'warning' | 'error' | 'info' | 'category';
 type BadgeSize = 'sm' | 'md';
@@ -100,7 +100,7 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start',
   },
   text: {
-    fontWeight: FontWeight.semiBold,
+    fontFamily: FontFamily.bodySemiBold,
   },
 });
 

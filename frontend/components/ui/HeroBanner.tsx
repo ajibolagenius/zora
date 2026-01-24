@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity, Dimensions } from 'react-native';
 import { Colors } from '../../constants/colors';
 import { BorderRadius, Spacing } from '../../constants/spacing';
-import { FontSize, FontWeight } from '../../constants/typography';
+import { FontSize, FontFamily } from '../../constants/typography';
 import { Banner } from '../../types';
 import { Button } from './Button';
 
@@ -78,17 +78,18 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.sm,
   },
   badgeText: {
+    fontFamily: FontFamily.bodyBold,
     color: Colors.textPrimary,
     fontSize: FontSize.tiny,
-    fontWeight: FontWeight.bold,
   },
   title: {
+    fontFamily: FontFamily.display,
     color: Colors.textPrimary,
     fontSize: FontSize.h3,
-    fontWeight: FontWeight.bold,
     marginBottom: Spacing.xs,
   },
   subtitle: {
+    fontFamily: FontFamily.body,
     color: Colors.textMuted,
     fontSize: FontSize.small,
     marginBottom: Spacing.md,

@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, TextInput, TouchableOpacity } from 'react-native';
 import { Colors } from '../../constants/colors';
 import { BorderRadius, Spacing } from '../../constants/spacing';
-import { FontSize } from '../../constants/typography';
+import { FontSize, FontFamily } from '../../constants/typography';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 interface SearchBarProps {
@@ -56,6 +56,7 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     marginLeft: Spacing.sm,
+    fontFamily: FontFamily.body,
     color: Colors.textPrimary,
     fontSize: FontSize.body,
   },

@@ -11,7 +11,7 @@ import {
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Colors } from '../../constants/colors';
 import { BorderRadius, Spacing, Heights } from '../../constants/spacing';
-import { FontSize, FontWeight } from '../../constants/typography';
+import { FontSize, FontFamily } from '../../constants/typography';
 
 type IconName = keyof typeof MaterialCommunityIcons.glyphMap;
 
@@ -117,9 +117,9 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.md,
   },
   label: {
+    fontFamily: FontFamily.bodySemiBold,
     color: Colors.textSecondary,
     fontSize: FontSize.small,
-    fontWeight: FontWeight.semiBold,
     marginBottom: Spacing.sm,
   },
   inputWrapper: {
@@ -143,6 +143,7 @@ const styles = StyleSheet.create({
   },
   input: {
     flex: 1,
+    fontFamily: FontFamily.body,
     color: Colors.textPrimary,
     fontSize: FontSize.body,
     height: '100%',

@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
 import { Colors } from '../../constants/colors';
 import { BorderRadius, Spacing } from '../../constants/spacing';
-import { FontSize, FontWeight } from '../../constants/typography';
+import { FontSize, FontFamily } from '../../constants/typography';
 import { Region } from '../../types';
 
 interface RegionCardProps {
@@ -55,9 +55,9 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.cardDark,
   },
   name: {
+    fontFamily: FontFamily.bodyMedium,
     color: Colors.textPrimary,
     fontSize: FontSize.caption,
-    fontWeight: FontWeight.medium,
     textAlign: 'center',
   },
   nameSelected: {
