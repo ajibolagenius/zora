@@ -25,7 +25,7 @@ import {
 } from 'phosphor-react-native';
 import { Colors } from '../../constants/colors';
 import { Spacing, BorderRadius, TouchTarget } from '../../constants/spacing';
-import { FontSize, FontWeight, FontFamily } from '../../constants/typography';
+import { FontSize, FontFamily } from '../../constants/typography';
 import { Button } from '../../components/ui';
 import { useAuthStore } from '../../stores/authStore';
 
@@ -190,9 +190,9 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.md,
   },
   title: {
+    fontFamily: FontFamily.display,
     color: Colors.textPrimary,
     fontSize: FontSize.h2,
-    fontWeight: FontWeight.bold,
   },
   settingsButton: {
     width: TouchTarget.min,
@@ -216,12 +216,13 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.md,
   },
   loginTitle: {
+    fontFamily: FontFamily.displayMedium,
     color: Colors.textPrimary,
     fontSize: FontSize.h4,
-    fontWeight: FontWeight.bold,
     marginTop: Spacing.md,
   },
   loginSubtitle: {
+    fontFamily: FontFamily.body,
     color: Colors.textMuted,
     fontSize: FontSize.body,
     marginTop: Spacing.sm,
@@ -246,11 +247,12 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   userName: {
+    fontFamily: FontFamily.displayMedium,
     color: Colors.textPrimary,
     fontSize: FontSize.h4,
-    fontWeight: FontWeight.bold,
   },
   userEmail: {
+    fontFamily: FontFamily.body,
     color: Colors.textMuted,
     fontSize: FontSize.small,
     marginTop: 2,
@@ -266,8 +268,8 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   tierText: {
+    fontFamily: FontFamily.bodyBold,
     fontSize: FontSize.tiny,
-    fontWeight: FontWeight.bold,
   },
   statsRow: {
     flexDirection: 'row',
@@ -282,11 +284,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   statValue: {
+    fontFamily: FontFamily.displayMedium,
     color: Colors.secondary,
     fontSize: FontSize.h4,
-    fontWeight: FontWeight.bold,
   },
   statLabel: {
+    fontFamily: FontFamily.body,
     color: Colors.textMuted,
     fontSize: FontSize.caption,
     marginTop: 4,
@@ -321,6 +324,7 @@ const styles = StyleSheet.create({
     gap: Spacing.md,
   },
   menuItemLabel: {
+    fontFamily: FontFamily.body,
     color: Colors.textPrimary,
     fontSize: FontSize.body,
   },
@@ -337,8 +341,8 @@ const styles = StyleSheet.create({
     height: 56,
   },
   logoutText: {
+    fontFamily: FontFamily.bodySemiBold,
     color: Colors.primary,
     fontSize: FontSize.body,
-    fontWeight: FontWeight.semiBold,
   },
 });
