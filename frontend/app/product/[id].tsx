@@ -30,8 +30,7 @@ import {
 import { Colors } from '../../constants/colors';
 import { Spacing, BorderRadius } from '../../constants/spacing';
 import { FontSize, FontWeight } from '../../constants/typography';
-import { productService, vendorService } from '../../services/dataService';
-import { Product, Vendor } from '../../types';
+import { productService, vendorService, type Product, type Vendor } from '../../services/mockDataService';
 import { useCartStore } from '../../stores/cartStore';
 
 type CollapsibleSection = 'description' | 'nutrition' | 'heritage';
