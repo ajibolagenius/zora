@@ -53,7 +53,10 @@ export default function ExploreScreen() {
   const { height: screenHeight } = useWindowDimensions();
   const [activeFilter, setActiveFilter] = useState<FilterType>('open');
   const [loading, setLoading] = useState(false);
-  const [vendors, setVendors] = useState(SAMPLE_VENDORS);
+  
+  // Get vendors from mock database
+  const allVendors = vendorService.getAll();
+  const vendors = allVendors.map(transformVendorForDisplay);
 
   const handleVendorPress = (vendorId: string) => {
     router.push(`/vendor/${vendorId}`);
