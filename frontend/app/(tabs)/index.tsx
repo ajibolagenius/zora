@@ -359,14 +359,4 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     paddingHorizontal: Spacing.base,
   },
-  productCardWrapper: {
-    width: '50%',
-    marginBottom: PRODUCT_GAP,
-  },
-  productCardLeft: {
-    paddingRight: PRODUCT_GAP / 2,
-  },
-  productCardRight: {
-    paddingLeft: PRODUCT_GAP / 2,
-  },
 });
