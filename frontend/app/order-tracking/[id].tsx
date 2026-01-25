@@ -664,7 +664,13 @@ const styles = StyleSheet.create({
   },
   
   // Need Help Button
+  actionButtonsContainer: {
+    flexDirection: 'row',
+    gap: 12,
+    marginTop: 8,
+  },
   needHelpButton: {
+    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
@@ -674,11 +680,27 @@ const styles = StyleSheet.create({
     borderRadius: BorderRadius.lg,
     borderWidth: 1,
     borderColor: 'rgba(193, 39, 45, 0.2)',
-    marginTop: 8,
   },
   needHelpText: {
     fontFamily: FontFamily.bodyMedium,
     fontSize: FontSize.small,
     color: ZORA_RED,
+  },
+  reportIssueButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    paddingVertical: 14,
+    backgroundColor: 'rgba(239, 68, 68, 0.1)',
+    borderRadius: BorderRadius.lg,
+    borderWidth: 1,
+    borderColor: 'rgba(239, 68, 68, 0.2)',
+  },
+  reportIssueText: {
+    fontFamily: FontFamily.bodyMedium,
+    fontSize: FontSize.small,
+    color: '#EF4444',
   },
 });
