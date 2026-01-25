@@ -184,6 +184,32 @@ export default function OrderConfirmationScreen() {
           </View>
         </View>
 
+        {/* QR Code Section */}
+        <View style={styles.qrSection}>
+          <View style={styles.qrHeader}>
+            <QrCode size={24} color={Colors.primary} weight="duotone" />
+            <Text style={styles.qrTitle}>Delivery Verification QR</Text>
+          </View>
+          {QRCode && Platform.OS !== 'web' ? (
+            <View style={styles.qrContainer}>
+              <QRCode
+                value={qrData.value}
+                size={160}
+                backgroundColor="#FFFFFF"
+                color="#000000"
+              />
+            </View>
+          ) : (
+            <View style={styles.qrPlaceholder}>
+              <QrCode size={48} color={Colors.textMuted} weight="duotone" />
+              <Text style={styles.qrPlaceholderText}>QR Code available on mobile</Text>
+            </View>
+          )}
+          <Text style={styles.qrInstruction}>
+            Show this code to the delivery driver to confirm your order
+          </Text>
+        </View>
+
         {/* Action Buttons */}
         <View style={styles.actionsContainer}>
           <TouchableOpacity
