@@ -16,7 +16,6 @@ import {
   CreditCard,
   CaretDown,
   CaretUp,
-  RadioButton,
 } from 'phosphor-react-native';
 import { Colors } from '../constants/colors';
 import { Spacing, BorderRadius } from '../constants/spacing';
@@ -98,11 +97,12 @@ export default function PaymentScreen() {
           >
             {/* Radio indicator */}
             <View style={styles.savedCardRadio}>
-              <RadioButton 
-                size={24} 
-                color={selectedMethod === 'saved' ? ZORA_RED : 'rgba(255,255,255,0.2)'} 
-                weight={selectedMethod === 'saved' ? 'fill' : 'regular'} 
-              />
+              <View style={[
+                styles.radioOuter,
+                selectedMethod === 'saved' && styles.radioOuterSelected,
+              ]}>
+                {selectedMethod === 'saved' && <View style={styles.radioInner} />}
+              </View>
             </View>
             
             {/* Card Info */}
@@ -171,11 +171,12 @@ export default function PaymentScreen() {
                   </View>
                   
                   {/* Radio */}
-                  <RadioButton 
-                    size={24} 
-                    color={isSelected ? ZORA_RED : 'rgba(255,255,255,0.2)'} 
-                    weight={isSelected ? 'fill' : 'regular'} 
-                  />
+                  <View style={[
+                    styles.radioOuter,
+                    isSelected && styles.radioOuterSelected,
+                  ]}>
+                    {isSelected && <View style={styles.radioInner} />}
+                  </View>
                 </TouchableOpacity>
               );
             })}
