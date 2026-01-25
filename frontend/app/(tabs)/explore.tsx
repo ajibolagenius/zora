@@ -62,10 +62,18 @@ export default function ExploreScreen() {
     router.push(`/vendor/${vendorId}`);
   };
 
+  const handleOpenFullMap = () => {
+    router.push('/vendor-map');
+  };
+
   return (
     <View style={styles.container}>
-      {/* Map Background */}
-      <View style={styles.mapContainer}>
+      {/* Map Background - Tappable to open full map */}
+      <TouchableOpacity 
+        style={styles.mapContainer}
+        onPress={handleOpenFullMap}
+        activeOpacity={0.9}
+      >
         <Image
           source={{ uri: 'https://images.unsplash.com/photo-1524661135-423995f22d0b?w=800&q=60' }}
           style={styles.mapImage}
@@ -96,6 +104,12 @@ export default function ExploreScreen() {
         
         {/* User Location Dot */}
         <View style={styles.userDot} />
+        
+        {/* Open Map Button */}
+        <View style={styles.openMapBadge}>
+          <Text style={styles.openMapText}>Tap to open full map</Text>
+        </View>
+      </TouchableOpacity>
       </View>
 
       {/* Header */}
