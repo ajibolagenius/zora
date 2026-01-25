@@ -417,6 +417,26 @@ const styles = StyleSheet.create({
     color: ZORA_RED,
   },
   
+  // Radio Button
+  radioOuter: {
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    borderWidth: 2,
+    borderColor: 'rgba(255,255,255,0.2)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  radioOuterSelected: {
+    borderColor: ZORA_RED,
+  },
+  radioInner: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    backgroundColor: ZORA_RED,
+  },
+  
   // Payment Methods
   methodsContainer: {
     gap: 12,
