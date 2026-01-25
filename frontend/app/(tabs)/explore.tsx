@@ -343,6 +343,22 @@ const styles = StyleSheet.create({
       },
     }),
   },
+  openMapBadge: {
+    position: 'absolute',
+    bottom: 16,
+    alignSelf: 'center',
+    backgroundColor: 'rgba(34, 23, 16, 0.9)',
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.sm,
+    borderRadius: BorderRadius.full,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.2)',
+  },
+  openMapText: {
+    color: Colors.textPrimary,
+    fontFamily: FontFamily.bodySemiBold,
+    fontSize: FontSize.small,
+  },
   // Header Styles
   header: {
     flexDirection: 'row',
