@@ -214,12 +214,12 @@ export default function CartTab() {
           </View>
         </View>
 
-        {/* Bottom spacing for checkout button */}
-        <View style={{ height: 120 }} />
+        {/* Bottom spacing for checkout button and tab bar */}
+        <View style={{ height: 200 }} />
       </ScrollView>
 
       {/* Sticky Footer - Checkout Button */}
-      <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom, 16) }]}>
+      <View style={[styles.footer, { bottom: 80 }]}>
         <TouchableOpacity 
           style={styles.checkoutButton}
           onPress={() => router.push('/checkout')}
