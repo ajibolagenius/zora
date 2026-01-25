@@ -102,7 +102,8 @@ export default function ReportIssueScreen() {
   const handleContinue = () => {
     console.log('Continue with issue:', selectedIssueType);
     console.log('Selected items:', selectedItems);
-    // Navigate to next step or submit
+    // Navigate to dispute details screen
+    router.push('/dispute-details');
   };
 
   const isAllSelected = selectedItems.length === ORDER_ITEMS.length;
