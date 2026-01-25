@@ -391,6 +391,55 @@ const styles = StyleSheet.create({
     color: ZORA_YELLOW,
   },
   
+  // QR Code Section
+  qrSection: {
+    backgroundColor: ZORA_CARD,
+    borderRadius: BorderRadius.lg,
+    padding: 20,
+    alignItems: 'center',
+    marginBottom: 24,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.05)',
+  },
+  qrHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 16,
+  },
+  qrTitle: {
+    fontFamily: FontFamily.bodySemiBold,
+    fontSize: FontSize.body,
+    color: Colors.textPrimary,
+  },
+  qrContainer: {
+    padding: 16,
+    backgroundColor: '#FFFFFF',
+    borderRadius: BorderRadius.lg,
+    marginBottom: 16,
+  },
+  qrPlaceholder: {
+    width: 160,
+    height: 160,
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    borderRadius: BorderRadius.lg,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  qrPlaceholderText: {
+    fontFamily: FontFamily.body,
+    fontSize: FontSize.small,
+    color: Colors.textMuted,
+    marginTop: 8,
+  },
+  qrInstruction: {
+    fontFamily: FontFamily.body,
+    fontSize: FontSize.small,
+    color: Colors.textMuted,
+    textAlign: 'center',
+  },
+  
   // Action Buttons
   actionsContainer: {
     width: '100%',
