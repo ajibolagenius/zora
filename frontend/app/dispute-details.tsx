@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -8,6 +8,9 @@ import {
   TextInput,
   Image,
   Alert,
+  Animated,
+  Easing,
+  Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
@@ -19,15 +22,8 @@ import {
 } from 'phosphor-react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { Colors } from '../constants/colors';
-import { Spacing, BorderRadius } from '../constants/spacing';
+import { Spacing, BorderRadius, Heights } from '../constants/spacing';
 import { FontSize, FontFamily } from '../constants/typography';
-
-// Zora Brand Colors
-const ZORA_RED = '#f90606';
-const ZORA_CARD = '#342418';
-const SURFACE_DARK = '#3a2727';
-const BACKGROUND_DARK = '#230f0f';
-const MUTED_TEXT = '#bb9b9b';
 
 interface ResolutionOption {
   id: string;
@@ -76,6 +72,27 @@ export default function DisputeDetailsScreen() {
     'https://images.unsplash.com/photo-1532336414038-cf19250c5757?w=200',
   ]);
   const [isAccordionOpen, setIsAccordionOpen] = useState(false);
+
+  // Animation values
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const slideAnim = useRef(new Animated.Value(20)).current;
+
+  useEffect(() => {
+    Animated.parallel([
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 400,
+        easing: Easing.out(Easing.cubic),
+        useNativeDriver: true,
+      }),
+      Animated.timing(slideAnim, {
+        toValue: 0,
+        duration: 400,
+        easing: Easing.out(Easing.cubic),
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, []);
 
   const handlePickImage = async () => {
     if (uploadedImages.length >= MAX_PHOTOS) {
@@ -282,7 +299,7 @@ export default function DisputeDetailsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: BACKGROUND_DARK,
+    backgroundColor: Colors.backgroundDark,
   },
 
   // Header
@@ -291,24 +308,26 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: Spacing.base,
-    paddingVertical: Spacing.sm,
-    backgroundColor: `${BACKGROUND_DARK}F2`,
+    paddingVertical: Spacing.md,
+    backgroundColor: Colors.backgroundDark,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255, 255, 255, 0.05)',
   },
   backButton: {
-    width: 40,
-    height: 40,
+    width: 44,
+    height: 44,
     justifyContent: 'center',
     alignItems: 'center',
-    borderRadius: 20,
+    borderRadius: 22,
+    backgroundColor: 'rgba(0, 0, 0, 0.3)',
   },
   headerTitle: {
-    fontFamily: FontFamily.display,
+    fontFamily: FontFamily.displaySemiBold,
     fontSize: FontSize.h4,
     color: Colors.textPrimary,
-    letterSpacing: -0.3,
   },
   headerRight: {
-    width: 40,
+    width: 44,
   },
 
   // Scroll View
@@ -317,73 +336,75 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingHorizontal: Spacing.base,
-    paddingTop: 8,
-    gap: 24,
+    paddingTop: Spacing.md,
+    gap: Spacing.lg,
   },
 
   // Accordion
   accordionContainer: {
-    backgroundColor: SURFACE_DARK,
+    backgroundColor: Colors.cardDark,
     borderRadius: BorderRadius.lg,
     overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.05)',
   },
   accordionHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    padding: 16,
+    padding: Spacing.base,
   },
   accordionHeaderContent: {
-    gap: 2,
+    gap: Spacing.xs,
   },
   accordionTitle: {
-    fontFamily: FontFamily.bodySemiBold,
-    fontSize: FontSize.small,
+    fontFamily: FontFamily.displaySemiBold,
+    fontSize: FontSize.body,
     color: Colors.textPrimary,
   },
   accordionSubtitle: {
     fontFamily: FontFamily.body,
-    fontSize: 12,
-    color: MUTED_TEXT,
+    fontSize: FontSize.caption,
+    color: Colors.textMuted,
   },
   accordionContent: {
-    paddingHorizontal: 16,
-    paddingBottom: 16,
+    paddingHorizontal: Spacing.base,
+    paddingBottom: Spacing.base,
   },
   accordionDivider: {
     height: 1,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    marginBottom: 12,
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+    marginBottom: Spacing.md,
   },
   accordionItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
-    marginBottom: 8,
+    gap: Spacing.md,
+    marginBottom: Spacing.sm,
   },
   accordionItemImage: {
-    width: 40,
-    height: 40,
-    borderRadius: BorderRadius.sm,
-    backgroundColor: '#444',
+    width: 44,
+    height: 44,
+    borderRadius: BorderRadius.md,
+    backgroundColor: Colors.backgroundDark,
   },
   accordionItemInfo: {
-    gap: 2,
+    gap: Spacing.xs,
   },
   accordionItemName: {
-    fontFamily: FontFamily.bodyMedium,
+    fontFamily: FontFamily.bodySemiBold,
     fontSize: FontSize.small,
     color: Colors.textPrimary,
   },
   accordionItemQty: {
     fontFamily: FontFamily.body,
-    fontSize: 12,
-    color: 'rgba(255, 255, 255, 0.5)',
+    fontSize: FontSize.caption,
+    color: Colors.textMuted,
   },
 
   // Sections
   section: {
-    gap: 8,
+    gap: Spacing.sm,
   },
   sectionHeaderRow: {
     flexDirection: 'row',
@@ -391,14 +412,14 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   sectionLabel: {
-    fontFamily: FontFamily.bodyBold,
+    fontFamily: FontFamily.displaySemiBold,
     fontSize: FontSize.body,
     color: Colors.textPrimary,
   },
   photoLimit: {
     fontFamily: FontFamily.body,
-    fontSize: 12,
-    color: 'rgba(255, 255, 255, 0.5)',
+    fontSize: FontSize.caption,
+    color: Colors.textMuted,
   },
 
   // Text Area
@@ -406,44 +427,47 @@ const styles = StyleSheet.create({
     position: 'relative',
   },
   textArea: {
-    backgroundColor: ZORA_CARD,
+    backgroundColor: Colors.cardDark,
     borderRadius: BorderRadius.lg,
-    padding: 16,
-    minHeight: 160,
+    padding: Spacing.base,
+    minHeight: 140,
     fontFamily: FontFamily.body,
     fontSize: FontSize.body,
     color: Colors.textPrimary,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.05)',
   },
   charCount: {
     position: 'absolute',
-    bottom: 12,
-    right: 16,
-    fontFamily: FontFamily.bodyMedium,
-    fontSize: 12,
-    color: `${MUTED_TEXT}99`,
+    bottom: Spacing.md,
+    right: Spacing.base,
+    fontFamily: FontFamily.bodySemiBold,
+    fontSize: FontSize.caption,
+    color: Colors.textMuted,
   },
 
   // Image Grid
   imageGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 12,
+    gap: Spacing.md,
   },
   addPhotoButton: {
     width: '31%',
     aspectRatio: 1,
     borderRadius: BorderRadius.lg,
-    borderWidth: 1,
+    borderWidth: 1.5,
     borderStyle: 'dashed',
-    borderColor: 'rgba(255, 255, 255, 0.2)',
+    borderColor: 'rgba(255, 255, 255, 0.15)',
     justifyContent: 'center',
     alignItems: 'center',
-    gap: 4,
+    gap: Spacing.xs,
+    backgroundColor: 'rgba(255, 255, 255, 0.02)',
   },
   addPhotoText: {
-    fontFamily: FontFamily.bodyMedium,
-    fontSize: 12,
-    color: 'rgba(255, 255, 255, 0.8)',
+    fontFamily: FontFamily.bodySemiBold,
+    fontSize: FontSize.caption,
+    color: Colors.textMuted,
   },
   uploadedImageContainer: {
     width: '31%',
@@ -462,44 +486,44 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: 'rgba(0, 0, 0, 0.2)',
+    backgroundColor: 'rgba(0, 0, 0, 0.15)',
   },
   removeImageButton: {
     position: 'absolute',
-    top: 4,
-    right: 4,
+    top: Spacing.xs,
+    right: Spacing.xs,
     width: 24,
     height: 24,
     borderRadius: 12,
-    backgroundColor: ZORA_RED,
+    backgroundColor: Colors.primary,
     justifyContent: 'center',
     alignItems: 'center',
   },
 
   // Options
   optionsContainer: {
-    gap: 12,
+    gap: Spacing.md,
   },
   optionCard: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: '#2A1D1D',
+    backgroundColor: Colors.cardDark,
     borderRadius: BorderRadius.lg,
-    padding: 16,
+    padding: Spacing.base,
     borderWidth: 1,
-    borderColor: 'transparent',
+    borderColor: 'rgba(255, 255, 255, 0.05)',
   },
   optionCardSelected: {
-    borderColor: ZORA_RED,
-    backgroundColor: SURFACE_DARK,
+    borderColor: Colors.primary,
+    backgroundColor: 'rgba(204, 0, 0, 0.1)',
   },
   optionContent: {
     flex: 1,
-    paddingRight: 16,
+    paddingRight: Spacing.base,
   },
   optionTitle: {
-    fontFamily: FontFamily.bodyMedium,
+    fontFamily: FontFamily.bodySemiBold,
     fontSize: FontSize.body,
     color: Colors.textPrimary,
   },
@@ -508,22 +532,22 @@ const styles = StyleSheet.create({
   },
   optionDescription: {
     fontFamily: FontFamily.body,
-    fontSize: 12,
-    color: MUTED_TEXT,
-    marginTop: 2,
+    fontSize: FontSize.small,
+    color: Colors.textMuted,
+    marginTop: Spacing.xs,
   },
   radioOuter: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
+    width: 22,
+    height: 22,
+    borderRadius: 11,
     borderWidth: 2,
-    borderColor: 'rgba(255, 255, 255, 0.3)',
+    borderColor: 'rgba(255, 255, 255, 0.2)',
     justifyContent: 'center',
     alignItems: 'center',
   },
   radioOuterSelected: {
-    borderColor: ZORA_RED,
-    backgroundColor: ZORA_RED,
+    borderColor: Colors.primary,
+    backgroundColor: Colors.primary,
   },
   radioInner: {
     width: 8,
@@ -539,20 +563,31 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     padding: Spacing.base,
-    paddingBottom: 32,
-    backgroundColor: `${BACKGROUND_DARK}F2`,
+    paddingBottom: Spacing.xl,
+    backgroundColor: Colors.backgroundDark,
     borderTopWidth: 1,
     borderTopColor: 'rgba(255, 255, 255, 0.05)',
   },
   submitButton: {
-    backgroundColor: ZORA_RED,
-    height: 52,
+    backgroundColor: Colors.primary,
+    height: Heights.button,
     borderRadius: BorderRadius.lg,
     justifyContent: 'center',
     alignItems: 'center',
+    ...Platform.select({
+      ios: {
+        shadowColor: Colors.primary,
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.3,
+        shadowRadius: 8,
+      },
+      android: {
+        elevation: 4,
+      },
+    }),
   },
   submitButtonText: {
-    fontFamily: FontFamily.bodyBold,
+    fontFamily: FontFamily.displaySemiBold,
     fontSize: FontSize.body,
     color: Colors.textPrimary,
   },

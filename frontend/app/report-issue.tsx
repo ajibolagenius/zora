@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -6,29 +6,19 @@ import {
   ScrollView,
   TouchableOpacity,
   Image,
+  Animated,
+  Easing,
+  Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import {
   ArrowLeft,
-  Package,
-  ArrowsLeftRight,
-  Warning,
-  ThumbsDown,
-  DotsThreeCircle,
   Check,
 } from 'phosphor-react-native';
 import { Colors } from '../constants/colors';
-import { Spacing, BorderRadius } from '../constants/spacing';
+import { Spacing, BorderRadius, Heights } from '../constants/spacing';
 import { FontSize, FontFamily } from '../constants/typography';
-
-// Zora Brand Colors
-const ZORA_RED = '#CC0000';
-const ZORA_CARD = '#2e211a';
-const SURFACE_DARK = '#231515';
-const BACKGROUND_DARK = '#221710';
-const MUTED_TEXT = '#bc9a9a';
-const BORDER_COLOR = '#3b2d2d';
 
 interface IssueType {
   id: string;
@@ -89,6 +79,27 @@ export default function ReportIssueScreen() {
   const params = useLocalSearchParams();
   const [selectedIssueType, setSelectedIssueType] = useState<string | null>(null);
   const [selectedItems, setSelectedItems] = useState<string[]>(['2']);
+
+  // Animation values
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const slideAnim = useRef(new Animated.Value(20)).current;
+
+  useEffect(() => {
+    Animated.parallel([
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 400,
+        easing: Easing.out(Easing.cubic),
+        useNativeDriver: true,
+      }),
+      Animated.timing(slideAnim, {
+        toValue: 0,
+        duration: 400,
+        easing: Easing.out(Easing.cubic),
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, []);
 
   const toggleItemSelection = (itemId: string) => {
     setSelectedItems((prev) =>
@@ -160,7 +171,7 @@ export default function ReportIssueScreen() {
               );
             })}
           </View>
-        </View>
+        </View>  
 
         {/* Spacer */}
         <View style={{ height: 16 }} />
@@ -230,7 +241,7 @@ export default function ReportIssueScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: BACKGROUND_DARK,
+    backgroundColor: Colors.backgroundDark,
   },
 
   // Header
@@ -239,26 +250,26 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: Spacing.base,
-    paddingVertical: Spacing.sm,
-    backgroundColor: BACKGROUND_DARK,
+    paddingVertical: Spacing.md,
+    backgroundColor: Colors.backgroundDark,
     borderBottomWidth: 1,
-    borderBottomColor: BORDER_COLOR,
+    borderBottomColor: 'rgba(255, 255, 255, 0.05)',
   },
   backButton: {
-    width: 40,
-    height: 40,
+    width: 44,
+    height: 44,
     justifyContent: 'center',
     alignItems: 'center',
-    borderRadius: 20,
+    borderRadius: 22,
+    backgroundColor: 'rgba(0, 0, 0, 0.3)',
   },
   headerTitle: {
-    fontFamily: FontFamily.display,
+    fontFamily: FontFamily.displaySemiBold,
     fontSize: FontSize.h4,
     color: Colors.textPrimary,
-    letterSpacing: -0.3,
   },
   headerRight: {
-    width: 40,
+    width: 44,
   },
 
   // Scroll View
@@ -267,49 +278,50 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingHorizontal: Spacing.base,
-    paddingTop: 24,
+    paddingTop: Spacing.lg,
   },
 
   // Sections
   section: {
-    marginBottom: 8,
+    marginBottom: Spacing.sm,
   },
   sectionTitle: {
-    fontFamily: FontFamily.display,
-    fontSize: 20,
+    fontFamily: FontFamily.displaySemiBold,
+    fontSize: FontSize.h4,
     color: Colors.textPrimary,
-    marginBottom: 16,
+    marginBottom: Spacing.base,
   },
 
   // Issue Types List
   issueTypesList: {
-    gap: 12,
+    gap: Spacing.md,
   },
   issueTypeItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 16,
-    backgroundColor: `${ZORA_CARD}80`,
+    gap: Spacing.base,
+    backgroundColor: Colors.cardDark,
     borderRadius: BorderRadius.lg,
-    padding: 16,
+    padding: Spacing.base,
     borderWidth: 1,
-    borderColor: BORDER_COLOR,
+    borderColor: 'rgba(255, 255, 255, 0.05)',
   },
   issueTypeItemSelected: {
-    borderColor: ZORA_RED,
+    borderColor: Colors.primary,
+    backgroundColor: 'rgba(204, 0, 0, 0.1)',
   },
   radioOuter: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
+    width: 22,
+    height: 22,
+    borderRadius: 11,
     borderWidth: 2,
-    borderColor: '#563939',
+    borderColor: 'rgba(255, 255, 255, 0.2)',
     justifyContent: 'center',
     alignItems: 'center',
   },
   radioOuterSelected: {
-    borderColor: ZORA_RED,
-    backgroundColor: ZORA_RED,
+    borderColor: Colors.primary,
+    backgroundColor: Colors.primary,
   },
   radioInner: {
     width: 8,
@@ -318,8 +330,8 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.textPrimary,
   },
   issueTypeLabel: {
-    fontFamily: FontFamily.bodyMedium,
-    fontSize: FontSize.small,
+    fontFamily: FontFamily.bodySemiBold,
+    fontSize: FontSize.body,
     color: Colors.textPrimary,
   },
   issueTypeLabelSelected: {
@@ -329,55 +341,55 @@ const styles = StyleSheet.create({
   // Items List
   itemsList: {
     borderTopWidth: 1,
-    borderTopColor: BORDER_COLOR,
+    borderTopColor: 'rgba(255, 255, 255, 0.05)',
   },
   itemRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingVertical: 16,
+    paddingVertical: Spacing.base,
     borderBottomWidth: 1,
-    borderBottomColor: BORDER_COLOR,
+    borderBottomColor: 'rgba(255, 255, 255, 0.05)',
   },
   itemLeft: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 16,
+    gap: Spacing.md,
     flex: 1,
   },
   itemImage: {
-    width: 64,
-    height: 64,
-    borderRadius: BorderRadius.lg,
-    backgroundColor: '#333',
+    width: 60,
+    height: 60,
+    borderRadius: BorderRadius.md,
+    backgroundColor: Colors.cardDark,
   },
   itemInfo: {
     flex: 1,
   },
   itemName: {
-    fontFamily: FontFamily.bodyMedium,
+    fontFamily: FontFamily.bodySemiBold,
     fontSize: FontSize.body,
     color: Colors.textPrimary,
-    marginBottom: 4,
+    marginBottom: Spacing.xs,
   },
   itemPrice: {
     fontFamily: FontFamily.body,
     fontSize: FontSize.small,
-    color: MUTED_TEXT,
+    color: Colors.textMuted,
   },
   checkbox: {
     width: 24,
     height: 24,
-    borderRadius: 4,
+    borderRadius: BorderRadius.sm,
     borderWidth: 2,
-    borderColor: '#563939',
+    borderColor: 'rgba(255, 255, 255, 0.2)',
     justifyContent: 'center',
     alignItems: 'center',
-    marginLeft: 8,
+    marginLeft: Spacing.sm,
   },
   checkboxSelected: {
-    backgroundColor: ZORA_RED,
-    borderColor: ZORA_RED,
+    backgroundColor: Colors.primary,
+    borderColor: Colors.primary,
   },
 
   // Footer
@@ -387,23 +399,42 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     padding: Spacing.base,
-    paddingBottom: 32,
-    backgroundColor: 'rgba(34, 23, 16, 0.9)',
+    paddingBottom: Spacing.xl,
+    backgroundColor: Colors.backgroundDark,
     borderTopWidth: 1,
-    borderTopColor: BORDER_COLOR,
+    borderTopColor: 'rgba(255, 255, 255, 0.05)',
   },
   continueButton: {
-    backgroundColor: ZORA_RED,
-    height: 52,
+    backgroundColor: Colors.primary,
+    height: Heights.button,
     borderRadius: BorderRadius.lg,
     justifyContent: 'center',
     alignItems: 'center',
+    ...Platform.select({
+      ios: {
+        shadowColor: Colors.primary,
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.3,
+        shadowRadius: 8,
+      },
+      android: {
+        elevation: 4,
+      },
+    }),
   },
   continueButtonDisabled: {
-    backgroundColor: 'rgba(204, 0, 0, 0.5)',
+    backgroundColor: 'rgba(204, 0, 0, 0.4)',
+    ...Platform.select({
+      ios: {
+        shadowOpacity: 0,
+      },
+      android: {
+        elevation: 0,
+      },
+    }),
   },
   continueButtonText: {
-    fontFamily: FontFamily.bodyBold,
+    fontFamily: FontFamily.displaySemiBold,
     fontSize: FontSize.body,
     color: Colors.textPrimary,
   },

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -6,8 +6,11 @@ import {
   ScrollView,
   TouchableOpacity,
   Image,
+  Animated,
+  Easing,
+  Platform,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context'
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import {
   ArrowLeft,
@@ -18,16 +21,8 @@ import {
   Camera,
 } from 'phosphor-react-native';
 import { Colors } from '../constants/colors';
-import { Spacing, BorderRadius } from '../constants/spacing';
+import { Spacing, BorderRadius, Heights } from '../constants/spacing';
 import { FontSize, FontFamily } from '../constants/typography';
-
-// Zora Brand Colors
-const ZORA_RED = '#CC0000';
-const ZORA_YELLOW = '#FFCC00';
-const ZORA_CARD = '#342418';
-const BACKGROUND_DARK = '#221710';
-const MUTED_TEXT = '#bc9a9a';
-const DIVIDER_COLOR = '#563939';
 
 interface TimelineStep {
   id: string;
@@ -80,6 +75,27 @@ const EVIDENCE_IMAGES = [
 
 export default function DisputeStatusScreen() {
   const router = useRouter();
+
+  // Animation values
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const slideAnim = useRef(new Animated.Value(20)).current;
+
+  useEffect(() => {
+    Animated.parallel([
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 400,
+        easing: Easing.out(Easing.cubic),
+        useNativeDriver: true,
+      }),
+      Animated.timing(slideAnim, {
+        toValue: 0,
+        duration: 400,
+        easing: Easing.out(Easing.cubic),
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, []);
 
   const renderTimelineStep = (step: TimelineStep, index: number) => {
     const isLast = index === TIMELINE_STEPS.length - 1;
@@ -278,7 +294,7 @@ export default function DisputeStatusScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: BACKGROUND_DARK,
+    backgroundColor: Colors.backgroundDark,
   },
 
   // Header
@@ -287,26 +303,26 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: Spacing.base,
-    paddingVertical: Spacing.sm,
-    backgroundColor: `${BACKGROUND_DARK}F2`,
+    paddingVertical: Spacing.md,
+    backgroundColor: Colors.backgroundDark,
     borderBottomWidth: 1,
     borderBottomColor: 'rgba(255, 255, 255, 0.05)',
   },
   backButton: {
-    width: 48,
-    height: 48,
+    width: 44,
+    height: 44,
     justifyContent: 'center',
     alignItems: 'center',
-    borderRadius: 24,
+    borderRadius: 22,
+    backgroundColor: 'rgba(0, 0, 0, 0.3)',
   },
   headerTitle: {
-    fontFamily: FontFamily.display,
+    fontFamily: FontFamily.displaySemiBold,
     fontSize: FontSize.h4,
     color: Colors.textPrimary,
-    letterSpacing: -0.3,
   },
   headerRight: {
-    width: 48,
+    width: 44,
   },
 
   // Scroll View
@@ -315,14 +331,14 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     padding: Spacing.base,
-    gap: 24,
+    gap: Spacing.lg,
   },
 
   // Header Card
   headerCard: {
-    backgroundColor: ZORA_CARD,
+    backgroundColor: Colors.cardDark,
     borderRadius: BorderRadius.xl,
-    padding: 20,
+    padding: Spacing.lg,
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.05)',
   },
@@ -330,37 +346,36 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
-    marginBottom: 16,
+    marginBottom: Spacing.base,
   },
   disputeIdLabel: {
     fontFamily: FontFamily.bodySemiBold,
-    fontSize: 10,
-    color: MUTED_TEXT,
+    fontSize: FontSize.tiny,
+    color: Colors.textMuted,
     textTransform: 'uppercase',
     letterSpacing: 1.5,
-    marginBottom: 4,
+    marginBottom: Spacing.xs,
   },
   disputeIdValue: {
-    fontFamily: FontFamily.display,
-    fontSize: 24,
+    fontFamily: FontFamily.displaySemiBold,
+    fontSize: FontSize.h2,
     color: Colors.textPrimary,
-    letterSpacing: -0.5,
   },
   statusBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
+    gap: Spacing.xs,
     backgroundColor: 'rgba(255, 204, 0, 0.1)',
     borderWidth: 1,
-    borderColor: 'rgba(255, 204, 0, 0.2)',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
+    borderColor: 'rgba(255, 204, 0, 0.25)',
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.sm,
     borderRadius: BorderRadius.full,
   },
   statusDotOuter: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
+    width: 10,
+    height: 10,
+    borderRadius: 5,
     backgroundColor: 'rgba(255, 204, 0, 0.3)',
     justifyContent: 'center',
     alignItems: 'center',
@@ -369,18 +384,18 @@ const styles = StyleSheet.create({
     width: 6,
     height: 6,
     borderRadius: 3,
-    backgroundColor: ZORA_YELLOW,
+    backgroundColor: Colors.secondary,
   },
   statusBadgeText: {
-    fontFamily: FontFamily.display,
-    fontSize: 10,
-    color: ZORA_YELLOW,
+    fontFamily: FontFamily.bodySemiBold,
+    fontSize: FontSize.tiny,
+    color: Colors.secondary,
     letterSpacing: 1,
   },
   headerDivider: {
     height: 1,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    marginBottom: 16,
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+    marginBottom: Spacing.base,
   },
   headerCardBottom: {
     flexDirection: 'row',
@@ -392,34 +407,34 @@ const styles = StyleSheet.create({
   headerCardLabel: {
     fontFamily: FontFamily.body,
     fontSize: FontSize.small,
-    color: MUTED_TEXT,
-    marginBottom: 2,
+    color: Colors.textMuted,
+    marginBottom: Spacing.xs,
   },
   headerCardValue: {
-    fontFamily: FontFamily.bodySemiBold,
+    fontFamily: FontFamily.displaySemiBold,
     fontSize: FontSize.body,
     color: Colors.textPrimary,
   },
 
   // Section
   section: {
-    gap: 16,
+    gap: Spacing.base,
   },
   sectionTitle: {
-    fontFamily: FontFamily.display,
-    fontSize: 20,
+    fontFamily: FontFamily.displaySemiBold,
+    fontSize: FontSize.h4,
     color: Colors.textPrimary,
-    paddingHorizontal: 4,
+    paddingHorizontal: Spacing.xs,
   },
 
   // Timeline
   timelineContainer: {
-    paddingLeft: 8,
+    paddingLeft: Spacing.sm,
   },
   timelineStep: {
     flexDirection: 'row',
-    gap: 16,
-    paddingBottom: 32,
+    gap: Spacing.base,
+    paddingBottom: Spacing.xl,
     position: 'relative',
   },
   timelineLine: {
@@ -428,27 +443,27 @@ const styles = StyleSheet.create({
     top: 32,
     bottom: 0,
     width: 2,
-    backgroundColor: ZORA_CARD,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
   },
   timelineLineCompleted: {
     backgroundColor: 'rgba(204, 0, 0, 0.3)',
   },
   timelineLineActive: {
-    backgroundColor: ZORA_CARD,
+    backgroundColor: Colors.primary,
   },
   timelineIconContainer: {
     width: 24,
     height: 24,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: BACKGROUND_DARK,
+    backgroundColor: Colors.backgroundDark,
     zIndex: 10,
   },
   activeIconOuter: {
-    width: 16,
-    height: 16,
-    borderRadius: 8,
-    backgroundColor: `${ZORA_RED}33`,
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    backgroundColor: 'rgba(204, 0, 0, 0.2)',
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -456,15 +471,15 @@ const styles = StyleSheet.create({
     width: 12,
     height: 12,
     borderRadius: 6,
-    backgroundColor: ZORA_RED,
+    backgroundColor: Colors.primary,
   },
   pendingIcon: {
-    width: 16,
-    height: 16,
-    borderRadius: 8,
+    width: 14,
+    height: 14,
+    borderRadius: 7,
     borderWidth: 2,
-    borderColor: ZORA_CARD,
-    backgroundColor: BACKGROUND_DARK,
+    borderColor: 'rgba(255, 255, 255, 0.2)',
+    backgroundColor: Colors.backgroundDark,
   },
   timelineContent: {
     flex: 1,
@@ -477,69 +492,69 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'baseline',
-    marginBottom: 4,
+    marginBottom: Spacing.xs,
   },
   timelineTitle: {
-    fontFamily: FontFamily.bodySemiBold,
+    fontFamily: FontFamily.displaySemiBold,
     fontSize: FontSize.body,
     color: Colors.textPrimary,
   },
   timelineDate: {
     fontFamily: FontFamily.body,
-    fontSize: 12,
-    color: MUTED_TEXT,
+    fontSize: FontSize.caption,
+    color: Colors.textMuted,
   },
   timelineDateActive: {
-    color: ZORA_RED,
-    fontFamily: FontFamily.bodyMedium,
+    color: Colors.primary,
+    fontFamily: FontFamily.bodySemiBold,
   },
   timelineDescription: {
     fontFamily: FontFamily.body,
     fontSize: FontSize.small,
-    color: MUTED_TEXT,
+    color: Colors.textMuted,
   },
 
   // Details Card
   detailsCard: {
-    backgroundColor: ZORA_CARD,
+    backgroundColor: Colors.cardDark,
     borderRadius: BorderRadius.xl,
-    padding: 20,
+    padding: Spacing.lg,
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.05)',
-    gap: 24,
+    gap: Spacing.lg,
   },
   detailSection: {
-    gap: 8,
+    gap: Spacing.sm,
   },
   detailLabel: {
     fontFamily: FontFamily.bodySemiBold,
-    fontSize: 10,
-    color: MUTED_TEXT,
+    fontSize: FontSize.tiny,
+    color: Colors.textMuted,
     textTransform: 'uppercase',
     letterSpacing: 1.5,
   },
   detailRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: Spacing.sm,
   },
   detailValue: {
-    fontFamily: FontFamily.bodyMedium,
+    fontFamily: FontFamily.bodySemiBold,
     fontSize: FontSize.body,
     color: Colors.textPrimary,
   },
 
   // Items List
   itemsList: {
-    gap: 8,
+    gap: Spacing.sm,
   },
   itemRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: BACKGROUND_DARK,
-    padding: 12,
-    borderRadius: BorderRadius.lg,
+    backgroundColor: Colors.backgroundDark,
+    padding: Spacing.md,
+    borderRadius: BorderRadius.md,
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.05)',
   },
@@ -549,35 +564,35 @@ const styles = StyleSheet.create({
     color: Colors.textPrimary,
   },
   itemQuantity: {
-    fontFamily: FontFamily.body,
-    fontSize: 12,
-    color: MUTED_TEXT,
+    fontFamily: FontFamily.bodySemiBold,
+    fontSize: FontSize.caption,
+    color: Colors.textMuted,
   },
 
   // Description
   descriptionBox: {
-    backgroundColor: BACKGROUND_DARK,
-    padding: 12,
-    borderRadius: BorderRadius.lg,
+    backgroundColor: Colors.backgroundDark,
+    padding: Spacing.md,
+    borderRadius: BorderRadius.md,
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.05)',
   },
   descriptionText: {
     fontFamily: FontFamily.body,
     fontSize: FontSize.small,
-    color: 'rgba(255, 255, 255, 0.9)',
-    lineHeight: 20,
+    color: Colors.textSecondary,
+    lineHeight: 22,
   },
 
   // Evidence Grid
   evidenceGrid: {
     flexDirection: 'row',
-    gap: 12,
+    gap: Spacing.md,
   },
   evidenceImageContainer: {
     width: '30%',
     aspectRatio: 1,
-    borderRadius: BorderRadius.lg,
+    borderRadius: BorderRadius.md,
     overflow: 'hidden',
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.1)',
@@ -589,44 +604,45 @@ const styles = StyleSheet.create({
   addEvidenceButton: {
     width: '30%',
     aspectRatio: 1,
-    borderRadius: BorderRadius.lg,
-    backgroundColor: BACKGROUND_DARK,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
+    borderRadius: BorderRadius.md,
+    backgroundColor: Colors.backgroundDark,
+    borderWidth: 1.5,
+    borderStyle: 'dashed',
+    borderColor: 'rgba(255, 255, 255, 0.15)',
     justifyContent: 'center',
     alignItems: 'center',
   },
 
   // Resolution Card
   resolutionCard: {
-    backgroundColor: ZORA_CARD,
+    backgroundColor: Colors.cardDark,
     borderRadius: BorderRadius.xl,
-    padding: 24,
-    borderWidth: 1,
+    padding: Spacing.xl,
+    borderWidth: 1.5,
     borderStyle: 'dashed',
     borderColor: 'rgba(255, 255, 255, 0.1)',
     alignItems: 'center',
-    gap: 12,
+    gap: Spacing.md,
   },
   resolutionIconContainer: {
     width: 56,
     height: 56,
     borderRadius: 28,
-    backgroundColor: BACKGROUND_DARK,
+    backgroundColor: Colors.backgroundDark,
     justifyContent: 'center',
     alignItems: 'center',
   },
   resolutionTitle: {
-    fontFamily: FontFamily.bodySemiBold,
+    fontFamily: FontFamily.displaySemiBold,
     fontSize: FontSize.body,
     color: Colors.textPrimary,
   },
   resolutionDescription: {
     fontFamily: FontFamily.body,
     fontSize: FontSize.small,
-    color: MUTED_TEXT,
+    color: Colors.textMuted,
     textAlign: 'center',
-    lineHeight: 20,
+    lineHeight: 22,
   },
 
   // Footer
@@ -636,8 +652,8 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     padding: Spacing.base,
-    paddingBottom: 32,
-    backgroundColor: 'rgba(34, 23, 16, 0.9)',
+    paddingBottom: Spacing.xl,
+    backgroundColor: Colors.backgroundDark,
     borderTopWidth: 1,
     borderTopColor: 'rgba(255, 255, 255, 0.05)',
   },
@@ -645,14 +661,16 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 8,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    height: 52,
-    borderRadius: BorderRadius.xl,
+    gap: Spacing.sm,
+    backgroundColor: 'transparent',
+    height: Heights.button,
+    borderRadius: BorderRadius.lg,
+    borderWidth: 1,
+    borderColor: Colors.primary,
   },
   contactButtonText: {
-    fontFamily: FontFamily.bodyBold,
+    fontFamily: FontFamily.displaySemiBold,
     fontSize: FontSize.body,
-    color: Colors.textPrimary,
+    color: Colors.primary,
   },
 });
