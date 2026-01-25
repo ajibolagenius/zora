@@ -522,16 +522,7 @@ const styles = StyleSheet.create({
     color: ZORA_YELLOW,
   },
   
-  // Footer
-  footer: {
-    position: 'absolute',
-    bottom: 90,
-    left: 0,
-    right: 0,
-    paddingHorizontal: Spacing.base,
-    paddingVertical: Spacing.sm,
-    backgroundColor: 'transparent',
-  },
+  // Checkout Button
   checkoutButton: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -540,6 +531,7 @@ const styles = StyleSheet.create({
     borderRadius: 100,
     paddingVertical: 16,
     paddingHorizontal: 24,
+    marginTop: Spacing.base,
   },
   checkoutText: {
     fontFamily: FontFamily.bodyBold,
