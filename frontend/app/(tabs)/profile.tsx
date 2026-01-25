@@ -47,7 +47,7 @@ const MENU_ITEMS: MenuItem[] = [
   { id: '1', icon: User, label: 'Personal Information', route: '/settings/personal' },
   { id: '2', icon: CreditCard, label: 'Payment Methods', route: '/settings/payment' },
   { id: '3', icon: MapPin, label: 'Saved Addresses', route: '/settings/addresses' },
-  { id: '4', icon: Bell, label: 'Notification Settings', route: '/settings/notifications' },
+  { id: '4', icon: Bell, label: 'Notification Settings', route: '/notification-settings' },
   { id: '5', icon: UserPlus, label: 'Refer a Friend', route: '/referrals' },
   { id: '6', icon: Question, label: 'Help & Support', route: '/help' },
   { id: '7', icon: Info, label: 'About Zora', route: '/settings/about' },
