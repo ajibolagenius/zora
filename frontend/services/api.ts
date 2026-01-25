@@ -1,37 +1,47 @@
-import axios from 'axios';
+import axios, { AxiosInstance } from 'axios';
 
-// Get backend URL from environment - use relative URL for web
-const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL || '';
+/**
+ * External API client for third-party services
+ * Note: For Supabase operations, use the supabaseService instead
+ */
 
-export const api = axios.create({
-  baseURL: `${BACKEND_URL}/api`,
-  timeout: 30000,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-});
+// Create a base API client for external services
+export const createApiClient = (baseURL: string): AxiosInstance => {
+  const client = axios.create({
+    baseURL,
+    timeout: 30000,
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
 
-// Request interceptor
-api.interceptors.request.use(
-  (config) => {
-    return config;
-  },
-  (error) => {
-    return Promise.reject(error);
-  }
-);
-
-// Response interceptor
-api.interceptors.response.use(
-  (response) => {
-    return response;
-  },
-  (error) => {
-    if (error.response?.status === 401) {
-      console.log('[API] Unauthorized request');
+  // Request interceptor
+  client.interceptors.request.use(
+    (config) => {
+      return config;
+    },
+    (error) => {
+      return Promise.reject(error);
     }
-    return Promise.reject(error);
-  }
-);
+  );
+
+  // Response interceptor
+  client.interceptors.response.use(
+    (response) => {
+      return response;
+    },
+    (error) => {
+      if (error.response?.status === 401) {
+        console.log('[API] Unauthorized request');
+      }
+      return Promise.reject(error);
+    }
+  );
+
+  return client;
+};
+
+// Generic API client (can be used for external services)
+export const api = createApiClient('');
 
 export default api;

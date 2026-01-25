@@ -1,50 +1,50 @@
-# Welcome to your Expo app 👋
+# Zora African Market - Mobile App
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+React Native / Expo application for the Zora African Market platform.
 
-## Get started
-
-1. Install dependencies
-
-   ```bash
-   npm install
-   ```
-
-2. Start the app
-
-   ```bash
-   npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
+## Quick Start
 
 ```bash
-npm run reset-project
+# Install dependencies
+npm install
+
+# Start development server
+npx expo start
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+## Development
 
-## Learn more
+### Running on Device
+- **Expo Go**: Scan QR code with Expo Go app (iOS/Android)
+- **Web**: Press `w` to open web preview
+- **iOS Simulator**: Press `i` (macOS only)
+- **Android Emulator**: Press `a`
 
-To learn more about developing your project with Expo, look at the following resources:
+### Environment Setup
+1. Copy `.env.example` to `.env`
+2. Fill in your Supabase and API keys
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+## Project Structure
 
-## Join the community
+```
+frontend/
+├── app/                 # Expo Router screens
+│   ├── (auth)/         # Authentication screens
+│   ├── (tabs)/         # Main tab navigation
+│   ├── onboarding/     # Onboarding flow
+│   ├── product/        # Product details
+│   ├── vendor/         # Vendor storefront
+│   └── settings/       # User settings
+├── components/         # Reusable UI components
+├── constants/          # Design tokens
+├── hooks/              # Custom React hooks
+├── lib/                # Supabase client
+├── services/           # API services
+├── stores/             # Zustand state
+├── supabase/           # Database migrations
+└── types/              # TypeScript types
+```
 
-Join our community of developers creating universal apps.
+## Learn More
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+See the main [README.md](../README.md) for complete documentation.

@@ -10,11 +10,10 @@ import {
   ScrollView,
   ActivityIndicator,
   Image,
+  Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import * as WebBrowser from 'expo-web-browser';
-import * as Linking from 'expo-linking';
 import {
   ArrowLeft,
   UserCircle,
@@ -34,68 +33,66 @@ import { useAuthStore } from '../../stores/authStore';
 
 type AuthMode = 'signin' | 'signup';
 
-const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL || '';
-
 export default function LoginScreen() {
   const router = useRouter();
-  const { login, setLoading } = useAuthStore();
+  const { signInWithGoogle, signInWithEmail, signUpWithEmail, isLoading } = useAuthStore();
   const [mode, setMode] = useState<AuthMode>('signin');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
-  const [loading, setLocalLoading] = useState(false);
+  const [localLoading, setLocalLoading] = useState(false);
+
+  const loading = isLoading || localLoading;
 
   const handleGoogleLogin = async () => {
     try {
       setLocalLoading(true);
-      
-      const redirectUrl = Platform.OS === 'web'
-        ? `${BACKEND_URL}/`
-        : Linking.createURL('/');
-      
-      const authUrl = `https://auth.emergentagent.com/?redirect=${encodeURIComponent(redirectUrl)}`;
-      
-      if (Platform.OS === 'web') {
-        window.location.href = authUrl;
-      } else {
-        const result = await WebBrowser.openAuthSessionAsync(authUrl, redirectUrl);
-        
-        if (result.type === 'success' && result.url) {
-          const sessionId = extractSessionId(result.url);
-          if (sessionId) {
-            setLoading(true);
-            await login(sessionId);
-            router.replace('/onboarding/heritage');
-          }
-        }
-      }
-    } catch (error) {
-      console.error('Login error:', error);
+      await signInWithGoogle();
+      // Navigation will be handled by auth state change listener
+    } catch (error: any) {
+      console.error('Google login error:', error);
+      Alert.alert('Login Failed', error.message || 'Unable to sign in with Google');
     } finally {
       setLocalLoading(false);
     }
   };
 
-  const extractSessionId = (url: string): string | null => {
-    if (!url) return null;
-    const hashMatch = url.match(/#session_id=([^&]+)/);
-    if (hashMatch) return hashMatch[1];
-    const queryMatch = url.match(/[?&]session_id=([^&]+)/);
-    if (queryMatch) return queryMatch[1];
-    return null;
-  };
-
   const handleAppleLogin = async () => {
-    console.log('Apple login');
+    // Apple Sign-In would be implemented here using expo-apple-authentication
+    Alert.alert('Coming Soon', 'Apple Sign-In will be available soon!');
   };
 
-  const handleEmailAuth = () => {
-    if (mode === 'signin') {
+  const handleEmailAuth = async () => {
+    if (!email || !password) {
+      Alert.alert('Missing Fields', 'Please enter your email and password');
+      return;
+    }
+
+    if (mode === 'signup' && !name) {
+      Alert.alert('Missing Fields', 'Please enter your name');
+      return;
+    }
+
+    try {
+      setLocalLoading(true);
+      
+      if (mode === 'signin') {
+        await signInWithEmail(email, password);
+      } else {
+        await signUpWithEmail(email, password, name);
+      }
+      
       router.replace('/onboarding/heritage');
-    } else {
-      router.replace('/onboarding/heritage');
+    } catch (error: any) {
+      console.error('Auth error:', error);
+      Alert.alert(
+        mode === 'signin' ? 'Sign In Failed' : 'Sign Up Failed',
+        error.message || 'An error occurred during authentication'
+      );
+    } finally {
+      setLocalLoading(false);
     }
   };
 
