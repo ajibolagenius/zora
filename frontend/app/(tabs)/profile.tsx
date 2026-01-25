@@ -47,12 +47,14 @@ interface MenuItem {
 
 const MENU_ITEMS: MenuItem[] = [
   { id: '1', icon: User, label: 'Personal Information', route: '/settings/personal' },
-  { id: '2', icon: CreditCard, label: 'Payment Methods', route: '/settings/payment' },
-  { id: '3', icon: MapPin, label: 'Saved Addresses', route: '/settings/addresses' },
-  { id: '4', icon: Bell, label: 'Notification Settings', route: '/notification-settings' },
-  { id: '5', icon: UserPlus, label: 'Refer a Friend', route: '/referrals' },
-  { id: '6', icon: Question, label: 'Help & Support', route: '/help' },
-  { id: '7', icon: Info, label: 'About Zora', route: '/settings/about' },
+  { id: '2', icon: Package, label: 'My Orders', route: '/orders' },
+  { id: '3', icon: QrCode, label: 'Scan QR Code', route: '/qr-scanner' },
+  { id: '4', icon: CreditCard, label: 'Payment Methods', route: '/settings/payment' },
+  { id: '5', icon: MapPin, label: 'Saved Addresses', route: '/settings/addresses' },
+  { id: '6', icon: Bell, label: 'Notification Settings', route: '/notification-settings' },
+  { id: '7', icon: UserPlus, label: 'Refer a Friend', route: '/referrals' },
+  { id: '8', icon: Question, label: 'Help & Support', route: '/help' },
+  { id: '9', icon: Info, label: 'About Zora', route: '/settings/about' },
 ];
 
 const STATS = [
