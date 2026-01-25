@@ -214,12 +214,7 @@ export default function CartTab() {
           </View>
         </View>
 
-        {/* Bottom spacing for checkout button and tab bar */}
-        <View style={{ height: 160 }} />
-      </ScrollView>
-
-      {/* Sticky Footer - Checkout Button */}
-      <View style={styles.footer}>
+        {/* Checkout Button - Inside ScrollView for proper positioning */}
         <TouchableOpacity 
           style={styles.checkoutButton}
           onPress={() => router.push('/checkout')}
@@ -228,7 +223,10 @@ export default function CartTab() {
           <Text style={styles.checkoutText}>Proceed to Checkout</Text>
           <Text style={styles.checkoutPrice}>£{total.toFixed(2)}</Text>
         </TouchableOpacity>
-      </View>
+
+        {/* Bottom spacing for tab bar */}
+        <View style={{ height: 100 }} />
+      </ScrollView>
     </SafeAreaView>
   );
 }
