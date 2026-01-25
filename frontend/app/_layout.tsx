@@ -18,6 +18,7 @@ import {
   Inter_700Bold,
 } from '@expo-google-fonts/inter';
 import { Colors } from '../constants/colors';
+import { QueryProvider } from '../providers/QueryProvider';
 import '../global.css';
 
 // Keep the splash screen visible while we fetch resources
