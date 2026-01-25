@@ -84,22 +84,14 @@ export default function ExploreScreen() {
     router.push(`/vendor/${vendorId}`);
   };
 
-  const handleOpenFullMap = () => {
-    router.push('/vendor-map');
-  };
-
   const handleFilterPress = () => {
     router.push('/vendors');
   };
 
   return (
     <View style={styles.container}>
-      {/* Map Background - Tappable to open full map */}
-      <TouchableOpacity 
-        style={styles.mapContainer}
-        onPress={handleOpenFullMap}
-        activeOpacity={0.95}
-      >
+      {/* Map Background */}
+      <View style={styles.mapContainer}>
         {/* Map Pattern Background */}
         <View style={styles.mapBackground}>
           <View style={styles.mapPattern}>
@@ -134,7 +126,7 @@ export default function ExploreScreen() {
           <View style={styles.userPulse} />
           <View style={styles.userDot} />
         </View>
-      </TouchableOpacity>
+      </View>
 
       {/* Header */}
       <SafeAreaView style={styles.header} edges={['top']}>
