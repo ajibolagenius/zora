@@ -137,7 +137,7 @@ export default function HomeScreen() {
   };
 
   const handleRegionPress = (region: Region) => {
-    setSelectedRegion(selectedRegion === region.id ? null : region.id);
+    setSelectedRegion(selectedRegion === region.name ? null : region.name);
   };
 
   const handleBannerPress = (banner: { cta_link?: string }) => {
@@ -264,7 +264,7 @@ export default function HomeScreen() {
                 <RegionCard
                   key={region.id}
                   region={region}
-                  selected={selectedRegion === region.id}
+                  selected={selectedRegion === region.name}
                   onPress={() => handleRegionPress(region)}
                 />
               ))}
@@ -299,10 +299,13 @@ export default function HomeScreen() {
           <View style={styles.section}>
             <View style={styles.sectionHeader}>
               <Text style={styles.sectionTitle}>
-                {selectedRegion ? `Products from ${selectedRegion.replace('-', ' ')}` : 'Popular Products'}
+                {selectedRegion ? `Products from ${selectedRegion}` : 'Popular Products'}
               </Text>
               <TouchableOpacity 
-                onPress={() => router.push(selectedRegion ? `/products?region=${selectedRegion}` : '/products')} 
+                onPress={() => {
+                  const regionSlug = selectedRegion?.toLowerCase().replace(/\s+/g, '-');
+                  router.push(selectedRegion ? `/products?region=${regionSlug}` : '/products');
+                }} 
                 activeOpacity={0.7}
               >
                 <Text style={styles.seeAllText}>See All</Text>

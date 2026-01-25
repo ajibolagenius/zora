@@ -86,10 +86,12 @@ export default function ProductsScreen() {
   const filteredProducts = useMemo(() => {
     let result = [...products];
     
-    // Filter by region
+    // Filter by region - convert slug format (west-africa) to match cultural_region (West Africa)
     if (selectedRegion) {
+      // Normalize slug to comparable format: "west-africa" -> "west africa"
+      const normalizedFilter = selectedRegion.toLowerCase().replace(/-/g, ' ');
       result = result.filter(p => 
-        p.cultural_region?.toLowerCase().includes(selectedRegion.toLowerCase())
+        p.cultural_region?.toLowerCase().includes(normalizedFilter)
       );
     }
     

@@ -47,18 +47,24 @@ export const FeaturedSlider: React.FC<FeaturedSliderProps> = ({
   const flatListRef = useRef<FlatList>(null);
   const [activeIndex, setActiveIndex] = useState(0);
   const scrollX = useRef(new Animated.Value(0)).current;
+  const activeIndexRef = useRef(0); // Track index without causing re-renders
 
-  // Auto-play functionality
+  // Keep ref in sync with state
+  useEffect(() => {
+    activeIndexRef.current = activeIndex;
+  }, [activeIndex]);
+
+  // Auto-play functionality - runs independently of manual scrolling
   useEffect(() => {
     if (!autoPlay || banners.length <= 1) return;
 
     const interval = setInterval(() => {
-      const nextIndex = (activeIndex + 1) % banners.length;
+      const nextIndex = (activeIndexRef.current + 1) % banners.length;
       flatListRef.current?.scrollToIndex({ index: nextIndex, animated: true });
     }, autoPlayInterval);
 
     return () => clearInterval(interval);
-  }, [activeIndex, autoPlay, autoPlayInterval, banners.length]);
+  }, [autoPlay, autoPlayInterval, banners.length]);
 
   const handleScroll = Animated.event(
     [{ nativeEvent: { contentOffset: { x: scrollX } } }],

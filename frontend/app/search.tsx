@@ -288,7 +288,7 @@ export default function SearchScreen() {
         )}
 
         {/* Dynamic Suggestions Dropdown */}
-        {isInputFocused && searchQuery.length >= 1 && searchQuery.length < 2 && dynamicSuggestions.length > 0 && (
+        {isInputFocused && searchQuery.length >= 2 && showDropdown && dynamicSuggestions.length > 0 && (
           <View className="px-4 mb-4">
             <Text className="text-text-muted text-sm mb-2">Suggestions</Text>
             <View className="bg-card-dark rounded-xl overflow-hidden">
