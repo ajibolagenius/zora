@@ -3,6 +3,30 @@ import { User } from '../types';
 import { supabase, getSupabaseClient, isSupabaseConfigured, getCredentialsError } from '../lib/supabase';
 import { Session, AuthError } from '@supabase/supabase-js';
 
+// ============================================
+// DEV MOCK USER - For testing without Supabase
+// ============================================
+// Email: test@zora.dev
+// Password: Test123!
+// ============================================
+export const DEV_MOCK_USER: User = {
+  id: 'dev-mock-user-001',
+  email: 'test@zora.dev',
+  name: 'Test User',
+  picture: null,
+  phone: '+234 800 000 0000',
+  membership_tier: 'gold',
+  zora_credits: 250.00,
+  loyalty_points: 5000,
+  referral_code: 'ZORATEST',
+  cultural_interests: ['Yoruba', 'Igbo', 'Hausa'],
+};
+
+export const DEV_MOCK_CREDENTIALS = {
+  email: 'test@zora.dev',
+  password: 'Test123!',
+};
+
 // Helper to add timeout to promises
 const withTimeout = <T>(promise: Promise<T>, ms: number, errorMessage: string): Promise<T> => {
   const timeout = new Promise<never>((_, reject) => {
@@ -27,6 +51,7 @@ interface AuthState {
   setOnboardingComplete: (complete: boolean) => void;
   signInWithGoogle: () => Promise<void>;
   signInWithEmail: (email: string, password: string) => Promise<void>;
+  signInWithMockUser: () => void; // Dev testing without Supabase
   signUpWithEmail: (email: string, password: string, name: string) => Promise<void>;
   resetPassword: (email: string) => Promise<void>;
   logout: () => Promise<void>;
@@ -88,6 +113,15 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
   },
   
   signInWithEmail: async (email: string, password: string) => {
+    // Check for dev mock user credentials
+    if (
+      email === DEV_MOCK_CREDENTIALS.email &&
+      password === DEV_MOCK_CREDENTIALS.password
+    ) {
+      get().signInWithMockUser();
+      return;
+    }
+
     // Check credentials before attempting auth
     if (!isSupabaseConfigured()) {
       const error = new Error(getCredentialsError());
@@ -130,6 +164,19 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
       set({ isLoading: false });
       throw error;
     }
+  },
+
+  // Mock user login for development testing
+  // Usage: Call signInWithMockUser() or use credentials test@zora.dev / Test123!
+  signInWithMockUser: () => {
+    console.log('🧪 DEV: Signing in with mock user');
+    set({
+      user: DEV_MOCK_USER,
+      session: null, // No real session for mock user
+      isAuthenticated: true,
+      isLoading: false,
+      hasCompletedOnboarding: true, // Skip onboarding for testing
+    });
   },
   
   signUpWithEmail: async (email: string, password: string, name: string) => {
