@@ -444,8 +444,8 @@ const styles = StyleSheet.create({
   sheetContentInner: {
     paddingHorizontal: 24,
     paddingTop: 8,
-    paddingBottom: 32,
-    gap: 24,
+    paddingBottom: 48,
+    gap: 20,
   },
   
   // Arrival Section
