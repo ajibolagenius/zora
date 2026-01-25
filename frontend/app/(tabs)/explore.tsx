@@ -110,7 +110,6 @@ export default function ExploreScreen() {
           <Text style={styles.openMapText}>Tap to open full map</Text>
         </View>
       </TouchableOpacity>
-      </View>
 
       {/* Header */}
       <SafeAreaView style={styles.header} edges={['top']}>
