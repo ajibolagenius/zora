@@ -20,6 +20,7 @@ import {
   Check,
   DotsThree,
   Crosshair,
+  Headset,
 } from 'phosphor-react-native';
 import { Colors } from '../../constants/colors';
 import { Spacing, BorderRadius } from '../../constants/spacing';
@@ -225,6 +226,16 @@ export default function OrderTrackingScreen() {
               );
             })}
           </View>
+
+          {/* Need Help Button */}
+          <TouchableOpacity
+            style={styles.needHelpButton}
+            onPress={() => router.push(`/order-support/${orderNumber}`)}
+            activeOpacity={0.8}
+          >
+            <Headset size={18} color={ZORA_RED} weight="regular" />
+            <Text style={styles.needHelpText}>Need Help with this Order?</Text>
+          </TouchableOpacity>
         </ScrollView>
       </View>
     </View>
