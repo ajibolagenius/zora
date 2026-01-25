@@ -1,0 +1,456 @@
+import React, { useState, useMemo, useCallback } from 'react';
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  ScrollView,
+  Image,
+  ActivityIndicator,
+  Modal,
+  Pressable,
+} from 'react-native';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useRouter } from 'expo-router';
+import {
+  MagnifyingGlass,
+  ArrowLeft,
+  SlidersHorizontal,
+  X,
+  Star,
+  Check,
+  CaretDown,
+} from 'phosphor-react-native';
+import { useProductSearch, useCategories, useRegions, usePriceRange, type ProductFilters } from '../../hooks/useQueries';
+
+const SORT_OPTIONS = [
+  { id: 'rating', label: 'Top Rated' },
+  { id: 'price_asc', label: 'Price: Low to High' },
+  { id: 'price_desc', label: 'Price: High to Low' },
+  { id: 'name', label: 'Name A-Z' },
+  { id: 'newest', label: 'Newest First' },
+] as const;
+
+const RATING_OPTIONS = [4, 3, 2, 1] as const;
+
+export default function SearchScreen() {
+  const router = useRouter();
+  const insets = useSafeAreaInsets();
+  
+  // Search state
+  const [searchQuery, setSearchQuery] = useState('');
+  const [showFilters, setShowFilters] = useState(false);
+  
+  // Filter state
+  const [filters, setFilters] = useState<ProductFilters>({});
+  const [tempFilters, setTempFilters] = useState<ProductFilters>({});
+  
+  // Fetch data
+  const { data: categories = [] } = useCategories();
+  const { data: regions = [] } = useRegions();
+  const { data: priceRange } = usePriceRange();
+  const { data: searchResults = [], isLoading, isFetching } = useProductSearch(searchQuery, filters);
+  
+  // Active filter count
+  const activeFilterCount = useMemo(() => {
+    let count = 0;
+    if (filters.category) count++;
+    if (filters.region) count++;
+    if (filters.minPrice !== undefined || filters.maxPrice !== undefined) count++;
+    if (filters.minRating !== undefined) count++;
+    if (filters.sortBy) count++;
+    return count;
+  }, [filters]);
+  
+  // Open filters modal
+  const openFilters = useCallback(() => {
+    setTempFilters({ ...filters });
+    setShowFilters(true);
+  }, [filters]);
+  
+  // Apply filters
+  const applyFilters = useCallback(() => {
+    setFilters({ ...tempFilters });
+    setShowFilters(false);
+  }, [tempFilters]);
+  
+  // Clear all filters
+  const clearFilters = useCallback(() => {
+    setTempFilters({});
+  }, []);
+  
+  // Navigate to product
+  const handleProductPress = (productId: string) => {
+    router.push(`/product/${productId}`);
+  };
+
+  return (
+    <View className="flex-1 bg-bg-dark">
+      <SafeAreaView className="flex-1" edges={['top']}>
+        {/* Header */}
+        <View className="flex-row items-center px-4 py-3 gap-3">
+          <TouchableOpacity
+            onPress={() => router.back()}
+            className="w-11 h-11 rounded-full bg-card-dark items-center justify-center"
+          >
+            <ArrowLeft size={24} color="#FFFFFF" weight="bold" />
+          </TouchableOpacity>
+          
+          {/* Search Input */}
+          <View className="flex-1 flex-row items-center bg-card-dark rounded-xl px-4 h-12">
+            <MagnifyingGlass size={20} color="#CBA990" weight="regular" />
+            <TextInput
+              className="flex-1 ml-3 text-text-primary font-body text-base"
+              placeholder="Search products..."
+              placeholderTextColor="#CBA990"
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+              autoFocus
+              returnKeyType="search"
+            />
+            {searchQuery.length > 0 && (
+              <TouchableOpacity onPress={() => setSearchQuery('')}>
+                <X size={18} color="#CBA990" weight="bold" />
+              </TouchableOpacity>
+            )}
+          </View>
+          
+          {/* Filter Button */}
+          <TouchableOpacity
+            onPress={openFilters}
+            className="w-11 h-11 rounded-full bg-card-dark items-center justify-center relative"
+          >
+            <SlidersHorizontal size={22} color="#FFFFFF" weight="bold" />
+            {activeFilterCount > 0 && (
+              <View className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-zora-red items-center justify-center">
+                <Text className="text-white text-xs font-bold">{activeFilterCount}</Text>
+              </View>
+            )}
+          </TouchableOpacity>
+        </View>
+        
+        {/* Active Filters Pills */}
+        {activeFilterCount > 0 && (
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            className="px-4 py-2"
+            contentContainerStyle={{ gap: 8 }}
+          >
+            {filters.category && (
+              <FilterPill
+                label={filters.category}
+                onRemove={() => setFilters(f => ({ ...f, category: undefined }))}
+              />
+            )}
+            {filters.region && (
+              <FilterPill
+                label={filters.region}
+                onRemove={() => setFilters(f => ({ ...f, region: undefined }))}
+              />
+            )}
+            {filters.minRating && (
+              <FilterPill
+                label={`${filters.minRating}+ Stars`}
+                onRemove={() => setFilters(f => ({ ...f, minRating: undefined }))}
+              />
+            )}
+            {(filters.minPrice !== undefined || filters.maxPrice !== undefined) && (
+              <FilterPill
+                label={`£${filters.minPrice || 0} - £${filters.maxPrice || '∞'}`}
+                onRemove={() => setFilters(f => ({ ...f, minPrice: undefined, maxPrice: undefined }))}
+              />
+            )}
+            {filters.sortBy && (
+              <FilterPill
+                label={SORT_OPTIONS.find(s => s.id === filters.sortBy)?.label || ''}
+                onRemove={() => setFilters(f => ({ ...f, sortBy: undefined }))}
+              />
+            )}
+            <TouchableOpacity
+              onPress={() => setFilters({})}
+              className="px-3 py-1.5 rounded-full border border-zora-red"
+            >
+              <Text className="text-zora-red text-sm font-medium">Clear All</Text>
+            </TouchableOpacity>
+          </ScrollView>
+        )}
+        
+        {/* Results */}
+        <ScrollView className="flex-1 px-4" showsVerticalScrollIndicator={false}>
+          {/* Results Count */}
+          {searchQuery.length >= 2 && (
+            <Text className="text-text-muted text-sm mb-3">
+              {isLoading ? 'Searching...' : `${searchResults.length} results found`}
+            </Text>
+          )}
+          
+          {/* Loading State */}
+          {(isLoading || isFetching) && searchQuery.length >= 2 && (
+            <View className="py-8 items-center">
+              <ActivityIndicator size="large" color="#C1272D" />
+            </View>
+          )}
+          
+          {/* Empty State */}
+          {!isLoading && searchQuery.length >= 2 && searchResults.length === 0 && (
+            <View className="py-12 items-center">
+              <MagnifyingGlass size={48} color="#CBA990" weight="duotone" />
+              <Text className="text-text-primary text-lg font-semibold mt-4">No results found</Text>
+              <Text className="text-text-muted text-sm mt-2 text-center">
+                Try adjusting your search or filters
+              </Text>
+            </View>
+          )}
+          
+          {/* Prompt to Search */}
+          {searchQuery.length < 2 && (
+            <View className="py-12 items-center">
+              <MagnifyingGlass size={48} color="#CBA990" weight="duotone" />
+              <Text className="text-text-primary text-lg font-semibold mt-4">Search for products</Text>
+              <Text className="text-text-muted text-sm mt-2 text-center">
+                Enter at least 2 characters to search
+              </Text>
+            </View>
+          )}
+          
+          {/* Results Grid */}
+          {!isLoading && searchResults.length > 0 && (
+            <View className="flex-row flex-wrap" style={{ marginHorizontal: -6 }}>
+              {searchResults.map((product) => (
+                <TouchableOpacity
+                  key={product.id}
+                  onPress={() => handleProductPress(product.id)}
+                  className="w-1/2 p-1.5"
+                  activeOpacity={0.8}
+                >
+                  <View className="bg-card-dark rounded-xl overflow-hidden">
+                    <Image
+                      source={{ uri: product.image_urls?.[0] || 'https://via.placeholder.com/200' }}
+                      className="w-full h-32"
+                      resizeMode="cover"
+                    />
+                    <View className="p-3">
+                      <Text className="text-text-primary text-sm font-semibold" numberOfLines={2}>
+                        {product.name}
+                      </Text>
+                      <Text className="text-text-muted text-xs mt-1">{product.category}</Text>
+                      <View className="flex-row items-center justify-between mt-2">
+                        <Text className="text-zora-yellow text-base font-bold">
+                          £{product.price.toFixed(2)}
+                        </Text>
+                        {product.rating && (
+                          <View className="flex-row items-center gap-1">
+                            <Star size={12} color="#FFCC00" weight="fill" />
+                            <Text className="text-text-muted text-xs">{product.rating}</Text>
+                          </View>
+                        )}
+                      </View>
+                    </View>
+                  </View>
+                </TouchableOpacity>
+              ))}
+            </View>
+          )}
+          
+          <View style={{ height: 100 }} />
+        </ScrollView>
+      </SafeAreaView>
+      
+      {/* Filter Modal */}
+      <Modal
+        visible={showFilters}
+        animationType="slide"
+        presentationStyle="pageSheet"
+        onRequestClose={() => setShowFilters(false)}
+      >
+        <View className="flex-1 bg-bg-dark">
+          <SafeAreaView className="flex-1">
+            {/* Modal Header */}
+            <View className="flex-row items-center justify-between px-4 py-3 border-b border-card-dark">
+              <TouchableOpacity onPress={() => setShowFilters(false)}>
+                <X size={24} color="#FFFFFF" weight="bold" />
+              </TouchableOpacity>
+              <Text className="text-text-primary text-lg font-bold">Filters</Text>
+              <TouchableOpacity onPress={clearFilters}>
+                <Text className="text-zora-red text-sm font-medium">Reset</Text>
+              </TouchableOpacity>
+            </View>
+            
+            <ScrollView className="flex-1 px-4" showsVerticalScrollIndicator={false}>
+              {/* Sort By */}
+              <View className="py-4 border-b border-card-dark">
+                <Text className="text-text-primary text-base font-semibold mb-3">Sort By</Text>
+                <View className="gap-2">
+                  {SORT_OPTIONS.map((option) => (
+                    <TouchableOpacity
+                      key={option.id}
+                      onPress={() => setTempFilters(f => ({ ...f, sortBy: option.id }))}
+                      className={`flex-row items-center justify-between p-3 rounded-lg ${
+                        tempFilters.sortBy === option.id ? 'bg-zora-red/20' : 'bg-card-dark'
+                      }`}
+                    >
+                      <Text className="text-text-primary text-sm">{option.label}</Text>
+                      {tempFilters.sortBy === option.id && (
+                        <Check size={20} color="#C1272D" weight="bold" />
+                      )}
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              </View>
+              
+              {/* Category Filter */}
+              <View className="py-4 border-b border-card-dark">
+                <Text className="text-text-primary text-base font-semibold mb-3">Category</Text>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                  <View className="flex-row gap-2">
+                    <FilterChip
+                      label="All"
+                      selected={!tempFilters.category}
+                      onPress={() => setTempFilters(f => ({ ...f, category: undefined }))}
+                    />
+                    {categories.map((cat) => (
+                      <FilterChip
+                        key={cat}
+                        label={cat}
+                        selected={tempFilters.category === cat}
+                        onPress={() => setTempFilters(f => ({ ...f, category: cat }))}
+                      />
+                    ))}
+                  </View>
+                </ScrollView>
+              </View>
+              
+              {/* Region Filter */}
+              <View className="py-4 border-b border-card-dark">
+                <Text className="text-text-primary text-base font-semibold mb-3">Region</Text>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                  <View className="flex-row gap-2">
+                    <FilterChip
+                      label="All Regions"
+                      selected={!tempFilters.region}
+                      onPress={() => setTempFilters(f => ({ ...f, region: undefined }))}
+                    />
+                    {regions.map((region) => (
+                      <FilterChip
+                        key={region}
+                        label={region}
+                        selected={tempFilters.region === region}
+                        onPress={() => setTempFilters(f => ({ ...f, region: region }))}
+                      />
+                    ))}
+                  </View>
+                </ScrollView>
+              </View>
+              
+              {/* Rating Filter */}
+              <View className="py-4 border-b border-card-dark">
+                <Text className="text-text-primary text-base font-semibold mb-3">Minimum Rating</Text>
+                <View className="flex-row gap-2">
+                  <FilterChip
+                    label="Any"
+                    selected={!tempFilters.minRating}
+                    onPress={() => setTempFilters(f => ({ ...f, minRating: undefined }))}
+                  />
+                  {RATING_OPTIONS.map((rating) => (
+                    <FilterChip
+                      key={rating}
+                      label={`${rating}+ ★`}
+                      selected={tempFilters.minRating === rating}
+                      onPress={() => setTempFilters(f => ({ ...f, minRating: rating }))}
+                    />
+                  ))}
+                </View>
+              </View>
+              
+              {/* Price Range */}
+              <View className="py-4">
+                <Text className="text-text-primary text-base font-semibold mb-3">Price Range</Text>
+                <View className="flex-row gap-3">
+                  <View className="flex-1">
+                    <Text className="text-text-muted text-xs mb-1">Min Price</Text>
+                    <TextInput
+                      className="bg-card-dark rounded-lg px-4 py-3 text-text-primary"
+                      placeholder={`£${priceRange?.min || 0}`}
+                      placeholderTextColor="#CBA990"
+                      keyboardType="numeric"
+                      value={tempFilters.minPrice?.toString() || ''}
+                      onChangeText={(text) => {
+                        const num = parseFloat(text);
+                        setTempFilters(f => ({ ...f, minPrice: isNaN(num) ? undefined : num }));
+                      }}
+                    />
+                  </View>
+                  <View className="flex-1">
+                    <Text className="text-text-muted text-xs mb-1">Max Price</Text>
+                    <TextInput
+                      className="bg-card-dark rounded-lg px-4 py-3 text-text-primary"
+                      placeholder={`£${priceRange?.max || 100}`}
+                      placeholderTextColor="#CBA990"
+                      keyboardType="numeric"
+                      value={tempFilters.maxPrice?.toString() || ''}
+                      onChangeText={(text) => {
+                        const num = parseFloat(text);
+                        setTempFilters(f => ({ ...f, maxPrice: isNaN(num) ? undefined : num }));
+                      }}
+                    />
+                  </View>
+                </View>
+              </View>
+              
+              <View style={{ height: 100 }} />
+            </ScrollView>
+            
+            {/* Apply Button */}
+            <View className="px-4 py-4 border-t border-card-dark">
+              <TouchableOpacity
+                onPress={applyFilters}
+                className="bg-zora-red rounded-full py-4 items-center"
+                activeOpacity={0.8}
+              >
+                <Text className="text-white text-base font-bold">Apply Filters</Text>
+              </TouchableOpacity>
+            </View>
+          </SafeAreaView>
+        </View>
+      </Modal>
+    </View>
+  );
+}
+
+// Filter Pill Component
+function FilterPill({ label, onRemove }: { label: string; onRemove: () => void }) {
+  return (
+    <View className="flex-row items-center bg-zora-red/20 rounded-full px-3 py-1.5 gap-2">
+      <Text className="text-zora-red text-sm">{label}</Text>
+      <TouchableOpacity onPress={onRemove}>
+        <X size={14} color="#C1272D" weight="bold" />
+      </TouchableOpacity>
+    </View>
+  );
+}
+
+// Filter Chip Component
+function FilterChip({ 
+  label, 
+  selected, 
+  onPress 
+}: { 
+  label: string; 
+  selected: boolean; 
+  onPress: () => void;
+}) {
+  return (
+    <TouchableOpacity
+      onPress={onPress}
+      className={`px-4 py-2 rounded-full ${
+        selected ? 'bg-zora-red' : 'bg-card-dark'
+      }`}
+      activeOpacity={0.8}
+    >
+      <Text className={`text-sm font-medium ${selected ? 'text-white' : 'text-text-primary'}`}>
+        {label}
+      </Text>
+    </TouchableOpacity>
+  );
+}
