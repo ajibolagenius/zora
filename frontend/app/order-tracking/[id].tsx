@@ -618,7 +618,7 @@ const styles = StyleSheet.create({
   },
   timelineLine: {
     width: 2,
-    height: 32,
+    height: 24,
     backgroundColor: 'rgba(255,255,255,0.1)',
     marginVertical: 4,
   },
