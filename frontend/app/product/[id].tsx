@@ -33,6 +33,7 @@ import { Spacing, BorderRadius, TouchTarget } from '../../constants/spacing';
 import { FontSize, FontWeight, LetterSpacing, FontFamily } from '../../constants/typography';
 import { productService, vendorService, type Product, type Vendor } from '../../services/mockDataService';
 import { useCartStore } from '../../stores/cartStore';
+import FloatingTabBar from '../../components/ui/FloatingTabBar';
 
 type SectionType = 'description' | 'nutrition' | 'heritage';
 
@@ -319,12 +320,12 @@ export default function ProductScreen() {
           </View>
 
           {/* Bottom spacer */}
-          <View style={{ height: 140 }} />
+          <View style={{ height: 200 }} />
         </View>
       </ScrollView>
 
       {/* Fixed Bottom Bar */}
-      <View style={[styles.bottomBar, { paddingBottom: insets.bottom + 16 }]}>
+      <View style={[styles.bottomBar, { paddingBottom: insets.bottom + 90 }]}>
         <View style={styles.bottomBarContent}>
           {/* Quantity Selector */}
           <View style={styles.quantitySelector}>
@@ -353,6 +354,9 @@ export default function ProductScreen() {
           </TouchableOpacity>
         </View>
       </View>
+
+      {/* Floating Tab Bar */}
+      <FloatingTabBar />
     </View>
   );
 }
