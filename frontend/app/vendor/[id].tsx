@@ -29,6 +29,7 @@ import { Spacing, BorderRadius, TouchTarget, Heights } from '../../constants/spa
 import { FontSize, FontWeight, FontFamily, LetterSpacing } from '../../constants/typography';
 import { vendorService, productService, type Vendor, type Product } from '../../services/mockDataService';
 import { useCartStore } from '../../stores/cartStore';
+import FloatingTabBar from '../../components/ui/FloatingTabBar';
 
 type TabType = 'products' | 'reviews' | 'about';
 
@@ -384,8 +385,11 @@ export default function VendorScreen() {
         )}
 
         {/* Bottom padding for tab bar */}
-        <View style={{ height: 120 }} />
+        <View style={{ height: 100 }} />
       </ScrollView>
+
+      {/* Floating Tab Bar */}
+      <FloatingTabBar />
     </View>
   );
 }
