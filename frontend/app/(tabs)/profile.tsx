@@ -333,6 +333,41 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   
+  // Rewards Card
+  rewardsCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 16,
+    backgroundColor: SURFACE_DARK,
+    paddingHorizontal: Spacing.base,
+    paddingVertical: Spacing.base,
+    borderRadius: BorderRadius.lg,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 204, 0, 0.2)',
+  },
+  rewardsIconContainer: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: 'rgba(255, 204, 0, 0.15)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  rewardsContent: {
+    flex: 1,
+  },
+  rewardsTitle: {
+    fontFamily: FontFamily.bodyBold,
+    fontSize: FontSize.body,
+    color: Colors.textPrimary,
+  },
+  rewardsSubtitle: {
+    fontFamily: FontFamily.body,
+    fontSize: FontSize.small,
+    color: ZORA_YELLOW,
+    marginTop: 2,
+  },
+  
   // QR Card
   qrCard: {
     backgroundColor: SURFACE_DARK,
