@@ -13,6 +13,7 @@ import {
   ShoppingBag,
   CaretRight,
   ArrowCounterClockwise,
+  Headset,
 } from 'phosphor-react-native';
 import { Colors } from '../../constants/colors';
 import { Spacing, BorderRadius } from '../../constants/spacing';
@@ -144,6 +145,10 @@ export default function OrdersTab() {
     console.log('Reorder:', orderId);
   };
 
+  const handleGetHelp = (orderId: string) => {
+    router.push(`/order-support/${orderId}`);
+  };
+
   const renderEmptyState = () => (
     <View style={styles.emptyContainer}>
       <View style={styles.emptyIconContainer}>
@@ -212,23 +217,36 @@ export default function OrdersTab() {
         {/* Divider */}
         <View style={styles.divider} />
 
-        {/* Footer: Price & Action */}
+        {/* Footer: Price & Actions */}
         <View style={styles.orderFooter}>
           <Text style={styles.orderTotal}>£{order.total.toFixed(2)}</Text>
-          <TouchableOpacity
-            style={styles.actionButton}
-            onPress={() => isCompleted ? handleReorder(order.id) : handleTrackOrder(order.id)}
-            activeOpacity={0.7}
-          >
-            <Text style={styles.actionButtonText}>
-              {isCompleted ? 'Reorder' : 'Track Order'}
-            </Text>
-            {isCompleted ? (
-              <ArrowCounterClockwise size={18} color={ZORA_RED} weight="bold" />
-            ) : (
-              <CaretRight size={18} color={ZORA_RED} weight="bold" />
-            )}
-          </TouchableOpacity>
+          <View style={styles.footerActions}>
+            {/* Get Help Button */}
+            <TouchableOpacity
+              style={styles.helpButton}
+              onPress={() => handleGetHelp(order.id)}
+              activeOpacity={0.7}
+            >
+              <Headset size={16} color={Colors.textMuted} weight="regular" />
+              <Text style={styles.helpButtonText}>Help</Text>
+            </TouchableOpacity>
+            
+            {/* Primary Action */}
+            <TouchableOpacity
+              style={styles.actionButton}
+              onPress={() => isCompleted ? handleReorder(order.id) : handleTrackOrder(order.id)}
+              activeOpacity={0.7}
+            >
+              <Text style={styles.actionButtonText}>
+                {isCompleted ? 'Reorder' : 'Track Order'}
+              </Text>
+              {isCompleted ? (
+                <ArrowCounterClockwise size={18} color={ZORA_RED} weight="bold" />
+              ) : (
+                <CaretRight size={18} color={ZORA_RED} weight="bold" />
+              )}
+            </TouchableOpacity>
+          </View>
         </View>
       </View>
     );
