@@ -171,6 +171,30 @@ frontend:
         agent: "main"
         comment: "Implemented platform-aware vendor map screen. On web, shows list view with static map background. On native (iOS/Android), shows interactive Google Maps with vendor markers. Uses conditional require() to avoid bundling react-native-maps on web."
 
+  - task: "Payment Integration"
+    implemented: true
+    working: true
+    file: "/app/frontend/app/payment.tsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "Integrated paymentService with Stripe, Klarna, and Clearpay. Payment screen shows dynamic installment info, availability based on order amount, processing overlay, and secure checkout flow."
+
+  - task: "QR Code Integration"
+    implemented: true
+    working: true
+    file: "/app/frontend/app/qr-scanner.tsx"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "QR scanner functional with camera permissions, barcode scanning, and parsing for orders/promos/vendors/products. Order confirmation shows QR code (placeholder on web, native on mobile). Profile menu includes Scan QR Code option."
+
   - task: "NativeWind Migration"
     implemented: false
     working: "NA"
