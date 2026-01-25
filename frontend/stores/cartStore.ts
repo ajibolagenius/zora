@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { CartItem, Cart, Product, Vendor } from '../types';
 import { api } from '../services/api';
 import { useAuthStore } from './authStore';
+import { vendorService } from '../services/mockDataService';
 
 interface CartState {
   items: CartItem[];
@@ -143,20 +144,25 @@ export const useCartStore = create<CartState>()((set, get) => ({
     
     const total = subtotal + deliveryFee + serviceFee - discount;
     
-    // Group items by vendor
+    // Group items by vendor and lookup vendor data from mock service
     const vendorMap = new Map<string, { id: string; name: string; logo_url: string; delivery_time: string; items: CartItem[] }>();
     
     items.forEach(item => {
       const vendorId = item.vendor_id || item.product?.vendor_id || 'unknown';
-      const vendorName = item.product?.vendor?.name || 'Unknown Vendor';
-      const vendorLogo = item.product?.vendor?.logo_url || 'https://via.placeholder.com/40';
       
       if (!vendorMap.has(vendorId)) {
+        // Look up vendor data from mock service
+        const vendorData = vendorService.getById(vendorId);
+        const vendorName = vendorData?.shop_name || item.product?.vendor?.name || 'Unknown Vendor';
+        const vendorLogo = vendorData?.logo_url || item.product?.vendor?.logo_url || 'https://via.placeholder.com/40';
+        const deliveryMin = vendorData?.delivery_time_min || 2;
+        const deliveryMax = vendorData?.delivery_time_max || 3;
+        
         vendorMap.set(vendorId, {
           id: vendorId,
           name: vendorName,
           logo_url: vendorLogo,
-          delivery_time: '2-3 days',
+          delivery_time: `${deliveryMin}-${deliveryMax} days`,
           items: [],
         });
       }
