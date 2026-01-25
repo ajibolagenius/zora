@@ -11,7 +11,6 @@ import {
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import MapView, { Marker, Circle, PROVIDER_GOOGLE, Region } from 'react-native-maps';
 import * as Location from 'expo-location';
 import {
   ArrowLeft,
@@ -26,6 +25,26 @@ import { Colors } from '../constants/colors';
 import { Spacing, BorderRadius } from '../constants/spacing';
 import { FontSize, FontFamily } from '../constants/typography';
 import { vendorService, type Vendor } from '../services/mockDataService';
+
+// Conditionally import MapView only on native platforms
+let MapView: any = null;
+let Marker: any = null;
+let Circle: any = null;
+let PROVIDER_GOOGLE: any = null;
+if (Platform.OS !== 'web') {
+  const Maps = require('react-native-maps');
+  MapView = Maps.default;
+  Marker = Maps.Marker;
+  Circle = Maps.Circle;
+  PROVIDER_GOOGLE = Maps.PROVIDER_GOOGLE;
+}
+
+type Region = {
+  latitude: number;
+  longitude: number;
+  latitudeDelta: number;
+  longitudeDelta: number;
+};
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
