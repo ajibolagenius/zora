@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -7,12 +7,14 @@ import {
   TouchableOpacity,
   Image,
   Dimensions,
+  Animated,
+  Easing,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { ArrowLeft, ArrowRight, Check } from 'phosphor-react-native';
 import { Colors } from '../../constants/colors';
-import { Spacing, BorderRadius } from '../../constants/spacing';
+import { Spacing, BorderRadius, Heights } from '../../constants/spacing';
 import { FontSize, FontFamily } from '../../constants/typography';
 
 const { width } = Dimensions.get('window');
@@ -53,6 +55,27 @@ const REGIONS = [
 export default function HeritageScreen() {
   const router = useRouter();
   const [selectedRegions, setSelectedRegions] = useState<string[]>([]);
+  
+  // Animation values
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const slideAnim = useRef(new Animated.Value(30)).current;
+
+  useEffect(() => {
+    Animated.parallel([
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 400,
+        easing: Easing.out(Easing.cubic),
+        useNativeDriver: true,
+      }),
+      Animated.timing(slideAnim, {
+        toValue: 0,
+        duration: 400,
+        easing: Easing.out(Easing.cubic),
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, []);
 
   const toggleRegion = (regionId: string) => {
     setSelectedRegions((prev) =>
@@ -70,68 +93,72 @@ export default function HeritageScreen() {
     <SafeAreaView style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity style={styles.backButton} onPress={() => router.replace('/(auth)/login')}>
-          <ArrowLeft size={24} color={Colors.textPrimary} weight="bold" />
+        <TouchableOpacity 
+          style={styles.backButton} 
+          onPress={() => router.replace('/(auth)/login')}
+          activeOpacity={0.8}
+        >
+          <ArrowLeft size={22} color={Colors.textPrimary} weight="bold" />
         </TouchableOpacity>
-        <View style={styles.progressContainer}>
-          <View style={styles.progressBar}>
-            <View style={[styles.progressFill, { width: '33%' }]} />
-          </View>
-          <Text style={styles.progressText}>Step 1 of 3</Text>
-        </View>
-        <View style={{ width: 44 }} />
       </View>
 
-      {/* Title */}
-      <View style={styles.titleContainer}>
-        <Text style={styles.title}>Discover Your Heritage</Text>
-        <Text style={styles.subtitle}>
-          Select the regions you connect with to personalize your market experience.
-        </Text>
-      </View>
-
-      {/* Regions List */}
-      <ScrollView
-        style={styles.scrollView}
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
+      <Animated.View 
+        style={[
+          styles.contentContainer,
+          { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }
+        ]}
       >
-        {REGIONS.map((region) => {
-          const isSelected = selectedRegions.includes(region.id);
-          return (
-            <TouchableOpacity
-              key={region.id}
-              style={[
-                styles.regionCard,
-                isSelected && styles.regionCardSelected,
-              ]}
-              onPress={() => toggleRegion(region.id)}
-              activeOpacity={0.8}
-            >
-              <Image
-                source={{ uri: region.image }}
-                style={styles.regionImage}
-                resizeMode="cover"
-              />
-              <View style={styles.regionOverlay} />
-              <View style={styles.regionContent}>
-                <View>
-                  <Text style={styles.regionName}>{region.name}</Text>
-                  <Text style={styles.regionCountries}>{region.countries}</Text>
+        {/* Title */}
+        <View style={styles.titleContainer}>
+          <Text style={styles.title}>Discover Your{'\n'}Heritage</Text>
+          <Text style={styles.subtitle}>
+            Select the regions you connect with to personalize your market experience.
+          </Text>
+        </View>
+
+        {/* Regions List */}
+        <ScrollView
+          style={styles.scrollView}
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+        >
+          {REGIONS.map((region) => {
+            const isSelected = selectedRegions.includes(region.id);
+            return (
+              <TouchableOpacity
+                key={region.id}
+                style={[
+                  styles.regionCard,
+                  isSelected && styles.regionCardSelected,
+                ]}
+                onPress={() => toggleRegion(region.id)}
+                activeOpacity={0.8}
+              >
+                <Image
+                  source={{ uri: region.image }}
+                  style={styles.regionImage}
+                  resizeMode="cover"
+                />
+                <View style={styles.regionOverlay} />
+                <View style={styles.regionContent}>
+                  <View>
+                    <Text style={styles.regionName}>{region.name}</Text>
+                    <Text style={styles.regionCountries}>{region.countries}</Text>
+                  </View>
+                  <View style={[
+                    styles.selectionIndicator,
+                    isSelected && styles.selectionIndicatorSelected,
+                  ]}>
+                    {isSelected && (
+                      <Check size={16} color={Colors.textPrimary} weight="bold" />
+                    )}
+                  </View>
                 </View>
-                <View style={[
-                  styles.selectionIndicator,
-                  isSelected && styles.selectionIndicatorSelected,
-                ]}>
-                  {isSelected && (
-                    <Check size={18} color={Colors.textPrimary} weight="bold" />
-                  )}
-                </View>
-              </View>
-            </TouchableOpacity>
-          );
-        })}
-      </ScrollView>
+              </TouchableOpacity>
+            );
+          })}
+        </ScrollView>
+      </Animated.View>
 
       {/* Continue Button */}
       <View style={styles.footer}>
@@ -144,7 +171,7 @@ export default function HeritageScreen() {
           disabled={selectedRegions.length === 0}
           activeOpacity={0.8}
         >
-          <Text style={styles.continueButtonText}>Continue</Text>
+          <Text style={styles.continueButtonText}>Start Shopping</Text>
           <ArrowRight size={20} color={Colors.textPrimary} weight="bold" />
         </TouchableOpacity>
       </View>
@@ -160,38 +187,19 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
     paddingHorizontal: Spacing.base,
-    paddingVertical: Spacing.md,
+    paddingVertical: Spacing.sm,
   },
   backButton: {
     width: 44,
     height: 44,
-    borderRadius: BorderRadius.full,
-    backgroundColor: Colors.cardDark,
+    borderRadius: 22,
+    backgroundColor: 'rgba(0, 0, 0, 0.4)',
     justifyContent: 'center',
     alignItems: 'center',
   },
-  progressContainer: {
-    alignItems: 'center',
-  },
-  progressBar: {
-    width: 120,
-    height: 4,
-    backgroundColor: Colors.cardDark,
-    borderRadius: BorderRadius.full,
-    overflow: 'hidden',
-  },
-  progressFill: {
-    height: '100%',
-    backgroundColor: Colors.primary,
-    borderRadius: BorderRadius.full,
-  },
-  progressText: {
-    fontFamily: FontFamily.body,
-    color: Colors.textMuted,
-    fontSize: FontSize.caption,
-    marginTop: Spacing.xs,
+  contentContainer: {
+    flex: 1,
   },
   titleContainer: {
     paddingHorizontal: Spacing.base,
@@ -199,15 +207,16 @@ const styles = StyleSheet.create({
   },
   title: {
     fontFamily: FontFamily.display,
-    fontSize: FontSize.h2,
+    fontSize: FontSize.h1,
     color: Colors.textPrimary,
     marginBottom: Spacing.sm,
+    lineHeight: 36,
   },
   subtitle: {
     fontFamily: FontFamily.body,
-    fontSize: FontSize.body,
+    fontSize: FontSize.small,
     color: Colors.textMuted,
-    lineHeight: 24,
+    lineHeight: 22,
   },
   scrollView: {
     flex: 1,
@@ -218,7 +227,7 @@ const styles = StyleSheet.create({
     gap: Spacing.md,
   },
   regionCard: {
-    height: 100,
+    height: 88,
     borderRadius: BorderRadius.lg,
     overflow: 'hidden',
     borderWidth: 2,
@@ -234,7 +243,7 @@ const styles = StyleSheet.create({
   },
   regionOverlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0, 0, 0, 0.4)',
+    backgroundColor: 'rgba(0, 0, 0, 0.35)',
   },
   regionContent: {
     flex: 1,
@@ -250,16 +259,17 @@ const styles = StyleSheet.create({
   },
   regionCountries: {
     fontFamily: FontFamily.body,
-    color: Colors.textMuted,
+    color: 'rgba(255, 255, 255, 0.7)',
     fontSize: FontSize.small,
     marginTop: 2,
   },
   selectionIndicator: {
-    width: 28,
-    height: 28,
-    borderRadius: BorderRadius.full,
-    borderWidth: 2,
-    borderColor: Colors.textMuted,
+    width: 26,
+    height: 26,
+    borderRadius: 13,
+    borderWidth: 1.5,
+    borderColor: 'rgba(255, 255, 255, 0.4)',
+    backgroundColor: 'transparent',
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -275,7 +285,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     backgroundColor: Colors.primary,
     borderRadius: BorderRadius.lg,
-    height: 56,
+    height: Heights.button,
     justifyContent: 'center',
     alignItems: 'center',
     gap: Spacing.sm,

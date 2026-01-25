@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -6,33 +6,34 @@ import {
   ScrollView,
   TouchableOpacity,
   useWindowDimensions,
+  Animated,
+  Easing,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import {
   ArrowLeft,
-  ArrowRight,
   Check,
   CookingPot,
   Leaf,
   Coffee,
   TShirt,
   Palette,
-  Flower,
+  Sparkle,
 } from 'phosphor-react-native';
 import { Colors } from '../../constants/colors';
-import { Spacing, BorderRadius } from '../../constants/spacing';
+import { Spacing, BorderRadius, Heights } from '../../constants/spacing';
 import { FontSize, FontFamily } from '../../constants/typography';
 
 const CATEGORIES = [
   {
     id: 'traditional-ingredients',
-    name: 'Traditional Ingredients',
+    name: 'Traditional\nIngredients',
     icon: CookingPot,
   },
   {
     id: 'spices-seasonings',
-    name: 'Spices & Seasonings',
+    name: 'Spices &\nSeasonings',
     icon: Leaf,
   },
   {
@@ -41,19 +42,19 @@ const CATEGORIES = [
     icon: Coffee,
   },
   {
+    id: 'beauty-skincare',
+    name: 'Beauty &\nSkincare',
+    icon: Sparkle,
+  },
+  {
     id: 'fashion-textiles',
-    name: 'Fashion & Textiles',
+    name: 'Fashion &\nTextiles',
     icon: TShirt,
   },
   {
     id: 'art-crafts',
     name: 'Art & Crafts',
     icon: Palette,
-  },
-  {
-    id: 'beauty-wellness',
-    name: 'Beauty & Wellness',
-    icon: Flower,
   },
 ];
 
@@ -62,6 +63,27 @@ export default function CategoriesScreen() {
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const { width } = useWindowDimensions();
   const cardWidth = Math.max(140, (width - Spacing.base * 2 - Spacing.md) / 2);
+  
+  // Animation values
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const slideAnim = useRef(new Animated.Value(30)).current;
+
+  useEffect(() => {
+    Animated.parallel([
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 400,
+        easing: Easing.out(Easing.cubic),
+        useNativeDriver: true,
+      }),
+      Animated.timing(slideAnim, {
+        toValue: 0,
+        duration: 400,
+        easing: Easing.out(Easing.cubic),
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, []);
 
   const toggleCategory = (categoryId: string) => {
     setSelectedCategories((prev) =>
@@ -79,70 +101,81 @@ export default function CategoriesScreen() {
     <SafeAreaView style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
-          <ArrowLeft size={24} color={Colors.textPrimary} weight="bold" />
+        <TouchableOpacity 
+          style={styles.backButton} 
+          onPress={() => router.back()}
+          activeOpacity={0.8}
+        >
+          <ArrowLeft size={22} color={Colors.textPrimary} weight="bold" />
         </TouchableOpacity>
         <View style={styles.progressContainer}>
+          <Text style={styles.progressText}>Step 2 of 3</Text>
           <View style={styles.progressBar}>
             <View style={[styles.progressFill, { width: '66%' }]} />
           </View>
-          <Text style={styles.progressText}>Step 2 of 3</Text>
         </View>
-        <View style={{ width: 44 }} />
       </View>
 
-      {/* Title */}
-      <View style={styles.titleContainer}>
-        <Text style={styles.title}>What Are You Looking For?</Text>
-        <Text style={styles.subtitle}>
-          Select the categories that interest you most to personalize your feed.
-        </Text>
-      </View>
-
-      {/* Categories Grid */}
-      <ScrollView
-        style={styles.scrollView}
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
+      <Animated.View 
+        style={[
+          styles.contentContainer,
+          { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }
+        ]}
       >
-        <View style={styles.grid}>
-          {CATEGORIES.map((category) => {
-            const isSelected = selectedCategories.includes(category.id);
-            const IconComponent = category.icon;
-            return (
-              <TouchableOpacity
-                key={category.id}
-                style={[
-                  styles.categoryCard,
-                  { width: cardWidth, height: cardWidth },
-                  isSelected && styles.categoryCardSelected,
-                ]}
-                onPress={() => toggleCategory(category.id)}
-                activeOpacity={0.8}
-              >
-                {/* Selection Indicator */}
-                {isSelected && (
-                  <View style={styles.checkmark}>
-                    <Check size={14} color={Colors.textPrimary} weight="bold" />
-                  </View>
-                )}
-                
-                {/* Icon */}
-                <View style={styles.iconContainer}>
+        {/* Title */}
+        <View style={styles.titleContainer}>
+          <Text style={styles.title}>What Are You{'\n'}Looking For?</Text>
+          <Text style={styles.subtitle}>
+            Select the categories that interest you most to personalize your feed.
+          </Text>
+        </View>
+
+        {/* Divider */}
+        <View style={styles.divider} />
+
+        {/* Categories Grid */}
+        <ScrollView
+          style={styles.scrollView}
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+        >
+          <View style={styles.grid}>
+            {CATEGORIES.map((category) => {
+              const isSelected = selectedCategories.includes(category.id);
+              const IconComponent = category.icon;
+              return (
+                <TouchableOpacity
+                  key={category.id}
+                  style={[
+                    styles.categoryCard,
+                    { width: cardWidth, height: cardWidth * 0.9 },
+                    isSelected && styles.categoryCardSelected,
+                  ]}
+                  onPress={() => toggleCategory(category.id)}
+                  activeOpacity={0.8}
+                >
+                  {/* Selection Indicator */}
+                  {isSelected && (
+                    <View style={styles.checkmark}>
+                      <Check size={12} color={Colors.textPrimary} weight="bold" />
+                    </View>
+                  )}
+                  
+                  {/* Icon - No background per design */}
                   <IconComponent
-                    size={32}
+                    size={28}
                     color={Colors.primary}
                     weight="duotone"
                   />
-                </View>
-                
-                {/* Name */}
-                <Text style={styles.categoryName}>{category.name}</Text>
-              </TouchableOpacity>
-            );
-          })}
-        </View>
-      </ScrollView>
+                  
+                  {/* Name */}
+                  <Text style={styles.categoryName}>{category.name}</Text>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+        </ScrollView>
+      </Animated.View>
 
       {/* Continue Button */}
       <View style={styles.footer}>
@@ -156,7 +189,6 @@ export default function CategoriesScreen() {
           activeOpacity={0.8}
         >
           <Text style={styles.continueButtonText}>Continue</Text>
-          <ArrowRight size={20} color={Colors.textPrimary} weight="bold" />
         </TouchableOpacity>
       </View>
     </SafeAreaView>
@@ -173,25 +205,26 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: Spacing.base,
-    paddingVertical: Spacing.md,
+    paddingVertical: Spacing.sm,
   },
   backButton: {
     width: 44,
     height: 44,
-    borderRadius: BorderRadius.full,
-    backgroundColor: Colors.cardDark,
+    borderRadius: 22,
+    backgroundColor: 'rgba(0, 0, 0, 0.4)',
     justifyContent: 'center',
     alignItems: 'center',
   },
   progressContainer: {
-    alignItems: 'center',
+    alignItems: 'flex-end',
   },
   progressBar: {
-    width: 120,
-    height: 4,
+    width: 100,
+    height: 3,
     backgroundColor: Colors.cardDark,
     borderRadius: BorderRadius.full,
     overflow: 'hidden',
+    marginTop: Spacing.xs,
   },
   progressFill: {
     height: '100%',
@@ -202,7 +235,9 @@ const styles = StyleSheet.create({
     fontFamily: FontFamily.body,
     color: Colors.textMuted,
     fontSize: FontSize.caption,
-    marginTop: Spacing.xs,
+  },
+  contentContainer: {
+    flex: 1,
   },
   titleContainer: {
     paddingHorizontal: Spacing.base,
@@ -210,15 +245,22 @@ const styles = StyleSheet.create({
   },
   title: {
     fontFamily: FontFamily.display,
-    fontSize: FontSize.h2,
+    fontSize: FontSize.h1,
     color: Colors.textPrimary,
     marginBottom: Spacing.sm,
+    lineHeight: 36,
   },
   subtitle: {
     fontFamily: FontFamily.body,
-    fontSize: FontSize.body,
+    fontSize: FontSize.small,
     color: Colors.textMuted,
-    lineHeight: 24,
+    lineHeight: 22,
+  },
+  divider: {
+    height: 1,
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+    marginHorizontal: Spacing.base,
+    marginBottom: Spacing.lg,
   },
   scrollView: {
     flex: 1,
@@ -239,9 +281,10 @@ const styles = StyleSheet.create({
     padding: Spacing.base,
     justifyContent: 'center',
     alignItems: 'center',
-    borderWidth: 2,
+    borderWidth: 1.5,
     borderColor: 'transparent',
     position: 'relative',
+    gap: Spacing.sm,
   },
   categoryCardSelected: {
     borderColor: Colors.primary,
@@ -250,40 +293,30 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: Spacing.sm,
     right: Spacing.sm,
-    width: 24,
-    height: 24,
-    borderRadius: BorderRadius.full,
+    width: 20,
+    height: 20,
+    borderRadius: 10,
     backgroundColor: Colors.primary,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  iconContainer: {
-    width: 64,
-    height: 64,
-    borderRadius: BorderRadius.lg,
-    backgroundColor: 'rgba(204, 0, 0, 0.1)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: Spacing.md,
-  },
   categoryName: {
     fontFamily: FontFamily.bodySemiBold,
     color: Colors.textPrimary,
-    fontSize: FontSize.small,
+    fontSize: FontSize.caption,
     textAlign: 'center',
+    lineHeight: 16,
   },
   footer: {
     paddingHorizontal: Spacing.base,
     paddingVertical: Spacing.lg,
   },
   continueButton: {
-    flexDirection: 'row',
     backgroundColor: Colors.primary,
     borderRadius: BorderRadius.lg,
-    height: 56,
+    height: Heights.button,
     justifyContent: 'center',
     alignItems: 'center',
-    gap: Spacing.sm,
   },
   continueButtonDisabled: {
     opacity: 0.5,
