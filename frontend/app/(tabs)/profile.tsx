@@ -6,172 +6,194 @@ import {
   ScrollView,
   TouchableOpacity,
   Image,
-  Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import { 
-  UserCircle,
+import {
   Gear,
-  ClipboardText,
-  MapPin,
+  User,
   CreditCard,
+  MapPin,
   Bell,
   Question,
   Info,
   SignOut,
   CaretRight,
-  Crown,
+  Camera,
+  ArrowsClockwise,
 } from 'phosphor-react-native';
 import { Colors } from '../../constants/colors';
-import { Spacing, BorderRadius, TouchTarget } from '../../constants/spacing';
+import { Spacing, BorderRadius } from '../../constants/spacing';
 import { FontSize, FontFamily } from '../../constants/typography';
-import { Button } from '../../components/ui';
-import { useAuthStore } from '../../stores/authStore';
 
-const MENU_ITEMS = [
-  { id: 'orders', icon: ClipboardText, label: 'My Orders', route: '/(tabs)/orders' },
-  { id: 'addresses', icon: MapPin, label: 'Saved Addresses', route: '/addresses' },
-  { id: 'payments', icon: CreditCard, label: 'Payment Methods', route: '/payments' },
-  { id: 'notifications', icon: Bell, label: 'Notifications', route: '/notifications' },
-  { id: 'help', icon: Question, label: 'Help & Support', route: '/help' },
-  { id: 'about', icon: Info, label: 'About Zora', route: '/about' },
+// Zora Brand Colors
+const ZORA_RED = '#C1272D';
+const ZORA_YELLOW = '#FFCC00';
+const ZORA_CARD = '#3A2A21';
+const SURFACE_DARK = '#2D1E18';
+const ICON_BG = '#221710';
+
+interface MenuItem {
+  id: string;
+  icon: React.ComponentType<any>;
+  label: string;
+  route?: string;
+  isLogout?: boolean;
+}
+
+const MENU_ITEMS: MenuItem[] = [
+  { id: '1', icon: User, label: 'Personal Information', route: '/settings/personal' },
+  { id: '2', icon: CreditCard, label: 'Payment Methods', route: '/settings/payment' },
+  { id: '3', icon: MapPin, label: 'Saved Addresses', route: '/settings/addresses' },
+  { id: '4', icon: Bell, label: 'Notification Settings', route: '/settings/notifications' },
+  { id: '5', icon: Question, label: 'Help & Support', route: '/settings/help' },
+  { id: '6', icon: Info, label: 'About Zora', route: '/settings/about' },
 ];
 
-export default function ProfileScreen() {
-  const router = useRouter();
-  const { isAuthenticated, user, logout } = useAuthStore();
+const STATS = [
+  { label: 'Orders', value: 24 },
+  { label: 'Reviews', value: 12 },
+  { label: 'Saved', value: 8 },
+];
 
-  const handleLogout = () => {
-    Alert.alert(
-      'Log Out',
-      'Are you sure you want to log out?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Log Out',
-          style: 'destructive',
-          onPress: async () => {
-            await logout();
-            router.replace('/(auth)/login');
-          },
-        },
-      ]
-    );
+export default function ProfileTab() {
+  const router = useRouter();
+
+  const handleMenuPress = (item: MenuItem) => {
+    if (item.route) {
+      router.push(item.route);
+    }
   };
 
-  if (!isAuthenticated) {
-    return (
-      <SafeAreaView style={styles.container} edges={['top']}>
-        <View style={styles.header}>
-          <Text style={styles.title}>Profile</Text>
-        </View>
-        <View style={styles.loginPrompt}>
-          <View style={styles.emptyIconContainer}>
-            <UserCircle size={48} color={Colors.textMuted} weight="duotone" />
-          </View>
-          <Text style={styles.loginTitle}>Sign in to your account</Text>
-          <Text style={styles.loginSubtitle}>Manage orders, save addresses, and more</Text>
-          <Button
-            title="Sign In"
-            onPress={() => router.push('/(auth)/login')}
-            style={{ marginTop: Spacing.lg }}
-          />
-        </View>
-      </SafeAreaView>
-    );
-  }
+  const handleLogout = () => {
+    console.log('Logout pressed');
+    // TODO: Implement logout logic
+  };
 
-  const getTierColor = (tier: string) => {
-    switch (tier) {
-      case 'gold':
-        return Colors.secondary;
-      case 'silver':
-        return '#C0C0C0';
-      case 'platinum':
-        return '#E5E4E2';
-      default:
-        return '#CD7F32';
-    }
+  const handleRefreshCode = () => {
+    console.log('Refresh code pressed');
+    // TODO: Implement QR code refresh
   };
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
-      <ScrollView showsVerticalScrollIndicator={false}>
-        {/* Header */}
-        <View style={styles.header}>
-          <Text style={styles.title}>Profile</Text>
-          <TouchableOpacity style={styles.settingsButton}>
-            <Gear size={24} color={Colors.textPrimary} weight="duotone" />
+      {/* Header */}
+      <View style={styles.header}>
+        <View style={styles.headerLeft} />
+        <Text style={styles.headerTitle}>My Profile</Text>
+        <TouchableOpacity style={styles.settingsButton}>
+          <Gear size={24} color={Colors.textPrimary} weight="regular" />
+        </TouchableOpacity>
+      </View>
+
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Profile Card */}
+        <View style={styles.profileSection}>
+          {/* Avatar */}
+          <View style={styles.avatarContainer}>
+            <Image
+              source={{ uri: 'https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=200' }}
+              style={styles.avatar}
+            />
+            <TouchableOpacity style={styles.cameraButton}>
+              <Camera size={16} color={Colors.textPrimary} weight="fill" />
+            </TouchableOpacity>
+          </View>
+          
+          {/* Name & Badge */}
+          <Text style={styles.userName}>Adaeze Johnson</Text>
+          <View style={styles.memberBadge}>
+            <Text style={styles.memberBadgeText}>Gold Member ⭐</Text>
+          </View>
+        </View>
+
+        {/* Stats Row */}
+        <View style={styles.statsRow}>
+          {STATS.map((stat, index) => (
+            <View 
+              key={stat.label} 
+              style={[
+                styles.statItem,
+                index < STATS.length - 1 && styles.statItemBorder,
+              ]}
+            >
+              <Text style={styles.statValue}>{stat.value}</Text>
+              <Text style={styles.statLabel}>{stat.label}</Text>
+            </View>
+          ))}
+        </View>
+
+        {/* QR Pickup Card */}
+        <View style={styles.qrCard}>
+          {/* Decorative Background */}
+          <View style={styles.qrDecorTop} />
+          <View style={styles.qrDecorBottom} />
+          
+          <View style={styles.qrHeader}>
+            <Text style={styles.qrTitle}>Pickup ID</Text>
+            <Text style={styles.qrSubtitle}>Show this code at the counter</Text>
+          </View>
+          
+          {/* QR Code */}
+          <View style={styles.qrCodeContainer}>
+            <Image
+              source={{ uri: 'https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=ZORA-ADAEZE-2024-GOLD&bgcolor=FFFFFF&color=000000' }}
+              style={styles.qrCode}
+              resizeMode="contain"
+            />
+          </View>
+          
+          {/* Customer ID */}
+          <Text style={styles.customerId}>ZORA-ADA-2024-G</Text>
+          
+          {/* Refresh Button */}
+          <TouchableOpacity 
+            style={styles.refreshButton}
+            onPress={handleRefreshCode}
+            activeOpacity={0.7}
+          >
+            <ArrowsClockwise size={18} color={ZORA_RED} weight="bold" />
+            <Text style={styles.refreshText}>Refresh Code</Text>
           </TouchableOpacity>
         </View>
 
-        {/* Profile Card */}
-        <View style={styles.profileCard}>
-          <Image
-            source={{ uri: user?.picture || 'https://via.placeholder.com/100' }}
-            style={styles.avatar}
-          />
-          <View style={styles.profileInfo}>
-            <Text style={styles.userName}>{user?.name}</Text>
-            <Text style={styles.userEmail}>{user?.email}</Text>
-            <View style={[styles.tierBadge, { backgroundColor: `${getTierColor(user?.membership_tier || 'bronze')}20` }]}>
-              <Crown size={14} color={getTierColor(user?.membership_tier || 'bronze')} weight="fill" />
-              <Text style={[styles.tierText, { color: getTierColor(user?.membership_tier || 'bronze') }]}>
-                {user?.membership_tier?.toUpperCase()} MEMBER
-              </Text>
-            </View>
-          </View>
-        </View>
-
-        {/* Stats */}
-        <View style={styles.statsRow}>
-          <View style={styles.statItem}>
-            <Text style={styles.statValue}>{user?.loyalty_points || 0}</Text>
-            <Text style={styles.statLabel}>Points</Text>
-          </View>
-          <View style={styles.statDivider} />
-          <View style={styles.statItem}>
-            <Text style={styles.statValue}>£{(user?.zora_credits || 0).toFixed(2)}</Text>
-            <Text style={styles.statLabel}>Credits</Text>
-          </View>
-          <View style={styles.statDivider} />
-          <View style={styles.statItem}>
-            <Text style={styles.statValue}>{user?.referral_code || '-'}</Text>
-            <Text style={styles.statLabel}>Referral</Text>
-          </View>
-        </View>
-
-        {/* Menu Items */}
+        {/* Menu Options */}
         <View style={styles.menuSection}>
-          {MENU_ITEMS.map((item, index) => {
+          {MENU_ITEMS.map((item) => {
             const IconComponent = item.icon;
             return (
               <TouchableOpacity
                 key={item.id}
-                style={[
-                  styles.menuItem,
-                  index === MENU_ITEMS.length - 1 && styles.menuItemLast,
-                ]}
-                onPress={() => router.push(item.route as any)}
+                style={styles.menuItem}
+                onPress={() => handleMenuPress(item)}
+                activeOpacity={0.7}
               >
-                <View style={styles.menuItemLeft}>
-                  <IconComponent size={24} color={Colors.textMuted} weight="duotone" />
-                  <Text style={styles.menuItemLabel}>{item.label}</Text>
+                <View style={styles.menuItemIcon}>
+                  <IconComponent size={22} color={Colors.textMuted} weight="regular" />
                 </View>
-                <CaretRight size={20} color={Colors.textMuted} weight="bold" />
+                <Text style={styles.menuItemLabel}>{item.label}</Text>
+                <CaretRight size={20} color={Colors.textMuted} weight="regular" />
               </TouchableOpacity>
             );
           })}
+          
+          {/* Logout Button */}
+          <TouchableOpacity
+            style={styles.logoutButton}
+            onPress={handleLogout}
+            activeOpacity={0.7}
+          >
+            <SignOut size={22} color={ZORA_RED} weight="regular" />
+            <Text style={styles.logoutText}>Log Out</Text>
+          </TouchableOpacity>
         </View>
 
-        {/* Logout */}
-        <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-          <SignOut size={24} color={Colors.primary} weight="duotone" />
-          <Text style={styles.logoutText}>Log Out</Text>
-        </TouchableOpacity>
-
-        <View style={{ height: 120 }} />
+        {/* Bottom padding for tab bar */}
+        <View style={{ height: 100 }} />
       </ScrollView>
     </SafeAreaView>
   );
@@ -182,167 +204,233 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Colors.backgroundDark,
   },
+  
+  // Header
   header: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
+    justifyContent: 'space-between',
     paddingHorizontal: Spacing.base,
     paddingVertical: Spacing.md,
   },
-  title: {
+  headerLeft: {
+    width: 44,
+  },
+  headerTitle: {
     fontFamily: FontFamily.display,
+    fontSize: FontSize.h3,
     color: Colors.textPrimary,
-    fontSize: FontSize.h2,
   },
   settingsButton: {
-    width: TouchTarget.min,
-    height: TouchTarget.min,
+    width: 44,
+    height: 44,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  loginPrompt: {
+  
+  // Scroll View
+  scrollView: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: Spacing.xl,
   },
-  emptyIconContainer: {
+  scrollContent: {
+    paddingHorizontal: Spacing.base,
+    gap: 24,
+  },
+  
+  // Profile Section
+  profileSection: {
+    alignItems: 'center',
+    gap: 12,
+  },
+  avatarContainer: {
+    position: 'relative',
+  },
+  avatar: {
     width: 100,
     height: 100,
     borderRadius: 50,
-    backgroundColor: Colors.cardDark,
+    borderWidth: 4,
+    borderColor: ZORA_CARD,
+  },
+  cameraButton: {
+    position: 'absolute',
+    bottom: 0,
+    right: 0,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: ZORA_CARD,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: Spacing.md,
-  },
-  loginTitle: {
-    fontFamily: FontFamily.displayMedium,
-    color: Colors.textPrimary,
-    fontSize: FontSize.h4,
-    marginTop: Spacing.md,
-  },
-  loginSubtitle: {
-    fontFamily: FontFamily.body,
-    color: Colors.textMuted,
-    fontSize: FontSize.body,
-    marginTop: Spacing.sm,
-    textAlign: 'center',
-  },
-  profileCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: Colors.cardDark,
-    marginHorizontal: Spacing.base,
-    padding: Spacing.base,
-    borderRadius: BorderRadius.lg,
-  },
-  avatar: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: Colors.backgroundDark,
-  },
-  profileInfo: {
-    marginLeft: Spacing.md,
-    flex: 1,
+    borderWidth: 2,
+    borderColor: ICON_BG,
   },
   userName: {
-    fontFamily: FontFamily.displayMedium,
+    fontFamily: FontFamily.display,
+    fontSize: 22,
     color: Colors.textPrimary,
-    fontSize: FontSize.h4,
   },
-  userEmail: {
-    fontFamily: FontFamily.body,
-    color: Colors.textMuted,
-    fontSize: FontSize.small,
-    marginTop: 2,
-  },
-  tierBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    alignSelf: 'flex-start',
-    paddingHorizontal: Spacing.sm,
-    paddingVertical: 4,
+  memberBadge: {
+    backgroundColor: ZORA_CARD,
+    paddingHorizontal: 14,
+    paddingVertical: 6,
     borderRadius: BorderRadius.full,
-    marginTop: Spacing.sm,
-    gap: 4,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 204, 0, 0.2)',
   },
-  tierText: {
+  memberBadgeText: {
     fontFamily: FontFamily.bodyBold,
-    fontSize: FontSize.tiny,
+    fontSize: 12,
+    color: ZORA_YELLOW,
+    letterSpacing: 1,
+    textTransform: 'uppercase',
   },
+  
+  // Stats Row
   statsRow: {
     flexDirection: 'row',
-    backgroundColor: Colors.cardDark,
-    marginHorizontal: Spacing.base,
-    marginTop: Spacing.md,
-    padding: Spacing.base,
+    backgroundColor: SURFACE_DARK,
     borderRadius: BorderRadius.lg,
+    borderWidth: 1,
+    borderColor: 'rgba(74, 53, 53, 0.3)',
+    overflow: 'hidden',
   },
   statItem: {
     flex: 1,
     alignItems: 'center',
+    paddingVertical: 16,
+  },
+  statItemBorder: {
+    borderRightWidth: 1,
+    borderRightColor: 'rgba(74, 53, 53, 0.3)',
   },
   statValue: {
-    fontFamily: FontFamily.displayMedium,
-    color: Colors.secondary,
-    fontSize: FontSize.h4,
+    fontFamily: FontFamily.display,
+    fontSize: 24,
+    color: ZORA_YELLOW,
   },
   statLabel: {
-    fontFamily: FontFamily.body,
+    fontFamily: FontFamily.bodyMedium,
+    fontSize: 12,
     color: Colors.textMuted,
-    fontSize: FontSize.caption,
     marginTop: 4,
   },
-  statDivider: {
-    width: 1,
-    backgroundColor: Colors.borderDark,
-    marginHorizontal: Spacing.sm,
-  },
-  menuSection: {
-    backgroundColor: Colors.cardDark,
-    marginHorizontal: Spacing.base,
-    marginTop: Spacing.md,
+  
+  // QR Card
+  qrCard: {
+    backgroundColor: SURFACE_DARK,
     borderRadius: BorderRadius.lg,
+    padding: 24,
+    alignItems: 'center',
+    gap: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(74, 53, 53, 0.5)',
+    position: 'relative',
     overflow: 'hidden',
+  },
+  qrDecorTop: {
+    position: 'absolute',
+    top: -40,
+    right: -40,
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    backgroundColor: 'rgba(193, 39, 45, 0.05)',
+  },
+  qrDecorBottom: {
+    position: 'absolute',
+    bottom: -40,
+    left: -40,
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    backgroundColor: 'rgba(255, 204, 0, 0.05)',
+  },
+  qrHeader: {
+    alignItems: 'center',
+    gap: 4,
+    zIndex: 10,
+  },
+  qrTitle: {
+    fontFamily: FontFamily.bodyBold,
+    fontSize: FontSize.bodyLarge,
+    color: Colors.textPrimary,
+  },
+  qrSubtitle: {
+    fontFamily: FontFamily.body,
+    fontSize: FontSize.small,
+    color: Colors.textMuted,
+  },
+  qrCodeContainer: {
+    backgroundColor: '#FFFFFF',
+    padding: 12,
+    borderRadius: BorderRadius.lg,
+    zIndex: 10,
+  },
+  qrCode: {
+    width: 160,
+    height: 160,
+  },
+  customerId: {
+    fontFamily: FontFamily.bodyMedium,
+    fontSize: 12,
+    color: Colors.textMuted,
+    letterSpacing: 2,
+    zIndex: 10,
+  },
+  refreshButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: BorderRadius.lg,
+    zIndex: 10,
+  },
+  refreshText: {
+    fontFamily: FontFamily.bodyBold,
+    fontSize: FontSize.small,
+    color: ZORA_RED,
+  },
+  
+  // Menu Section
+  menuSection: {
+    gap: 8,
   },
   menuItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    padding: Spacing.base,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.borderDark,
-    minHeight: 56,
+    gap: 16,
+    backgroundColor: SURFACE_DARK,
+    paddingHorizontal: Spacing.base,
+    paddingVertical: Spacing.base,
+    borderRadius: BorderRadius.lg,
   },
-  menuItemLast: {
-    borderBottomWidth: 0,
-  },
-  menuItemLeft: {
-    flexDirection: 'row',
+  menuItemIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: BorderRadius.md,
+    backgroundColor: ICON_BG,
+    justifyContent: 'center',
     alignItems: 'center',
-    gap: Spacing.md,
   },
   menuItemLabel: {
-    fontFamily: FontFamily.body,
-    color: Colors.textPrimary,
+    flex: 1,
+    fontFamily: FontFamily.bodyMedium,
     fontSize: FontSize.body,
+    color: Colors.textPrimary,
   },
   logoutButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    marginHorizontal: Spacing.base,
-    marginTop: Spacing.xl,
-    padding: Spacing.base,
-    backgroundColor: Colors.cardDark,
-    borderRadius: BorderRadius.lg,
-    gap: Spacing.sm,
-    height: 56,
+    gap: 8,
+    paddingVertical: 16,
+    marginTop: 8,
   },
   logoutText: {
-    fontFamily: FontFamily.bodySemiBold,
-    color: Colors.primary,
+    fontFamily: FontFamily.bodyBold,
     fontSize: FontSize.body,
+    color: ZORA_RED,
   },
 });
