@@ -6,15 +6,9 @@
  * For development/demo purposes, it falls back to mock data when Supabase is not configured.
  */
 
-import { supabase } from '../lib/supabase';
+import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import type { User, Vendor, Product, Order, Review, PromoCode } from '../types/supabase';
 import mockDatabase from '../data/mock_database.json';
-
-// Check if Supabase is properly configured
-const isSupabaseConfigured = () => {
-  const url = process.env.EXPO_PUBLIC_SUPABASE_URL;
-  return url && !url.includes('your-project');
-};
 
 // ============== AUTH SERVICE ==============
 export const authService = {
