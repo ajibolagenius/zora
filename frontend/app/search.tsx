@@ -21,7 +21,7 @@ import {
   Check,
   CaretDown,
 } from 'phosphor-react-native';
-import { useProductSearch, useCategories, useRegions, usePriceRange, type ProductFilters } from '../../hooks/useQueries';
+import { useProductSearch, useCategories, useRegions, usePriceRange, type ProductFilters } from '../hooks/useQueries';
 
 const SORT_OPTIONS = [
   { id: 'rating', label: 'Top Rated' },
