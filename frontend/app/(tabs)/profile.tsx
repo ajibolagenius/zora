@@ -128,6 +128,22 @@ export default function ProfileTab() {
           ))}
         </View>
 
+        {/* Rewards Card */}
+        <TouchableOpacity 
+          style={styles.rewardsCard}
+          onPress={() => router.push('/rewards')}
+          activeOpacity={0.8}
+        >
+          <View style={styles.rewardsIconContainer}>
+            <Gift size={24} color={ZORA_YELLOW} weight="fill" />
+          </View>
+          <View style={styles.rewardsContent}>
+            <Text style={styles.rewardsTitle}>Zora Rewards</Text>
+            <Text style={styles.rewardsSubtitle}>2,450 points · Gold Tier</Text>
+          </View>
+          <CaretRight size={20} color={Colors.textMuted} weight="bold" />
+        </TouchableOpacity>
+
         {/* QR Pickup Card */}
         <View style={styles.qrCard}>
           {/* Decorative Background */}
