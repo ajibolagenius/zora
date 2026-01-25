@@ -527,11 +527,11 @@ const styles = StyleSheet.create({
   // Footer
   footer: {
     position: 'absolute',
-    bottom: 70,
+    bottom: 90,
     left: 0,
     right: 0,
     paddingHorizontal: Spacing.base,
-    paddingVertical: Spacing.md,
+    paddingVertical: Spacing.sm,
     backgroundColor: 'transparent',
   },
   checkoutButton: {
