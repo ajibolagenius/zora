@@ -6,19 +6,30 @@ import {
   ScrollView,
   TouchableOpacity,
   Image,
+  Platform,
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import {
   Check,
   Truck,
   MapPin,
   Package,
+  QrCode,
 } from 'phosphor-react-native';
 import { Colors } from '../constants/colors';
 import { Spacing, BorderRadius } from '../constants/spacing';
 import { FontSize, FontFamily } from '../constants/typography';
 import { productService } from '../services/mockDataService';
+import { orderQRService } from '../services/qrCodeService';
+
+// Conditionally import QRCode (only works on native)
+let QRCode: any = null;
+try {
+  QRCode = require('react-native-qrcode-svg').default;
+} catch (e) {
+  // QRCode not available on web
+}
 
 // Zora Brand Colors
 const ZORA_RED = '#C1272D';
