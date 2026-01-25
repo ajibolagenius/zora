@@ -26,8 +26,54 @@ interface CartState {
   calculateTotals: () => void;
 }
 
+// TEST DATA - Remove after testing
+const TEST_CART_ITEMS: CartItem[] = [
+  {
+    product_id: 'prd_001',
+    vendor_id: 'vnd_001',
+    quantity: 2,
+    product: {
+      id: 'prd_001',
+      vendor_id: 'vnd_001',
+      name: 'Jollof Seasoning Mix',
+      description: 'Premium spice blend',
+      price: 5.99,
+      stock_quantity: 150,
+      category: 'Spices',
+      cultural_region: 'West Africa',
+      image_urls: ['https://lh3.googleusercontent.com/aida-public/AB6AXuCSTXrtnY1KRcIFzdwf0gp07sGWOAqbXsjIxeLQpAIrz2UTGPqv6hgPc05kGbJa1ZVTNDpFNPjkFP82wPEGSqQySw7k2GxVA1UzAEWE1DbfmKsNFY9MemAm1gC4Z-72iMUv_uLTDp9cIhRl25kHAwH4EwbH722eRAYUVI2jrtz8hmJjtIr5cJKNjierykD5cGCncYrvrmbT3riKMFiDpC0SbOWyUOditDmlXrV6ttZhwlcP-5Z7ndSmo6VrnAk_GnSSVvmlRo27SooO'],
+      weight: '100g',
+      is_active: true,
+      is_featured: true,
+      rating: 4.9,
+      review_count: 234,
+    } as Product,
+  },
+  {
+    product_id: 'prd_002',
+    vendor_id: 'vnd_001',
+    quantity: 1,
+    product: {
+      id: 'prd_002',
+      vendor_id: 'vnd_001',
+      name: 'Suya Spice Blend',
+      description: 'Authentic suya seasoning',
+      price: 4.99,
+      stock_quantity: 200,
+      category: 'Spices',
+      cultural_region: 'West Africa',
+      image_urls: ['https://lh3.googleusercontent.com/aida-public/AB6AXuAE_Qz01OtNi1gHE45pnCpTqh3IK34ckdWfkYdj2VJk0SJbVzzpHs5cG7u2TYyBPRxB6u5XfW7LpfI3kKp98bHdCYJ1j2A4cJ7KcXqX0j3K1dDAXn7hN3cQy7Uj5n3C9hF3QLPh7FoqE3Xr8y9J8k7K5mJ3H2GDFB7C6v5A4s3D2'],
+      weight: '75g',
+      is_active: true,
+      rating: 4.7,
+      review_count: 189,
+    } as Product,
+  },
+];
+
 export const useCartStore = create<CartState>()((set, get) => ({
-  items: [],
+  // TESTING: Initialize with test items to verify button visibility
+  items: TEST_CART_ITEMS,
   vendors: [],
   subtotal: 0,
   deliveryFee: 0,
