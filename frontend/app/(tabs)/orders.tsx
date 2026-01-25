@@ -470,6 +470,16 @@ const styles = StyleSheet.create({
     fontSize: FontSize.small,
     color: Colors.textMuted,
   },
+  reportButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  reportButtonText: {
+    fontFamily: FontFamily.bodyMedium,
+    fontSize: FontSize.small,
+    color: '#EF4444',
+  },
   actionButton: {
     flexDirection: 'row',
     alignItems: 'center',
