@@ -12,7 +12,7 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useRouter, useLocalSearchParams } from 'expo-router';
+import { useRouter, useLocalSearchParams, Link } from 'expo-router';
 import {
   ArrowLeft,
   Heart,
@@ -27,11 +27,12 @@ import {
   CaretRight,
   Minus,
   Plus,
+  PencilSimple,
 } from 'phosphor-react-native';
 import { Colors } from '../../constants/colors';
 import { Spacing, BorderRadius, TouchTarget } from '../../constants/spacing';
 import { FontSize, FontWeight, LetterSpacing, FontFamily } from '../../constants/typography';
-import { productService, vendorService, type Product, type Vendor } from '../../services/mockDataService';
+import { productService, vendorService, reviewService, type Product, type Vendor, type Review } from '../../services/mockDataService';
 import { useCartStore } from '../../stores/cartStore';
 import FloatingTabBar from '../../components/ui/FloatingTabBar';
 
