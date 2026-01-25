@@ -1,5 +1,13 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { productService, vendorService, reviewService, type Product, type Vendor, type Review } from '../services/mockDataService';
+import { 
+  productService, 
+  vendorService, 
+  reviewService,
+  authService,
+  orderService,
+  promoCodeService,
+} from '../services/supabaseService';
+import type { Product, Vendor, Review, Order, PromoCode } from '../types/supabase';
 
 // ============== Query Keys ==============
 export const queryKeys = {
