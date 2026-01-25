@@ -47,6 +47,7 @@ export default function ProductScreen() {
 
   const [product, setProduct] = useState<Product | null>(null);
   const [vendor, setVendor] = useState<Vendor | null>(null);
+  const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
   const [expandedSections, setExpandedSections] = useState<SectionType[]>(['description']);
@@ -62,6 +63,9 @@ export default function ProductScreen() {
           const vendorData = vendorService.getById(productData.vendor_id);
           setVendor(vendorData || null);
         }
+        // Fetch reviews for this product
+        const productReviews = reviewService.getByProduct(id);
+        setReviews(productReviews);
       }
     } catch (error) {
       console.error('Error fetching product:', error);
