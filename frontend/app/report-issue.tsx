@@ -355,6 +355,8 @@ const styles = StyleSheet.create({
     minHeight: 72,
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'flex-start',
+    gap: 12,
   },
   issueTypeCardSelected: {
     borderColor: ZORA_RED,
