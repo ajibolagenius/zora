@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -7,6 +7,9 @@ import {
   ScrollView,
   Image,
   Dimensions,
+  Animated,
+  Easing,
+  Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
@@ -26,13 +29,6 @@ import {
 import { Colors } from '../../constants/colors';
 import { Spacing, BorderRadius } from '../../constants/spacing';
 import { FontSize, FontFamily } from '../../constants/typography';
-
-// Zora Brand Colors
-const ZORA_RED = '#C1272D';
-const ZORA_CARD = '#3A2A21';
-const SURFACE_DARK = '#2D1E18';
-const MAP_BG = '#181111';
-const ROAD_COLOR = '#2a2222';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
@@ -57,39 +53,85 @@ export default function OrderTrackingScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const orderNumber = id || '8821';
 
+  // Animation values
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const slideAnim = useRef(new Animated.Value(30)).current;
+  const pulseAnim = useRef(new Animated.Value(1)).current;
+
+  useEffect(() => {
+    // Entrance animation
+    Animated.parallel([
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 400,
+        easing: Easing.out(Easing.cubic),
+        useNativeDriver: true,
+      }),
+      Animated.timing(slideAnim, {
+        toValue: 0,
+        duration: 400,
+        easing: Easing.out(Easing.cubic),
+        useNativeDriver: true,
+      }),
+    ]).start();
+
+    // Driver pin pulse animation
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(pulseAnim, {
+          toValue: 1.2,
+          duration: 1000,
+          easing: Easing.inOut(Easing.ease),
+          useNativeDriver: true,
+        }),
+        Animated.timing(pulseAnim, {
+          toValue: 1,
+          duration: 1000,
+          easing: Easing.inOut(Easing.ease),
+          useNativeDriver: true,
+        }),
+      ])
+    ).start();
+  }, []);
+
   return (
     <View style={styles.container}>
       {/* Map Background */}
       <View style={styles.mapContainer}>
-        {/* Abstract Roads */}
-        <View style={styles.road1} />
-        <View style={styles.road2} />
-        <View style={styles.road3} />
+        {/* Dot Pattern Background */}
+        <View style={styles.mapPattern}>
+          {Array.from({ length: 200 }).map((_, i) => (
+            <View key={i} style={styles.mapDot} />
+          ))}
+        </View>
         
-        {/* Route Line SVG Simulation */}
+        {/* Route Line */}
         <View style={styles.routeLineContainer}>
           <View style={styles.routeLine} />
         </View>
         
         {/* Vendor Pin */}
         <View style={styles.vendorPinContainer}>
-          <View style={styles.vendorPin}>
-            <Storefront size={20} color={ZORA_RED} weight="fill" />
+          <View style={styles.markerBalloon}>
+            <Storefront size={18} color="#FFFFFF" weight="fill" />
           </View>
+          <View style={styles.markerTail} />
         </View>
         
-        {/* Driver Pin */}
-        <View style={styles.driverPinContainer}>
+        {/* Driver Pin - Animated */}
+        <Animated.View style={[styles.driverPinContainer, { transform: [{ scale: pulseAnim }] }]}>
+          <View style={styles.driverPulse} />
           <View style={styles.driverPin}>
-            <Truck size={18} color={ZORA_RED} weight="fill" />
+            <Truck size={16} color={Colors.primary} weight="fill" />
           </View>
-        </View>
+        </Animated.View>
         
         {/* Destination Pin */}
         <View style={styles.destinationPinContainer}>
-          <View style={styles.destinationPin}>
-            <House size={20} color="#FFFFFF" weight="fill" />
+          <View style={styles.destinationBalloon}>
+            <House size={18} color="#FFFFFF" weight="fill" />
           </View>
+          <View style={styles.destinationTail} />
         </View>
       </View>
 
@@ -120,7 +162,7 @@ export default function OrderTrackingScreen() {
       </View>
 
       {/* Bottom Sheet */}
-      <View style={styles.bottomSheet}>
+      <Animated.View style={[styles.bottomSheet, { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }]}>
         {/* Drag Handle */}
         <View style={styles.dragHandle} />
         
@@ -167,7 +209,7 @@ export default function OrderTrackingScreen() {
                 <Phone size={20} color="#FFFFFF" weight="fill" />
               </TouchableOpacity>
               <TouchableOpacity style={styles.chatButton}>
-                <ChatCircle size={20} color={ZORA_RED} weight="fill" />
+                <ChatCircle size={20} color={Colors.primary} weight="fill" />
               </TouchableOpacity>
             </View>
           </View>
@@ -235,7 +277,7 @@ export default function OrderTrackingScreen() {
               onPress={() => router.push(`/order-support/${orderNumber}`)}
               activeOpacity={0.8}
             >
-              <Headset size={18} color={ZORA_RED} weight="regular" />
+              <Headset size={18} color={Colors.primary} weight="duotone" />
               <Text style={styles.needHelpText}>Need Help?</Text>
             </TouchableOpacity>
             
@@ -249,7 +291,7 @@ export default function OrderTrackingScreen() {
             </TouchableOpacity>
           </View>
         </ScrollView>
-      </View>
+      </Animated.View>
     </View>
   );
 }
@@ -257,7 +299,7 @@ export default function OrderTrackingScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: MAP_BG,
+    backgroundColor: Colors.backgroundDark,
   },
   
   // Map
@@ -267,94 +309,144 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
+    backgroundColor: Colors.cardDark,
   },
-  road1: {
-    position: 'absolute',
-    top: 0,
-    left: '33%',
-    width: 16,
-    height: '100%',
-    backgroundColor: ROAD_COLOR,
-    transform: [{ rotate: '12deg' }],
+  mapPattern: {
+    ...StyleSheet.absoluteFillObject,
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: Spacing.md,
+    gap: 20,
   },
-  road2: {
-    position: 'absolute',
-    top: '25%',
-    left: 0,
-    width: '100%',
-    height: 24,
-    backgroundColor: ROAD_COLOR,
-    transform: [{ rotate: '-6deg' }],
-  },
-  road3: {
-    position: 'absolute',
-    top: '66%',
-    right: 0,
-    width: '75%',
-    height: 20,
-    backgroundColor: ROAD_COLOR,
-    transform: [{ rotate: '3deg' }],
+  mapDot: {
+    width: 4,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
   },
   routeLineContainer: {
     position: 'absolute',
-    top: 120,
-    left: 140,
+    top: 100,
+    left: '35%',
     width: 60,
-    height: 330,
+    height: 350,
   },
   routeLine: {
     position: 'absolute',
     left: 20,
     top: 0,
-    width: 6,
+    width: 4,
     height: '100%',
-    backgroundColor: ZORA_RED,
-    borderRadius: 3,
-    transform: [{ rotate: '5deg' }],
+    backgroundColor: Colors.primary,
+    borderRadius: 2,
+    ...Platform.select({
+      ios: {
+        shadowColor: Colors.primary,
+        shadowOffset: { width: 0, height: 0 },
+        shadowOpacity: 0.5,
+        shadowRadius: 8,
+      },
+    }),
   },
   
-  // Pins
+  // Pins - Balloon Style
   vendorPinContainer: {
     position: 'absolute',
-    top: 100,
-    left: 120,
+    top: 80,
+    left: '30%',
     alignItems: 'center',
   },
-  vendorPin: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: ZORA_CARD,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 2,
-    borderColor: ZORA_RED,
+  markerBalloon: {
+    backgroundColor: Colors.primary,
+    padding: Spacing.sm,
+    borderRadius: BorderRadius.lg,
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 3 },
+        shadowOpacity: 0.3,
+        shadowRadius: 6,
+      },
+      android: {
+        elevation: 6,
+      },
+    }),
+  },
+  markerTail: {
+    width: 0,
+    height: 0,
+    borderLeftWidth: 8,
+    borderRightWidth: 8,
+    borderTopWidth: 10,
+    borderLeftColor: 'transparent',
+    borderRightColor: 'transparent',
+    borderTopColor: Colors.primary,
+    marginTop: -1,
   },
   driverPinContainer: {
     position: 'absolute',
-    top: 280,
-    left: 165,
+    top: 260,
+    left: '40%',
     alignItems: 'center',
+    justifyContent: 'center',
+  },
+  driverPulse: {
+    position: 'absolute',
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: 'rgba(204, 0, 0, 0.2)',
   },
   driverPin: {
-    padding: 6,
-    borderRadius: 20,
+    padding: Spacing.sm,
+    borderRadius: BorderRadius.full,
     backgroundColor: '#FFFFFF',
-    transform: [{ rotate: '12deg' }],
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.3,
+        shadowRadius: 4,
+      },
+      android: {
+        elevation: 4,
+      },
+    }),
   },
   destinationPinContainer: {
     position: 'absolute',
-    top: 420,
-    left: 160,
+    top: 400,
+    left: '38%',
     alignItems: 'center',
   },
-  destinationPin: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: ZORA_RED,
-    justifyContent: 'center',
-    alignItems: 'center',
+  destinationBalloon: {
+    backgroundColor: Colors.success || '#22C55E',
+    padding: Spacing.sm,
+    borderRadius: BorderRadius.lg,
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 3 },
+        shadowOpacity: 0.3,
+        shadowRadius: 6,
+      },
+      android: {
+        elevation: 6,
+      },
+    }),
+  },
+  destinationTail: {
+    width: 0,
+    height: 0,
+    borderLeftWidth: 8,
+    borderRightWidth: 8,
+    borderTopWidth: 10,
+    borderLeftColor: 'transparent',
+    borderRightColor: 'transparent',
+    borderTopColor: Colors.success || '#22C55E',
+    marginTop: -1,
   },
   
   // Top Bar
@@ -364,40 +456,37 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     zIndex: 30,
-    paddingHorizontal: 16,
-    paddingBottom: 16,
+    paddingHorizontal: Spacing.base,
+    paddingBottom: Spacing.base,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: 'rgba(0,0,0,0.5)',
   },
   topBarButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: 'rgba(58, 42, 33, 0.9)',
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: 'rgba(0, 0, 0, 0.4)',
     justifyContent: 'center',
     alignItems: 'center',
   },
   titleContainer: {
-    backgroundColor: 'rgba(58, 42, 33, 0.8)',
-    paddingHorizontal: 16,
-    paddingVertical: 6,
+    backgroundColor: 'rgba(0, 0, 0, 0.4)',
+    paddingHorizontal: Spacing.base,
+    paddingVertical: Spacing.sm,
     borderRadius: BorderRadius.full,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.05)',
     alignItems: 'center',
   },
   titleText: {
-    fontFamily: FontFamily.bodyBold,
-    fontSize: 12,
-    color: 'rgba(255,255,255,0.9)',
+    fontFamily: FontFamily.bodySemiBold,
+    fontSize: FontSize.caption,
+    color: Colors.textPrimary,
     letterSpacing: 1,
   },
   orderNumberText: {
     fontFamily: FontFamily.body,
-    fontSize: 10,
-    color: 'rgba(255,255,255,0.5)',
+    fontSize: FontSize.tiny,
+    color: Colors.textMuted,
     letterSpacing: 1,
   },
   
@@ -405,14 +494,14 @@ const styles = StyleSheet.create({
   locationButtonContainer: {
     position: 'absolute',
     bottom: '52%',
-    right: 16,
+    right: Spacing.base,
     zIndex: 20,
   },
   locationButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: 'rgba(58, 42, 33, 0.9)',
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: 'rgba(0, 0, 0, 0.4)',
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -423,34 +512,45 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    maxHeight: '65%',
-    backgroundColor: ZORA_CARD,
+    maxHeight: '60%',
+    backgroundColor: Colors.cardDark,
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     zIndex: 40,
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: -4 },
+        shadowOpacity: 0.2,
+        shadowRadius: 8,
+      },
+      android: {
+        elevation: 16,
+      },
+    }),
   },
   dragHandle: {
-    width: 48,
+    width: 40,
     height: 4,
-    backgroundColor: 'rgba(255,255,255,0.1)',
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
     borderRadius: 2,
     alignSelf: 'center',
-    marginTop: 12,
-    marginBottom: 4,
+    marginTop: Spacing.md,
+    marginBottom: Spacing.xs,
   },
   sheetContent: {
     flex: 1,
   },
   sheetContentInner: {
-    paddingHorizontal: 24,
-    paddingTop: 8,
-    paddingBottom: 24,
-    gap: 16,
+    paddingHorizontal: Spacing.lg,
+    paddingTop: Spacing.sm,
+    paddingBottom: Spacing.xl,
+    gap: Spacing.base,
   },
   
   // Arrival Section
   arrivalSection: {
-    gap: 12,
+    gap: Spacing.md,
   },
   arrivalHeader: {
     flexDirection: 'row',
@@ -458,30 +558,32 @@ const styles = StyleSheet.create({
     alignItems: 'flex-end',
   },
   arrivalTitle: {
-    fontFamily: FontFamily.display,
-    fontSize: 24,
+    fontFamily: FontFamily.displaySemiBold,
+    fontSize: FontSize.h3,
     color: Colors.textPrimary,
   },
   onTimeBadge: {
-    backgroundColor: 'rgba(193, 39, 45, 0.1)',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 4,
+    backgroundColor: 'rgba(34, 197, 94, 0.15)',
+    paddingHorizontal: Spacing.sm,
+    paddingVertical: Spacing.xs,
+    borderRadius: BorderRadius.sm,
+    borderWidth: 1,
+    borderColor: 'rgba(34, 197, 94, 0.3)',
   },
   onTimeText: {
-    fontFamily: FontFamily.bodyBold,
-    fontSize: 12,
-    color: ZORA_RED,
+    fontFamily: FontFamily.bodySemiBold,
+    fontSize: FontSize.caption,
+    color: '#22C55E',
   },
   progressBarBg: {
     height: 6,
-    backgroundColor: '#543b3b',
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
     borderRadius: 3,
     overflow: 'hidden',
   },
   progressBarFill: {
     height: '100%',
-    backgroundColor: ZORA_RED,
+    backgroundColor: Colors.primary,
     borderRadius: 3,
   },
   
@@ -489,12 +591,12 @@ const styles = StyleSheet.create({
   driverCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 16,
-    backgroundColor: SURFACE_DARK,
-    padding: 16,
+    gap: Spacing.md,
+    backgroundColor: Colors.backgroundDark,
+    padding: Spacing.base,
     borderRadius: BorderRadius.lg,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.05)',
+    borderColor: 'rgba(255, 255, 255, 0.05)',
   },
   driverPhoto: {
     position: 'relative',
@@ -504,80 +606,80 @@ const styles = StyleSheet.create({
     height: 56,
     borderRadius: 28,
     borderWidth: 2,
-    borderColor: ZORA_RED,
+    borderColor: Colors.primary,
   },
   ratingBadge: {
     position: 'absolute',
     bottom: -4,
     right: -4,
-    backgroundColor: ZORA_RED,
-    paddingHorizontal: 6,
+    backgroundColor: Colors.secondary,
+    paddingHorizontal: Spacing.xs,
     paddingVertical: 2,
     borderRadius: BorderRadius.full,
   },
   ratingText: {
-    fontFamily: FontFamily.bodyBold,
-    fontSize: 10,
-    color: '#FFFFFF',
+    fontFamily: FontFamily.bodySemiBold,
+    fontSize: FontSize.tiny,
+    color: '#000',
   },
   driverInfo: {
     flex: 1,
   },
   driverName: {
-    fontFamily: FontFamily.bodyBold,
-    fontSize: FontSize.bodyLarge,
+    fontFamily: FontFamily.displaySemiBold,
+    fontSize: FontSize.body,
     color: Colors.textPrimary,
   },
   vehicleInfo: {
     fontFamily: FontFamily.body,
     fontSize: FontSize.small,
-    color: 'rgba(255,255,255,0.6)',
+    color: Colors.textMuted,
     marginTop: 2,
   },
   licensePlate: {
-    backgroundColor: 'rgba(255,255,255,0.1)',
-    paddingHorizontal: 6,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    paddingHorizontal: Spacing.sm,
     paddingVertical: 2,
-    borderRadius: 4,
+    borderRadius: BorderRadius.sm,
     alignSelf: 'flex-start',
-    marginTop: 4,
+    marginTop: Spacing.xs,
   },
   licensePlateText: {
-    fontFamily: FontFamily.body,
-    fontSize: 10,
-    color: 'rgba(255,255,255,0.8)',
+    fontFamily: FontFamily.bodySemiBold,
+    fontSize: FontSize.tiny,
+    color: Colors.textPrimary,
     letterSpacing: 1,
   },
   driverActions: {
     flexDirection: 'row',
-    gap: 8,
+    gap: Spacing.sm,
   },
   callButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: ZORA_RED,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: Colors.primary,
     justifyContent: 'center',
     alignItems: 'center',
   },
   chatButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: 'rgba(193, 39, 45, 0.2)',
-    borderWidth: 1,
-    borderColor: 'rgba(193, 39, 45, 0.3)',
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: 'transparent',
+    borderWidth: 1.5,
+    borderColor: Colors.primary,
     justifyContent: 'center',
     alignItems: 'center',
   },
   
   // Timeline
   timelineContainer: {
-    paddingLeft: 8,
+    paddingLeft: Spacing.sm,
   },
   timelineStep: {
     flexDirection: 'row',
-    gap: 16,
+    gap: Spacing.base,
   },
   timelineLeft: {
     alignItems: 'center',
@@ -587,119 +689,117 @@ const styles = StyleSheet.create({
     width: 24,
     height: 24,
     borderRadius: 12,
-    backgroundColor: ZORA_RED,
+    backgroundColor: Colors.primary,
     justifyContent: 'center',
     alignItems: 'center',
     zIndex: 10,
   },
   stepIconActive: {
-    width: 16,
-    height: 16,
-    borderRadius: 8,
-    backgroundColor: ZORA_RED,
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    backgroundColor: Colors.primary,
     justifyContent: 'center',
     alignItems: 'center',
     zIndex: 10,
-    marginTop: 4,
+    marginTop: 2,
   },
   stepIconActiveDot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
+    width: 8,
+    height: 8,
+    borderRadius: 4,
     backgroundColor: '#FFFFFF',
   },
   stepIconPending: {
     width: 12,
     height: 12,
     borderRadius: 6,
-    backgroundColor: 'rgba(255,255,255,0.2)',
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
     zIndex: 10,
-    marginTop: 4,
+    marginTop: 6,
   },
   timelineLine: {
     width: 2,
-    height: 24,
-    backgroundColor: 'rgba(255,255,255,0.1)',
-    marginVertical: 4,
+    height: 28,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    marginVertical: Spacing.xs,
   },
   timelineLineCompleted: {
-    backgroundColor: 'rgba(193, 39, 45, 0.3)',
+    backgroundColor: 'rgba(204, 0, 0, 0.3)',
   },
   timelineLineActive: {
-    backgroundColor: ZORA_RED,
+    backgroundColor: Colors.primary,
   },
   timelineRight: {
     flex: 1,
-    paddingBottom: 12,
+    paddingBottom: Spacing.md,
   },
   timelineRightPending: {
     opacity: 0.4,
   },
   stepLabel: {
-    fontFamily: FontFamily.bodyMedium,
+    fontFamily: FontFamily.bodySemiBold,
     fontSize: FontSize.small,
-    color: 'rgba(255,255,255,0.4)',
-    textDecorationLine: 'line-through',
+    color: Colors.textMuted,
   },
   stepLabelCompleted: {
-    textDecorationLine: 'line-through',
+    color: Colors.textMuted,
   },
   stepLabelActive: {
-    fontFamily: FontFamily.bodyBold,
+    fontFamily: FontFamily.displaySemiBold,
     fontSize: FontSize.body,
     color: Colors.textPrimary,
-    textDecorationLine: 'none',
   },
   stepTime: {
     fontFamily: FontFamily.body,
-    fontSize: 12,
-    color: 'rgba(255,255,255,0.2)',
+    fontSize: FontSize.caption,
+    color: Colors.textMuted,
     marginTop: 2,
   },
   stepDescription: {
     fontFamily: FontFamily.body,
-    fontSize: 12,
-    color: 'rgba(255,255,255,0.6)',
+    fontSize: FontSize.caption,
+    color: Colors.textMuted,
     marginTop: 2,
   },
   
-  // Need Help Button
+  // Action Buttons
   actionButtonsContainer: {
     flexDirection: 'row',
-    gap: 12,
-    marginTop: 8,
+    gap: Spacing.md,
+    marginTop: Spacing.sm,
   },
   needHelpButton: {
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 8,
-    paddingVertical: 14,
-    backgroundColor: 'rgba(193, 39, 45, 0.1)',
+    gap: Spacing.sm,
+    paddingVertical: Spacing.md,
+    backgroundColor: 'transparent',
     borderRadius: BorderRadius.lg,
     borderWidth: 1,
-    borderColor: 'rgba(193, 39, 45, 0.2)',
+    borderColor: Colors.primary,
   },
   needHelpText: {
-    fontFamily: FontFamily.bodyMedium,
+    fontFamily: FontFamily.bodySemiBold,
     fontSize: FontSize.small,
-    color: ZORA_RED,
+    color: Colors.primary,
   },
   reportIssueButton: {
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 8,
-    paddingVertical: 14,
-    backgroundColor: 'rgba(239, 68, 68, 0.1)',
+    gap: Spacing.sm,
+    paddingVertical: Spacing.md,
+    backgroundColor: 'transparent',
     borderRadius: BorderRadius.lg,
     borderWidth: 1,
-    borderColor: 'rgba(239, 68, 68, 0.2)',
+    borderColor: '#EF4444',
   },
   reportIssueText: {
-    fontFamily: FontFamily.bodyMedium,
+    fontFamily: FontFamily.bodySemiBold,
     fontSize: FontSize.small,
     color: '#EF4444',
   },

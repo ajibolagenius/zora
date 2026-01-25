@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   View,
   Text,
@@ -9,6 +9,8 @@ import {
   Image,
   KeyboardAvoidingView,
   Platform,
+  Animated,
+  Easing,
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
@@ -16,17 +18,11 @@ import {
   ArrowLeft,
   PaperPlaneRight,
   Paperclip,
+  Robot,
 } from 'phosphor-react-native';
 import { Colors } from '../../constants/colors';
-import { Spacing, BorderRadius } from '../../constants/spacing';
+import { Spacing, BorderRadius, Heights } from '../../constants/spacing';
 import { FontSize, FontFamily } from '../../constants/typography';
-
-// Zora Brand Colors
-const ZORA_RED = '#C1272D';
-const ZORA_CARD = '#3A2A21';
-const SURFACE_DARK = '#342418';
-const BOT_BUBBLE = '#342418';
-const USER_BUBBLE = '#CC0000';
 
 interface Message {
   id: string;
@@ -77,6 +73,27 @@ export default function OrderSupportScreen() {
   const [isTyping, setIsTyping] = useState(true);
   const scrollViewRef = useRef<ScrollView>(null);
 
+  // Animation values
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const slideAnim = useRef(new Animated.Value(20)).current;
+
+  useEffect(() => {
+    Animated.parallel([
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 400,
+        easing: Easing.out(Easing.cubic),
+        useNativeDriver: true,
+      }),
+      Animated.timing(slideAnim, {
+        toValue: 0,
+        duration: 400,
+        easing: Easing.out(Easing.cubic),
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, []);
+
   const handleSend = () => {
     if (!inputText.trim()) return;
     
@@ -119,23 +136,21 @@ export default function OrderSupportScreen() {
 
   const renderMessage = (message: Message, index: number) => {
     const isUser = message.sender === 'user';
-    const prevMessage = index > 0 ? messages[index - 1] : null;
-    const showTimestamp = !prevMessage || prevMessage.sender !== message.sender;
     
     return (
-      <View 
+      <Animated.View 
         key={message.id}
         style={[
           styles.messageContainer,
           isUser ? styles.messageContainerUser : styles.messageContainerBot,
+          { opacity: fadeAnim, transform: [{ translateY: slideAnim }] },
         ]}
       >
         {/* Bot Avatar */}
         {!isUser && (
-          <Image
-            source={{ uri: 'https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=100' }}
-            style={styles.botAvatar}
-          />
+          <View style={styles.botAvatar}>
+            <Robot size={20} color={Colors.primary} weight="duotone" />
+          </View>
         )}
         
         <View style={[
@@ -158,7 +173,7 @@ export default function OrderSupportScreen() {
             {!isUser && message.senderName && `${message.senderName} • `}{message.timestamp}
           </Text>
         </View>
-      </View>
+      </Animated.View>
     );
   };
 
@@ -279,26 +294,28 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.base,
     paddingVertical: Spacing.md,
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255,255,255,0.05)',
+    borderBottomColor: 'rgba(255, 255, 255, 0.05)',
   },
   backButton: {
     width: 44,
     height: 44,
+    borderRadius: 22,
+    backgroundColor: 'rgba(0, 0, 0, 0.3)',
     justifyContent: 'center',
-    alignItems: 'flex-start',
+    alignItems: 'center',
   },
   headerCenter: {
     flex: 1,
     alignItems: 'center',
   },
   headerTitle: {
-    fontFamily: FontFamily.displayMedium,
-    fontSize: FontSize.bodyLarge,
+    fontFamily: FontFamily.displaySemiBold,
+    fontSize: FontSize.h4,
     color: Colors.textPrimary,
   },
   headerSubtitle: {
     fontFamily: FontFamily.body,
-    fontSize: 12,
+    fontSize: FontSize.caption,
     color: Colors.textMuted,
     marginTop: 2,
   },
@@ -318,7 +335,7 @@ const styles = StyleSheet.create({
   chatContent: {
     paddingHorizontal: Spacing.base,
     paddingTop: Spacing.md,
-    gap: 24,
+    gap: Spacing.lg,
   },
   
   // Timestamp
@@ -326,12 +343,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   timestampText: {
-    fontFamily: FontFamily.bodyMedium,
-    fontSize: 12,
+    fontFamily: FontFamily.bodySemiBold,
+    fontSize: FontSize.caption,
     color: Colors.textMuted,
-    backgroundColor: 'rgba(52, 36, 24, 0.5)',
-    paddingHorizontal: 12,
-    paddingVertical: 4,
+    backgroundColor: Colors.cardDark,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.xs,
     borderRadius: BorderRadius.full,
   },
   
@@ -339,7 +356,7 @@ const styles = StyleSheet.create({
   messageContainer: {
     flexDirection: 'row',
     alignItems: 'flex-end',
-    gap: 12,
+    gap: Spacing.sm,
     maxWidth: '85%',
   },
   messageContainerBot: {
@@ -350,46 +367,49 @@ const styles = StyleSheet.create({
     flexDirection: 'row-reverse',
   },
   botAvatar: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: Colors.cardDark,
+    justifyContent: 'center',
+    alignItems: 'center',
     borderWidth: 1,
-    borderColor: SURFACE_DARK,
+    borderColor: 'rgba(255, 255, 255, 0.1)',
   },
   messageContent: {
-    gap: 4,
+    gap: Spacing.xs,
     alignItems: 'flex-start',
   },
   messageContentUser: {
     alignItems: 'flex-end',
   },
   messageBubble: {
-    padding: 12,
-    borderRadius: 18,
+    padding: Spacing.md,
+    borderRadius: BorderRadius.lg,
     maxWidth: '100%',
   },
   messageBubbleBot: {
-    backgroundColor: BOT_BUBBLE,
-    borderBottomLeftRadius: 4,
+    backgroundColor: Colors.cardDark,
+    borderBottomLeftRadius: Spacing.xs,
   },
   messageBubbleUser: {
-    backgroundColor: USER_BUBBLE,
-    borderBottomRightRadius: 4,
+    backgroundColor: Colors.primary,
+    borderBottomRightRadius: Spacing.xs,
   },
   messageText: {
     fontFamily: FontFamily.body,
-    fontSize: 15,
+    fontSize: FontSize.body,
     color: Colors.textPrimary,
     lineHeight: 22,
   },
   messageTimestamp: {
     fontFamily: FontFamily.body,
-    fontSize: 11,
+    fontSize: FontSize.tiny,
     color: Colors.textMuted,
-    marginLeft: 4,
+    marginLeft: Spacing.xs,
   },
   messageTimestampUser: {
-    marginRight: 4,
+    marginRight: Spacing.xs,
     marginLeft: 0,
   },
   
@@ -397,12 +417,12 @@ const styles = StyleSheet.create({
   typingContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
-    marginLeft: 44,
+    gap: Spacing.sm,
+    marginLeft: 48,
   },
   typingDots: {
     flexDirection: 'row',
-    gap: 4,
+    gap: Spacing.xs,
   },
   typingDot: {
     width: 6,
@@ -421,7 +441,7 @@ const styles = StyleSheet.create({
   },
   typingText: {
     fontFamily: FontFamily.body,
-    fontSize: 12,
+    fontSize: FontSize.caption,
     color: Colors.textMuted,
   },
   
@@ -429,25 +449,27 @@ const styles = StyleSheet.create({
   bottomSection: {
     backgroundColor: Colors.backgroundDark,
     borderTopWidth: 1,
-    borderTopColor: 'rgba(255,255,255,0.05)',
-    paddingTop: 12,
+    borderTopColor: 'rgba(255, 255, 255, 0.05)',
+    paddingTop: Spacing.md,
   },
   
   // Quick Replies
   quickRepliesContainer: {
     paddingHorizontal: Spacing.base,
-    gap: 8,
-    marginBottom: 12,
+    gap: Spacing.sm,
+    marginBottom: Spacing.md,
   },
   quickReplyChip: {
-    backgroundColor: SURFACE_DARK,
-    paddingHorizontal: 16,
-    paddingVertical: 10,
+    backgroundColor: 'transparent',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.15)',
+    paddingHorizontal: Spacing.base,
+    paddingVertical: Spacing.sm,
     borderRadius: BorderRadius.full,
   },
   quickReplyText: {
-    fontFamily: FontFamily.bodyMedium,
-    fontSize: 14,
+    fontFamily: FontFamily.bodySemiBold,
+    fontSize: FontSize.small,
     color: Colors.textPrimary,
   },
   
@@ -455,37 +477,59 @@ const styles = StyleSheet.create({
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'flex-end',
-    gap: 8,
+    gap: Spacing.sm,
     paddingHorizontal: Spacing.base,
-    paddingBottom: 8,
+    paddingBottom: Spacing.sm,
   },
   attachButton: {
     width: 44,
     height: 44,
+    borderRadius: 22,
     justifyContent: 'center',
     alignItems: 'center',
   },
   textInput: {
     flex: 1,
-    minHeight: 44,
+    minHeight: Heights.input,
     maxHeight: 120,
-    backgroundColor: SURFACE_DARK,
-    borderRadius: 22,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+    backgroundColor: Colors.cardDark,
+    borderRadius: BorderRadius.full,
+    paddingHorizontal: Spacing.base,
+    paddingVertical: Spacing.md,
     fontFamily: FontFamily.body,
     fontSize: FontSize.body,
     color: Colors.textPrimary,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.05)',
   },
   sendButton: {
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: ZORA_RED,
+    backgroundColor: Colors.primary,
     justifyContent: 'center',
     alignItems: 'center',
+    ...Platform.select({
+      ios: {
+        shadowColor: Colors.primary,
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.3,
+        shadowRadius: 4,
+      },
+      android: {
+        elevation: 4,
+      },
+    }),
   },
   sendButtonDisabled: {
-    backgroundColor: 'rgba(193, 39, 45, 0.3)',
+    backgroundColor: 'rgba(204, 0, 0, 0.3)',
+    ...Platform.select({
+      ios: {
+        shadowOpacity: 0,
+      },
+      android: {
+        elevation: 0,
+      },
+    }),
   },
 });
