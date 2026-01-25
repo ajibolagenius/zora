@@ -28,6 +28,7 @@ interface AuthState {
   signInWithGoogle: () => Promise<void>;
   signInWithEmail: (email: string, password: string) => Promise<void>;
   signUpWithEmail: (email: string, password: string, name: string) => Promise<void>;
+  resetPassword: (email: string) => Promise<void>;
   logout: () => Promise<void>;
   checkAuth: () => Promise<void>;
   updateProfile: (updates: Partial<User>) => Promise<void>;
@@ -189,6 +190,35 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
       console.error('Email sign up error:', error);
       set({ isLoading: false });
       throw error;
+    }
+  },
+  
+  resetPassword: async (email: string) => {
+    // Check credentials before attempting password reset
+    if (!isSupabaseConfigured()) {
+      const error = new Error(getCredentialsError());
+      console.error('Password reset error:', error);
+      throw error;
+    }
+
+    try {
+      set({ isLoading: true });
+      const client = await getSupabaseClient();
+      
+      const { error } = await withTimeout(
+        client.auth.resetPasswordForEmail(email, {
+          redirectTo: 'zora://auth/reset-password',
+        }),
+        AUTH_TIMEOUT_MS,
+        'Password reset timed out. Please check your internet connection and try again.'
+      );
+      
+      if (error) throw error;
+    } catch (error) {
+      console.error('Password reset error:', error);
+      throw error;
+    } finally {
+      set({ isLoading: false });
     }
   },
   
