@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -7,101 +7,68 @@ import {
   TouchableOpacity,
   Image,
   Platform,
+  Animated,
+  Easing,
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import {
   Check,
-  Truck,
-  MapPin,
-  Package,
-  QrCode,
+  ArrowLeft,
+  ArrowRight,
+  Gift,
+  Export,
 } from 'phosphor-react-native';
 import { Colors } from '../constants/colors';
-import { Spacing, BorderRadius } from '../constants/spacing';
+import { Spacing, BorderRadius, Heights } from '../constants/spacing';
 import { FontSize, FontFamily } from '../constants/typography';
-import { productService } from '../services/mockDataService';
-import { orderQRService } from '../services/qrCodeService';
-
-// Conditionally import QRCode (only works on native)
-let QRCode: any = null;
-try {
-  QRCode = require('react-native-qrcode-svg').default;
-} catch (e) {
-  // QRCode not available on web
-}
-
-// Zora Brand Colors
-const ZORA_RED = '#C1272D';
-const ZORA_YELLOW = '#FFCC00';
-const ZORA_CARD = '#3A2A21';
-const SUCCESS_GREEN = '#22C55E';
-
-// Confetti colors
-const CONFETTI_COLORS = [ZORA_YELLOW, ZORA_RED, SUCCESS_GREEN, '#3B82F6', '#A855F7'];
-
-// Generate random confetti positions
-const generateConfetti = (count: number) => {
-  const items = [];
-  for (let i = 0; i < count; i++) {
-    items.push({
-      id: i,
-      left: `${Math.random() * 90 + 5}%`,
-      top: Math.random() * 80 + 10,
-      size: Math.random() * 8 + 4,
-      color: CONFETTI_COLORS[Math.floor(Math.random() * CONFETTI_COLORS.length)],
-      rotation: Math.random() * 45,
-      isCircle: Math.random() > 0.5,
-    });
-  }
-  return items;
-};
-
-const CONFETTI_ITEMS = generateConfetti(12);
-
-// Sample recommended products
-const RECOMMENDED_PRODUCTS = [
-  {
-    id: '1',
-    name: 'Suya Spice Blend',
-    price: 8.50,
-    image: 'https://images.unsplash.com/photo-1596040033229-a9821ebd058d?w=300',
-  },
-  {
-    id: '2',
-    name: 'Kente Table Runner',
-    price: 32.00,
-    image: 'https://images.unsplash.com/photo-1590736969955-71cc94901144?w=300',
-  },
-  {
-    id: '3',
-    name: 'Plantain Chips',
-    price: 4.25,
-    image: 'https://images.unsplash.com/photo-1621939514649-280e2ee25f60?w=300',
-  },
-  {
-    id: '4',
-    name: 'Woven Basket',
-    price: 28.00,
-    image: 'https://images.unsplash.com/photo-1595408076683-5d0c29b4c3db?w=300',
-  },
-];
 
 export default function OrderConfirmationScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { orderId } = useLocalSearchParams<{ orderId?: string }>();
   
-  // Generate QR code data
-  const orderNumber = orderId || 'ZAM-2024-1234';
-  const qrData = orderQRService.getOrderQRData(orderNumber);
+  const orderNumber = orderId || 'ZORA-8839';
 
-  // Get estimated delivery date (3 days from now)
-  const deliveryDate = new Date();
-  deliveryDate.setDate(deliveryDate.getDate() + 3);
-  const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  // Animation values
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const scaleAnim = useRef(new Animated.Value(0.8)).current;
+  const slideAnim = useRef(new Animated.Value(30)).current;
+
+  useEffect(() => {
+    // Animate success icon
+    Animated.sequence([
+      Animated.parallel([
+        Animated.timing(fadeAnim, {
+          toValue: 1,
+          duration: 400,
+          easing: Easing.out(Easing.cubic),
+          useNativeDriver: true,
+        }),
+        Animated.spring(scaleAnim, {
+          toValue: 1,
+          friction: 4,
+          tension: 100,
+          useNativeDriver: true,
+        }),
+      ]),
+      Animated.timing(slideAnim, {
+        toValue: 0,
+        duration: 300,
+        easing: Easing.out(Easing.cubic),
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, []);
+
+  // Get estimated delivery date range
+  const startDate = new Date();
+  startDate.setDate(startDate.getDate() + 2);
+  const endDate = new Date();
+  endDate.setDate(endDate.getDate() + 4);
   const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-  const formattedDate = `${days[deliveryDate.getDay()]}, ${months[deliveryDate.getMonth()]} ${deliveryDate.getDate()}`;
+  const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  const formattedDateRange = `${days[startDate.getDay()]}, ${months[startDate.getMonth()]} ${startDate.getDate()} - ${days[endDate.getDay()]}, ${months[endDate.getMonth()]} ${endDate.getDate()}`;
 
   const handleTrackOrder = () => {
     router.push(`/order-tracking/${orderNumber}`);
@@ -111,29 +78,25 @@ export default function OrderConfirmationScreen() {
     router.push('/(tabs)');
   };
 
+  const handleHelp = () => {
+    router.push('/help');
+  };
+
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
-      {/* Gradient overlay at top */}
-      <View style={styles.gradientOverlay} />
-      
-      {/* Confetti decoration */}
-      {CONFETTI_ITEMS.map((item) => (
-        <View
-          key={item.id}
-          style={[
-            styles.confetti,
-            {
-              left: item.left,
-              top: item.top,
-              width: item.size,
-              height: item.isCircle ? item.size : item.size * 1.5,
-              backgroundColor: item.color,
-              borderRadius: item.isCircle ? item.size / 2 : 2,
-              transform: [{ rotate: `${item.rotation}deg` }],
-            },
-          ]}
-        />
-      ))}
+      {/* Header */}
+      <View style={styles.header}>
+        <TouchableOpacity 
+          style={styles.backButton}
+          onPress={() => router.push('/(tabs)')}
+        >
+          <ArrowLeft size={22} color={Colors.textPrimary} weight="bold" />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>Order Confirmation</Text>
+        <TouchableOpacity onPress={handleHelp}>
+          <Text style={styles.helpText}>Help</Text>
+        </TouchableOpacity>
+      </View>
 
       <ScrollView 
         style={styles.scrollView}
@@ -141,77 +104,32 @@ export default function OrderConfirmationScreen() {
         showsVerticalScrollIndicator={false}
       >
         {/* Success Icon */}
-        <View style={styles.successIconContainer}>
+        <Animated.View style={[
+          styles.successIconContainer,
+          { opacity: fadeAnim, transform: [{ scale: scaleAnim }] }
+        ]}>
           <View style={styles.successIcon}>
             <Check size={40} color="#FFFFFF" weight="bold" />
           </View>
-        </View>
+        </Animated.View>
 
         {/* Header Text */}
-        <View style={styles.headerText}>
-          <Text style={styles.title}>Order Confirmed! 🎉</Text>
-          <Text style={styles.subtitle}>Thank you for supporting African vendors!</Text>
-          <Text style={styles.orderNumber}>Order #ZAM-2024-1234</Text>
-        </View>
-
-        {/* Order Details Card */}
-        <View style={styles.detailsCard}>
-          <View style={styles.detailsRow}>
-            <View style={styles.detailItem}>
-              <Text style={styles.detailLabel}>EST. DELIVERY</Text>
-              <View style={styles.detailValue}>
-                <Truck size={20} color={Colors.textPrimary} weight="fill" />
-                <Text style={styles.detailValueText}>{formattedDate}</Text>
-              </View>
-            </View>
-            <View style={[styles.detailItem, styles.detailItemRight]}>
-              <Text style={styles.detailLabel}>SHIP TO</Text>
-              <Text style={styles.detailValueText} numberOfLines={1}>123 Zora Lane, London</Text>
-            </View>
-          </View>
-          
-          <View style={styles.detailsDivider} />
-          
-          <View style={styles.detailsRow}>
-            <View style={styles.detailItem}>
-              <Text style={styles.detailLabel}>ITEMS</Text>
-              <Text style={styles.detailValueText}>3 items from 2 vendors</Text>
-            </View>
-            <View style={[styles.detailItem, styles.detailItemRight]}>
-              <Text style={styles.detailLabel}>TOTAL PAID</Text>
-              <Text style={styles.totalPaid}>£45.49</Text>
-            </View>
-          </View>
-        </View>
-
-        {/* QR Code Section */}
-        <View style={styles.qrSection}>
-          <View style={styles.qrHeader}>
-            <QrCode size={24} color={Colors.primary} weight="duotone" />
-            <Text style={styles.qrTitle}>Delivery Verification QR</Text>
-          </View>
-          {QRCode && Platform.OS !== 'web' ? (
-            <View style={styles.qrContainer}>
-              <QRCode
-                value={qrData.value}
-                size={160}
-                backgroundColor="#FFFFFF"
-                color="#000000"
-              />
-            </View>
-          ) : (
-            <View style={styles.qrPlaceholder}>
-              <QrCode size={48} color={Colors.textMuted} weight="duotone" />
-              <Text style={styles.qrPlaceholderText}>QR Code available on mobile</Text>
-            </View>
-          )}
-          <Text style={styles.qrInstruction}>
-            Show this code to the delivery driver to confirm your order
+        <Animated.View style={[
+          styles.headerText,
+          { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }
+        ]}>
+          <Text style={styles.title}>Order Placed!</Text>
+          <Text style={styles.subtitle}>
+            Thank you for shopping with Zora.{'\n'}
+            Your order <Text style={styles.orderNumberHighlight}>#{orderNumber}</Text> has been confirmed.
           </Text>
-        </View>
+        </Animated.View>
 
-        {/* Action Buttons */}
-        <View style={styles.actionsContainer}>
+        {/* Track Order Button */}
+        <Animated.View style={[
+          styles.trackButtonContainer,
+          { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }
+        ]}>
           <TouchableOpacity
             style={styles.trackButton}
             onPress={handleTrackOrder}
@@ -219,52 +137,74 @@ export default function OrderConfirmationScreen() {
           >
             <Text style={styles.trackButtonText}>Track Order</Text>
           </TouchableOpacity>
-          
-          <TouchableOpacity
-            style={styles.continueButton}
-            onPress={handleContinueShopping}
-            activeOpacity={0.8}
-          >
-            <Text style={styles.continueButtonText}>Continue Shopping</Text>
-          </TouchableOpacity>
-        </View>
+        </Animated.View>
 
-        {/* Recommendations Section */}
-        <View style={styles.recommendationsSection}>
-          <View style={styles.recommendationsHeader}>
-            <Text style={styles.recommendationsTitle}>You might also like</Text>
-            <TouchableOpacity>
-              <Text style={styles.viewAllText}>View All</Text>
-            </TouchableOpacity>
+        {/* Delivery Card */}
+        <Animated.View style={[
+          styles.deliveryCard,
+          { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }
+        ]}>
+          {/* Orange accent border */}
+          <View style={styles.deliveryCardAccent} />
+          <View style={styles.deliveryCardContent}>
+            <View style={styles.deliveryInfo}>
+              <Text style={styles.deliveryLabel}>ESTIMATED DELIVERY</Text>
+              <Text style={styles.deliveryDate}>{formattedDateRange}</Text>
+              <View style={styles.deliveryStatusRow}>
+                <Text style={styles.deliveryStatusLabel}>Order Received</Text>
+                <Text style={styles.deliveryStatusValue}>Processing</Text>
+              </View>
+              <View style={styles.progressBar}>
+                <View style={styles.progressFill} />
+              </View>
+              <Text style={styles.deliveryNote}>We've sent a confirmation email to your inbox.</Text>
+            </View>
+            <View style={styles.mapPreview}>
+              {/* Static map placeholder with roads pattern */}
+              <View style={styles.mapBackground}>
+                {/* Horizontal roads */}
+                <View style={[styles.mapRoad, styles.mapRoadH1]} />
+                <View style={[styles.mapRoad, styles.mapRoadH2]} />
+                {/* Vertical roads */}
+                <View style={[styles.mapRoad, styles.mapRoadV1]} />
+                <View style={[styles.mapRoad, styles.mapRoadV2]} />
+                {/* Location pin */}
+                <View style={styles.mapPin} />
+              </View>
+            </View>
           </View>
-          
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.recommendationsScroll}
-          >
-            {RECOMMENDED_PRODUCTS.map((product) => (
-              <TouchableOpacity
-                key={product.id}
-                style={styles.productCard}
-                onPress={() => router.push(`/product/${product.id}`)}
-                activeOpacity={0.8}
-              >
-                <View style={styles.productImageContainer}>
-                  <Image
-                    source={{ uri: product.image }}
-                    style={styles.productImage}
-                    resizeMode="cover"
-                  />
-                </View>
-                <View style={styles.productInfo}>
-                  <Text style={styles.productName} numberOfLines={1}>{product.name}</Text>
-                  <Text style={styles.productPrice}>£{product.price.toFixed(2)}</Text>
-                </View>
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
-        </View>
+        </Animated.View>
+
+        {/* Referral Card */}
+        <Animated.View style={[
+          styles.referralCard,
+          { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }
+        ]}>
+          <View style={styles.referralHeader}>
+            <View style={styles.referralIconContainer}>
+              <Gift size={22} color={Colors.secondary} weight="fill" />
+            </View>
+            <View style={styles.referralContent}>
+              <Text style={styles.referralTitle}>Share the love!</Text>
+              <Text style={styles.referralDescription}>
+                Give friends <Text style={styles.referralHighlight}>10% off</Text> and earn <Text style={styles.referralHighlight}>$10 credit</Text> when they shop.
+              </Text>
+            </View>
+          </View>
+          <TouchableOpacity style={styles.inviteButton} activeOpacity={0.8}>
+            <Export size={16} color={Colors.secondary} weight="bold" />
+            <Text style={styles.inviteButtonText}>Invite Friends</Text>
+          </TouchableOpacity>
+        </Animated.View>
+
+        {/* Continue Shopping Link */}
+        <TouchableOpacity
+          style={styles.continueShoppingButton}
+          onPress={handleContinueShopping}
+          activeOpacity={0.8}
+        >
+          <Text style={styles.continueShoppingText}>Continue Shopping</Text>
+        </TouchableOpacity>
 
         {/* Bottom padding */}
         <View style={{ height: insets.bottom + 32 }} />
@@ -278,260 +218,315 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Colors.backgroundDark,
   },
-  gradientOverlay: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    height: 200,
-    backgroundColor: 'rgba(193, 39, 45, 0.05)',
+  
+  // Header
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: Spacing.base,
+    paddingVertical: Spacing.md,
   },
-  confetti: {
-    position: 'absolute',
-    opacity: 0.5,
+  backButton: {
+    width: 44,
+    height: 44,
+    justifyContent: 'center',
+    alignItems: 'flex-start',
   },
+  headerTitle: {
+    fontFamily: FontFamily.displaySemiBold,
+    fontSize: FontSize.h4,
+    color: Colors.textPrimary,
+  },
+  helpText: {
+    fontFamily: FontFamily.bodySemiBold,
+    fontSize: FontSize.body,
+    color: Colors.secondary,
+  },
+  
+  // Scroll View
   scrollView: {
     flex: 1,
   },
   scrollContent: {
     alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingTop: 40,
+    paddingHorizontal: Spacing.base,
+    paddingTop: Spacing.lg,
   },
   
   // Success Icon
   successIconContainer: {
-    marginBottom: 24,
+    marginBottom: Spacing.lg,
   },
   successIcon: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: SUCCESS_GREEN,
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    backgroundColor: Colors.secondary,
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: SUCCESS_GREEN,
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.4,
-    shadowRadius: 20,
-    elevation: 10,
+    ...Platform.select({
+      ios: {
+        shadowColor: Colors.secondary,
+        shadowOffset: { width: 0, height: 8 },
+        shadowOpacity: 0.4,
+        shadowRadius: 16,
+      },
+      android: {
+        elevation: 12,
+      },
+    }),
   },
   
   // Header Text
   headerText: {
     alignItems: 'center',
-    marginBottom: 32,
+    marginBottom: Spacing.lg,
+    paddingHorizontal: Spacing.sm,
   },
   title: {
-    fontFamily: FontFamily.display,
-    fontSize: 28,
+    fontFamily: FontFamily.displaySemiBold,
+    fontSize: FontSize.h2,
     color: Colors.textPrimary,
     textAlign: 'center',
-    marginBottom: 8,
+    marginBottom: Spacing.sm,
   },
   subtitle: {
-    fontFamily: FontFamily.bodyMedium,
-    fontSize: FontSize.body,
-    color: 'rgba(255, 255, 255, 0.7)',
-    textAlign: 'center',
-    paddingHorizontal: 20,
-  },
-  orderNumber: {
-    fontFamily: FontFamily.bodyMedium,
-    fontSize: FontSize.small,
-    color: 'rgba(255, 255, 255, 0.4)',
-    marginTop: 8,
-  },
-  
-  // Order Details Card
-  detailsCard: {
-    width: '100%',
-    backgroundColor: ZORA_CARD,
-    borderRadius: BorderRadius.lg,
-    padding: 20,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.05)',
-    marginBottom: 32,
-  },
-  detailsRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  detailItem: {
-    flex: 1,
-  },
-  detailItemRight: {
-    alignItems: 'flex-end',
-  },
-  detailLabel: {
-    fontFamily: FontFamily.bodySemiBold,
-    fontSize: 10,
-    color: '#b99d9d',
-    letterSpacing: 1,
-    marginBottom: 6,
-  },
-  detailValue: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  detailValueText: {
-    fontFamily: FontFamily.bodySemiBold,
-    fontSize: FontSize.body,
-    color: Colors.textPrimary,
-  },
-  detailsDivider: {
-    height: 1,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    marginVertical: 16,
-  },
-  totalPaid: {
-    fontFamily: FontFamily.displayMedium,
-    fontSize: FontSize.h3,
-    color: ZORA_YELLOW,
-  },
-  
-  // QR Code Section
-  qrSection: {
-    backgroundColor: ZORA_CARD,
-    borderRadius: BorderRadius.lg,
-    padding: 20,
-    alignItems: 'center',
-    marginBottom: 24,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.05)',
-  },
-  qrHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    marginBottom: 16,
-  },
-  qrTitle: {
-    fontFamily: FontFamily.bodySemiBold,
-    fontSize: FontSize.body,
-    color: Colors.textPrimary,
-  },
-  qrContainer: {
-    padding: 16,
-    backgroundColor: '#FFFFFF',
-    borderRadius: BorderRadius.lg,
-    marginBottom: 16,
-  },
-  qrPlaceholder: {
-    width: 160,
-    height: 160,
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-    borderRadius: BorderRadius.lg,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  qrPlaceholderText: {
     fontFamily: FontFamily.body,
-    fontSize: FontSize.small,
-    color: Colors.textMuted,
-    marginTop: 8,
-  },
-  qrInstruction: {
-    fontFamily: FontFamily.body,
-    fontSize: FontSize.small,
+    fontSize: FontSize.body,
     color: Colors.textMuted,
     textAlign: 'center',
+    lineHeight: 24,
+  },
+  orderNumberHighlight: {
+    fontFamily: FontFamily.bodySemiBold,
+    color: Colors.secondary,
   },
   
-  // Action Buttons
-  actionsContainer: {
+  // Track Order Button
+  trackButtonContainer: {
     width: '100%',
-    gap: 12,
-    marginBottom: 40,
+    marginBottom: Spacing.lg,
   },
   trackButton: {
     width: '100%',
-    height: 56,
-    backgroundColor: ZORA_RED,
+    height: Heights.button,
+    backgroundColor: Colors.secondary,
     borderRadius: BorderRadius.lg,
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: ZORA_RED,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 8,
+    ...Platform.select({
+      ios: {
+        shadowColor: Colors.secondary,
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.3,
+        shadowRadius: 8,
+      },
+      android: {
+        elevation: 4,
+      },
+    }),
   },
   trackButtonText: {
-    fontFamily: FontFamily.bodyBold,
+    fontFamily: FontFamily.displaySemiBold,
     fontSize: FontSize.bodyLarge,
-    color: Colors.textPrimary,
-  },
-  continueButton: {
-    width: '100%',
-    height: 56,
-    backgroundColor: 'transparent',
-    borderRadius: BorderRadius.lg,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 2,
-    borderColor: 'rgba(193, 39, 45, 0.3)',
-  },
-  continueButtonText: {
-    fontFamily: FontFamily.bodyBold,
-    fontSize: FontSize.bodyLarge,
-    color: ZORA_RED,
+    color: Colors.backgroundDark,
   },
   
-  // Recommendations Section
-  recommendationsSection: {
+  // Delivery Card
+  deliveryCard: {
     width: '100%',
+    backgroundColor: Colors.cardDark,
+    borderRadius: BorderRadius.xl,
+    padding: Spacing.base,
+    paddingLeft: Spacing.base + 4,
+    marginBottom: Spacing.lg,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.05)',
+    overflow: 'hidden',
+    position: 'relative',
   },
-  recommendationsHeader: {
+  deliveryCardAccent: {
+    position: 'absolute',
+    left: 0,
+    top: 0,
+    bottom: 0,
+    width: 4,
+    backgroundColor: Colors.secondary,
+    borderTopLeftRadius: BorderRadius.xl,
+    borderBottomLeftRadius: BorderRadius.xl,
+  },
+  deliveryCardContent: {
+    flexDirection: 'row',
+    gap: Spacing.md,
+  },
+  deliveryInfo: {
+    flex: 1,
+  },
+  deliveryLabel: {
+    fontFamily: FontFamily.bodySemiBold,
+    fontSize: FontSize.tiny,
+    color: Colors.textMuted,
+    letterSpacing: 1,
+    marginBottom: Spacing.xs,
+  },
+  deliveryDate: {
+    fontFamily: FontFamily.displaySemiBold,
+    fontSize: FontSize.bodyLarge,
+    color: Colors.textPrimary,
+    marginBottom: Spacing.md,
+  },
+  deliveryStatusRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 16,
-    paddingHorizontal: 4,
+    marginBottom: Spacing.sm,
   },
-  recommendationsTitle: {
-    fontFamily: FontFamily.bodyBold,
-    fontSize: FontSize.bodyLarge,
+  deliveryStatusLabel: {
+    fontFamily: FontFamily.body,
+    fontSize: FontSize.small,
     color: Colors.textPrimary,
   },
-  viewAllText: {
+  deliveryStatusValue: {
     fontFamily: FontFamily.bodySemiBold,
     fontSize: FontSize.small,
-    color: ZORA_RED,
+    color: Colors.secondary,
   },
-  recommendationsScroll: {
-    gap: 16,
+  progressBar: {
+    height: 4,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    borderRadius: 2,
+    marginBottom: Spacing.md,
+    overflow: 'hidden',
   },
-  
-  // Product Card
-  productCard: {
-    width: 140,
-    gap: 8,
+  progressFill: {
+    width: '25%',
+    height: '100%',
+    backgroundColor: Colors.secondary,
+    borderRadius: 2,
   },
-  productImageContainer: {
-    width: '100%',
-    aspectRatio: 1,
+  deliveryNote: {
+    fontFamily: FontFamily.body,
+    fontSize: FontSize.caption,
+    color: Colors.textMuted,
+  },
+  mapPreview: {
+    width: 90,
+    height: 90,
     borderRadius: BorderRadius.lg,
     overflow: 'hidden',
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
   },
-  productImage: {
+  mapBackground: {
+    flex: 1,
+    backgroundColor: '#E8DED4',
+    position: 'relative',
+  },
+  mapRoad: {
+    position: 'absolute',
+    backgroundColor: '#D4C8BC',
+  },
+  mapRoadH1: {
+    left: 0,
+    right: 0,
+    top: 25,
+    height: 3,
+  },
+  mapRoadH2: {
+    left: 0,
+    right: 0,
+    top: 55,
+    height: 2,
+  },
+  mapRoadV1: {
+    top: 0,
+    bottom: 0,
+    left: 30,
+    width: 3,
+  },
+  mapRoadV2: {
+    top: 0,
+    bottom: 0,
+    right: 20,
+    width: 2,
+  },
+  mapPin: {
+    position: 'absolute',
+    top: 35,
+    left: 45,
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    backgroundColor: Colors.secondary,
+    borderWidth: 2,
+    borderColor: '#FFFFFF',
+  },
+  
+  // Referral Card
+  referralCard: {
     width: '100%',
-    height: '100%',
+    backgroundColor: Colors.cardDark,
+    borderRadius: BorderRadius.xl,
+    padding: Spacing.base,
+    marginBottom: Spacing.xl,
+    borderWidth: 1.5,
+    borderStyle: 'dashed',
+    borderColor: 'rgba(255, 204, 0, 0.4)',
   },
-  productInfo: {
-    gap: 2,
+  referralHeader: {
+    flexDirection: 'row',
+    gap: Spacing.md,
+    marginBottom: Spacing.md,
   },
-  productName: {
+  referralIconContainer: {
+    width: 44,
+    height: 44,
+    borderRadius: BorderRadius.md,
+    backgroundColor: 'rgba(255, 204, 0, 0.15)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  referralContent: {
+    flex: 1,
+  },
+  referralTitle: {
+    fontFamily: FontFamily.displaySemiBold,
+    fontSize: FontSize.body,
+    color: Colors.textPrimary,
+    marginBottom: Spacing.xs,
+  },
+  referralDescription: {
+    fontFamily: FontFamily.body,
+    fontSize: FontSize.small,
+    color: Colors.textMuted,
+    lineHeight: 20,
+  },
+  referralHighlight: {
+    fontFamily: FontFamily.bodySemiBold,
+    color: Colors.secondary,
+  },
+  inviteButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: Spacing.sm,
+    paddingVertical: Spacing.md,
+    borderRadius: BorderRadius.lg,
+    borderWidth: 1,
+    borderColor: Colors.secondary,
+  },
+  inviteButtonText: {
     fontFamily: FontFamily.bodySemiBold,
     fontSize: FontSize.small,
-    color: Colors.textPrimary,
+    color: Colors.secondary,
   },
-  productPrice: {
-    fontFamily: FontFamily.body,
-    fontSize: 12,
+  
+  // Continue Shopping
+  continueShoppingButton: {
+    paddingVertical: Spacing.md,
+  },
+  continueShoppingText: {
+    fontFamily: FontFamily.bodySemiBold,
+    fontSize: FontSize.body,
     color: Colors.textMuted,
   },
 });

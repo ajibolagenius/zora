@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -9,6 +9,8 @@ import {
   ActivityIndicator,
   Alert,
   Platform,
+  Animated,
+  Easing,
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -17,42 +19,53 @@ import {
   ArrowRight,
   Lock,
   CreditCard,
-  CaretDown,
-  CaretUp,
+  Wallet,
   CheckCircle,
-  Warning,
 } from 'phosphor-react-native';
 import { Colors } from '../constants/colors';
-import { Spacing, BorderRadius } from '../constants/spacing';
+import { Spacing, BorderRadius, Heights } from '../constants/spacing';
 import { FontSize, FontFamily } from '../constants/typography';
 import { useCartStore } from '../stores/cartStore';
 import { 
   paymentService, 
-  stripeService, 
   klarnaService, 
   clearpayService,
   type PaymentMethod,
   type PaymentResult,
 } from '../services/paymentService';
 
-// Zora Brand Colors
-const ZORA_RED = '#C1272D';
-const ZORA_CARD = '#3A2A21';
-const SURFACE_DARK = '#2D1E18';
-const SUCCESS_GREEN = '#22C55E';
-
-type PaymentMethodType = 'saved' | 'card' | 'klarna' | 'clearpay' | 'apple_pay' | 'google_pay';
+type PaymentMethodType = 'card' | 'klarna' | 'clearpay';
 
 export default function PaymentScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { items, subtotal, total, clearCart } = useCartStore();
   
-  const [selectedMethod, setSelectedMethod] = useState<PaymentMethodType>('saved');
+  const [selectedMethod, setSelectedMethod] = useState<PaymentMethodType>('card');
   const [useZoraCredit, setUseZoraCredit] = useState(true);
-  const [showOrderSummary, setShowOrderSummary] = useState(true);
   const [isProcessing, setIsProcessing] = useState(false);
   const [processingStep, setProcessingStep] = useState('');
+
+  // Animation values
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const slideAnim = useRef(new Animated.Value(20)).current;
+
+  useEffect(() => {
+    Animated.parallel([
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 400,
+        easing: Easing.out(Easing.cubic),
+        useNativeDriver: true,
+      }),
+      Animated.timing(slideAnim, {
+        toValue: 0,
+        duration: 400,
+        easing: Easing.out(Easing.cubic),
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, []);
   
   const zoraCredit = 12.50;
   const orderTotal = total || 45.49;
@@ -187,56 +200,31 @@ export default function PaymentScreen() {
     }
   };
 
-  // Build payment methods list dynamically
+  // Build payment methods list
   const paymentMethods = [
     { 
       id: 'card' as PaymentMethodType, 
-      name: 'Credit/Debit Card', 
-      subtitle: 'Visa, Mastercard, Amex',
-      icon: 'card', 
-      bgColor: 'rgba(255,255,255,0.05)',
+      name: 'Credit or Debit Card', 
+      subtitle: undefined,
       available: true,
     },
     { 
       id: 'klarna' as PaymentMethodType, 
-      name: 'Klarna', 
-      subtitle: klarnaPayIn3 ? klarnaPayIn3.description : 'Pay in 3 interest-free', 
+      name: 'Klarna.', 
+      subtitle: klarnaPayIn3 ? klarnaPayIn3.description : 'Pay in 3 interest-free installments', 
       bgColor: '#FFB3C7', 
       textColor: '#000',
-      available: klarnaPayIn3?.available ?? false,
+      available: klarnaPayIn3?.available ?? true,
     },
     { 
       id: 'clearpay' as PaymentMethodType, 
       name: 'Clearpay', 
-      subtitle: clearpayInfo?.description || 'Pay in 4', 
+      subtitle: clearpayInfo?.description || '4 interest-free payments', 
       bgColor: '#B2FCE4', 
       textColor: '#000',
-      available: clearpayInfo?.available ?? false,
+      available: clearpayInfo?.available ?? true,
     },
   ];
-  
-  // Add platform-specific payment methods
-  if (Platform.OS === 'ios') {
-    paymentMethods.push({ 
-      id: 'apple_pay' as PaymentMethodType, 
-      name: 'Apple Pay', 
-      subtitle: undefined,
-      bgColor: '#FFFFFF', 
-      textColor: '#000',
-      available: true,
-    });
-  }
-  
-  if (Platform.OS === 'android') {
-    paymentMethods.push({ 
-      id: 'google_pay' as PaymentMethodType, 
-      name: 'Google Pay', 
-      subtitle: undefined,
-      bgColor: '#FFFFFF', 
-      textColor: '#000',
-      available: true,
-    });
-  }
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
@@ -244,7 +232,7 @@ export default function PaymentScreen() {
       {isProcessing && (
         <View style={styles.processingOverlay}>
           <View style={styles.processingCard}>
-            <ActivityIndicator size="large" color={ZORA_RED} />
+            <ActivityIndicator size="large" color={Colors.primary} />
             <Text style={styles.processingText}>{processingStep}</Text>
             <Text style={styles.processingSubtext}>Please don't close this screen</Text>
           </View>
@@ -253,76 +241,44 @@ export default function PaymentScreen() {
       
       {/* Header */}
       <View style={styles.header}>
-        <View style={styles.headerTop}>
-          <View style={styles.headerLeft}>
-            <TouchableOpacity 
-              style={styles.backButton}
-              onPress={() => router.back()}
-              disabled={isProcessing}
-            >
-              <ArrowLeft size={20} color={Colors.textPrimary} weight="bold" />
-            </TouchableOpacity>
-            <Text style={styles.stepText}>STEP 2/3</Text>
-          </View>
-          
-          {/* Trust Badge */}
-          <View style={styles.trustBadge}>
-            <Lock size={14} color="#bc9a9a" weight="fill" />
-            <Text style={styles.trustBadgeText}>SECURE CHECKOUT</Text>
-          </View>
-        </View>
-        <Text style={styles.headerTitle}>Payment</Text>
+        <TouchableOpacity 
+          style={styles.backButton}
+          onPress={() => router.back()}
+          disabled={isProcessing}
+        >
+          <ArrowLeft size={22} color={Colors.textPrimary} weight="bold" />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>Checkout</Text>
+        <View style={styles.headerRight} />
       </View>
 
-      <ScrollView 
-        style={styles.scrollView}
+      <Animated.ScrollView 
+        style={[styles.scrollView, { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }]}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        {/* Saved Card Section */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Saved Card</Text>
-          <TouchableOpacity
-            style={[
-              styles.savedCardContainer,
-              selectedMethod === 'saved' && styles.savedCardContainerSelected,
-            ]}
-            onPress={() => setSelectedMethod('saved')}
-            activeOpacity={0.8}
-          >
-            {/* Radio indicator */}
-            <View style={styles.savedCardRadio}>
-              <View style={[
-                styles.radioOuter,
-                selectedMethod === 'saved' && styles.radioOuterSelected,
-              ]}>
-                {selectedMethod === 'saved' && <View style={styles.radioInner} />}
-              </View>
+        {/* Zora Credits Card */}
+        <View style={styles.zoraCreditCard}>
+          <View style={styles.zoraCreditLeft}>
+            <View style={styles.zoraCreditIconContainer}>
+              <Wallet size={20} color={Colors.textPrimary} weight="duotone" />
             </View>
-            
-            {/* Card Info */}
-            <View style={styles.savedCardInner}>
-              <View style={styles.visaLogo}>
-                <Text style={styles.visaText}>VISA</Text>
-              </View>
-              <View style={styles.cardDetails}>
-                <Text style={styles.cardNumber}>Visa ending in 4242</Text>
-                <Text style={styles.cardExpiry}>Expires 12/25</Text>
-              </View>
+            <View style={styles.zoraCreditInfo}>
+              <Text style={styles.zoraCreditTitle}>Zora Credits</Text>
+              <Text style={styles.zoraCreditBalance}>Balance: £{zoraCredit.toFixed(2)}</Text>
             </View>
-            
-            {/* Edit Link */}
-            <View style={styles.savedCardFooter}>
-              <TouchableOpacity>
-                <Text style={styles.editLink}>Edit</Text>
-              </TouchableOpacity>
-            </View>
-          </TouchableOpacity>
+          </View>
+          <Switch
+            value={useZoraCredit}
+            onValueChange={setUseZoraCredit}
+            trackColor={{ false: 'rgba(255,255,255,0.1)', true: Colors.primary }}
+            thumbColor="#FFFFFF"
+          />
         </View>
 
-        {/* Payment Methods Section */}
+        {/* Payment Method Section */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Payment Methods</Text>
+          <Text style={styles.sectionTitle}>Payment Method</Text>
           <View style={styles.methodsContainer}>
             {paymentMethods.map((method) => {
               const isSelected = selectedMethod === method.id;
@@ -342,43 +298,26 @@ export default function PaymentScreen() {
                 >
                   <View style={styles.methodLeft}>
                     {/* Method Icon/Logo */}
-                    <View style={[styles.methodLogo, { backgroundColor: method.bgColor }]}>
+                    <View style={[styles.methodLogo, method.bgColor && { backgroundColor: method.bgColor }]}>
                       {method.id === 'card' && (
-                        <CreditCard size={20} color="rgba(255,255,255,0.8)" weight="regular" />
+                        <CreditCard size={20} color={Colors.textPrimary} weight="duotone" />
                       )}
                       {method.id === 'klarna' && (
-                        <Text style={styles.klarnaText}>Klarna.</Text>
+                        <Text style={styles.klarnaText}>Kl.</Text>
                       )}
                       {method.id === 'clearpay' && (
-                        <Text style={styles.clearpayText}>Clear{'\n'}Pay</Text>
-                      )}
-                      {method.id === 'apple_pay' && (
-                        <Text style={styles.applePayText}> Pay</Text>
-                      )}
-                      {method.id === 'google_pay' && (
-                        <Text style={styles.googlePayText}>G Pay</Text>
+                        <Text style={styles.clearpayText}>cp</Text>
                       )}
                     </View>
                     
                     {/* Method Name */}
                     <View style={styles.methodInfo}>
-                      <Text style={[
-                        styles.methodName,
-                        !isAvailable && styles.methodNameDisabled
-                      ]}>
+                      <Text style={[styles.methodName, !isAvailable && styles.methodNameDisabled]}>
                         {method.name}
                       </Text>
                       {method.subtitle && (
-                        <Text style={[
-                          styles.methodSubtitle,
-                          !isAvailable && styles.methodSubtitleDisabled
-                        ]}>
+                        <Text style={[styles.methodSubtitle, !isAvailable && styles.methodSubtitleDisabled]}>
                           {method.subtitle}
-                        </Text>
-                      )}
-                      {!isAvailable && (
-                        <Text style={styles.unavailableText}>
-                          Not available for this amount
                         </Text>
                       )}
                     </View>
@@ -386,10 +325,7 @@ export default function PaymentScreen() {
                   
                   {/* Radio */}
                   {isAvailable && (
-                    <View style={[
-                      styles.radioOuter,
-                      isSelected && styles.radioOuterSelected,
-                    ]}>
+                    <View style={[styles.radioOuter, isSelected && styles.radioOuterSelected]}>
                       {isSelected && <View style={styles.radioInner} />}
                     </View>
                   )}
@@ -399,104 +335,54 @@ export default function PaymentScreen() {
           </View>
         </View>
 
-        {/* Zora Credit Toggle */}
+        {/* Order Summary Card */}
         <View style={styles.section}>
-          <View style={styles.zoraCreditCard}>
-            <View style={styles.zoraCreditInfo}>
-              <Text style={styles.zoraCreditTitle}>Use Zora Credit</Text>
-              <View style={styles.zoraCreditAmount}>
-                <Text style={styles.zoraCreditValue}>£{zoraCredit.toFixed(2)}</Text>
-                <Text style={styles.zoraCreditLabel}>Available balance</Text>
-              </View>
-            </View>
-            <Switch
-              value={useZoraCredit}
-              onValueChange={setUseZoraCredit}
-              trackColor={{ false: 'rgba(255,255,255,0.1)', true: ZORA_RED }}
-              thumbColor="#FFFFFF"
-            />
-          </View>
-          {useZoraCredit && (
-            <View style={styles.creditAppliedBadge}>
-              <CheckCircle size={16} color={SUCCESS_GREEN} weight="fill" />
-              <Text style={styles.creditAppliedText}>
-                £{zoraCredit.toFixed(2)} credit will be applied
-              </Text>
-            </View>
-          )}
-        </View>
-
-        {/* Order Summary Accordion */}
-        <View style={styles.section}>
-          <TouchableOpacity
-            style={styles.orderSummaryHeader}
-            onPress={() => setShowOrderSummary(!showOrderSummary)}
-            activeOpacity={0.8}
-          >
+          <View style={styles.orderSummaryCard}>
             <Text style={styles.orderSummaryTitle}>Order Summary</Text>
-            <View style={styles.orderSummaryRight}>
-              <Text style={styles.orderSummaryTotal}>£{finalTotal.toFixed(2)}</Text>
-              {showOrderSummary ? (
-                <CaretUp size={20} color="rgba(255,255,255,0.5)" weight="bold" />
-              ) : (
-                <CaretDown size={20} color="rgba(255,255,255,0.5)" weight="bold" />
-              )}
+            
+            <View style={styles.summaryRow}>
+              <Text style={styles.summaryLabel}>Subtotal</Text>
+              <Text style={styles.summaryValue}>£{(subtotal || 80.00).toFixed(2)}</Text>
             </View>
-          </TouchableOpacity>
-          
-          {showOrderSummary && (
-            <View style={styles.orderSummaryContent}>
-              <View style={styles.summaryDivider} />
+            
+            <View style={styles.summaryRowDashed}>
+              <Text style={styles.summaryLabel}>Delivery Fee</Text>
+              <Text style={styles.summaryValue}>£4.99</Text>
+            </View>
+            
+            {useZoraCredit && (
               <View style={styles.summaryRow}>
-                <Text style={styles.summaryLabel}>Subtotal ({items.length || 3} items)</Text>
-                <Text style={styles.summaryValue}>£{(subtotal || 57.99).toFixed(2)}</Text>
-              </View>
-              {useZoraCredit && (
-                <View style={styles.summaryRow}>
-                  <Text style={styles.summaryLabelCredit}>Zora Credit</Text>
-                  <Text style={styles.summaryValueCredit}>-£{zoraCredit.toFixed(2)}</Text>
+                <View style={styles.summaryLabelWithIcon}>
+                  <CheckCircle size={14} color={Colors.primary} weight="fill" />
+                  <Text style={styles.summaryLabelCredit}>Zora Credits</Text>
                 </View>
-              )}
-              <View style={styles.summaryRow}>
-                <Text style={styles.summaryLabel}>Delivery</Text>
-                <Text style={styles.summaryValueFree}>Free</Text>
+                <Text style={styles.summaryValueCredit}>-£{zoraCredit.toFixed(2)}</Text>
               </View>
-              <View style={styles.summaryDivider} />
-              <View style={styles.summaryRow}>
-                <Text style={styles.summaryLabelTotal}>Total</Text>
-                <Text style={styles.summaryValueTotal}>£{finalTotal.toFixed(2)}</Text>
-              </View>
+            )}
+            
+            <View style={styles.summaryRowDashed}>
+              <Text style={styles.summaryLabel}>Taxes</Text>
+              <Text style={styles.summaryValue}>£0.00</Text>
             </View>
-          )}
+          </View>
         </View>
 
-        {/* Payment Method Info */}
-        {selectedMethod === 'klarna' && klarnaPayIn3 && (
-          <View style={styles.paymentInfoCard}>
-            <Text style={styles.paymentInfoTitle}>Pay in 3 with Klarna</Text>
-            <Text style={styles.paymentInfoText}>
-              Split your purchase into 3 interest-free payments of £{(finalTotal / 3).toFixed(2)}.
-              First payment today, then every 30 days.
-            </Text>
-          </View>
-        )}
-        
-        {selectedMethod === 'clearpay' && clearpayInfo && (
-          <View style={styles.paymentInfoCard}>
-            <Text style={styles.paymentInfoTitle}>Pay in 4 with Clearpay</Text>
-            <Text style={styles.paymentInfoText}>
-              4 interest-free payments of £{clearpayInfo.installmentAmount.toFixed(2)}.
-              First payment today, then fortnightly.
-            </Text>
-          </View>
-        )}
+        {/* Secured Badge */}
+        <View style={styles.securedBadge}>
+          <Lock size={14} color={Colors.textMuted} weight="fill" />
+          <Text style={styles.securedBadgeText}>ENCRYPTED & SECURE</Text>
+        </View>
 
         {/* Bottom spacing */}
-        <View style={{ height: 160 }} />
-      </ScrollView>
+        <View style={{ height: 140 }} />
+      </Animated.ScrollView>
 
       {/* Footer */}
       <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom, 16) }]}>
+        <View style={styles.footerTotalRow}>
+          <Text style={styles.footerTotalLabel}>Total to pay</Text>
+          <Text style={styles.footerTotalValue}>£{finalTotal.toFixed(2)}</Text>
+        </View>
         <TouchableOpacity 
           style={[styles.payButton, isProcessing && styles.payButtonDisabled]}
           onPress={handlePay}
@@ -508,10 +394,6 @@ export default function PaymentScreen() {
           </Text>
           {!isProcessing && <ArrowRight size={20} color={Colors.textPrimary} weight="bold" />}
         </TouchableOpacity>
-        <View style={styles.securedBy}>
-          <Lock size={12} color="rgba(255,255,255,0.3)" weight="fill" />
-          <Text style={styles.securedByText}>SECURED BY STRIPE</Text>
-        </View>
       </View>
     </SafeAreaView>
   );
@@ -532,9 +414,9 @@ const styles = StyleSheet.create({
     zIndex: 100,
   },
   processingCard: {
-    backgroundColor: ZORA_CARD,
+    backgroundColor: Colors.cardDark,
     borderRadius: BorderRadius.lg,
-    padding: 32,
+    padding: Spacing.xl,
     alignItems: 'center',
     width: '80%',
   },
@@ -542,69 +424,38 @@ const styles = StyleSheet.create({
     fontFamily: FontFamily.bodySemiBold,
     fontSize: FontSize.body,
     color: Colors.textPrimary,
-    marginTop: 16,
+    marginTop: Spacing.base,
   },
   processingSubtext: {
     fontFamily: FontFamily.body,
     fontSize: FontSize.small,
     color: Colors.textMuted,
-    marginTop: 8,
+    marginTop: Spacing.sm,
   },
   
   // Header
   header: {
-    paddingHorizontal: Spacing.base,
-    paddingTop: Spacing.sm,
-    paddingBottom: Spacing.md,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255,255,255,0.05)',
-  },
-  headerTop: {
     flexDirection: 'row',
+    alignItems: 'center',
     justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: Spacing.md,
-  },
-  headerLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
+    paddingHorizontal: Spacing.base,
+    paddingVertical: Spacing.md,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255, 255, 255, 0.05)',
   },
   backButton: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: 'rgba(255,255,255,0.05)',
+    width: 44,
+    height: 44,
     justifyContent: 'center',
-    alignItems: 'center',
-  },
-  stepText: {
-    fontFamily: FontFamily.bodyBold,
-    fontSize: 11,
-    color: ZORA_RED,
-    letterSpacing: 2,
-  },
-  trustBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    backgroundColor: ZORA_CARD,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: BorderRadius.full,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.05)',
-  },
-  trustBadgeText: {
-    fontFamily: FontFamily.bodyBold,
-    fontSize: 9,
-    color: '#bc9a9a',
-    letterSpacing: 1,
+    alignItems: 'flex-start',
   },
   headerTitle: {
-    fontFamily: FontFamily.display,
-    fontSize: 28,
+    fontFamily: FontFamily.displaySemiBold,
+    fontSize: FontSize.h4,
     color: Colors.textPrimary,
+  },
+  headerRight: {
+    width: 44,
   },
   
   // Scroll View
@@ -621,81 +472,49 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.lg,
   },
   sectionTitle: {
-    fontFamily: FontFamily.bodyBold,
-    fontSize: FontSize.bodyLarge,
+    fontFamily: FontFamily.displaySemiBold,
+    fontSize: FontSize.h4,
     color: Colors.textPrimary,
     marginBottom: Spacing.md,
-    marginLeft: 4,
   },
   
-  // Saved Card
-  savedCardContainer: {
-    backgroundColor: SURFACE_DARK,
-    borderRadius: BorderRadius.lg,
-    padding: 6,
-    borderWidth: 2,
-    borderColor: 'transparent',
-    position: 'relative',
-  },
-  savedCardContainerSelected: {
-    borderColor: ZORA_RED,
-  },
-  savedCardRadio: {
-    position: 'absolute',
-    top: 16,
-    right: 16,
-    zIndex: 10,
-  },
-  savedCardInner: {
+  // Zora Credit Card
+  zoraCreditCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 16,
-    backgroundColor: 'rgba(255,255,255,0.05)',
-    borderRadius: BorderRadius.md,
+    justifyContent: 'space-between',
+    backgroundColor: Colors.cardDark,
+    borderRadius: BorderRadius.lg,
     padding: Spacing.base,
+    marginBottom: Spacing.lg,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.05)',
   },
-  visaLogo: {
-    width: 56,
-    height: 40,
-    backgroundColor: '#FFFFFF',
-    borderRadius: 4,
+  zoraCreditLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.md,
+  },
+  zoraCreditIconContainer: {
+    width: 44,
+    height: 44,
+    borderRadius: BorderRadius.md,
+    backgroundColor: Colors.backgroundDark,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  visaText: {
-    fontFamily: FontFamily.bodyBold,
-    fontSize: 16,
-    color: '#1a1f71',
-    fontStyle: 'italic',
-    letterSpacing: -1,
+  zoraCreditInfo: {
+    gap: 2,
   },
-  cardDetails: {
-    flex: 1,
-  },
-  cardNumber: {
-    fontFamily: FontFamily.bodyBold,
+  zoraCreditTitle: {
+    fontFamily: FontFamily.displaySemiBold,
     fontSize: FontSize.body,
     color: Colors.textPrimary,
-    letterSpacing: 0.5,
   },
-  cardExpiry: {
-    fontFamily: FontFamily.bodyMedium,
-    fontSize: 12,
-    color: 'rgba(255,255,255,0.4)',
-    marginTop: 2,
-  },
-  savedCardFooter: {
-    paddingHorizontal: Spacing.base,
-    paddingVertical: 12,
-    alignItems: 'flex-end',
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(255,255,255,0.05)',
-    marginTop: 6,
-  },
-  editLink: {
-    fontFamily: FontFamily.bodyBold,
+  zoraCreditBalance: {
+    fontFamily: FontFamily.body,
     fontSize: FontSize.small,
-    color: ZORA_RED,
+    color: Colors.textMuted,
   },
   
   // Radio Button
@@ -704,36 +523,37 @@ const styles = StyleSheet.create({
     height: 22,
     borderRadius: 11,
     borderWidth: 2,
-    borderColor: 'rgba(255,255,255,0.2)',
+    borderColor: 'rgba(255, 255, 255, 0.2)',
     justifyContent: 'center',
     alignItems: 'center',
   },
   radioOuterSelected: {
-    borderColor: ZORA_RED,
+    borderColor: Colors.primary,
+    backgroundColor: Colors.primary,
   },
   radioInner: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
-    backgroundColor: ZORA_RED,
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: Colors.textPrimary,
   },
   
   // Payment Methods
   methodsContainer: {
-    gap: 12,
+    gap: Spacing.md,
   },
   methodCard: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: SURFACE_DARK,
+    backgroundColor: Colors.cardDark,
     borderRadius: BorderRadius.lg,
     padding: Spacing.base,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.05)',
+    borderWidth: 1.5,
+    borderColor: 'rgba(255, 255, 255, 0.05)',
   },
   methodCardSelected: {
-    borderColor: ZORA_RED,
+    borderColor: Colors.primary,
   },
   methodCardDisabled: {
     opacity: 0.5,
@@ -741,23 +561,22 @@ const styles = StyleSheet.create({
   methodLeft: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 16,
+    gap: Spacing.md,
     flex: 1,
   },
   methodLogo: {
-    width: 56,
-    height: 40,
-    borderRadius: 4,
+    width: 48,
+    height: 36,
+    borderRadius: BorderRadius.sm,
     justifyContent: 'center',
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.1)',
+    backgroundColor: Colors.backgroundDark,
   },
   methodInfo: {
     flex: 1,
   },
   methodName: {
-    fontFamily: FontFamily.bodyMedium,
+    fontFamily: FontFamily.bodySemiBold,
     fontSize: FontSize.body,
     color: Colors.textPrimary,
   },
@@ -766,193 +585,91 @@ const styles = StyleSheet.create({
   },
   methodSubtitle: {
     fontFamily: FontFamily.body,
-    fontSize: 10,
-    color: 'rgba(255,255,255,0.4)',
+    fontSize: FontSize.caption,
+    color: Colors.textMuted,
     marginTop: 2,
   },
   methodSubtitleDisabled: {
-    color: 'rgba(255,255,255,0.3)',
-  },
-  unavailableText: {
-    fontFamily: FontFamily.body,
-    fontSize: 10,
-    color: '#FF6B6B',
-    marginTop: 2,
+    color: 'rgba(255, 255, 255, 0.3)',
   },
   klarnaText: {
-    fontFamily: FontFamily.bodyBold,
-    fontSize: 11,
+    fontFamily: FontFamily.bodySemiBold,
+    fontSize: FontSize.body,
     color: '#000',
   },
   clearpayText: {
-    fontFamily: FontFamily.bodyBold,
-    fontSize: 8,
-    color: '#000',
-    textAlign: 'center',
-    lineHeight: 10,
-    textTransform: 'uppercase',
-  },
-  applePayText: {
-    fontFamily: FontFamily.bodyBold,
-    fontSize: 13,
-    color: '#000',
-  },
-  googlePayText: {
-    fontFamily: FontFamily.bodyBold,
-    fontSize: 11,
-    color: '#000',
-  },
-  
-  // Zora Credit
-  zoraCreditCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: SURFACE_DARK,
-    borderRadius: BorderRadius.lg,
-    padding: 20,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.05)',
-  },
-  zoraCreditInfo: {
-    gap: 4,
-  },
-  zoraCreditTitle: {
-    fontFamily: FontFamily.bodyBold,
-    fontSize: FontSize.body,
-    color: Colors.textPrimary,
-  },
-  zoraCreditAmount: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  zoraCreditValue: {
-    fontFamily: FontFamily.bodyBold,
-    fontSize: FontSize.small,
-    color: ZORA_RED,
-  },
-  zoraCreditLabel: {
-    fontFamily: FontFamily.body,
-    fontSize: 12,
-    color: 'rgba(255,255,255,0.3)',
-  },
-  creditAppliedBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    marginTop: 8,
-    paddingLeft: 4,
-  },
-  creditAppliedText: {
     fontFamily: FontFamily.bodySemiBold,
-    fontSize: FontSize.small,
-    color: SUCCESS_GREEN,
+    fontSize: FontSize.body,
+    color: '#000',
   },
   
-  // Order Summary
-  orderSummaryHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: 'rgba(255,255,255,0.02)',
+  // Order Summary Card
+  orderSummaryCard: {
+    backgroundColor: Colors.cardDark,
     borderRadius: BorderRadius.lg,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.05)',
     padding: Spacing.base,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.05)',
   },
   orderSummaryTitle: {
-    fontFamily: FontFamily.bodySemiBold,
-    fontSize: FontSize.small,
-    color: 'rgba(255,255,255,0.7)',
-  },
-  orderSummaryRight: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  orderSummaryTotal: {
-    fontFamily: FontFamily.bodyBold,
-    fontSize: FontSize.bodyLarge,
+    fontFamily: FontFamily.displaySemiBold,
+    fontSize: FontSize.body,
     color: Colors.textPrimary,
-  },
-  orderSummaryContent: {
-    backgroundColor: 'rgba(255,255,255,0.02)',
-    borderBottomLeftRadius: BorderRadius.lg,
-    borderBottomRightRadius: BorderRadius.lg,
-    borderWidth: 1,
-    borderTopWidth: 0,
-    borderColor: 'rgba(255,255,255,0.05)',
-    paddingHorizontal: Spacing.base,
-    paddingBottom: Spacing.base,
-    marginTop: -1,
-  },
-  summaryDivider: {
-    height: 1,
-    backgroundColor: 'rgba(255,255,255,0.05)',
-    marginVertical: Spacing.md,
+    marginBottom: Spacing.md,
   },
   summaryRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 8,
+    marginBottom: Spacing.sm,
+  },
+  summaryRowDashed: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: Spacing.sm,
+    paddingBottom: Spacing.sm,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255, 255, 255, 0.05)',
+    borderStyle: 'dashed',
   },
   summaryLabel: {
     fontFamily: FontFamily.body,
-    fontSize: 12,
-    color: 'rgba(255,255,255,0.4)',
+    fontSize: FontSize.small,
+    color: Colors.textMuted,
   },
   summaryValue: {
     fontFamily: FontFamily.body,
-    fontSize: 12,
-    color: 'rgba(255,255,255,0.4)',
-  },
-  summaryLabelCredit: {
-    fontFamily: FontFamily.bodyMedium,
-    fontSize: 12,
-    color: ZORA_RED,
-  },
-  summaryValueCredit: {
-    fontFamily: FontFamily.bodyMedium,
-    fontSize: 12,
-    color: ZORA_RED,
-  },
-  summaryValueFree: {
-    fontFamily: FontFamily.body,
-    fontSize: 12,
-    color: SUCCESS_GREEN,
-  },
-  summaryLabelTotal: {
-    fontFamily: FontFamily.bodyBold,
-    fontSize: FontSize.body,
-    color: Colors.textPrimary,
-  },
-  summaryValueTotal: {
-    fontFamily: FontFamily.bodyBold,
-    fontSize: FontSize.body,
-    color: Colors.textPrimary,
-  },
-  
-  // Payment Info Card
-  paymentInfoCard: {
-    backgroundColor: 'rgba(255, 179, 199, 0.1)',
-    borderRadius: BorderRadius.lg,
-    padding: Spacing.base,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 179, 199, 0.2)',
-    marginBottom: Spacing.lg,
-  },
-  paymentInfoTitle: {
-    fontFamily: FontFamily.bodySemiBold,
-    fontSize: FontSize.body,
-    color: Colors.textPrimary,
-    marginBottom: 4,
-  },
-  paymentInfoText: {
-    fontFamily: FontFamily.body,
     fontSize: FontSize.small,
     color: Colors.textMuted,
-    lineHeight: 18,
+  },
+  summaryLabelWithIcon: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.xs,
+  },
+  summaryLabelCredit: {
+    fontFamily: FontFamily.bodySemiBold,
+    fontSize: FontSize.small,
+    color: Colors.primary,
+  },
+  summaryValueCredit: {
+    fontFamily: FontFamily.bodySemiBold,
+    fontSize: FontSize.small,
+    color: Colors.primary,
+  },
+  
+  // Secured Badge
+  securedBadge: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: Spacing.sm,
+    paddingVertical: Spacing.md,
+  },
+  securedBadgeText: {
+    fontFamily: FontFamily.bodySemiBold,
+    fontSize: FontSize.tiny,
+    color: Colors.textMuted,
+    letterSpacing: 1,
   },
   
   // Footer
@@ -965,36 +682,50 @@ const styles = StyleSheet.create({
     paddingTop: Spacing.base,
     backgroundColor: Colors.backgroundDark,
     borderTopWidth: 1,
-    borderTopColor: 'rgba(255,255,255,0.05)',
+    borderTopColor: 'rgba(255, 255, 255, 0.05)',
+  },
+  footerTotalRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: Spacing.md,
+  },
+  footerTotalLabel: {
+    fontFamily: FontFamily.body,
+    fontSize: FontSize.body,
+    color: Colors.textMuted,
+  },
+  footerTotalValue: {
+    fontFamily: FontFamily.displaySemiBold,
+    fontSize: FontSize.h3,
+    color: Colors.textPrimary,
   },
   payButton: {
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    gap: 8,
-    backgroundColor: ZORA_RED,
-    borderRadius: BorderRadius.full,
-    paddingVertical: 16,
+    gap: Spacing.sm,
+    backgroundColor: Colors.primary,
+    borderRadius: BorderRadius.lg,
+    height: Heights.button,
+    ...Platform.select({
+      ios: {
+        shadowColor: Colors.primary,
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.3,
+        shadowRadius: 8,
+      },
+      android: {
+        elevation: 4,
+      },
+    }),
   },
   payButtonDisabled: {
     opacity: 0.7,
   },
   payButtonText: {
-    fontFamily: FontFamily.bodyBold,
-    fontSize: FontSize.bodyLarge,
+    fontFamily: FontFamily.displaySemiBold,
+    fontSize: FontSize.body,
     color: Colors.textPrimary,
-  },
-  securedBy: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    gap: 6,
-    marginTop: Spacing.md,
-  },
-  securedByText: {
-    fontFamily: FontFamily.bodySemiBold,
-    fontSize: 9,
-    color: 'rgba(255,255,255,0.3)',
-    letterSpacing: 1,
   },
 });

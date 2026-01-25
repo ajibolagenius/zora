@@ -1,32 +1,29 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   ScrollView,
   TouchableOpacity,
-  TextInput,
+  Animated,
+  Easing,
+  Platform,
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import {
   ArrowLeft,
   ArrowRight,
-  MapPin,
-  Sun,
-  Moon,
-  CloudSun,
+  House,
+  Briefcase,
+  MapTrifold,
 } from 'phosphor-react-native';
 import { Colors } from '../constants/colors';
-import { Spacing, BorderRadius } from '../constants/spacing';
+import { Spacing, BorderRadius, Heights } from '../constants/spacing';
 import { FontSize, FontFamily } from '../constants/typography';
+import { useCartStore } from '../stores/cartStore';
 
-// Zora Brand Colors
-const ZORA_RED = '#C1272D';
-const ZORA_CARD = '#3A2A21';
-
-type DeliveryMethod = 'standard' | 'express' | 'collect';
-type TimeSlot = 'morning' | 'afternoon' | 'evening';
+type DeliveryTab = 'delivery' | 'pickup';
 
 interface DateOption {
   day: string;
@@ -35,16 +32,29 @@ interface DateOption {
   isToday?: boolean;
 }
 
-const DELIVERY_OPTIONS = [
-  { id: 'standard', name: 'Standard Delivery', time: '2-3 business days', price: 3.99 },
-  { id: 'express', name: 'Express', time: 'Next day delivery', price: 6.99 },
-  { id: 'collect', name: 'Click & Collect', time: 'Ready within 2 hours', price: 0 },
+interface TimeSlotOption {
+  id: string;
+  label: string;
+}
+
+interface AddressOption {
+  id: string;
+  label: string;
+  address: string;
+  isDefault?: boolean;
+  icon: 'home' | 'work';
+}
+
+const ADDRESSES: AddressOption[] = [
+  { id: '1', label: 'Home', address: '123 Nairobi St, Apt 4B, Westlands', isDefault: true, icon: 'home' },
+  { id: '2', label: 'Work', address: '45 Corporate Blvd, Suite 200', icon: 'work' },
 ];
 
-const TIME_SLOTS = [
-  { id: 'morning', name: 'Morning', time: '8am - 12pm', icon: CloudSun },
-  { id: 'afternoon', name: 'Afternoon', time: '12pm - 5pm', icon: Sun },
-  { id: 'evening', name: 'Evening', time: '5pm - 9pm', icon: Moon },
+const TIME_SLOTS: TimeSlotOption[] = [
+  { id: '1', label: '10:00 AM - 11:00 AM' },
+  { id: '2', label: '11:00 AM - 12:00 PM' },
+  { id: '3', label: '12:00 PM - 01:00 PM' },
+  { id: '4', label: '01:00 PM - 02:00 PM' },
 ];
 
 // Generate next 7 days
@@ -70,17 +80,41 @@ const generateDates = (): DateOption[] => {
 export default function CheckoutScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const [deliveryMethod, setDeliveryMethod] = useState<DeliveryMethod>('standard');
+  const { total } = useCartStore();
+  
+  const [activeTab, setActiveTab] = useState<DeliveryTab>('delivery');
+  const [selectedAddress, setSelectedAddress] = useState('1');
   const [selectedDate, setSelectedDate] = useState(0);
-  const [selectedTimeSlot, setSelectedTimeSlot] = useState<TimeSlot>('afternoon');
-  const [instructions, setInstructions] = useState('');
+  const [selectedTimeSlot, setSelectedTimeSlot] = useState('3');
   
   const dates = generateDates();
 
+  // Animation values
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const slideAnim = useRef(new Animated.Value(20)).current;
+
+  useEffect(() => {
+    Animated.parallel([
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 400,
+        easing: Easing.out(Easing.cubic),
+        useNativeDriver: true,
+      }),
+      Animated.timing(slideAnim, {
+        toValue: 0,
+        duration: 400,
+        easing: Easing.out(Easing.cubic),
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, []);
+
   const handleContinue = () => {
-    // Navigate to payment screen
     router.push('/payment');
   };
+
+  const estimatedTotal = total || 124.50;
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
@@ -90,86 +124,87 @@ export default function CheckoutScreen() {
           style={styles.backButton}
           onPress={() => router.back()}
         >
-          <ArrowLeft size={24} color={Colors.textPrimary} weight="bold" />
+          <ArrowLeft size={22} color={Colors.textPrimary} weight="bold" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Delivery Options</Text>
-        <View style={styles.stepIndicator}>
-          <Text style={styles.stepText}>Step 1/3</Text>
-        </View>
+        <Text style={styles.headerTitle}>Checkout</Text>
+        <View style={styles.headerRight} />
       </View>
 
-      <ScrollView 
-        style={styles.scrollView}
+      <Animated.ScrollView 
+        style={[styles.scrollView, { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }]}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        {/* Address Section */}
-        <View style={styles.section}>
-          <Text style={styles.sectionLabel}>DELIVERING TO</Text>
-          <View style={styles.addressCard}>
-            <View style={styles.addressContent}>
-              <View style={styles.addressIconContainer}>
-                <MapPin size={18} color={ZORA_RED} weight="fill" />
-              </View>
-              <View style={styles.addressDetails}>
-                <Text style={styles.addressLabel}>Home</Text>
-                <Text style={styles.addressText}>Jane Doe</Text>
-                <Text style={styles.addressText}>123 Zora Lane, Apartment 4B</Text>
-                <Text style={styles.addressText}>London, UK, SE1 7PB</Text>
-              </View>
-            </View>
-            <TouchableOpacity>
-              <Text style={styles.changeLink}>Change</Text>
-            </TouchableOpacity>
-          </View>
+        {/* Delivery/Pickup Tabs */}
+        <View style={styles.tabsContainer}>
+          <TouchableOpacity
+            style={[styles.tab, activeTab === 'delivery' && styles.tabActive]}
+            onPress={() => setActiveTab('delivery')}
+          >
+            <Text style={[styles.tabText, activeTab === 'delivery' && styles.tabTextActive]}>
+              Delivery
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.tab, activeTab === 'pickup' && styles.tabActive]}
+            onPress={() => setActiveTab('pickup')}
+          >
+            <Text style={[styles.tabText, activeTab === 'pickup' && styles.tabTextActive]}>
+              Store Pickup
+            </Text>
+          </TouchableOpacity>
         </View>
 
-        {/* Delivery Method Section */}
+        {/* Delivering To Section */}
         <View style={styles.section}>
-          <Text style={styles.sectionLabel}>DELIVERY METHOD</Text>
-          <View style={styles.optionsContainer}>
-            {DELIVERY_OPTIONS.map((option) => {
-              const isSelected = deliveryMethod === option.id;
-              return (
-                <TouchableOpacity
-                  key={option.id}
-                  style={[
-                    styles.optionCard,
-                    isSelected && styles.optionCardSelected,
-                  ]}
-                  onPress={() => setDeliveryMethod(option.id as DeliveryMethod)}
-                  activeOpacity={0.8}
-                >
-                  {/* Radio Button */}
-                  <View style={[
-                    styles.radioOuter,
-                    isSelected && styles.radioOuterSelected,
-                  ]}>
-                    {isSelected && <View style={styles.radioInner} />}
+          <Text style={styles.sectionTitle}>Delivering to</Text>
+          
+          {ADDRESSES.map((address) => {
+            const isSelected = selectedAddress === address.id;
+            return (
+              <TouchableOpacity
+                key={address.id}
+                style={[styles.addressCard, isSelected && styles.addressCardSelected]}
+                onPress={() => setSelectedAddress(address.id)}
+                activeOpacity={0.8}
+              >
+                <View style={styles.addressLeft}>
+                  <View style={styles.addressIconContainer}>
+                    {address.icon === 'home' ? (
+                      <House size={18} color={Colors.textMuted} weight="fill" />
+                    ) : (
+                      <Briefcase size={18} color={Colors.textMuted} weight="fill" />
+                    )}
                   </View>
-                  
-                  {/* Option Details */}
-                  <View style={styles.optionContent}>
-                    <View style={styles.optionRow}>
-                      <Text style={styles.optionName}>{option.name}</Text>
-                      <Text style={[
-                        styles.optionPrice,
-                        option.price === 0 && styles.optionPriceFree,
-                      ]}>
-                        {option.price === 0 ? 'Free' : `£${option.price.toFixed(2)}`}
-                      </Text>
+                  <View style={styles.addressInfo}>
+                    <View style={styles.addressLabelRow}>
+                      <Text style={styles.addressLabel}>{address.label}</Text>
+                      {address.isDefault && (
+                        <View style={styles.defaultBadge}>
+                          <Text style={styles.defaultBadgeText}>DEFAULT</Text>
+                        </View>
+                      )}
                     </View>
-                    <Text style={styles.optionTime}>{option.time}</Text>
+                    <Text style={styles.addressText}>{address.address}</Text>
                   </View>
-                </TouchableOpacity>
-              );
-            })}
-          </View>
+                </View>
+                <View style={[styles.radioOuter, isSelected && styles.radioOuterSelected]}>
+                  {isSelected && <View style={styles.radioInner} />}
+                </View>
+              </TouchableOpacity>
+            );
+          })}
+
+          {/* Add New Address Button */}
+          <TouchableOpacity style={styles.addAddressButton} activeOpacity={0.8}>
+            <MapTrifold size={20} color={Colors.textMuted} weight="duotone" />
+            <Text style={styles.addAddressText}>Add New Address</Text>
+          </TouchableOpacity>
         </View>
 
         {/* Preferred Time Section */}
         <View style={styles.section}>
-          <Text style={styles.sectionLabel}>PREFERRED TIME</Text>
+          <Text style={styles.sectionTitle}>Preferred Time</Text>
           
           {/* Date Picker */}
           <ScrollView
@@ -182,29 +217,17 @@ export default function CheckoutScreen() {
               return (
                 <TouchableOpacity
                   key={index}
-                  style={[
-                    styles.dateCard,
-                    isSelected && styles.dateCardSelected,
-                  ]}
+                  style={[styles.dateCard, isSelected && styles.dateCardSelected]}
                   onPress={() => setSelectedDate(index)}
                   activeOpacity={0.8}
                 >
-                  <Text style={[
-                    styles.dateDay,
-                    isSelected && styles.dateDaySelected,
-                  ]}>
+                  <Text style={[styles.dateDay, isSelected && styles.dateDaySelected]}>
                     {dateOption.day}
                   </Text>
-                  <Text style={[
-                    styles.dateNumber,
-                    isSelected && styles.dateNumberSelected,
-                  ]}>
+                  <Text style={[styles.dateNumber, isSelected && styles.dateNumberSelected]}>
                     {dateOption.date}
                   </Text>
-                  <Text style={[
-                    styles.dateMonth,
-                    isSelected && styles.dateMonthSelected,
-                  ]}>
+                  <Text style={[styles.dateMonth, isSelected && styles.dateMonthSelected]}>
                     {dateOption.month}
                   </Text>
                 </TouchableOpacity>
@@ -212,37 +235,19 @@ export default function CheckoutScreen() {
             })}
           </ScrollView>
 
-          {/* Time Slots */}
-          <View style={styles.timeSlotsContainer}>
+          {/* Time Slots Grid */}
+          <View style={styles.timeSlotsGrid}>
             {TIME_SLOTS.map((slot) => {
               const isSelected = selectedTimeSlot === slot.id;
-              const IconComponent = slot.icon;
               return (
                 <TouchableOpacity
                   key={slot.id}
-                  style={[
-                    styles.timeSlotCard,
-                    isSelected && styles.timeSlotCardSelected,
-                  ]}
-                  onPress={() => setSelectedTimeSlot(slot.id as TimeSlot)}
+                  style={[styles.timeSlotChip, isSelected && styles.timeSlotChipSelected]}
+                  onPress={() => setSelectedTimeSlot(slot.id)}
                   activeOpacity={0.8}
                 >
-                  <IconComponent
-                    size={22}
-                    color={isSelected ? Colors.textPrimary : Colors.textMuted}
-                    weight={isSelected ? 'fill' : 'regular'}
-                  />
-                  <Text style={[
-                    styles.timeSlotName,
-                    isSelected && styles.timeSlotNameSelected,
-                  ]}>
-                    {slot.name}
-                  </Text>
-                  <Text style={[
-                    styles.timeSlotTime,
-                    isSelected && styles.timeSlotTimeSelected,
-                  ]}>
-                    {slot.time}
+                  <Text style={[styles.timeSlotText, isSelected && styles.timeSlotTextSelected]}>
+                    {slot.label}
                   </Text>
                 </TouchableOpacity>
               );
@@ -250,36 +255,23 @@ export default function CheckoutScreen() {
           </View>
         </View>
 
-        {/* Instructions Section */}
-        <View style={styles.section}>
-          <Text style={styles.sectionLabel}>INSTRUCTIONS</Text>
-          <View style={styles.instructionsContainer}>
-            <TextInput
-              style={styles.instructionsInput}
-              placeholder="Add delivery notes (e.g. Leave with neighbor, Gate code 1234)..."
-              placeholderTextColor="rgba(255, 255, 255, 0.3)"
-              value={instructions}
-              onChangeText={setInstructions}
-              multiline
-              numberOfLines={3}
-              textAlignVertical="top"
-            />
-          </View>
-        </View>
-
         {/* Bottom spacing */}
-        <View style={{ height: 120 }} />
-      </ScrollView>
+        <View style={{ height: 140 }} />
+      </Animated.ScrollView>
 
       {/* Footer */}
       <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom, 16) }]}>
+        <View style={styles.footerTotalRow}>
+          <Text style={styles.footerTotalLabel}>Estimated Total</Text>
+          <Text style={styles.footerTotalValue}>${estimatedTotal.toFixed(2)}</Text>
+        </View>
         <TouchableOpacity 
           style={styles.continueButton}
           onPress={handleContinue}
           activeOpacity={0.9}
         >
           <Text style={styles.continueButtonText}>Continue to Payment</Text>
-          <ArrowRight size={20} color={Colors.textPrimary} weight="bold" />
+          <ArrowRight size={20} color={Colors.backgroundDark} weight="bold" />
         </TouchableOpacity>
       </View>
     </SafeAreaView>
@@ -307,20 +299,12 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
   },
   headerTitle: {
-    fontFamily: FontFamily.display,
-    fontSize: FontSize.h3,
+    fontFamily: FontFamily.displaySemiBold,
+    fontSize: FontSize.h4,
     color: Colors.textPrimary,
   },
-  stepIndicator: {
-    backgroundColor: 'rgba(193, 39, 45, 0.15)',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: BorderRadius.full,
-  },
-  stepText: {
-    fontFamily: FontFamily.bodySemiBold,
-    fontSize: FontSize.caption,
-    color: ZORA_RED,
+  headerRight: {
+    width: 44,
   },
   
   // Scroll View
@@ -331,221 +315,213 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.base,
   },
   
+  // Tabs
+  tabsContainer: {
+    flexDirection: 'row',
+    backgroundColor: Colors.cardDark,
+    borderRadius: BorderRadius.lg,
+    padding: Spacing.xs,
+    marginBottom: Spacing.lg,
+  },
+  tab: {
+    flex: 1,
+    paddingVertical: Spacing.md,
+    borderRadius: BorderRadius.md,
+    alignItems: 'center',
+  },
+  tabActive: {
+    backgroundColor: Colors.secondary,
+  },
+  tabText: {
+    fontFamily: FontFamily.bodySemiBold,
+    fontSize: FontSize.body,
+    color: Colors.textMuted,
+  },
+  tabTextActive: {
+    color: Colors.backgroundDark,
+  },
+  
   // Sections
   section: {
     marginBottom: Spacing.xl,
   },
-  sectionLabel: {
-    fontFamily: FontFamily.bodySemiBold,
-    fontSize: 12,
-    color: Colors.textMuted,
-    letterSpacing: 1,
+  sectionTitle: {
+    fontFamily: FontFamily.displaySemiBold,
+    fontSize: FontSize.h4,
+    color: Colors.textPrimary,
     marginBottom: Spacing.md,
-    marginLeft: 4,
   },
   
   // Address Card
   addressCard: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    backgroundColor: ZORA_CARD,
+    alignItems: 'center',
+    backgroundColor: Colors.cardDark,
     borderRadius: BorderRadius.lg,
     padding: Spacing.base,
+    marginBottom: Spacing.md,
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.05)',
   },
-  addressContent: {
+  addressCardSelected: {
+    borderColor: Colors.secondary,
+  },
+  addressLeft: {
     flexDirection: 'row',
     flex: 1,
-    gap: 12,
+    gap: Spacing.md,
   },
   addressIconContainer: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: 'rgba(193, 39, 45, 0.1)',
+    width: 40,
+    height: 40,
+    borderRadius: BorderRadius.md,
+    backgroundColor: Colors.backgroundDark,
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 2,
   },
-  addressDetails: {
+  addressInfo: {
     flex: 1,
   },
+  addressLabelRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.sm,
+    marginBottom: Spacing.xs,
+  },
   addressLabel: {
-    fontFamily: FontFamily.bodyBold,
+    fontFamily: FontFamily.displaySemiBold,
     fontSize: FontSize.body,
     color: Colors.textPrimary,
-    marginBottom: 4,
+  },
+  defaultBadge: {
+    backgroundColor: 'rgba(255, 204, 0, 0.2)',
+    paddingHorizontal: Spacing.sm,
+    paddingVertical: 2,
+    borderRadius: BorderRadius.sm,
+  },
+  defaultBadgeText: {
+    fontFamily: FontFamily.bodySemiBold,
+    fontSize: FontSize.tiny,
+    color: Colors.secondary,
+    letterSpacing: 0.5,
   },
   addressText: {
     fontFamily: FontFamily.body,
     fontSize: FontSize.small,
     color: Colors.textMuted,
-    lineHeight: 20,
-  },
-  changeLink: {
-    fontFamily: FontFamily.bodyBold,
-    fontSize: FontSize.small,
-    color: ZORA_RED,
   },
   
-  // Delivery Options
-  optionsContainer: {
-    gap: 12,
-  },
-  optionCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 16,
-    backgroundColor: ZORA_CARD,
-    borderRadius: BorderRadius.lg,
-    padding: Spacing.base,
-    borderWidth: 2,
-    borderColor: 'transparent',
-  },
-  optionCardSelected: {
-    borderColor: ZORA_RED,
-  },
+  // Radio Button
   radioOuter: {
     width: 22,
     height: 22,
     borderRadius: 11,
     borderWidth: 2,
-    borderColor: Colors.textMuted,
+    borderColor: 'rgba(255, 255, 255, 0.2)',
     justifyContent: 'center',
     alignItems: 'center',
   },
   radioOuterSelected: {
-    borderColor: ZORA_RED,
+    borderColor: Colors.secondary,
+    backgroundColor: Colors.secondary,
   },
   radioInner: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
-    backgroundColor: ZORA_RED,
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: Colors.backgroundDark,
   },
-  optionContent: {
-    flex: 1,
-  },
-  optionRow: {
+  
+  // Add Address Button
+  addAddressButton: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
+    justifyContent: 'center',
+    gap: Spacing.sm,
+    paddingVertical: Spacing.base,
+    borderRadius: BorderRadius.lg,
+    borderWidth: 1.5,
+    borderStyle: 'dashed',
+    borderColor: 'rgba(255, 255, 255, 0.15)',
   },
-  optionName: {
-    fontFamily: FontFamily.bodyBold,
+  addAddressText: {
+    fontFamily: FontFamily.bodySemiBold,
     fontSize: FontSize.body,
     color: Colors.textPrimary,
-  },
-  optionPrice: {
-    fontFamily: FontFamily.bodyBold,
-    fontSize: FontSize.body,
-    color: Colors.textPrimary,
-  },
-  optionPriceFree: {
-    color: '#4ADE80',
-  },
-  optionTime: {
-    fontFamily: FontFamily.body,
-    fontSize: FontSize.small,
-    color: Colors.textMuted,
-    marginTop: 2,
   },
   
   // Date Picker
   datesContainer: {
-    gap: 12,
-    paddingBottom: Spacing.base,
+    gap: Spacing.md,
+    marginBottom: Spacing.base,
   },
   dateCard: {
-    width: 72,
-    height: 80,
+    width: 70,
+    height: 90,
     borderRadius: BorderRadius.lg,
-    backgroundColor: ZORA_CARD,
+    backgroundColor: Colors.cardDark,
     justifyContent: 'center',
     alignItems: 'center',
-    borderWidth: 1,
+    borderWidth: 1.5,
     borderColor: 'transparent',
   },
   dateCardSelected: {
-    backgroundColor: ZORA_RED,
+    backgroundColor: 'transparent',
+    borderColor: Colors.secondary,
   },
   dateDay: {
-    fontFamily: FontFamily.bodyMedium,
-    fontSize: 12,
+    fontFamily: FontFamily.body,
+    fontSize: FontSize.caption,
     color: Colors.textMuted,
   },
   dateDaySelected: {
-    color: 'rgba(255, 255, 255, 0.8)',
+    color: Colors.secondary,
   },
   dateNumber: {
-    fontFamily: FontFamily.displayMedium,
-    fontSize: FontSize.h3,
+    fontFamily: FontFamily.displaySemiBold,
+    fontSize: FontSize.h2,
     color: Colors.textPrimary,
     marginVertical: 2,
   },
   dateNumberSelected: {
-    color: Colors.textPrimary,
+    color: Colors.secondary,
   },
   dateMonth: {
-    fontFamily: FontFamily.bodyMedium,
-    fontSize: 12,
+    fontFamily: FontFamily.body,
+    fontSize: FontSize.caption,
     color: Colors.textMuted,
   },
   dateMonthSelected: {
-    color: 'rgba(255, 255, 255, 0.8)',
+    color: Colors.secondary,
   },
   
-  // Time Slots
-  timeSlotsContainer: {
+  // Time Slots Grid
+  timeSlotsGrid: {
     flexDirection: 'row',
-    gap: 12,
+    flexWrap: 'wrap',
+    gap: Spacing.md,
   },
-  timeSlotCard: {
-    flex: 1,
-    paddingVertical: 14,
-    borderRadius: BorderRadius.md,
-    backgroundColor: ZORA_CARD,
+  timeSlotChip: {
+    width: '48%',
+    paddingVertical: Spacing.md,
+    borderRadius: BorderRadius.lg,
+    backgroundColor: Colors.cardDark,
     alignItems: 'center',
-    borderWidth: 2,
+    borderWidth: 1.5,
     borderColor: 'transparent',
   },
-  timeSlotCardSelected: {
-    borderColor: ZORA_RED,
-    backgroundColor: 'rgba(193, 39, 45, 0.1)',
+  timeSlotChipSelected: {
+    borderColor: Colors.secondary,
+    backgroundColor: 'transparent',
   },
-  timeSlotName: {
-    fontFamily: FontFamily.bodyBold,
-    fontSize: 12,
-    color: Colors.textMuted,
-    marginTop: 4,
-  },
-  timeSlotNameSelected: {
-    color: Colors.textPrimary,
-  },
-  timeSlotTime: {
-    fontFamily: FontFamily.body,
-    fontSize: 10,
-    color: 'rgba(255, 255, 255, 0.5)',
-    marginTop: 2,
-  },
-  timeSlotTimeSelected: {
-    color: 'rgba(255, 255, 255, 0.7)',
-  },
-  
-  // Instructions
-  instructionsContainer: {
-    backgroundColor: ZORA_CARD,
-    borderRadius: BorderRadius.lg,
-    padding: Spacing.base,
-  },
-  instructionsInput: {
-    fontFamily: FontFamily.body,
+  timeSlotText: {
+    fontFamily: FontFamily.bodySemiBold,
     fontSize: FontSize.small,
-    color: Colors.textPrimary,
-    lineHeight: 22,
-    minHeight: 80,
+    color: Colors.textMuted,
+  },
+  timeSlotTextSelected: {
+    color: Colors.secondary,
   },
   
   // Footer
@@ -557,19 +533,48 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.base,
     paddingTop: Spacing.base,
     backgroundColor: Colors.backgroundDark,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(255, 255, 255, 0.05)',
+  },
+  footerTotalRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: Spacing.md,
+  },
+  footerTotalLabel: {
+    fontFamily: FontFamily.body,
+    fontSize: FontSize.body,
+    color: Colors.textMuted,
+  },
+  footerTotalValue: {
+    fontFamily: FontFamily.displaySemiBold,
+    fontSize: FontSize.h3,
+    color: Colors.textPrimary,
   },
   continueButton: {
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    gap: 8,
-    backgroundColor: ZORA_RED,
-    borderRadius: BorderRadius.full,
-    paddingVertical: 16,
+    gap: Spacing.sm,
+    backgroundColor: Colors.secondary,
+    borderRadius: BorderRadius.lg,
+    height: Heights.button,
+    ...Platform.select({
+      ios: {
+        shadowColor: Colors.secondary,
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.3,
+        shadowRadius: 8,
+      },
+      android: {
+        elevation: 4,
+      },
+    }),
   },
   continueButtonText: {
-    fontFamily: FontFamily.bodyBold,
+    fontFamily: FontFamily.displaySemiBold,
     fontSize: FontSize.body,
-    color: Colors.textPrimary,
+    color: Colors.backgroundDark,
   },
 });
