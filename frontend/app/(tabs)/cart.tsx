@@ -36,8 +36,15 @@ const ZORA_INPUT = '#2D1E18';
 export default function CartTab() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { items, vendors, subtotal, deliveryFee, serviceFee, total, updateQuantity, removeItem, clearCart } = useCartStore();
+  const { items, vendors, subtotal, deliveryFee, serviceFee, total, updateQuantity, removeItem, clearCart, calculateTotals } = useCartStore();
   const [promoCode, setPromoCode] = useState('');
+
+  // Calculate totals on mount and whenever items change
+  useEffect(() => {
+    if (items.length > 0) {
+      calculateTotals();
+    }
+  }, [items.length]);
 
   if (items.length === 0) {
     return (
