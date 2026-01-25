@@ -1,117 +1,53 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   TouchableOpacity,
   Image,
+  ScrollView,
   ActivityIndicator,
   Platform,
-  Dimensions,
-  ScrollView,
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import * as Location from 'expo-location';
 import {
   ArrowLeft,
   MapPin,
   Star,
-  NavigationArrow,
   Storefront,
   Clock,
   CaretRight,
+  MapTrifold,
 } from 'phosphor-react-native';
 import { Colors } from '../constants/colors';
 import { Spacing, BorderRadius } from '../constants/spacing';
 import { FontSize, FontFamily } from '../constants/typography';
 import { vendorService, type Vendor } from '../services/mockDataService';
 
-type Region = {
-  latitude: number;
-  longitude: number;
-  latitudeDelta: number;
-  longitudeDelta: number;
-};
-
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
-
-// London default location (Brixton area)
-const DEFAULT_LOCATION = {
-  latitude: 51.4613,
-  longitude: -0.1156,
-  latitudeDelta: 0.05,
-  longitudeDelta: 0.05,
-};
+// NOTE: Google Maps integration is available on native platforms only.
+// On web, we show a vendor list with static map background.
+// On iOS/Android with proper API key, use react-native-maps for full map experience.
 
 export default function VendorMapScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const mapRef = useRef<MapView>(null);
   
-  const [location, setLocation] = useState<Location.LocationObject | null>(null);
-  const [region, setRegion] = useState<Region>(DEFAULT_LOCATION);
-  const [selectedVendor, setSelectedVendor] = useState<Vendor | null>(null);
   const [loading, setLoading] = useState(true);
-  const [locationPermission, setLocationPermission] = useState<boolean>(false);
+  const [selectedVendor, setSelectedVendor] = useState<Vendor | null>(null);
   
   // Get all vendors
   const vendors = vendorService.getAll();
   
-  // Request location permission and get current location
   useEffect(() => {
-    (async () => {
-      try {
-        const { status } = await Location.requestForegroundPermissionsAsync();
-        if (status === 'granted') {
-          setLocationPermission(true);
-          const currentLocation = await Location.getCurrentPositionAsync({});
-          setLocation(currentLocation);
-          setRegion({
-            latitude: currentLocation.coords.latitude,
-            longitude: currentLocation.coords.longitude,
-            latitudeDelta: 0.05,
-            longitudeDelta: 0.05,
-          });
-        }
-      } catch (error) {
-        console.log('Location error:', error);
-      } finally {
-        setLoading(false);
-      }
-    })();
+    // Simulate loading
+    const timer = setTimeout(() => setLoading(false), 500);
+    return () => clearTimeout(timer);
   }, []);
   
-  // Center map on user location
-  const centerOnUser = useCallback(() => {
-    if (location && mapRef.current) {
-      mapRef.current.animateToRegion({
-        latitude: location.coords.latitude,
-        longitude: location.coords.longitude,
-        latitudeDelta: 0.02,
-        longitudeDelta: 0.02,
-      }, 500);
-    }
-  }, [location]);
-  
-  // Handle marker press
-  const handleMarkerPress = (vendor: Vendor) => {
-    setSelectedVendor(vendor);
-    if (mapRef.current) {
-      mapRef.current.animateToRegion({
-        latitude: vendor.location.coordinates[1],
-        longitude: vendor.location.coordinates[0],
-        latitudeDelta: 0.01,
-        longitudeDelta: 0.01,
-      }, 500);
-    }
-  };
-  
   // Navigate to vendor page
-  const handleVendorPress = () => {
-    if (selectedVendor) {
-      router.push(`/vendor/${selectedVendor.id}`);
-    }
+  const handleVendorPress = (vendor: Vendor) => {
+    router.push(`/vendor/${vendor.id}`);
   };
   
   if (loading) {
@@ -125,54 +61,28 @@ export default function VendorMapScreen() {
 
   return (
     <View style={styles.container}>
-      {/* Map */}
-      <MapView
-        ref={mapRef}
-        style={styles.map}
-        provider={Platform.OS === 'android' ? PROVIDER_GOOGLE : undefined}
-        initialRegion={region}
-        showsUserLocation={locationPermission}
-        showsMyLocationButton={false}
-        showsCompass={false}
-        customMapStyle={mapStyle}
-      >
-        {/* Vendor Markers */}
-        {vendors.map((vendor) => (
-          <React.Fragment key={vendor.id}>
-            {/* Coverage Circle */}
-            <Circle
-              center={{
-                latitude: vendor.location.coordinates[1],
-                longitude: vendor.location.coordinates[0],
-              }}
-              radius={vendor.coverage_radius_km * 1000}
-              fillColor="rgba(193, 39, 45, 0.1)"
-              strokeColor="rgba(193, 39, 45, 0.3)"
-              strokeWidth={1}
-            />
-            {/* Vendor Marker */}
-            <Marker
-              coordinate={{
-                latitude: vendor.location.coordinates[1],
-                longitude: vendor.location.coordinates[0],
-              }}
-              onPress={() => handleMarkerPress(vendor)}
-            >
-              <View style={[
-                styles.markerContainer,
-                selectedVendor?.id === vendor.id && styles.markerSelected
-              ]}>
-                <View style={styles.markerIcon}>
-                  <Storefront size={16} color="#FFFFFF" weight="fill" />
-                </View>
-              </View>
-            </Marker>
-          </React.Fragment>
-        ))}
-      </MapView>
+      {/* Static Map Background */}
+      <View style={styles.mapBackground}>
+        <Image
+          source={{ uri: 'https://images.unsplash.com/photo-1524661135-423995f22d0b?w=800&q=60' }}
+          style={styles.mapImage}
+          resizeMode="cover"
+        />
+        <View style={styles.mapOverlay} />
+        
+        {/* Map Unavailable Notice (Web) */}
+        {Platform.OS === 'web' && (
+          <View style={styles.webNotice}>
+            <MapTrifold size={32} color={Colors.textMuted} weight="duotone" />
+            <Text style={styles.webNoticeText}>
+              Interactive map available on mobile app
+            </Text>
+          </View>
+        )}
+      </View>
       
-      {/* Header Overlay */}
-      <SafeAreaView style={styles.headerOverlay} edges={['top']}>
+      {/* Header */}
+      <SafeAreaView style={styles.headerContainer} edges={['top']}>
         <View style={styles.header}>
           <TouchableOpacity
             style={styles.backButton}
@@ -188,102 +98,88 @@ export default function VendorMapScreen() {
         </View>
       </SafeAreaView>
       
-      {/* My Location Button */}
-      {locationPermission && (
-        <TouchableOpacity
-          style={[styles.locationButton, { bottom: selectedVendor ? 220 : 40 }]}
-          onPress={centerOnUser}
-        >
-          <NavigationArrow size={24} color={Colors.primary} weight="fill" />
-        </TouchableOpacity>
-      )}
-      
-      {/* Selected Vendor Card */}
-      {selectedVendor && (
-        <View style={[styles.vendorCardContainer, { paddingBottom: insets.bottom + 16 }]}>
-          <TouchableOpacity
-            style={styles.vendorCard}
-            onPress={handleVendorPress}
-            activeOpacity={0.9}
-          >
-            <Image
-              source={{ uri: selectedVendor.cover_image_url }}
-              style={styles.vendorImage}
-            />
-            <View style={styles.vendorInfo}>
-              <View style={styles.vendorHeader}>
-                <Text style={styles.vendorName} numberOfLines={1}>
-                  {selectedVendor.shop_name}
-                </Text>
-                {selectedVendor.is_verified && (
-                  <View style={styles.verifiedBadge}>
-                    <Text style={styles.verifiedText}>✓ Verified</Text>
-                  </View>
-                )}
-              </View>
-              <Text style={styles.vendorCategories} numberOfLines={1}>
-                {selectedVendor.categories.join(' • ')}
-              </Text>
-              <View style={styles.vendorMeta}>
-                <View style={styles.metaItem}>
-                  <Star size={14} color="#FFCC00" weight="fill" />
-                  <Text style={styles.metaText}>{selectedVendor.rating}</Text>
-                </View>
-                <View style={styles.metaDivider} />
-                <View style={styles.metaItem}>
-                  <Clock size={14} color={Colors.textMuted} />
-                  <Text style={styles.metaText}>
-                    {selectedVendor.delivery_time_min}-{selectedVendor.delivery_time_max} min
-                  </Text>
-                </View>
-                <View style={styles.metaDivider} />
-                <View style={styles.metaItem}>
-                  <MapPin size={14} color={Colors.textMuted} />
-                  <Text style={styles.metaText}>
-                    {selectedVendor.coverage_radius_km}km delivery
-                  </Text>
-                </View>
-              </View>
-              <View style={styles.vendorCta}>
-                <Text style={styles.ctaText}>View Shop</Text>
-                <CaretRight size={16} color={Colors.primary} weight="bold" />
-              </View>
-            </View>
-          </TouchableOpacity>
-        </View>
-      )}
-      
       {/* Vendor Count Badge */}
       <View style={styles.vendorCountBadge}>
         <Storefront size={16} color="#FFFFFF" weight="fill" />
         <Text style={styles.vendorCountText}>{vendors.length} vendors nearby</Text>
       </View>
+      
+      {/* Vendor List */}
+      <View style={styles.vendorListContainer}>
+        <ScrollView 
+          style={styles.vendorList}
+          contentContainerStyle={styles.vendorListContent}
+          showsVerticalScrollIndicator={false}
+        >
+          <Text style={styles.sectionTitle}>Nearby Vendors</Text>
+          
+          {vendors.map((vendor) => (
+            <TouchableOpacity
+              key={vendor.id}
+              style={styles.vendorCard}
+              onPress={() => handleVendorPress(vendor)}
+              activeOpacity={0.8}
+            >
+              <Image
+                source={{ uri: vendor.cover_image_url }}
+                style={styles.vendorImage}
+              />
+              <View style={styles.vendorInfo}>
+                <View style={styles.vendorHeader}>
+                  <Text style={styles.vendorName} numberOfLines={1}>
+                    {vendor.shop_name}
+                  </Text>
+                  {vendor.is_verified && (
+                    <View style={styles.verifiedBadge}>
+                      <Text style={styles.verifiedText}>✓</Text>
+                    </View>
+                  )}
+                </View>
+                <Text style={styles.vendorCategories} numberOfLines={1}>
+                  {vendor.categories.join(' • ')}
+                </Text>
+                <View style={styles.vendorMeta}>
+                  <View style={styles.metaItem}>
+                    <Star size={14} color="#FFCC00" weight="fill" />
+                    <Text style={styles.metaText}>{vendor.rating}</Text>
+                  </View>
+                  <View style={styles.metaDivider} />
+                  <View style={styles.metaItem}>
+                    <Clock size={14} color={Colors.textMuted} />
+                    <Text style={styles.metaText}>
+                      {vendor.delivery_time_min}-{vendor.delivery_time_max} min
+                    </Text>
+                  </View>
+                  <View style={styles.metaDivider} />
+                  <View style={styles.metaItem}>
+                    <MapPin size={14} color={Colors.textMuted} />
+                    <Text style={styles.metaText}>
+                      {vendor.coverage_radius_km}km
+                    </Text>
+                  </View>
+                </View>
+              </View>
+              <CaretRight size={20} color={Colors.textMuted} />
+            </TouchableOpacity>
+          ))}
+          
+          <View style={{ height: insets.bottom + 20 }} />
+        </ScrollView>
+      </View>
     </View>
   );
 }
 
-// Dark map style for consistent look
-const mapStyle = [
-  { elementType: 'geometry', stylers: [{ color: '#1d1d1d' }] },
-  { elementType: 'labels.text.fill', stylers: [{ color: '#8a8a8a' }] },
-  { elementType: 'labels.text.stroke', stylers: [{ color: '#1d1d1d' }] },
-  { featureType: 'road', elementType: 'geometry', stylers: [{ color: '#2c2c2c' }] },
-  { featureType: 'road', elementType: 'geometry.stroke', stylers: [{ color: '#1d1d1d' }] },
-  { featureType: 'water', elementType: 'geometry', stylers: [{ color: '#0e0e0e' }] },
-  { featureType: 'poi', stylers: [{ visibility: 'off' }] },
-  { featureType: 'transit', stylers: [{ visibility: 'off' }] },
-];
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#000000',
+    backgroundColor: Colors.backgroundDark,
   },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#000000',
+    backgroundColor: Colors.backgroundDark,
   },
   loadingText: {
     marginTop: 16,
@@ -291,10 +187,38 @@ const styles = StyleSheet.create({
     fontFamily: FontFamily.body,
     fontSize: FontSize.body,
   },
-  map: {
-    flex: 1,
+  mapBackground: {
+    height: '35%',
+    position: 'relative',
   },
-  headerOverlay: {
+  mapImage: {
+    width: '100%',
+    height: '100%',
+  },
+  mapOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0, 0, 0, 0.3)',
+  },
+  webNotice: {
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    transform: [{ translateX: -100 }, { translateY: -30 }],
+    alignItems: 'center',
+    backgroundColor: 'rgba(34, 23, 16, 0.9)',
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: 12,
+    width: 200,
+  },
+  webNoticeText: {
+    color: Colors.textMuted,
+    fontFamily: FontFamily.body,
+    fontSize: FontSize.small,
+    textAlign: 'center',
+    marginTop: 8,
+  },
+  headerContainer: {
     position: 'absolute',
     top: 0,
     left: 0,
@@ -330,131 +254,9 @@ const styles = StyleSheet.create({
     fontFamily: FontFamily.bodySemiBold,
     fontSize: FontSize.body,
   },
-  markerContainer: {
-    alignItems: 'center',
-  },
-  markerIcon: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: Colors.primary,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 3,
-    borderColor: '#FFFFFF',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5,
-  },
-  markerSelected: {
-    transform: [{ scale: 1.2 }],
-  },
-  locationButton: {
-    position: 'absolute',
-    right: 16,
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: 'rgba(34, 23, 16, 0.95)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5,
-  },
-  vendorCardContainer: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    paddingHorizontal: Spacing.lg,
-    paddingTop: Spacing.md,
-    backgroundColor: 'transparent',
-  },
-  vendorCard: {
-    flexDirection: 'row',
-    backgroundColor: 'rgba(34, 23, 16, 0.95)',
-    borderRadius: BorderRadius.xl,
-    overflow: 'hidden',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
-  },
-  vendorImage: {
-    width: 100,
-    height: 120,
-  },
-  vendorInfo: {
-    flex: 1,
-    padding: Spacing.md,
-    justifyContent: 'space-between',
-  },
-  vendorHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.sm,
-  },
-  vendorName: {
-    flex: 1,
-    color: Colors.textPrimary,
-    fontFamily: FontFamily.displaySemiBold,
-    fontSize: FontSize.bodyLarge,
-  },
-  verifiedBadge: {
-    backgroundColor: 'rgba(16, 185, 129, 0.2)',
-    paddingHorizontal: Spacing.sm,
-    paddingVertical: 2,
-    borderRadius: BorderRadius.full,
-  },
-  verifiedText: {
-    color: '#10B981',
-    fontFamily: FontFamily.body,
-    fontSize: FontSize.caption,
-  },
-  vendorCategories: {
-    color: Colors.textMuted,
-    fontFamily: FontFamily.body,
-    fontSize: FontSize.small,
-    marginTop: 2,
-  },
-  vendorMeta: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: Spacing.sm,
-  },
-  metaItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-  },
-  metaText: {
-    color: Colors.textMuted,
-    fontFamily: FontFamily.body,
-    fontSize: FontSize.caption,
-  },
-  metaDivider: {
-    width: 1,
-    height: 12,
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    marginHorizontal: Spacing.sm,
-  },
-  vendorCta: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    marginTop: Spacing.sm,
-  },
-  ctaText: {
-    color: Colors.primary,
-    fontFamily: FontFamily.bodySemiBold,
-    fontSize: FontSize.small,
-  },
   vendorCountBadge: {
     position: 'absolute',
-    top: 100,
+    top: 110,
     alignSelf: 'center',
     flexDirection: 'row',
     alignItems: 'center',
@@ -465,10 +267,100 @@ const styles = StyleSheet.create({
     borderRadius: BorderRadius.full,
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.1)',
+    zIndex: 10,
   },
   vendorCountText: {
     color: Colors.textPrimary,
     fontFamily: FontFamily.bodySemiBold,
     fontSize: FontSize.small,
+  },
+  vendorListContainer: {
+    flex: 1,
+    backgroundColor: Colors.backgroundDark,
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    marginTop: -24,
+  },
+  vendorList: {
+    flex: 1,
+  },
+  vendorListContent: {
+    padding: Spacing.lg,
+  },
+  sectionTitle: {
+    fontFamily: FontFamily.displaySemiBold,
+    fontSize: FontSize.h4,
+    color: Colors.textPrimary,
+    marginBottom: Spacing.md,
+  },
+  vendorCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    borderRadius: BorderRadius.lg,
+    padding: Spacing.md,
+    marginBottom: Spacing.md,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.05)',
+  },
+  vendorImage: {
+    width: 70,
+    height: 70,
+    borderRadius: BorderRadius.md,
+  },
+  vendorInfo: {
+    flex: 1,
+    marginLeft: Spacing.md,
+  },
+  vendorHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.xs,
+  },
+  vendorName: {
+    flex: 1,
+    fontFamily: FontFamily.bodySemiBold,
+    fontSize: FontSize.body,
+    color: Colors.textPrimary,
+  },
+  verifiedBadge: {
+    backgroundColor: '#10B981',
+    width: 18,
+    height: 18,
+    borderRadius: 9,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  verifiedText: {
+    color: '#FFFFFF',
+    fontSize: 10,
+    fontWeight: 'bold',
+  },
+  vendorCategories: {
+    fontFamily: FontFamily.body,
+    fontSize: FontSize.small,
+    color: Colors.textMuted,
+    marginTop: 2,
+  },
+  vendorMeta: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: Spacing.xs,
+  },
+  metaItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  metaText: {
+    fontFamily: FontFamily.body,
+    fontSize: FontSize.caption,
+    color: Colors.textMuted,
+  },
+  metaDivider: {
+    width: 1,
+    height: 12,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    marginHorizontal: Spacing.sm,
   },
 });
