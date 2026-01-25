@@ -113,18 +113,19 @@ const getSupabaseClient = async (): Promise<SupabaseClient<Database>> => {
   return supabaseInstance;
 };
 
-// Create a synchronous client for initial rendering (without storage)
-// Use empty strings if not configured to avoid runtime errors during initial load
-const safeUrl = isSupabaseConfigured() ? supabaseUrl : 'https://placeholder.supabase.co';
-const safeKey = isSupabaseConfigured() ? supabaseAnonKey : 'placeholder_key';
-
-export const supabase = createClient<Database>(safeUrl, safeKey, {
-  auth: {
-    autoRefreshToken: false,
-    persistSession: false,
-    detectSessionInUrl: false,
+// For backwards compatibility, export a getter that returns the singleton instance
+// This avoids creating multiple GoTrueClient instances
+export const supabase = {
+  get auth() {
+    if (!supabaseInstance) {
+      console.warn('Supabase client not initialized. Call getSupabaseClient() first.');
+    }
+    return supabaseInstance?.auth;
   },
-});
+  get from() {
+    return supabaseInstance?.from.bind(supabaseInstance);
+  },
+};
 
 // Export async client getter for full auth functionality
 export { getSupabaseClient };
