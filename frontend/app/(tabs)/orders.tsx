@@ -226,15 +226,29 @@ export default function OrdersTab() {
         <View style={styles.orderFooter}>
           <Text style={styles.orderTotal}>£{order.total.toFixed(2)}</Text>
           <View style={styles.footerActions}>
-            {/* Get Help Button */}
-            <TouchableOpacity
-              style={styles.helpButton}
-              onPress={() => handleGetHelp(order.id)}
-              activeOpacity={0.7}
-            >
-              <Headset size={16} color={Colors.textMuted} weight="regular" />
-              <Text style={styles.helpButtonText}>Help</Text>
-            </TouchableOpacity>
+            {/* Report Issue Button - Only for delivered orders */}
+            {order.status === 'delivered' && (
+              <TouchableOpacity
+                style={styles.reportButton}
+                onPress={() => handleReportIssue(order.id)}
+                activeOpacity={0.7}
+              >
+                <Warning size={16} color="#EF4444" weight="fill" />
+                <Text style={styles.reportButtonText}>Report</Text>
+              </TouchableOpacity>
+            )}
+            
+            {/* Get Help Button - Only for active orders */}
+            {order.status !== 'delivered' && order.status !== 'cancelled' && (
+              <TouchableOpacity
+                style={styles.helpButton}
+                onPress={() => handleGetHelp(order.id)}
+                activeOpacity={0.7}
+              >
+                <Headset size={16} color={Colors.textMuted} weight="regular" />
+                <Text style={styles.helpButtonText}>Help</Text>
+              </TouchableOpacity>
+            )}
             
             {/* Primary Action */}
             <TouchableOpacity
