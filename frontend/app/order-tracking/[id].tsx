@@ -228,15 +228,26 @@ export default function OrderTrackingScreen() {
             })}
           </View>
 
-          {/* Need Help Button */}
-          <TouchableOpacity
-            style={styles.needHelpButton}
-            onPress={() => router.push(`/order-support/${orderNumber}`)}
-            activeOpacity={0.8}
-          >
-            <Headset size={18} color={ZORA_RED} weight="regular" />
-            <Text style={styles.needHelpText}>Need Help with this Order?</Text>
-          </TouchableOpacity>
+          {/* Action Buttons */}
+          <View style={styles.actionButtonsContainer}>
+            <TouchableOpacity
+              style={styles.needHelpButton}
+              onPress={() => router.push(`/order-support/${orderNumber}`)}
+              activeOpacity={0.8}
+            >
+              <Headset size={18} color={ZORA_RED} weight="regular" />
+              <Text style={styles.needHelpText}>Need Help?</Text>
+            </TouchableOpacity>
+            
+            <TouchableOpacity
+              style={styles.reportIssueButton}
+              onPress={() => router.push(`/report-issue?orderId=${orderNumber}`)}
+              activeOpacity={0.8}
+            >
+              <Warning size={18} color="#EF4444" weight="fill" />
+              <Text style={styles.reportIssueText}>Report Issue</Text>
+            </TouchableOpacity>
+          </View>
         </ScrollView>
       </View>
     </View>
