@@ -21,10 +21,17 @@ import {
   Info,
 } from 'phosphor-react-native';
 import { Colors } from '../../constants/colors';
-import { Spacing, BorderRadius, TouchTarget } from '../../constants/spacing';
+import { Spacing, BorderRadius } from '../../constants/spacing';
 import { FontSize, FontFamily } from '../../constants/typography';
 import { Button } from '../../components/ui';
 import { useCartStore } from '../../stores/cartStore';
+
+// Zora Brand Colors
+const ZORA_YELLOW = '#FFCC00';
+const ZORA_RED = '#C1272D';
+const ZORA_CARD = 'rgba(58, 42, 33, 0.3)';
+const ZORA_CARD_SOLID = '#3A2A21';
+const ZORA_INPUT = '#2D1E18';
 
 export default function CartTab() {
   const router = useRouter();
@@ -35,6 +42,7 @@ export default function CartTab() {
   if (items.length === 0) {
     return (
       <SafeAreaView style={styles.container} edges={['top']}>
+        {/* Header */}
         <View style={styles.header}>
           <TouchableOpacity 
             style={styles.backButton}
@@ -42,9 +50,10 @@ export default function CartTab() {
           >
             <ArrowLeft size={24} color={Colors.textPrimary} weight="bold" />
           </TouchableOpacity>
-          <Text style={styles.title}>Your Cart</Text>
-          <View style={styles.headerSpacer} />
+          <Text style={styles.headerTitle}>Your Cart</Text>
+          <View style={styles.headerRight} />
         </View>
+        
         <View style={styles.emptyContainer}>
           <View style={styles.emptyIconContainer}>
             <ShoppingCart size={48} color={Colors.textMuted} weight="duotone" />
@@ -73,9 +82,9 @@ export default function CartTab() {
         >
           <ArrowLeft size={24} color={Colors.textPrimary} weight="bold" />
         </TouchableOpacity>
-        <Text style={styles.title}>Your Cart</Text>
-        <TouchableOpacity style={styles.clearButton} onPress={clearCart}>
-          <Text style={styles.clearText}>Clear All</Text>
+        <Text style={styles.headerTitle}>Your Cart</Text>
+        <TouchableOpacity onPress={clearCart}>
+          <Text style={styles.clearAllText}>Clear All</Text>
         </TouchableOpacity>
       </View>
 
@@ -85,16 +94,16 @@ export default function CartTab() {
         contentContainerStyle={styles.scrollContent}
       >
         {/* Vendor Sections */}
-        {vendors.map((vendor) => (
-          <View key={vendor.id} style={styles.vendorSection}>
+        {vendors.map((vendor, vendorIndex) => (
+          <View key={vendor.id} style={[styles.vendorSection, vendorIndex > 0 && { paddingTop: Spacing.sm }]}>
             {/* Vendor Header */}
             <View style={styles.vendorHeader}>
               <Image source={{ uri: vendor.logo_url }} style={styles.vendorLogo} />
-              <View style={styles.vendorInfoContainer}>
+              <View style={styles.vendorInfo}>
                 <Text style={styles.vendorName}>{vendor.name}</Text>
-                <View style={styles.deliveryInfo}>
-                  <Truck size={14} color={Colors.textMuted} weight="fill" />
-                  <Text style={styles.deliveryTime}>Delivers in {vendor.delivery_time}</Text>
+                <View style={styles.deliveryRow}>
+                  <Truck size={14} color="rgba(255, 255, 255, 0.5)" weight="fill" />
+                  <Text style={styles.deliveryText}>Delivers in {vendor.delivery_time}</Text>
                 </View>
               </View>
             </View>
@@ -102,36 +111,45 @@ export default function CartTab() {
             {/* Items */}
             {vendor.items.map((item) => (
               <View key={item.product_id} style={styles.itemCard}>
+                {/* Product Image */}
                 <Image source={{ uri: item.product?.image_url }} style={styles.itemImage} />
+                
+                {/* Product Content */}
                 <View style={styles.itemContent}>
+                  {/* Top Row: Name + Delete */}
                   <View style={styles.itemTopRow}>
                     <View style={styles.itemNameContainer}>
                       <Text style={styles.itemName} numberOfLines={2}>{item.product?.name}</Text>
-                      <Text style={styles.itemWeight}>{item.product?.weight}</Text>
+                      <Text style={styles.itemVariant}>{item.product?.weight}</Text>
                     </View>
                     <TouchableOpacity
                       style={styles.deleteButton}
                       onPress={() => removeItem(item.product_id)}
                     >
-                      <Trash size={20} color={Colors.textMuted} weight="regular" />
+                      <Trash size={20} color="rgba(255, 255, 255, 0.3)" weight="regular" />
                     </TouchableOpacity>
                   </View>
+                  
+                  {/* Bottom Row: Quantity + Price */}
                   <View style={styles.itemBottomRow}>
-                    <View style={styles.quantityControls}>
+                    {/* Quantity Stepper */}
+                    <View style={styles.quantityStepper}>
                       <TouchableOpacity
-                        style={styles.quantityButton}
+                        style={styles.stepperButton}
                         onPress={() => updateQuantity(item.product_id, item.quantity - 1)}
                       >
                         <Minus size={16} color={Colors.textPrimary} weight="bold" />
                       </TouchableOpacity>
                       <Text style={styles.quantityText}>{item.quantity}</Text>
                       <TouchableOpacity
-                        style={styles.quantityButton}
+                        style={styles.stepperButton}
                         onPress={() => updateQuantity(item.product_id, item.quantity + 1)}
                       >
                         <Plus size={16} color={Colors.textPrimary} weight="bold" />
                       </TouchableOpacity>
                     </View>
+                    
+                    {/* Price */}
                     <Text style={styles.itemPrice}>
                       £{((item.product?.price || 0) * item.quantity).toFixed(2)}
                     </Text>
@@ -143,13 +161,13 @@ export default function CartTab() {
         ))}
 
         {/* Promo Code Section */}
-        <View style={styles.promoSection}>
-          <View style={styles.promoInputContainer}>
-            <Tag size={18} color={Colors.textMuted} weight="regular" />
+        <View style={styles.promoCard}>
+          <View style={styles.promoInputWrapper}>
+            <Tag size={18} color="rgba(255, 255, 255, 0.4)" weight="regular" style={styles.promoIcon} />
             <TextInput
               style={styles.promoInput}
               placeholder="Promo code"
-              placeholderTextColor={Colors.textMuted}
+              placeholderTextColor="rgba(255, 255, 255, 0.3)"
               value={promoCode}
               onChangeText={setPromoCode}
             />
@@ -160,7 +178,7 @@ export default function CartTab() {
         </View>
 
         {/* Order Summary */}
-        <View style={styles.summarySection}>
+        <View style={styles.summaryCard}>
           <Text style={styles.summaryTitle}>Order Summary</Text>
           
           <View style={styles.summaryRow}>
@@ -174,9 +192,9 @@ export default function CartTab() {
           </View>
           
           <View style={styles.summaryRow}>
-            <View style={styles.serviceFeeLabel}>
+            <View style={styles.serviceFeeRow}>
               <Text style={styles.summaryLabel}>Service Fee</Text>
-              <Info size={14} color={Colors.textMuted} weight="regular" />
+              <Info size={14} color="rgba(255, 255, 255, 0.4)" weight="regular" />
             </View>
             <Text style={styles.summaryValue}>£{serviceFee.toFixed(2)}</Text>
           </View>
@@ -189,11 +207,12 @@ export default function CartTab() {
           </View>
         </View>
 
-        <View style={{ height: 140 }} />
+        {/* Bottom spacing for checkout button */}
+        <View style={{ height: 120 }} />
       </ScrollView>
 
-      {/* Checkout Button - Fixed at bottom */}
-      <View style={[styles.checkoutContainer, { paddingBottom: insets.bottom + 90 }]}>
+      {/* Sticky Footer - Checkout Button */}
+      <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom, 16) }]}>
         <TouchableOpacity 
           style={styles.checkoutButton}
           onPress={() => router.push('/checkout')}
@@ -212,36 +231,36 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Colors.backgroundDark,
   },
+  
+  // Header
   header: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
+    justifyContent: 'space-between',
     paddingHorizontal: Spacing.base,
     paddingVertical: Spacing.md,
   },
   backButton: {
-    width: TouchTarget.min,
-    height: TouchTarget.min,
+    width: 44,
+    height: 44,
     justifyContent: 'center',
-    alignItems: 'center',
+    alignItems: 'flex-start',
   },
-  title: {
+  headerTitle: {
     fontFamily: FontFamily.display,
-    color: Colors.textPrimary,
     fontSize: FontSize.h3,
+    color: Colors.textPrimary,
   },
-  headerSpacer: {
-    width: TouchTarget.min,
+  headerRight: {
+    width: 60,
   },
-  clearButton: {
-    paddingVertical: Spacing.sm,
-    paddingHorizontal: Spacing.md,
-  },
-  clearText: {
-    fontFamily: FontFamily.bodySemiBold,
-    color: Colors.primary,
+  clearAllText: {
+    fontFamily: FontFamily.bodyMedium,
     fontSize: FontSize.small,
+    color: ZORA_RED,
   },
+  
+  // Empty State
   emptyContainer: {
     flex: 1,
     justifyContent: 'center',
@@ -259,22 +278,23 @@ const styles = StyleSheet.create({
   },
   emptyTitle: {
     fontFamily: FontFamily.displayMedium,
-    color: Colors.textPrimary,
     fontSize: FontSize.h4,
+    color: Colors.textPrimary,
     marginTop: Spacing.md,
   },
   emptySubtitle: {
     fontFamily: FontFamily.body,
-    color: Colors.textMuted,
     fontSize: FontSize.body,
+    color: Colors.textMuted,
     marginTop: Spacing.sm,
   },
+  
+  // Scroll View
   scrollView: {
     flex: 1,
   },
   scrollContent: {
     paddingHorizontal: Spacing.base,
-    paddingTop: Spacing.sm,
   },
   
   // Vendor Section
@@ -284,7 +304,8 @@ const styles = StyleSheet.create({
   vendorHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingBottom: Spacing.md,
+    gap: 12,
+    paddingBottom: Spacing.sm,
     borderBottomWidth: 1,
     borderBottomColor: 'rgba(255, 255, 255, 0.05)',
     marginBottom: Spacing.md,
@@ -293,39 +314,39 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    marginRight: Spacing.md,
     backgroundColor: Colors.cardDark,
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.1)',
   },
-  vendorInfoContainer: {
+  vendorInfo: {
     flex: 1,
   },
   vendorName: {
     fontFamily: FontFamily.bodyBold,
-    color: Colors.textPrimary,
     fontSize: FontSize.body,
+    color: Colors.textPrimary,
   },
-  deliveryInfo: {
+  deliveryRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: Spacing.xs,
+    gap: 4,
     marginTop: 2,
   },
-  deliveryTime: {
+  deliveryText: {
     fontFamily: FontFamily.bodyMedium,
-    color: Colors.textMuted,
-    fontSize: FontSize.caption,
+    fontSize: 12,
+    color: 'rgba(255, 255, 255, 0.5)',
   },
-
+  
   // Item Card
   itemCard: {
     flexDirection: 'row',
-    backgroundColor: 'rgba(255, 255, 255, 0.03)',
+    gap: 16,
+    alignItems: 'flex-start',
+    backgroundColor: ZORA_CARD,
+    padding: 12,
     borderRadius: BorderRadius.lg,
-    padding: Spacing.md,
-    marginBottom: Spacing.md,
-    gap: Spacing.base,
+    marginBottom: 12,
   },
   itemImage: {
     width: 60,
@@ -335,48 +356,49 @@ const styles = StyleSheet.create({
   },
   itemContent: {
     flex: 1,
-    gap: Spacing.sm,
+    minWidth: 0,
+    gap: 4,
   },
   itemTopRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
-    gap: Spacing.sm,
+    gap: 8,
   },
   itemNameContainer: {
     flex: 1,
   },
   itemName: {
     fontFamily: FontFamily.bodyMedium,
-    color: Colors.textPrimary,
     fontSize: FontSize.small,
+    color: Colors.textPrimary,
     lineHeight: 18,
   },
-  itemWeight: {
+  itemVariant: {
     fontFamily: FontFamily.body,
-    color: Colors.textMuted,
-    fontSize: FontSize.caption,
+    fontSize: 12,
+    color: 'rgba(255, 255, 255, 0.4)',
     marginTop: 2,
   },
   deleteButton: {
-    width: 32,
-    height: 32,
-    justifyContent: 'center',
-    alignItems: 'center',
+    padding: 4,
   },
   itemBottomRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
+    alignItems: 'flex-end',
+    marginTop: 8,
   },
-  quantityControls: {
+  
+  // Quantity Stepper
+  quantityStepper: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.cardDark,
+    backgroundColor: ZORA_INPUT,
     borderRadius: BorderRadius.lg,
     height: 32,
   },
-  quantityButton: {
+  stepperButton: {
     width: 32,
     height: 32,
     justifyContent: 'center',
@@ -384,114 +406,119 @@ const styles = StyleSheet.create({
   },
   quantityText: {
     fontFamily: FontFamily.bodyMedium,
-    color: Colors.textPrimary,
     fontSize: FontSize.small,
-    minWidth: 24,
+    color: Colors.textPrimary,
+    width: 24,
     textAlign: 'center',
   },
+  
+  // Item Price
   itemPrice: {
     fontFamily: FontFamily.bodyBold,
-    color: Colors.secondary,
     fontSize: FontSize.body,
+    color: ZORA_YELLOW,
   },
-
-  // Promo Section
-  promoSection: {
+  
+  // Promo Code Section
+  promoCard: {
     flexDirection: 'row',
-    backgroundColor: Colors.cardDark,
-    borderRadius: BorderRadius.lg,
+    alignItems: 'center',
+    gap: 12,
+    backgroundColor: ZORA_CARD_SOLID,
     padding: Spacing.base,
-    gap: Spacing.md,
-    marginBottom: Spacing.base,
+    borderRadius: BorderRadius.lg,
+    marginTop: Spacing.base,
   },
-  promoInputContainer: {
+  promoInputWrapper: {
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.backgroundDark,
+    backgroundColor: ZORA_INPUT,
     borderRadius: BorderRadius.lg,
-    paddingHorizontal: Spacing.md,
-    gap: Spacing.sm,
+    paddingHorizontal: 12,
+  },
+  promoIcon: {
+    marginRight: 8,
   },
   promoInput: {
     flex: 1,
     fontFamily: FontFamily.body,
-    color: Colors.textPrimary,
     fontSize: FontSize.small,
-    paddingVertical: Spacing.sm,
+    color: Colors.textPrimary,
+    paddingVertical: 10,
   },
   applyButton: {
-    paddingHorizontal: Spacing.lg,
-    paddingVertical: Spacing.sm,
+    paddingHorizontal: 20,
+    paddingVertical: 10,
     borderWidth: 1,
-    borderColor: Colors.primary,
+    borderColor: ZORA_RED,
     borderRadius: BorderRadius.lg,
-    justifyContent: 'center',
-    alignItems: 'center',
   },
   applyButtonText: {
     fontFamily: FontFamily.bodyBold,
-    color: Colors.primary,
     fontSize: FontSize.small,
+    color: ZORA_RED,
   },
-
-  // Summary Section
-  summarySection: {
-    backgroundColor: Colors.cardDark,
+  
+  // Order Summary
+  summaryCard: {
+    backgroundColor: ZORA_CARD_SOLID,
+    padding: 20,
     borderRadius: BorderRadius.lg,
-    padding: Spacing.lg,
+    marginTop: Spacing.base,
+    marginBottom: 32,
   },
   summaryTitle: {
     fontFamily: FontFamily.displayMedium,
-    color: Colors.textPrimary,
     fontSize: FontSize.body,
-    marginBottom: Spacing.md,
+    color: Colors.textPrimary,
+    marginBottom: 12,
   },
   summaryRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: Spacing.md,
+    marginBottom: 12,
   },
   summaryLabel: {
     fontFamily: FontFamily.body,
-    color: Colors.textMuted,
     fontSize: FontSize.small,
+    color: 'rgba(255, 255, 255, 0.6)',
   },
   summaryValue: {
     fontFamily: FontFamily.bodyMedium,
-    color: Colors.textPrimary,
     fontSize: FontSize.small,
+    color: Colors.textPrimary,
   },
-  serviceFeeLabel: {
+  serviceFeeRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: Spacing.xs,
+    gap: 4,
   },
   summaryDivider: {
     height: 1,
     backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    marginVertical: Spacing.sm,
+    marginVertical: 8,
   },
   totalRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingTop: Spacing.sm,
+    paddingTop: 4,
   },
   totalLabel: {
     fontFamily: FontFamily.displayMedium,
-    color: Colors.textPrimary,
     fontSize: FontSize.bodyLarge,
+    color: Colors.textPrimary,
   },
   totalValue: {
     fontFamily: FontFamily.displayMedium,
-    color: Colors.secondary,
     fontSize: FontSize.h3,
+    color: ZORA_YELLOW,
   },
-
-  // Checkout Button
-  checkoutContainer: {
+  
+  // Footer
+  footer: {
     position: 'absolute',
     bottom: 0,
     left: 0,
@@ -504,19 +531,19 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: Colors.primary,
-    borderRadius: BorderRadius.full,
-    paddingVertical: Spacing.base,
-    paddingHorizontal: Spacing.xl,
+    backgroundColor: ZORA_RED,
+    borderRadius: 100,
+    paddingVertical: 16,
+    paddingHorizontal: 24,
   },
   checkoutText: {
     fontFamily: FontFamily.bodyBold,
-    color: Colors.textPrimary,
     fontSize: FontSize.body,
+    color: Colors.textPrimary,
   },
   checkoutPrice: {
     fontFamily: FontFamily.bodyBold,
-    color: Colors.secondary,
     fontSize: FontSize.body,
+    color: ZORA_YELLOW,
   },
 });
