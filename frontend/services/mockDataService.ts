@@ -192,11 +192,53 @@ export const bannerService = {
   getActive: (): Banner[] => db.banners?.filter(b => b.is_active).sort((a, b) => a.order - b.order) || [],
 };
 
+// In-memory reviews storage for new reviews (since we can't modify JSON at runtime)
+let additionalReviews: Review[] = [];
+
 // Review Service
 export const reviewService = {
-  getByProduct: (productId: string): Review[] => db.reviews?.filter(r => r.product_id === productId) || [],
+  getByProduct: (productId: string): Review[] => {
+    const dbReviews = db.reviews?.filter(r => r.product_id === productId) || [];
+    const newReviews = additionalReviews.filter(r => r.product_id === productId);
+    return [...newReviews, ...dbReviews];
+  },
   
-  getByVendor: (vendorId: string): Review[] => db.reviews?.filter(r => r.vendor_id === vendorId) || [],
+  getByVendor: (vendorId: string): Review[] => {
+    const dbReviews = db.reviews?.filter(r => r.vendor_id === vendorId) || [];
+    const newReviews = additionalReviews.filter(r => r.vendor_id === vendorId);
+    return [...newReviews, ...dbReviews];
+  },
+  
+  getAll: (): Review[] => [...additionalReviews, ...(db.reviews || [])],
+  
+  create: (reviewData: {
+    product_id?: string;
+    vendor_id?: string;
+    rating: number;
+    title: string;
+    comment: string;
+    user_name: string;
+    user_avatar?: string;
+  }): Review => {
+    const newReview: Review = {
+      id: `rev_new_${Date.now()}`,
+      product_id: reviewData.product_id || '',
+      vendor_id: reviewData.vendor_id || '',
+      user_id: `user_${Date.now()}`,
+      user_name: reviewData.user_name,
+      user_avatar: reviewData.user_avatar || 'https://api.dicebear.com/7.x/avataaars/svg?seed=User',
+      rating: reviewData.rating,
+      title: reviewData.title,
+      content: reviewData.comment,
+      images: [],
+      helpful_count: 0,
+      verified_purchase: true,
+      created_at: new Date().toISOString(),
+    };
+    
+    additionalReviews.unshift(newReview);
+    return newReview;
+  },
 };
 
 // Export everything
