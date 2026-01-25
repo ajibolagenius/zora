@@ -109,10 +109,16 @@ export default function CartTab() {
             </View>
 
             {/* Items */}
-            {vendor.items.map((item) => (
+            {vendor.items.map((item) => {
+              // Handle both image_url and image_urls array
+              const productImage = item.product?.image_url || 
+                (item.product as any)?.image_urls?.[0] || 
+                'https://via.placeholder.com/60';
+              
+              return (
               <View key={item.product_id} style={styles.itemCard}>
                 {/* Product Image */}
-                <Image source={{ uri: item.product?.image_url }} style={styles.itemImage} />
+                <Image source={{ uri: productImage }} style={styles.itemImage} />
                 
                 {/* Product Content */}
                 <View style={styles.itemContent}>
@@ -156,7 +162,8 @@ export default function CartTab() {
                   </View>
                 </View>
               </View>
-            ))}
+              );
+            })}
           </View>
         ))}
 
