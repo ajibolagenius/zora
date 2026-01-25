@@ -423,7 +423,7 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    maxHeight: '58%',
+    maxHeight: '65%',
     backgroundColor: ZORA_CARD,
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
