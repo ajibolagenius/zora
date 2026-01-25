@@ -324,6 +324,92 @@ export default function ProductScreen() {
             </View>
           </View>
 
+          {/* Reviews Section */}
+          <View style={styles.reviewsSection}>
+            <View style={styles.reviewsHeader}>
+              <View>
+                <Text style={styles.reviewsTitle}>Customer Reviews</Text>
+                <View style={styles.reviewsRating}>
+                  <Star size={16} color="#FFCC00" weight="fill" />
+                  <Text style={styles.reviewsRatingText}>
+                    {product.rating || 4.5} ({product.review_count || reviews.length} reviews)
+                  </Text>
+                </View>
+              </View>
+              <Link 
+                href={`/write-review?productId=${id}&productName=${encodeURIComponent(product.name)}`}
+                asChild
+              >
+                <TouchableOpacity style={styles.writeReviewButton}>
+                  <PencilSimple size={18} color="#C1272D" weight="bold" />
+                  <Text style={styles.writeReviewText}>Write Review</Text>
+                </TouchableOpacity>
+              </Link>
+            </View>
+
+            {/* Reviews List */}
+            {reviews.length > 0 ? (
+              <View style={styles.reviewsList}>
+                {reviews.slice(0, 3).map((review) => (
+                  <View key={review.id} style={styles.reviewCard}>
+                    <View style={styles.reviewHeader}>
+                      <Image
+                        source={{ uri: review.user_avatar || 'https://api.dicebear.com/7.x/avataaars/svg?seed=User' }}
+                        style={styles.reviewAvatar}
+                      />
+                      <View style={styles.reviewMeta}>
+                        <Text style={styles.reviewerName}>{review.user_name}</Text>
+                        <View style={styles.reviewStars}>
+                          {[1, 2, 3, 4, 5].map((star) => (
+                            <Star
+                              key={star}
+                              size={12}
+                              color={star <= review.rating ? '#FFCC00' : '#3D3D3D'}
+                              weight={star <= review.rating ? 'fill' : 'regular'}
+                            />
+                          ))}
+                          <Text style={styles.reviewDate}>
+                            {new Date(review.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
+                          </Text>
+                        </View>
+                      </View>
+                      {review.verified_purchase && (
+                        <View style={styles.verifiedBadge}>
+                          <SealCheck size={14} color="#10B981" weight="fill" />
+                          <Text style={styles.verifiedText}>Verified</Text>
+                        </View>
+                      )}
+                    </View>
+                    {review.title && (
+                      <Text style={styles.reviewTitle}>{review.title}</Text>
+                    )}
+                    <Text style={styles.reviewContent} numberOfLines={3}>
+                      {review.content}
+                    </Text>
+                  </View>
+                ))}
+                {reviews.length > 3 && (
+                  <TouchableOpacity style={styles.viewAllReviews}>
+                    <Text style={styles.viewAllReviewsText}>View All {reviews.length} Reviews</Text>
+                    <CaretRight size={16} color="#C1272D" weight="bold" />
+                  </TouchableOpacity>
+                )}
+              </View>
+            ) : (
+              <View style={styles.noReviews}>
+                <Text style={styles.noReviewsText}>No reviews yet. Be the first to review!</Text>
+                <Link 
+                  href={`/write-review?productId=${id}&productName=${encodeURIComponent(product.name)}`}
+                  asChild
+                >
+                  <TouchableOpacity style={styles.firstReviewButton}>
+                    <Text style={styles.firstReviewText}>Write a Review</Text>
+                  </TouchableOpacity>
+                </Link>
+              </View>
+            )}
+          </View>
+
           {/* Bottom spacer */}
           <View style={{ height: 200 }} />
         </View>
