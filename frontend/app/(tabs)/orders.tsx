@@ -150,6 +150,10 @@ export default function OrdersTab() {
     router.push(`/order-support/${orderId}`);
   };
 
+  const handleReportIssue = (orderId: string) => {
+    router.push(`/report-issue?orderId=${orderId}`);
+  };
+
   const renderEmptyState = () => (
     <View style={styles.emptyContainer}>
       <View style={styles.emptyIconContainer}>
