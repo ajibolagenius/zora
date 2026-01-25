@@ -18,10 +18,10 @@ import {
   Envelope,
   Package,
   CreditCard,
+  ArrowsLeftRight,
   User,
-  Gift,
   CaretRight,
-  ArrowRight,
+  Headset,
 } from 'phosphor-react-native';
 import { Colors } from '../constants/colors';
 import { Spacing, BorderRadius } from '../constants/spacing';
@@ -30,9 +30,10 @@ import { FontSize, FontFamily } from '../constants/typography';
 // Zora Brand Colors
 const ZORA_RED = '#CC0000';
 const ZORA_CARD = '#342418';
-const SURFACE_DARK = '#2D1E18';
-const ICON_BG = '#463222';
-const MUTED_TEXT = '#bc9a9a';
+const BACKGROUND_DARK = '#221710';
+const SURFACE_LIGHT = '#ffffff';
+const MUTED_TEXT = '#94A3B8';
+const ICON_BG = 'rgba(204, 0, 0, 0.1)';
 
 interface QuickAction {
   id: string;
@@ -56,16 +57,17 @@ interface TopicItem {
 }
 
 const FAQ_TOPICS: TopicItem[] = [
-  { id: '1', icon: Package, label: 'Orders & Shipping' },
+  { id: '1', icon: Package, label: 'Orders & Delivery' },
   { id: '2', icon: CreditCard, label: 'Payments & Refunds' },
-  { id: '3', icon: User, label: 'Account Settings' },
-  { id: '4', icon: Gift, label: 'Zora Rewards', route: '/rewards' },
+  { id: '3', icon: ArrowsLeftRight, label: 'Returns & Exchanges' },
+  { id: '4', icon: User, label: 'Account Settings' },
 ];
 
 const POPULAR_QUESTIONS = [
   { id: '1', question: 'Where is my order?' },
-  { id: '2', question: 'How do I reset my password?' },
-  { id: '3', question: 'Do you ship internationally?' },
+  { id: '2', question: 'How do I change my delivery address?' },
+  { id: '3', question: 'What payment methods do you accept?' },
+  { id: '4', question: 'How can I apply a discount code?' },
 ];
 
 export default function HelpCenterScreen() {
@@ -76,7 +78,6 @@ export default function HelpCenterScreen() {
     if (action.route) {
       router.push(action.route);
     } else if (action.id === 'chat') {
-      // Navigate to latest order support if exists
       router.push('/order-support/ord_001');
     } else {
       console.log(`${action.label} pressed`);
@@ -113,7 +114,7 @@ export default function HelpCenterScreen() {
         {/* Search Bar */}
         <View style={styles.searchContainer}>
           <View style={styles.searchInputWrapper}>
-            <MagnifyingGlass size={24} color={MUTED_TEXT} weight="regular" />
+            <MagnifyingGlass size={20} color={MUTED_TEXT} weight="regular" />
             <TextInput
               style={styles.searchInput}
               placeholder="How can we help?"
@@ -144,7 +145,7 @@ export default function HelpCenterScreen() {
                   activeOpacity={0.8}
                 >
                   <View style={styles.quickActionIcon}>
-                    <IconComponent size={24} color={Colors.textPrimary} weight="fill" />
+                    <IconComponent size={24} color={ZORA_RED} weight="fill" />
                   </View>
                   <Text style={styles.quickActionLabel}>{action.label}</Text>
                 </TouchableOpacity>
@@ -168,11 +169,11 @@ export default function HelpCenterScreen() {
                 >
                   <View style={styles.topicLeft}>
                     <View style={styles.topicIconContainer}>
-                      <IconComponent size={20} color={MUTED_TEXT} weight="fill" />
+                      <IconComponent size={20} color={ZORA_RED} weight="fill" />
                     </View>
                     <Text style={styles.topicLabel}>{topic.label}</Text>
                   </View>
-                  <CaretRight size={24} color={ZORA_RED} weight="bold" />
+                  <CaretRight size={20} color={MUTED_TEXT} weight="bold" />
                 </TouchableOpacity>
               );
             })}
@@ -182,7 +183,7 @@ export default function HelpCenterScreen() {
         {/* Popular Questions */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Popular Questions</Text>
-          <View style={styles.questionsContainer}>
+          <View style={styles.questionsCard}>
             {POPULAR_QUESTIONS.map((item, index) => (
               <TouchableOpacity
                 key={item.id}
@@ -193,32 +194,39 @@ export default function HelpCenterScreen() {
                 activeOpacity={0.7}
               >
                 <Text style={styles.questionText}>{item.question}</Text>
-                <ArrowRight size={20} color={MUTED_TEXT} weight="regular" />
+                <CaretRight size={20} color={MUTED_TEXT} weight="regular" />
               </TouchableOpacity>
             ))}
           </View>
         </View>
 
-        {/* Bottom padding for contact card */}
-        <View style={{ height: 140 }} />
-      </ScrollView>
-
-      {/* Bottom Contact Card */}
-      <View style={styles.contactCardContainer}>
+        {/* Contact Card */}
         <View style={styles.contactCard}>
-          <View style={styles.contactTextContainer}>
+          {/* Decorative circles */}
+          <View style={styles.decorativeCircle1} />
+          <View style={styles.decorativeCircle2} />
+          
+          <View style={styles.contactContent}>
+            <View style={styles.contactIconContainer}>
+              <Headset size={24} color={ZORA_RED} weight="fill" />
+            </View>
             <Text style={styles.contactTitle}>Still need help?</Text>
-            <Text style={styles.contactSubtitle}>Our team is available 24/7.</Text>
+            <Text style={styles.contactSubtitle}>
+              Our Zora support team is available 24/7 to assist you.
+            </Text>
+            <TouchableOpacity
+              style={styles.contactButton}
+              onPress={handleContactUs}
+              activeOpacity={0.8}
+            >
+              <Text style={styles.contactButtonText}>Contact Us</Text>
+            </TouchableOpacity>
           </View>
-          <TouchableOpacity
-            style={styles.contactButton}
-            onPress={handleContactUs}
-            activeOpacity={0.8}
-          >
-            <Text style={styles.contactButtonText}>Contact Us</Text>
-          </TouchableOpacity>
         </View>
-      </View>
+
+        {/* Bottom padding */}
+        <View style={{ height: 40 }} />
+      </ScrollView>
     </SafeAreaView>
   );
 }
@@ -226,14 +234,13 @@ export default function HelpCenterScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.backgroundDark,
+    backgroundColor: BACKGROUND_DARK,
   },
 
   // Header
   header: {
-    backgroundColor: 'rgba(34, 23, 16, 0.95)',
-    borderBottomWidth: 1,
-    borderBottomColor: '#3a2727',
+    backgroundColor: BACKGROUND_DARK,
+    paddingBottom: 8,
   },
   headerTop: {
     flexDirection: 'row',
@@ -264,21 +271,20 @@ const styles = StyleSheet.create({
   // Search Bar
   searchContainer: {
     paddingHorizontal: Spacing.base,
-    paddingBottom: Spacing.base,
     paddingTop: 4,
   },
   searchInputWrapper: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: ZORA_CARD,
-    borderRadius: BorderRadius.xl,
+    borderRadius: BorderRadius.lg,
     paddingHorizontal: Spacing.base,
-    height: 48,
+    height: 52,
   },
   searchInput: {
     flex: 1,
     fontFamily: FontFamily.body,
-    fontSize: FontSize.body,
+    fontSize: FontSize.small,
     color: Colors.textPrimary,
     marginLeft: Spacing.sm,
   },
@@ -288,19 +294,20 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
+    paddingHorizontal: Spacing.base,
     paddingTop: 24,
   },
 
   // Sections
   section: {
-    paddingHorizontal: Spacing.base,
-    marginBottom: 24,
+    marginBottom: 32,
   },
   sectionTitle: {
     fontFamily: FontFamily.display,
     fontSize: FontSize.h4,
     color: Colors.textPrimary,
     marginBottom: 16,
+    paddingHorizontal: 4,
   },
 
   // Quick Actions
@@ -309,22 +316,22 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   quickAction: {
-    flex: 1,
     alignItems: 'center',
     gap: 8,
+    flex: 1,
   },
   quickActionIcon: {
-    width: 52,
-    height: 52,
-    borderRadius: 26,
-    backgroundColor: ZORA_RED,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: ZORA_CARD,
     justifyContent: 'center',
     alignItems: 'center',
   },
   quickActionLabel: {
     fontFamily: FontFamily.bodyMedium,
-    fontSize: FontSize.caption,
-    color: 'rgba(255, 255, 255, 0.9)',
+    fontSize: 12,
+    color: 'rgba(255, 255, 255, 0.8)',
     textAlign: 'center',
   },
 
@@ -337,30 +344,30 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     backgroundColor: ZORA_CARD,
-    borderRadius: BorderRadius.xl,
+    borderRadius: BorderRadius.lg,
     padding: Spacing.base,
   },
   topicLeft: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
+    gap: 16,
   },
   topicIconContainer: {
-    width: 36,
-    height: 36,
-    borderRadius: BorderRadius.lg,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     backgroundColor: ICON_BG,
     justifyContent: 'center',
     alignItems: 'center',
   },
   topicLabel: {
-    fontFamily: FontFamily.bodyMedium,
+    fontFamily: FontFamily.bodySemiBold,
     fontSize: FontSize.body,
     color: Colors.textPrimary,
   },
 
-  // Popular Questions
-  questionsContainer: {
+  // Questions Card
+  questionsCard: {
     backgroundColor: ZORA_CARD,
     borderRadius: BorderRadius.xl,
     paddingHorizontal: Spacing.base,
@@ -369,61 +376,83 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingVertical: Spacing.base,
+    paddingVertical: 16,
   },
   questionItemBorder: {
     borderBottomWidth: 1,
-    borderBottomColor: ICON_BG,
+    borderBottomColor: 'rgba(255, 255, 255, 0.05)',
   },
   questionText: {
     fontFamily: FontFamily.bodyMedium,
     fontSize: FontSize.small,
-    color: 'rgba(255, 255, 255, 0.9)',
+    color: 'rgba(255, 255, 255, 0.8)',
     flex: 1,
   },
 
   // Contact Card
-  contactCardContainer: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    padding: Spacing.base,
-    paddingTop: 32,
-    backgroundColor: 'transparent',
-  },
   contactCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
     backgroundColor: ZORA_CARD,
     borderRadius: BorderRadius.xl,
-    padding: Spacing.base,
-    borderWidth: 1,
-    borderColor: ICON_BG,
+    padding: 24,
+    overflow: 'hidden',
+    position: 'relative',
   },
-  contactTextContainer: {
-    gap: 4,
+  decorativeCircle1: {
+    position: 'absolute',
+    top: -40,
+    right: -40,
+    width: 128,
+    height: 128,
+    borderRadius: 64,
+    backgroundColor: 'rgba(204, 0, 0, 0.05)',
+  },
+  decorativeCircle2: {
+    position: 'absolute',
+    bottom: -32,
+    left: -32,
+    width: 96,
+    height: 96,
+    borderRadius: 48,
+    backgroundColor: 'rgba(204, 0, 0, 0.05)',
+  },
+  contactContent: {
+    alignItems: 'center',
+    position: 'relative',
+    zIndex: 10,
+  },
+  contactIconContainer: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: ICON_BG,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 16,
   },
   contactTitle: {
-    fontFamily: FontFamily.bodyBold,
-    fontSize: FontSize.small,
+    fontFamily: FontFamily.display,
+    fontSize: 20,
     color: Colors.textPrimary,
+    marginBottom: 8,
   },
   contactSubtitle: {
     fontFamily: FontFamily.body,
-    fontSize: FontSize.caption,
+    fontSize: FontSize.small,
     color: MUTED_TEXT,
+    textAlign: 'center',
+    marginBottom: 24,
+    maxWidth: 240,
   },
   contactButton: {
+    width: '100%',
     backgroundColor: ZORA_RED,
-    paddingHorizontal: 24,
-    paddingVertical: 10,
-    borderRadius: BorderRadius.lg,
+    paddingVertical: 14,
+    borderRadius: BorderRadius.full,
+    alignItems: 'center',
   },
   contactButtonText: {
-    fontFamily: FontFamily.bodySemiBold,
-    fontSize: FontSize.small,
+    fontFamily: FontFamily.bodyBold,
+    fontSize: FontSize.body,
     color: Colors.textPrimary,
   },
 });
