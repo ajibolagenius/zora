@@ -143,10 +143,33 @@ export const useCartStore = create<CartState>()((set, get) => ({
     
     const total = subtotal + deliveryFee + serviceFee - discount;
     
+    // Group items by vendor
+    const vendorMap = new Map<string, { id: string; name: string; logo_url: string; delivery_time: string; items: CartItem[] }>();
+    
+    items.forEach(item => {
+      const vendorId = item.vendor_id || item.product?.vendor_id || 'unknown';
+      const vendorName = item.product?.vendor?.name || 'Unknown Vendor';
+      const vendorLogo = item.product?.vendor?.logo_url || 'https://via.placeholder.com/40';
+      
+      if (!vendorMap.has(vendorId)) {
+        vendorMap.set(vendorId, {
+          id: vendorId,
+          name: vendorName,
+          logo_url: vendorLogo,
+          delivery_time: '2-3 days',
+          items: [],
+        });
+      }
+      vendorMap.get(vendorId)?.items.push(item);
+    });
+    
+    const vendors = Array.from(vendorMap.values());
+    
     set({
       subtotal: Math.round(subtotal * 100) / 100,
       deliveryFee: Math.round(deliveryFee * 100) / 100,
       total: Math.round(total * 100) / 100,
+      vendors,
     });
   },
 }));
