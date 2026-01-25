@@ -436,6 +436,21 @@ const styles = StyleSheet.create({
     fontSize: FontSize.bodyLarge,
     color: Colors.textPrimary,
   },
+  footerActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 16,
+  },
+  helpButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  helpButtonText: {
+    fontFamily: FontFamily.bodyMedium,
+    fontSize: FontSize.small,
+    color: Colors.textMuted,
+  },
   actionButton: {
     flexDirection: 'row',
     alignItems: 'center',
