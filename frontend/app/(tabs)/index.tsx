@@ -140,6 +140,32 @@ export default function HomeScreen() {
     setSelectedRegion(selectedRegion === region.id ? null : region.id);
   };
 
+  const handleBannerPress = (banner: { cta_link?: string }) => {
+    // Navigate based on banner CTA link
+    if (banner.cta_link) {
+      // Handle different link formats
+      if (banner.cta_link.startsWith('/products')) {
+        router.push(banner.cta_link as any);
+      } else if (banner.cta_link.startsWith('/categories')) {
+        router.push(banner.cta_link as any);
+      } else if (banner.cta_link.startsWith('/collections')) {
+        // Collections can be mapped to products with filters
+        router.push('/products');
+      } else {
+        router.push(banner.cta_link as any);
+      }
+    }
+  };
+
+  const handleLocationPress = () => {
+    // Navigate to address/location settings
+    router.push('/settings/addresses');
+  };
+
+  const handleNotificationsPress = () => {
+    router.push('/notifications');
+  };
+
   if (loading) {
     return (
       <SafeAreaView style={styles.container}>
@@ -160,12 +186,20 @@ export default function HomeScreen() {
       <View style={styles.stickyHeader}>
         {/* Header Row */}
         <View style={styles.header}>
-          <TouchableOpacity style={styles.locationButton}>
+          <TouchableOpacity 
+            style={styles.locationButton}
+            onPress={handleLocationPress}
+            activeOpacity={0.8}
+          >
             <MapPin size={20} color={Colors.primary} weight="fill" />
             <Text style={styles.locationText}>Brixton, London</Text>
             <CaretDown size={16} color={Colors.textMuted} weight="bold" />
           </TouchableOpacity>
-          <TouchableOpacity style={styles.notificationButton}>
+          <TouchableOpacity 
+            style={styles.notificationButton}
+            onPress={handleNotificationsPress}
+            activeOpacity={0.8}
+          >
             <Bell size={24} color={Colors.textPrimary} weight="duotone" />
             <View style={styles.notificationBadge} />
           </TouchableOpacity>
@@ -207,6 +241,7 @@ export default function HomeScreen() {
           {homeData?.banners && homeData.banners.length > 0 && (
             <FeaturedSlider 
               banners={homeData.banners}
+              onBannerPress={handleBannerPress}
               autoPlay={true}
               autoPlayInterval={5000}
             />

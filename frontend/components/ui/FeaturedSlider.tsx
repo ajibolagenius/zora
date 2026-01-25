@@ -14,15 +14,26 @@ import { ArrowRight } from 'phosphor-react-native';
 import { Colors } from '../../constants/colors';
 import { BorderRadius, Spacing } from '../../constants/spacing';
 import { FontSize, FontFamily } from '../../constants/typography';
-import { Banner } from '../../types';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const CARD_WIDTH = SCREEN_WIDTH - 32;
 const CARD_MARGIN = 8;
 
+// Generic banner interface that works with both types and mockDataService
+interface SliderBanner {
+  id: string;
+  title: string;
+  subtitle: string;
+  image_url: string;
+  badge?: string;
+  badge_style?: string;
+  cta_text: string;
+  cta_link?: string;
+}
+
 interface FeaturedSliderProps {
-  banners: Banner[];
-  onBannerPress?: (banner: Banner) => void;
+  banners: SliderBanner[];
+  onBannerPress?: (banner: SliderBanner) => void;
   autoPlay?: boolean;
   autoPlayInterval?: number;
 }
@@ -59,7 +70,7 @@ export const FeaturedSlider: React.FC<FeaturedSliderProps> = ({
     setActiveIndex(index);
   };
 
-  const renderBanner = ({ item, index }: { item: Banner; index: number }) => {
+  const renderBanner = ({ item, index }: { item: SliderBanner; index: number }) => {
     return (
       <TouchableOpacity
         style={styles.bannerCard}
