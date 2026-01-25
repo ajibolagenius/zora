@@ -11,9 +11,13 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.zora.africanmarket",
+      "config": {
+        "googleMapsApiKey": "your_google_maps_api_key_here"
+      },
       "infoPlist": {
-        "NSCameraUsageDescription": "Scan QR codes for order pickup",
-        "NSLocationWhenInUseUsageDescription": "Find nearby vendors and track deliveries"
+        "NSCameraUsageDescription": "Scan QR codes for order pickup and promo codes",
+        "NSLocationWhenInUseUsageDescription": "Find nearby vendors and track deliveries",
+        "NSPhotoLibraryUsageDescription": "Upload photos for reviews and disputes"
       }
     },
     "android": {
@@ -23,6 +27,11 @@
       },
       "edgeToEdgeEnabled": true,
       "package": "com.zora.africanmarket",
+      "config": {
+        "googleMaps": {
+          "apiKey": "your_google_maps_api_key_here"
+        }
+      },
       "permissions": [
         "android.permission.CAMERA",
         "android.permission.ACCESS_FINE_LOCATION",
@@ -53,7 +62,19 @@
           "enableGooglePay": true
         }
       ],
-      "expo-font"
+      "expo-font",
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Allow Zora African Market to use your location to find nearby vendors."
+        }
+      ],
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow Zora African Market to access your camera to scan QR codes."
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true
