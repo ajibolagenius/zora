@@ -650,4 +650,23 @@ const styles = StyleSheet.create({
     color: 'rgba(255,255,255,0.6)',
     marginTop: 2,
   },
+  
+  // Need Help Button
+  needHelpButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    paddingVertical: 14,
+    backgroundColor: 'rgba(193, 39, 45, 0.1)',
+    borderRadius: BorderRadius.lg,
+    borderWidth: 1,
+    borderColor: 'rgba(193, 39, 45, 0.2)',
+    marginTop: 8,
+  },
+  needHelpText: {
+    fontFamily: FontFamily.bodyMedium,
+    fontSize: FontSize.small,
+    color: ZORA_RED,
+  },
 });
