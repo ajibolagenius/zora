@@ -630,7 +630,7 @@ const styles = StyleSheet.create({
   },
   timelineRight: {
     flex: 1,
-    paddingBottom: 16,
+    paddingBottom: 12,
   },
   timelineRightPending: {
     opacity: 0.4,
