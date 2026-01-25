@@ -4,36 +4,107 @@ import { Database } from '../types/supabase';
 
 // Supabase configuration
 // Replace these with your actual Supabase project URL and anon key
-const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL || 'https://your-project.supabase.co';
-const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY || 'your_supabase_anon_key_here';
+const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL || '';
+const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY || '';
+
+// Placeholder values that indicate unconfigured credentials
+const PLACEHOLDER_URL = 'https://your-project.supabase.co';
+const PLACEHOLDER_KEY = 'your_supabase_anon_key_here';
+
+/**
+ * Check if Supabase credentials are properly configured
+ * @returns true if credentials appear valid, false otherwise
+ */
+export const isSupabaseConfigured = (): boolean => {
+  // Check if URL is missing or is the placeholder
+  if (!supabaseUrl || supabaseUrl === PLACEHOLDER_URL) {
+    return false;
+  }
+  
+  // Check if key is missing or is the placeholder
+  if (!supabaseAnonKey || supabaseAnonKey === PLACEHOLDER_KEY) {
+    return false;
+  }
+  
+  // Basic URL format validation
+  try {
+    const url = new URL(supabaseUrl);
+    if (!url.hostname.includes('supabase')) {
+      return false;
+    }
+  } catch {
+    return false;
+  }
+  
+  return true;
+};
+
+/**
+ * Get a descriptive error message for missing credentials
+ */
+export const getCredentialsError = (): string => {
+  if (!supabaseUrl || supabaseUrl === PLACEHOLDER_URL) {
+    return 'Supabase URL is not configured. Please update EXPO_PUBLIC_SUPABASE_URL in your .env file.';
+  }
+  if (!supabaseAnonKey || supabaseAnonKey === PLACEHOLDER_KEY) {
+    return 'Supabase API key is not configured. Please update EXPO_PUBLIC_SUPABASE_ANON_KEY in your .env file.';
+  }
+  return 'Supabase credentials are invalid. Please check your .env file configuration.';
+};
 
 // Initialize with null, will be created lazily when needed
 let supabaseInstance: SupabaseClient<Database> | null = null;
 
 // Lazy initialization to avoid SSR issues with AsyncStorage
 const getSupabaseClient = async (): Promise<SupabaseClient<Database>> => {
+  // Validate credentials before creating client
+  if (!isSupabaseConfigured()) {
+    throw new Error(getCredentialsError());
+  }
+
   if (supabaseInstance) {
     return supabaseInstance;
   }
 
-  // Only import AsyncStorage when needed (not during SSR)
-  if (Platform.OS === 'web' && typeof window === 'undefined') {
-    // During SSR, create a client without auth storage
+  try {
+    // Only import AsyncStorage when needed (not during SSR)
+    if (Platform.OS === 'web' && typeof window === 'undefined') {
+      // During SSR, create a client without auth storage
+      supabaseInstance = createClient<Database>(supabaseUrl, supabaseAnonKey, {
+        auth: {
+          autoRefreshToken: false,
+          persistSession: false,
+          detectSessionInUrl: false,
+        },
+      });
+    } else if (Platform.OS === 'web') {
+      // On web client, use localStorage (no need for AsyncStorage)
+      supabaseInstance = createClient<Database>(supabaseUrl, supabaseAnonKey, {
+        auth: {
+          autoRefreshToken: true,
+          persistSession: true,
+          detectSessionInUrl: true,
+        },
+      });
+    } else {
+      // On native, use AsyncStorage for auth persistence
+      const AsyncStorage = (await import('@react-native-async-storage/async-storage')).default;
+      supabaseInstance = createClient<Database>(supabaseUrl, supabaseAnonKey, {
+        auth: {
+          storage: AsyncStorage,
+          autoRefreshToken: true,
+          persistSession: true,
+          detectSessionInUrl: false,
+        },
+      });
+    }
+  } catch (error) {
+    console.error('Failed to initialize Supabase client:', error);
+    // Fallback to basic client without storage
     supabaseInstance = createClient<Database>(supabaseUrl, supabaseAnonKey, {
       auth: {
         autoRefreshToken: false,
         persistSession: false,
-        detectSessionInUrl: false,
-      },
-    });
-  } else {
-    // On client side, use AsyncStorage for auth persistence
-    const AsyncStorage = (await import('@react-native-async-storage/async-storage')).default;
-    supabaseInstance = createClient<Database>(supabaseUrl, supabaseAnonKey, {
-      auth: {
-        storage: AsyncStorage,
-        autoRefreshToken: true,
-        persistSession: true,
         detectSessionInUrl: false,
       },
     });
@@ -43,7 +114,11 @@ const getSupabaseClient = async (): Promise<SupabaseClient<Database>> => {
 };
 
 // Create a synchronous client for initial rendering (without storage)
-export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
+// Use empty strings if not configured to avoid runtime errors during initial load
+const safeUrl = isSupabaseConfigured() ? supabaseUrl : 'https://placeholder.supabase.co';
+const safeKey = isSupabaseConfigured() ? supabaseAnonKey : 'placeholder_key';
+
+export const supabase = createClient<Database>(safeUrl, safeKey, {
   auth: {
     autoRefreshToken: false,
     persistSession: false,

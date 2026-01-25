@@ -1,7 +1,17 @@
 import { create } from 'zustand';
 import { User } from '../types';
-import { supabase, getSupabaseClient } from '../lib/supabase';
+import { supabase, getSupabaseClient, isSupabaseConfigured, getCredentialsError } from '../lib/supabase';
 import { Session, AuthError } from '@supabase/supabase-js';
+
+// Helper to add timeout to promises
+const withTimeout = <T>(promise: Promise<T>, ms: number, errorMessage: string): Promise<T> => {
+  const timeout = new Promise<never>((_, reject) => {
+    setTimeout(() => reject(new Error(errorMessage)), ms);
+  });
+  return Promise.race([promise, timeout]);
+};
+
+const AUTH_TIMEOUT_MS = 15000; // 15 seconds
 
 interface AuthState {
   user: User | null;
@@ -41,7 +51,7 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
   user: null,
   session: null,
   isAuthenticated: false,
-  isLoading: true,
+  isLoading: false, // Start as false to prevent blocking UI
   hasCompletedOnboarding: false,
   
   setUser: (user) => set({ user, isAuthenticated: !!user }),
@@ -50,6 +60,13 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
   setOnboardingComplete: (hasCompletedOnboarding) => set({ hasCompletedOnboarding }),
   
   signInWithGoogle: async () => {
+    // Check credentials before attempting auth
+    if (!isSupabaseConfigured()) {
+      const error = new Error(getCredentialsError());
+      console.error('Google sign in error:', error);
+      throw error;
+    }
+
     try {
       set({ isLoading: true });
       const client = await getSupabaseClient();
@@ -70,23 +87,33 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
   },
   
   signInWithEmail: async (email: string, password: string) => {
+    // Check credentials before attempting auth
+    if (!isSupabaseConfigured()) {
+      const error = new Error(getCredentialsError());
+      console.error('Email sign in error:', error);
+      throw error;
+    }
+
     try {
       set({ isLoading: true });
       const client = await getSupabaseClient();
-      const { data, error } = await client.auth.signInWithPassword({
-        email,
-        password,
-      });
+      
+      // Add timeout to prevent infinite loading
+      const { data, error } = await withTimeout(
+        client.auth.signInWithPassword({ email, password }),
+        AUTH_TIMEOUT_MS,
+        'Sign in timed out. Please check your internet connection and try again.'
+      );
       
       if (error) throw error;
       
       if (data.user) {
-        // Fetch user profile
-        const { data: profile } = await client
-          .from('profiles')
-          .select('*')
-          .eq('id', data.user.id)
-          .single();
+        // Fetch user profile with timeout
+        const { data: profile } = await withTimeout(
+          client.from('profiles').select('*').eq('id', data.user.id).single(),
+          AUTH_TIMEOUT_MS,
+          'Failed to load profile. Please try again.'
+        );
         
         set({
           user: mapSupabaseUser(data.user, profile),
@@ -94,6 +121,8 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
           isAuthenticated: true,
           isLoading: false,
         });
+      } else {
+        set({ isLoading: false });
       }
     } catch (error) {
       console.error('Email sign in error:', error);
@@ -103,32 +132,49 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
   },
   
   signUpWithEmail: async (email: string, password: string, name: string) => {
+    // Check credentials before attempting auth
+    if (!isSupabaseConfigured()) {
+      const error = new Error(getCredentialsError());
+      console.error('Email sign up error:', error);
+      throw error;
+    }
+
     try {
       set({ isLoading: true });
       const client = await getSupabaseClient();
-      const { data, error } = await client.auth.signUp({
-        email,
-        password,
-        options: {
-          data: {
-            full_name: name,
+      
+      // Add timeout to prevent infinite loading
+      const { data, error } = await withTimeout(
+        client.auth.signUp({
+          email,
+          password,
+          options: {
+            data: {
+              full_name: name,
+            },
           },
-        },
-      });
+        }),
+        AUTH_TIMEOUT_MS,
+        'Sign up timed out. Please check your internet connection and try again.'
+      );
       
       if (error) throw error;
       
       if (data.user) {
-        // Create profile in profiles table
-        await client.from('profiles').insert({
-          id: data.user.id,
-          email: data.user.email,
-          full_name: name,
-          membership_tier: 'bronze',
-          zora_credits: 5.0, // Welcome bonus
-          loyalty_points: 100,
-          referral_code: `ZORA${data.user.id.substring(0, 6).toUpperCase()}`,
-        });
+        // Create profile in profiles table with timeout
+        await withTimeout(
+          client.from('profiles').insert({
+            id: data.user.id,
+            email: data.user.email,
+            full_name: name,
+            membership_tier: 'bronze',
+            zora_credits: 5.0, // Welcome bonus
+            loyalty_points: 100,
+            referral_code: `ZORA${data.user.id.substring(0, 6).toUpperCase()}`,
+          }),
+          AUTH_TIMEOUT_MS,
+          'Failed to create profile. Please try again.'
+        );
         
         set({
           user: mapSupabaseUser(data.user, { full_name: name }),
@@ -136,6 +182,8 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
           isAuthenticated: !!data.session,
           isLoading: false,
         });
+      } else {
+        set({ isLoading: false });
       }
     } catch (error) {
       console.error('Email sign up error:', error);
@@ -162,6 +210,18 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
   },
   
   checkAuth: async () => {
+    // If Supabase is not configured, skip auth check silently
+    if (!isSupabaseConfigured()) {
+      console.warn('Supabase not configured. Skipping auth check.');
+      set({
+        user: null,
+        session: null,
+        isAuthenticated: false,
+        isLoading: false,
+      });
+      return;
+    }
+
     try {
       set({ isLoading: true });
       const client = await getSupabaseClient();

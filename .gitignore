@@ -70,6 +70,7 @@ web-build/
 
 # Metro bundler
 .metro-health-check*
+.metro-cache/
 
 # EAS Build
 .eas/
