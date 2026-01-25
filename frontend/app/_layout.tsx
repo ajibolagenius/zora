@@ -1,5 +1,5 @@
-import { useEffect, useCallback } from 'react';
-import { View, ActivityIndicator, StyleSheet } from 'react-native';
+import { useEffect, useCallback, useState } from 'react';
+import { View, ActivityIndicator, StyleSheet, Platform } from 'react-native';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import * as SplashScreen from 'expo-splash-screen';
@@ -24,6 +24,8 @@ import '../global.css';
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
+  const [fontTimeout, setFontTimeout] = useState(false);
+  
   const [fontsLoaded, fontError] = useFonts({
     // Montserrat - Headlines & Display
     'Montserrat-Regular': Montserrat_400Regular,
@@ -38,18 +40,30 @@ export default function RootLayout() {
     'Inter-Bold': Inter_700Bold,
   });
 
+  // Fallback timeout for font loading (especially for web)
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      if (!fontsLoaded && !fontError) {
+        console.warn('Font loading timeout - proceeding with system fonts');
+        setFontTimeout(true);
+      }
+    }, 8000); // 8 second timeout
+
+    return () => clearTimeout(timeout);
+  }, [fontsLoaded, fontError]);
+
   const onLayoutRootView = useCallback(async () => {
-    if (fontsLoaded || fontError) {
+    if (fontsLoaded || fontError || fontTimeout) {
       await SplashScreen.hideAsync();
     }
-  }, [fontsLoaded, fontError]);
+  }, [fontsLoaded, fontError, fontTimeout]);
 
   useEffect(() => {
     onLayoutRootView();
   }, [onLayoutRootView]);
 
   // Show loading indicator while fonts are loading
-  if (!fontsLoaded && !fontError) {
+  if (!fontsLoaded && !fontError && !fontTimeout) {
     return (
       <View style={styles.loadingContainer}>
         <StatusBar style="light" />
