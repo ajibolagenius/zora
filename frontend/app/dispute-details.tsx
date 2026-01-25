@@ -192,7 +192,7 @@ export default function DisputeDetailsScreen() {
             <TextInput
               style={styles.textArea}
               placeholder="Please describe the issue in detail so we can help resolve it quickly..."
-              placeholderTextColor={`${MUTED_TEXT}99`}
+              placeholderTextColor={Colors.textMuted}
               multiline
               numberOfLines={6}
               value={description}
@@ -216,7 +216,7 @@ export default function DisputeDetailsScreen() {
               onPress={handlePickImage}
               activeOpacity={0.8}
             >
-              <Camera size={28} color={ZORA_RED} weight="regular" />
+              <Camera size={28} color={Colors.primary} weight="duotone" />
               <Text style={styles.addPhotoText}>Add Photo</Text>
             </TouchableOpacity>
 

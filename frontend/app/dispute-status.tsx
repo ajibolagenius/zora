@@ -119,7 +119,7 @@ export default function DisputeStatusScreen() {
         {/* Icon */}
         <View style={styles.timelineIconContainer}>
           {isCompleted ? (
-            <CheckCircle size={24} color={ZORA_RED} weight="fill" />
+            <CheckCircle size={24} color={Colors.primary} weight="fill" />
           ) : isActive ? (
             <View style={styles.activeIconOuter}>
               <View style={styles.activeIconInner} />
@@ -213,7 +213,7 @@ export default function DisputeStatusScreen() {
             <View style={styles.detailSection}>
               <Text style={styles.detailLabel}>ISSUE TYPE</Text>
               <View style={styles.detailRow}>
-                <Package size={20} color={ZORA_RED} weight="fill" />
+                <Package size={20} color={Colors.primary} weight="duotone" />
                 <Text style={styles.detailValue}>Item Not Received</Text>
               </View>
             </View>
@@ -251,7 +251,7 @@ export default function DisputeStatusScreen() {
                   </View>
                 ))}
                 <TouchableOpacity style={styles.addEvidenceButton}>
-                  <Camera size={24} color={MUTED_TEXT} weight="regular" />
+                  <Camera size={24} color={Colors.textMuted} weight="duotone" />
                 </TouchableOpacity>
               </View>
             </View>
@@ -263,7 +263,7 @@ export default function DisputeStatusScreen() {
           <Text style={styles.sectionTitle}>Resolution</Text>
           <View style={styles.resolutionCard}>
             <View style={styles.resolutionIconContainer}>
-              <Gavel size={28} color={MUTED_TEXT} weight="fill" />
+              <Gavel size={28} color={Colors.textMuted} weight="duotone" />
             </View>
             <Text style={styles.resolutionTitle}>Outcome Pending</Text>
             <Text style={styles.resolutionDescription}>
