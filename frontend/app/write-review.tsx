@@ -13,8 +13,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { ArrowLeft, Star, Camera, X } from 'phosphor-react-native';
-import { useProduct } from '../../hooks/useQueries';
-import { useCreateReview } from '../../hooks/useQueries';
+import { useProduct, useCreateReview } from '../hooks/useQueries';
 
 export default function WriteReviewScreen() {
   const router = useRouter();
