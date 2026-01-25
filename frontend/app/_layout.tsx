@@ -74,7 +74,7 @@ export default function RootLayout() {
   }
 
   return (
-    <>
+    <QueryProvider>
       <StatusBar style="light" />
       <Stack
         screenOptions={{
@@ -82,7 +82,7 @@ export default function RootLayout() {
           contentStyle: { backgroundColor: Colors.backgroundDark },
         }}
       />
-    </>
+    </QueryProvider>
   );
 }
 
