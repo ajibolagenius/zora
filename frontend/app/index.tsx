@@ -1,12 +1,25 @@
 import React, { useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, Animated, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, Animated, Dimensions, Easing } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Colors } from '../constants/colors';
-import { FontSize, FontWeight } from '../constants/typography';
+import { FontFamily, FontSize, LetterSpacing } from '../constants/typography';
 import { useAuthStore } from '../stores/authStore';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 
-const { width, height } = Dimensions.get('window');
+const { width } = Dimensions.get('window');
+
+// Subtle African-inspired geometric pattern positions
+const GEOMETRIC_PATTERNS = [
+  { top: '8%', left: '10%', rotation: '45deg', size: 12 },
+  { top: '12%', right: '15%', rotation: '0deg', size: 8 },
+  { top: '25%', left: '5%', rotation: '30deg', size: 10 },
+  { top: '35%', right: '8%', rotation: '60deg', size: 14 },
+  { bottom: '30%', left: '12%', rotation: '15deg', size: 10 },
+  { bottom: '20%', right: '10%', rotation: '45deg', size: 12 },
+  { bottom: '12%', left: '20%', rotation: '0deg', size: 8 },
+  { bottom: '8%', right: '25%', rotation: '30deg', size: 10 },
+];
 
 export default function SplashScreen() {
   const router = useRouter();
@@ -14,92 +27,177 @@ export default function SplashScreen() {
   
   // Animation values
   const logoOpacity = useRef(new Animated.Value(0)).current;
-  const logoScale = useRef(new Animated.Value(0.5)).current;
+  const logoScale = useRef(new Animated.Value(0.8)).current;
+  const iconGlow = useRef(new Animated.Value(0.3)).current;
   const taglineOpacity = useRef(new Animated.Value(0)).current;
-  const taglineTranslate = useRef(new Animated.Value(20)).current;
+  const taglineTranslate = useRef(new Animated.Value(15)).current;
   const subtitleOpacity = useRef(new Animated.Value(0)).current;
   const loaderOpacity = useRef(new Animated.Value(0)).current;
   const decorativeOpacity = useRef(new Animated.Value(0)).current;
+  const screenOpacity = useRef(new Animated.Value(1)).current;
+  
+  // Loader dot animations
+  const dot1Translate = useRef(new Animated.Value(0)).current;
+  const dot2Translate = useRef(new Animated.Value(0)).current;
+  const dot3Translate = useRef(new Animated.Value(0)).current;
+
+  // Animated loader dots
+  const startLoaderAnimation = () => {
+    const createBounce = (animatedValue: Animated.Value, delay: number) => {
+      return Animated.loop(
+        Animated.sequence([
+          Animated.delay(delay),
+          Animated.timing(animatedValue, {
+            toValue: -8,
+            duration: 300,
+            easing: Easing.out(Easing.quad),
+            useNativeDriver: true,
+          }),
+          Animated.timing(animatedValue, {
+            toValue: 0,
+            duration: 300,
+            easing: Easing.in(Easing.quad),
+            useNativeDriver: true,
+          }),
+        ])
+      );
+    };
+
+    Animated.parallel([
+      createBounce(dot1Translate, 0),
+      createBounce(dot2Translate, 150),
+      createBounce(dot3Translate, 300),
+    ]).start();
+  };
+
+  // Icon glow pulse animation
+  const startGlowAnimation = () => {
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(iconGlow, {
+          toValue: 1,
+          duration: 1200,
+          easing: Easing.inOut(Easing.ease),
+          useNativeDriver: true,
+        }),
+        Animated.timing(iconGlow, {
+          toValue: 0.3,
+          duration: 1200,
+          easing: Easing.inOut(Easing.ease),
+          useNativeDriver: true,
+        }),
+      ])
+    ).start();
+  };
 
   useEffect(() => {
     // Orchestrated animation sequence
     Animated.sequence([
-      // Logo appears
+      // Decorative elements fade in first
+      Animated.timing(decorativeOpacity, {
+        toValue: 0.15,
+        duration: 500,
+        useNativeDriver: true,
+      }),
+      // Logo appears with spring
       Animated.parallel([
         Animated.timing(logoOpacity, {
           toValue: 1,
-          duration: 600,
+          duration: 500,
           useNativeDriver: true,
         }),
         Animated.spring(logoScale, {
           toValue: 1,
           friction: 8,
-          tension: 40,
+          tension: 50,
           useNativeDriver: true,
         }),
       ]),
-      // Tagline slides in
+      // Tagline slides in smoothly
       Animated.parallel([
         Animated.timing(taglineOpacity, {
           toValue: 1,
-          duration: 400,
+          duration: 350,
           useNativeDriver: true,
         }),
-        Animated.spring(taglineTranslate, {
+        Animated.timing(taglineTranslate, {
           toValue: 0,
-          friction: 10,
+          duration: 350,
+          easing: Easing.out(Easing.cubic),
           useNativeDriver: true,
         }),
       ]),
-      // Subtitle and decorative elements
-      Animated.parallel([
-        Animated.timing(subtitleOpacity, {
-          toValue: 1,
-          duration: 400,
-          useNativeDriver: true,
-        }),
-        Animated.timing(decorativeOpacity, {
-          toValue: 0.3,
-          duration: 600,
-          useNativeDriver: true,
-        }),
-      ]),
+      // Subtitle fades in
+      Animated.timing(subtitleOpacity, {
+        toValue: 1,
+        duration: 350,
+        useNativeDriver: true,
+      }),
       // Loader appears
       Animated.timing(loaderOpacity, {
         toValue: 1,
-        duration: 300,
+        duration: 250,
         useNativeDriver: true,
       }),
-    ]).start();
+    ]).start(() => {
+      startLoaderAnimation();
+      startGlowAnimation();
+    });
 
-    // Navigate after 4 seconds (as per design requirements)
+    // Navigate after 5 seconds with fade-out
     const timer = setTimeout(() => {
-      if (isAuthenticated) {
-        if (hasCompletedOnboarding) {
-          router.replace('/(tabs)');
+      Animated.timing(screenOpacity, {
+        toValue: 0,
+        duration: 400,
+        useNativeDriver: true,
+      }).start(() => {
+        if (isAuthenticated) {
+          if (hasCompletedOnboarding) {
+            router.replace('/(tabs)');
+          } else {
+            router.replace('/onboarding/heritage');
+          }
         } else {
-          router.replace('/onboarding/heritage');
+          router.replace('/(auth)/login');
         }
-      } else {
-        router.replace('/(auth)/login');
-      }
-    }, 4000);
+      });
+    }, 5000);
 
     return () => clearTimeout(timer);
   }, [isAuthenticated, hasCompletedOnboarding]);
 
   return (
-    <View style={styles.container}>
-      {/* Background decorative elements */}
-      <Animated.View style={[styles.decorativeCircle, styles.circleTopRight, { opacity: decorativeOpacity }]} />
-      <Animated.View style={[styles.decorativeCircle, styles.circleBottomLeft, { opacity: decorativeOpacity }]} />
+    <Animated.View style={[styles.container, { opacity: screenOpacity }]}>
+      {/* Gradient background */}
+      <LinearGradient
+        colors={['#1a1209', Colors.backgroundDark, '#2a1a10']}
+        locations={[0, 0.5, 1]}
+        style={StyleSheet.absoluteFillObject}
+      />
       
-      {/* Pattern overlay */}
-      <Animated.View style={[styles.patternOverlay, { opacity: decorativeOpacity }]}>
-        {Array.from({ length: 20 }).map((_, i) => (
-          <View key={i} style={styles.patternDot} />
-        ))}
-      </Animated.View>
+      {/* Subtle geometric patterns (African-inspired) */}
+      {GEOMETRIC_PATTERNS.map((pattern, index) => (
+        <Animated.View
+          key={index}
+          style={[
+            styles.geometricShape,
+            {
+              top: pattern.top,
+              bottom: pattern.bottom,
+              left: pattern.left,
+              right: pattern.right,
+              opacity: decorativeOpacity,
+              transform: [{ rotate: pattern.rotation }],
+            },
+          ]}
+        >
+          <View style={[styles.diamond, { width: pattern.size, height: pattern.size }]} />
+        </Animated.View>
+      ))}
+
+      {/* Decorative rings */}
+      <Animated.View style={[styles.decorativeRing, styles.ringOuter, { opacity: decorativeOpacity }]} />
+      <Animated.View style={[styles.decorativeRing, styles.ringInner, { opacity: decorativeOpacity }]} />
 
       {/* Main content */}
       <View style={styles.content}>
@@ -113,13 +211,19 @@ export default function SplashScreen() {
             },
           ]}
         >
-          <View style={styles.logoWrapper}>
-            <MaterialCommunityIcons name="basket" size={48} color={Colors.primary} />
+          {/* Icon with glow effect */}
+          <View style={styles.iconContainer}>
+            <Animated.View style={[styles.iconGlow, { opacity: iconGlow }]} />
+            <View style={styles.iconWrapper}>
+              <MaterialCommunityIcons name="basket" size={44} color={Colors.primary} />
+            </View>
           </View>
+          
+          {/* Brand name */}
           <Text style={styles.logo}>ZORA</Text>
         </Animated.View>
 
-        {/* Tagline */}
+        {/* Tagline with divider */}
         <Animated.View
           style={[
             styles.taglineContainer,
@@ -131,7 +235,7 @@ export default function SplashScreen() {
         >
           <View style={styles.divider}>
             <View style={styles.dividerLine} />
-            <MaterialCommunityIcons name="diamond-stone" size={16} color={Colors.secondary} />
+            <View style={styles.dividerDiamond} />
             <View style={styles.dividerLine} />
           </View>
           <Text style={styles.tagline}>AFRICAN MARKET</Text>
@@ -143,62 +247,72 @@ export default function SplashScreen() {
         </Animated.Text>
       </View>
 
-      {/* Footer */}
+      {/* Footer with animated loader */}
       <Animated.View style={[styles.footer, { opacity: loaderOpacity }]}>
         <View style={styles.loader}>
-          <Animated.View style={[styles.loaderDot, styles.loaderDot1]} />
-          <Animated.View style={[styles.loaderDot, styles.loaderDot2]} />
-          <Animated.View style={[styles.loaderDot, styles.loaderDot3]} />
+          <Animated.View 
+            style={[
+              styles.loaderDot, 
+              { transform: [{ translateY: dot1Translate }] }
+            ]} 
+          />
+          <Animated.View 
+            style={[
+              styles.loaderDot, 
+              { transform: [{ translateY: dot2Translate }] }
+            ]} 
+          />
+          <Animated.View 
+            style={[
+              styles.loaderDot, 
+              { transform: [{ translateY: dot3Translate }] }
+            ]} 
+          />
         </View>
         <Text style={styles.footerText}>Premium African Groceries</Text>
       </Animated.View>
-    </View>
+    </Animated.View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.backgroundDark,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  decorativeCircle: {
+  
+  // Geometric patterns (African-inspired diamonds)
+  geometricShape: {
     position: 'absolute',
-    width: width * 0.8,
-    height: width * 0.8,
-    borderRadius: width * 0.4,
+  },
+  diamond: {
+    backgroundColor: 'transparent',
     borderWidth: 1,
     borderColor: Colors.primary,
+    transform: [{ rotate: '45deg' }],
   },
-  circleTopRight: {
-    top: -width * 0.4,
-    right: -width * 0.3,
-  },
-  circleBottomLeft: {
-    bottom: -width * 0.4,
-    left: -width * 0.3,
-  },
-  patternOverlay: {
+  
+  // Decorative rings
+  decorativeRing: {
     position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-around',
-    alignItems: 'center',
-    padding: 40,
+    borderWidth: 1,
+    borderColor: Colors.primary,
+    borderStyle: 'dashed',
+    borderRadius: 999,
   },
-  patternDot: {
-    width: 4,
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: Colors.primary,
-    margin: 30,
+  ringOuter: {
+    width: width * 1.2,
+    height: width * 1.2,
+    opacity: 0.3,
+  },
+  ringInner: {
+    width: width * 0.85,
+    height: width * 0.85,
     opacity: 0.2,
   },
+  
+  // Main content
   content: {
     alignItems: 'center',
     zIndex: 1,
@@ -206,76 +320,103 @@ const styles = StyleSheet.create({
   logoContainer: {
     alignItems: 'center',
   },
-  logoWrapper: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: 'rgba(204, 0, 0, 0.15)',
+  
+  // Icon with glow
+  iconContainer: {
+    position: 'relative',
+    marginBottom: 20,
+  },
+  iconGlow: {
+    position: 'absolute',
+    top: -10,
+    left: -10,
+    right: -10,
+    bottom: -10,
+    borderRadius: 50,
+    backgroundColor: Colors.primary,
+    opacity: 0.15,
+  },
+  iconWrapper: {
+    width: 72,
+    height: 72,
+    borderRadius: 36,
+    backgroundColor: 'rgba(204, 0, 0, 0.12)',
+    borderWidth: 1,
+    borderColor: 'rgba(204, 0, 0, 0.25)',
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 16,
   },
+  
+  // Brand name
   logo: {
-    fontSize: 72,
-    fontWeight: FontWeight.bold,
+    fontFamily: FontFamily.displayExtraBold,
+    fontSize: 64,
     color: Colors.primary,
-    letterSpacing: 12,
+    letterSpacing: 14,
+    includeFontPadding: false,
   },
+  
+  // Tagline section
   taglineContainer: {
     alignItems: 'center',
-    marginTop: 8,
+    marginTop: 6,
   },
   divider: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 8,
+    marginBottom: 10,
   },
   dividerLine: {
-    width: 40,
+    width: 36,
     height: 1,
     backgroundColor: Colors.secondary,
-    marginHorizontal: 12,
+    marginHorizontal: 10,
+  },
+  dividerDiamond: {
+    width: 6,
+    height: 6,
+    backgroundColor: Colors.secondary,
+    transform: [{ rotate: '45deg' }],
   },
   tagline: {
+    fontFamily: FontFamily.montserratSemiBold,
     fontSize: FontSize.small,
     color: Colors.secondary,
-    letterSpacing: 6,
-    fontWeight: FontWeight.semiBold,
+    letterSpacing: LetterSpacing.widest + 3,
   },
+  
+  // Subtitle
   subtitle: {
+    fontFamily: FontFamily.body,
     fontSize: FontSize.body,
     color: Colors.textMuted,
-    marginTop: 24,
-    letterSpacing: 1,
+    marginTop: 20,
+    letterSpacing: LetterSpacing.wide,
   },
+  
+  // Footer
   footer: {
     position: 'absolute',
-    bottom: 60,
+    bottom: 56,
     alignItems: 'center',
   },
   loader: {
     flexDirection: 'row',
-    marginBottom: 16,
+    marginBottom: 14,
+    height: 20,
+    alignItems: 'flex-end',
   },
   loaderDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
+    width: 7,
+    height: 7,
+    borderRadius: 3.5,
     backgroundColor: Colors.primary,
-    marginHorizontal: 4,
-  },
-  loaderDot1: {
-    opacity: 0.4,
-  },
-  loaderDot2: {
-    opacity: 0.7,
-  },
-  loaderDot3: {
-    opacity: 1,
+    marginHorizontal: 5,
   },
   footerText: {
+    fontFamily: FontFamily.bodyMedium,
     fontSize: FontSize.caption,
     color: Colors.textMuted,
-    letterSpacing: 1,
+    letterSpacing: LetterSpacing.wide,
   },
 });
