@@ -52,8 +52,9 @@ export default function PaymentScreen() {
   const finalTotal = useZoraCredit ? Math.max(0, (total || 45.49) - zoraCredit) : (total || 45.49);
 
   const handlePay = () => {
-    // Navigate to order confirmation
-    router.push('/order-confirmation');
+    // TODO: Navigate to order confirmation when implemented
+    console.log('Processing payment...');
+    // router.push('/order-confirmation');
   };
 
   return (
