@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import {
   View,
   Text,
@@ -6,24 +6,25 @@ import {
   ScrollView,
   TouchableOpacity,
   Image,
-  ActivityIndicator,
   Platform,
   Animated,
+  Easing,
   useWindowDimensions,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import {
-  ArrowLeft,
   Sliders,
   Star,
-  ShoppingBag,
+  Storefront,
   ForkKnife,
   ListBullets,
+  MapPin,
+  Clock,
 } from 'phosphor-react-native';
 import { Colors } from '../../constants/colors';
-import { Spacing, BorderRadius } from '../../constants/spacing';
-import { FontSize, FontFamily } from '../../constants/typography';
+import { Spacing, BorderRadius, Heights } from '../../constants/spacing';
+import { FontSize, FontFamily } from '../../constants/typography'
 import { vendorService, type Vendor } from '../../services/mockDataService';
 
 type FilterType = 'open' | 'delivery' | 'pickup' | 'topRated';
@@ -52,11 +53,32 @@ export default function ExploreScreen() {
   const router = useRouter();
   const { height: screenHeight } = useWindowDimensions();
   const [activeFilter, setActiveFilter] = useState<FilterType>('open');
-  const [loading, setLoading] = useState(false);
+  const [isListView, setIsListView] = useState(false);
+  
+  // Animation values
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const slideAnim = useRef(new Animated.Value(30)).current;
   
   // Get vendors from mock database
   const allVendors = vendorService.getAll();
   const vendors = allVendors.map(transformVendorForDisplay);
+
+  useEffect(() => {
+    Animated.parallel([
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 400,
+        easing: Easing.out(Easing.cubic),
+        useNativeDriver: true,
+      }),
+      Animated.timing(slideAnim, {
+        toValue: 0,
+        duration: 400,
+        easing: Easing.out(Easing.cubic),
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, []);
 
   const handleVendorPress = (vendorId: string) => {
     router.push(`/vendor/${vendorId}`);
@@ -66,63 +88,68 @@ export default function ExploreScreen() {
     router.push('/vendor-map');
   };
 
+  const handleFilterPress = () => {
+    router.push('/vendors');
+  };
+
   return (
     <View style={styles.container}>
       {/* Map Background - Tappable to open full map */}
       <TouchableOpacity 
         style={styles.mapContainer}
         onPress={handleOpenFullMap}
-        activeOpacity={0.9}
+        activeOpacity={0.95}
       >
-        <Image
-          source={{ uri: 'https://images.unsplash.com/photo-1524661135-423995f22d0b?w=800&q=60' }}
-          style={styles.mapImage}
-          resizeMode="cover"
-        />
-        <View style={styles.mapOverlay} />
-        
-        {/* Map Markers */}
-        <View style={[styles.mapMarker, { top: '30%', left: '25%' }]}>
-          <View style={styles.markerIcon}>
-            <ShoppingBag size={16} color="#FFFFFF" weight="fill" />
+        {/* Map Pattern Background */}
+        <View style={styles.mapBackground}>
+          <View style={styles.mapPattern}>
+            {Array.from({ length: 120 }).map((_, i) => (
+              <View key={i} style={styles.mapDot} />
+            ))}
           </View>
-          <View style={styles.markerPin} />
-          <View style={styles.markerShadow} />
         </View>
         
-        <View style={[styles.mapMarker, { top: '25%', right: '15%' }]}>
-          <View style={styles.markerIcon}>
+        {/* Map Markers - Balloon Style */}
+        <View style={[styles.mapMarker, { top: '28%', left: '20%' }]}>
+          <View style={styles.markerBalloon}>
+            <Storefront size={16} color="#FFFFFF" weight="fill" />
+          </View>
+          <View style={styles.markerTail} />
+        </View>
+        
+        <View style={[styles.mapMarker, { top: '22%', right: '18%' }]}>
+          <View style={styles.markerBalloon}>
             <ForkKnife size={16} color="#FFFFFF" weight="fill" />
           </View>
-          <View style={styles.markerPin} />
+          <View style={styles.markerTail} />
         </View>
         
         {/* Cluster Marker */}
-        <View style={[styles.clusterMarker, { top: '35%', right: '30%' }]}>
+        <View style={[styles.clusterMarker, { top: '40%', right: '25%' }]}>
           <Text style={styles.clusterText}>3</Text>
         </View>
         
-        {/* User Location Dot */}
-        <View style={styles.userDot} />
-        
-        {/* Open Map Button */}
-        <View style={styles.openMapBadge}>
-          <Text style={styles.openMapText}>Tap to open full map</Text>
+        {/* User Location Pulse */}
+        <View style={styles.userLocationContainer}>
+          <View style={styles.userPulse} />
+          <View style={styles.userDot} />
         </View>
       </TouchableOpacity>
 
       {/* Header */}
       <SafeAreaView style={styles.header} edges={['top']}>
-        <TouchableOpacity style={styles.headerButton} onPress={() => router.back()}>
-          <ArrowLeft size={24} color={Colors.textPrimary} weight="bold" />
-        </TouchableOpacity>
+        <View style={{ width: 44 }} />
         <Text style={styles.headerTitle}>Find Vendors</Text>
-        <TouchableOpacity style={styles.headerButton}>
-          <Sliders size={24} color={Colors.textPrimary} weight="duotone" />
+        <TouchableOpacity 
+          style={styles.headerButton}
+          onPress={handleFilterPress}
+          activeOpacity={0.8}
+        >
+          <Sliders size={22} color={Colors.textPrimary} weight="bold" />
         </TouchableOpacity>
       </SafeAreaView>
 
-      {/* Filter Chips */}
+      {/* Filter Chips - Outline style for inactive */}
       <View style={styles.filtersContainer}>
         <ScrollView
           horizontal
@@ -153,7 +180,12 @@ export default function ExploreScreen() {
       </View>
 
       {/* Bottom Sheet - Vendors List */}
-      <View style={styles.bottomSheet}>
+      <Animated.View 
+        style={[
+          styles.bottomSheet,
+          { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }
+        ]}
+      >
         {/* Handle */}
         <View style={styles.sheetHandle}>
           <View style={styles.handleBar} />
@@ -190,21 +222,17 @@ export default function ExploreScreen() {
 
               {/* Vendor Info */}
               <View style={styles.vendorInfo}>
-                <View style={styles.vendorHeader}>
-                  <Text style={styles.vendorName} numberOfLines={1}>
-                    {vendor.name}
-                  </Text>
-                  <Text style={styles.vendorCategory} numberOfLines={1}>
-                    {vendor.category}
-                  </Text>
-                </View>
+                <Text style={styles.vendorName} numberOfLines={1}>
+                  {vendor.name}
+                </Text>
+                <Text style={styles.vendorCategory} numberOfLines={1}>
+                  {vendor.category}
+                </Text>
 
                 {/* Rating and Meta */}
                 <View style={styles.vendorMeta}>
-                  <View style={styles.ratingContainer}>
-                    <Star size={14} color="#FFCC00" weight="fill" />
-                    <Text style={styles.ratingText}>{vendor.rating}</Text>
-                  </View>
+                  <Star size={14} color={Colors.secondary} weight="fill" />
+                  <Text style={styles.ratingText}>{vendor.rating}</Text>
                   <Text style={styles.metaDivider}>•</Text>
                   <Text style={styles.metaText}>{vendor.distance}</Text>
                   <Text style={styles.metaDivider}>•</Text>
@@ -220,15 +248,19 @@ export default function ExploreScreen() {
           ))}
 
           {/* Bottom padding for tab bar */}
-          <View style={{ height: 120 }} />
+          <View style={{ height: 140 }} />
         </ScrollView>
-      </View>
+      </Animated.View>
 
       {/* Floating List View Button */}
       <View style={styles.floatingButtonContainer}>
-        <TouchableOpacity style={styles.floatingButton} activeOpacity={0.9}>
+        <TouchableOpacity 
+          style={styles.floatingButton} 
+          onPress={() => router.push('/vendors')}
+          activeOpacity={0.9}
+        >
           <Text style={styles.floatingButtonText}>List View</Text>
-          <ListBullets size={18} color="#FFFFFF" weight="bold" />
+          <ListBullets size={18} color={Colors.textPrimary} weight="bold" />
         </TouchableOpacity>
       </View>
     </View>
@@ -246,60 +278,70 @@ const styles = StyleSheet.create({
     top: 0,
     left: 0,
     right: 0,
-    height: '55%',
+    height: '50%',
   },
-  mapImage: {
+  mapBackground: {
+    flex: 1,
+    backgroundColor: Colors.cardDark,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  mapPattern: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    alignItems: 'center',
     width: '100%',
     height: '100%',
-    opacity: 0.4,
+    padding: Spacing.md,
+    gap: 20,
   },
-  mapOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(128, 128, 128, 0.3)',
+  mapDot: {
+    width: 4,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
   },
   mapMarker: {
     position: 'absolute',
     alignItems: 'center',
   },
-  markerIcon: {
+  markerBalloon: {
     backgroundColor: Colors.primary,
-    padding: 8,
-    borderRadius: BorderRadius.full,
+    padding: 10,
+    borderRadius: BorderRadius.lg,
     ...Platform.select({
       ios: {
         shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
+        shadowOffset: { width: 0, height: 3 },
         shadowOpacity: 0.3,
-        shadowRadius: 4,
+        shadowRadius: 6,
       },
       android: {
-        elevation: 4,
+        elevation: 6,
       },
     }),
   },
-  markerPin: {
-    width: 4,
-    height: 12,
-    backgroundColor: Colors.primary,
-    borderRadius: 2,
-    marginTop: -2,
-  },
-  markerShadow: {
-    width: 8,
-    height: 4,
-    backgroundColor: 'rgba(0, 0, 0, 0.2)',
-    borderRadius: BorderRadius.full,
-    marginTop: 2,
+  markerTail: {
+    width: 0,
+    height: 0,
+    borderLeftWidth: 8,
+    borderRightWidth: 8,
+    borderTopWidth: 10,
+    borderLeftColor: 'transparent',
+    borderRightColor: 'transparent',
+    borderTopColor: Colors.primary,
+    marginTop: -1,
   },
   clusterMarker: {
     position: 'absolute',
-    width: 40,
-    height: 40,
+    width: 36,
+    height: 36,
     backgroundColor: Colors.primary,
-    borderRadius: 20,
+    borderRadius: 18,
     justifyContent: 'center',
     alignItems: 'center',
-    borderWidth: 2,
+    borderWidth: 3,
     borderColor: Colors.backgroundDark,
     ...Platform.select({
       ios: {
@@ -315,21 +357,34 @@ const styles = StyleSheet.create({
   },
   clusterText: {
     fontFamily: FontFamily.bodyBold,
-    color: '#FFFFFF',
-    fontSize: 14,
+    color: Colors.textPrimary,
+    fontSize: FontSize.small,
   },
-  userDot: {
+  userLocationContainer: {
     position: 'absolute',
     top: '50%',
     left: '50%',
+    marginLeft: -20,
+    marginTop: -20,
+    width: 40,
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  userPulse: {
+    position: 'absolute',
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(59, 130, 246, 0.2)',
+  },
+  userDot: {
     width: 16,
     height: 16,
-    backgroundColor: '#3B82F6',
+    backgroundColor: Colors.info,
     borderRadius: 8,
-    borderWidth: 2,
-    borderColor: '#FFFFFF',
-    marginLeft: -8,
-    marginTop: -8,
+    borderWidth: 3,
+    borderColor: Colors.textPrimary,
     ...Platform.select({
       ios: {
         shadowColor: '#000',
@@ -342,22 +397,6 @@ const styles = StyleSheet.create({
       },
     }),
   },
-  openMapBadge: {
-    position: 'absolute',
-    bottom: 16,
-    alignSelf: 'center',
-    backgroundColor: 'rgba(34, 23, 16, 0.9)',
-    paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.sm,
-    borderRadius: BorderRadius.full,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.2)',
-  },
-  openMapText: {
-    color: Colors.textPrimary,
-    fontFamily: FontFamily.bodySemiBold,
-    fontSize: FontSize.small,
-  },
   // Header Styles
   header: {
     flexDirection: 'row',
@@ -365,38 +404,40 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: Spacing.base,
     paddingTop: Spacing.sm,
-    paddingBottom: Spacing.md,
+    paddingBottom: Spacing.sm,
   },
   headerButton: {
     width: 44,
     height: 44,
-    borderRadius: BorderRadius.full,
+    borderRadius: 22,
     backgroundColor: 'rgba(0, 0, 0, 0.4)',
     justifyContent: 'center',
     alignItems: 'center',
   },
   headerTitle: {
-    fontFamily: FontFamily.displayMedium,
-    fontSize: FontSize.h3,
+    fontFamily: FontFamily.displaySemiBold,
+    fontSize: FontSize.h4,
     color: Colors.textPrimary,
   },
-  // Filters Styles
+  // Filters Styles - Outline style for inactive
   filtersContainer: {
-    paddingBottom: Spacing.md,
+    paddingBottom: Spacing.sm,
   },
   filtersContent: {
     paddingHorizontal: Spacing.base,
-    gap: Spacing.sm,
   },
   filterChip: {
     paddingHorizontal: Spacing.base,
     paddingVertical: Spacing.sm,
     borderRadius: BorderRadius.full,
-    backgroundColor: '#2A1D15',
+    backgroundColor: 'transparent',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.15)',
     marginRight: Spacing.sm,
   },
   filterChipActive: {
     backgroundColor: Colors.primary,
+    borderColor: Colors.primary,
   },
   filterChipText: {
     fontFamily: FontFamily.bodySemiBold,
@@ -409,7 +450,7 @@ const styles = StyleSheet.create({
   // Bottom Sheet Styles
   bottomSheet: {
     position: 'absolute',
-    bottom: 80,
+    bottom: 0,
     left: 0,
     right: 0,
     height: '55%',
@@ -430,46 +471,45 @@ const styles = StyleSheet.create({
   },
   sheetHandle: {
     alignItems: 'center',
-    paddingVertical: 12,
+    paddingVertical: Spacing.md,
   },
   handleBar: {
-    width: 48,
-    height: 6,
-    backgroundColor: '#4B4B4B',
-    borderRadius: 3,
+    width: 40,
+    height: 4,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    borderRadius: 2,
   },
   vendorCountContainer: {
-    paddingHorizontal: 20,
-    paddingBottom: 16,
+    paddingHorizontal: Spacing.base,
+    paddingBottom: Spacing.md,
   },
   vendorCountText: {
     fontFamily: FontFamily.bodySemiBold,
-    fontSize: 12,
-    color: '#9CA3AF',
+    fontSize: FontSize.caption,
+    color: Colors.textMuted,
     letterSpacing: 1,
-    textTransform: 'uppercase',
   },
   vendorsList: {
     flex: 1,
   },
   vendorsListContent: {
-    paddingHorizontal: 20,
+    paddingHorizontal: Spacing.base,
   },
   // Vendor Card Styles
   vendorCard: {
     flexDirection: 'row',
-    backgroundColor: '#2A1D15',
-    borderRadius: 12,
-    padding: 12,
-    marginBottom: 16,
-    gap: 16,
+    backgroundColor: Colors.backgroundDark,
+    borderRadius: BorderRadius.lg,
+    padding: Spacing.sm,
+    marginBottom: Spacing.md,
+    gap: Spacing.md,
   },
   vendorImageContainer: {
     width: 80,
     height: 80,
-    borderRadius: 8,
+    borderRadius: BorderRadius.md,
     overflow: 'hidden',
-    backgroundColor: '#3E3E3E',
+    backgroundColor: Colors.cardDark,
   },
   vendorImage: {
     width: '100%',
@@ -477,58 +517,51 @@ const styles = StyleSheet.create({
   },
   vendorInfo: {
     flex: 1,
-    justifyContent: 'space-between',
-  },
-  vendorHeader: {
-    marginBottom: 4,
+    justifyContent: 'center',
   },
   vendorName: {
-    fontFamily: FontFamily.displayMedium,
-    fontSize: 18,
+    fontFamily: FontFamily.displaySemiBold,
+    fontSize: FontSize.body,
     color: Colors.textPrimary,
-    lineHeight: 22,
+    marginBottom: 2,
   },
   vendorCategory: {
-    fontSize: 12,
-    color: '#9CA3AF',
-    marginTop: 4,
+    fontFamily: FontFamily.body,
+    fontSize: FontSize.caption,
+    color: Colors.textMuted,
+    marginBottom: Spacing.xs,
   },
   vendorMeta: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 8,
-  },
-  ratingContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 2,
+    marginBottom: Spacing.xs,
+    gap: 4,
   },
   ratingText: {
     fontFamily: FontFamily.bodySemiBold,
-    color: '#FFCC00',
-    fontSize: 12,
+    color: Colors.secondary,
+    fontSize: FontSize.caption,
+    marginLeft: 2,
   },
   metaDivider: {
-    color: '#6B7280',
-    marginHorizontal: 8,
-    fontSize: 12,
+    color: Colors.textMuted,
+    fontSize: FontSize.caption,
   },
   metaText: {
-    fontFamily: FontFamily.bodyMedium,
-    color: '#D1D5DB',
-    fontSize: 12,
+    fontFamily: FontFamily.body,
+    color: Colors.textPrimary,
+    fontSize: FontSize.caption,
   },
   statusText: {
-    fontFamily: FontFamily.bodyBold,
-    fontSize: 10,
+    fontFamily: FontFamily.bodySemiBold,
+    fontSize: FontSize.tiny,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
-    marginTop: 4,
   },
   // Floating Button Styles
   floatingButtonContainer: {
     position: 'absolute',
-    bottom: 120,
+    bottom: 100,
     left: 0,
     right: 0,
     alignItems: 'center',
@@ -537,10 +570,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: Colors.primary,
-    paddingHorizontal: 24,
-    paddingVertical: 14,
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.md,
     borderRadius: BorderRadius.full,
-    gap: 8,
+    gap: Spacing.sm,
     ...Platform.select({
       ios: {
         shadowColor: '#000',
@@ -554,8 +587,8 @@ const styles = StyleSheet.create({
     }),
   },
   floatingButtonText: {
-    fontFamily: FontFamily.bodyBold,
-    color: '#FFFFFF',
-    fontSize: 14,
+    fontFamily: FontFamily.bodySemiBold,
+    color: Colors.textPrimary,
+    fontSize: FontSize.small,
   },
 });
