@@ -21,6 +21,7 @@ import {
   CaretRight,
   Camera,
   ArrowsClockwise,
+  Gift,
 } from 'phosphor-react-native';
 import { Colors } from '../../constants/colors';
 import { Spacing, BorderRadius } from '../../constants/spacing';
