@@ -210,7 +210,7 @@ export const CardStyles = {
 // BADGE STYLES
 // ============================================
 export const BadgeStyles = {
-  // Standard Badge
+  // Standard Badge (filled - for image overlays)
   base: {
     paddingHorizontal: Spacing.sm,
     paddingVertical: 2,
@@ -223,7 +223,36 @@ export const BadgeStyles = {
     textTransform: 'uppercase' as const,
   },
   
-  // Chip Badge (Filter chips)
+  // Filter Pill - Inactive (OUTLINE STYLE - preferred)
+  pillOutline: {
+    paddingHorizontal: Spacing.base,
+    paddingVertical: Spacing.sm,
+    borderRadius: BorderRadius.full,
+    backgroundColor: 'transparent',
+    borderWidth: 1,
+    borderColor: Colors.borderOutline,
+  },
+  // Filter Pill - Active (filled)
+  pillActive: {
+    paddingHorizontal: Spacing.base,
+    paddingVertical: Spacing.sm,
+    borderRadius: BorderRadius.full,
+    backgroundColor: Colors.primary,
+    borderWidth: 1,
+    borderColor: Colors.primary,
+  },
+  pillText: {
+    fontSize: FontSize.small,
+    fontWeight: FontWeight.semiBold,
+    color: Colors.textPrimary,
+  },
+  pillTextInactive: {
+    fontSize: FontSize.small,
+    fontWeight: FontWeight.semiBold,
+    color: Colors.textMuted,
+  },
+  
+  // Chip Badge (Legacy - use pillOutline/pillActive instead)
   chip: {
     paddingHorizontal: Spacing.base,
     paddingVertical: Spacing.sm,
@@ -239,7 +268,23 @@ export const BadgeStyles = {
     color: Colors.textPrimary,
   },
   
-  // Tag Badge (Inline tags like "Organic")
+  // Certification Tag - OUTLINE STYLE (Organic, Top Rated, Eco-Friendly)
+  tagOutline: {
+    flexDirection: 'row' as const,
+    alignItems: 'center' as const,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.sm - 2,
+    borderRadius: BorderRadius.xl,
+    backgroundColor: 'transparent',
+    borderWidth: 1,
+    gap: Spacing.xs,
+  },
+  tagOutlineText: {
+    fontSize: FontSize.caption,
+    fontWeight: FontWeight.semiBold,
+  },
+  
+  // Tag Badge (Legacy filled style)
   tag: {
     flexDirection: 'row' as const,
     alignItems: 'center' as const,
@@ -251,6 +296,25 @@ export const BadgeStyles = {
   tagText: {
     fontSize: FontSize.small,
     fontWeight: FontWeight.semiBold,
+  },
+  
+  // Membership Badge (tinted background with border)
+  membership: {
+    flexDirection: 'row' as const,
+    alignItems: 'center' as const,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.xs,
+    borderRadius: Spacing.md,
+    backgroundColor: 'rgba(255, 204, 0, 0.15)',
+    borderWidth: 1,
+    borderColor: Colors.secondary,
+    gap: Spacing.xs,
+  },
+  membershipText: {
+    fontSize: FontSize.tiny,
+    fontWeight: FontWeight.bold,
+    color: Colors.secondary,
+    textTransform: 'uppercase' as const,
   },
 };
 

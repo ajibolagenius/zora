@@ -26,6 +26,7 @@ export const Colors = {
   // Border Colors
   borderDark: 'rgba(255, 255, 255, 0.05)',
   borderLight: 'rgba(0, 0, 0, 0.05)',
+  borderOutline: 'rgba(255, 255, 255, 0.15)', // For outlined pills/tags
   
   // Overlay
   overlay: 'rgba(34, 23, 16, 0.8)',

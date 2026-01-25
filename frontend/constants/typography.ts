@@ -5,7 +5,7 @@ import { Platform } from 'react-native';
  * Font Families - Zora Design System
  * 
  * Primary: Montserrat - For headlines, titles, and emphasis
- * Secondary: Inter - For body text, UI elements
+ * Secondary: Poppins - For body text, UI elements
  * 
  * Fonts are loaded via @expo-google-fonts in _layout.tsx
  */
@@ -15,14 +15,14 @@ export const FontFamily = {
   displayMedium: 'Montserrat-SemiBold',
   displayExtraBold: 'Montserrat-ExtraBold',
   
-  // Body Text: Inter
-  body: 'Inter-Regular',
-  bodyMedium: 'Inter-Medium',
-  bodySemiBold: 'Inter-SemiBold',
-  bodyBold: 'Inter-Bold',
+  // Body Text: Poppins
+  body: 'Poppins-Regular',
+  bodyMedium: 'Poppins-Medium',
+  bodySemiBold: 'Poppins-SemiBold',
+  bodyBold: 'Poppins-Bold',
   
-  // UI Text: Inter Medium
-  ui: 'Inter-Medium',
+  // UI Text: Poppins Medium
+  ui: 'Poppins-Medium',
   
   // Montserrat variants
   montserratRegular: 'Montserrat-Regular',
@@ -31,11 +31,11 @@ export const FontFamily = {
   montserratBold: 'Montserrat-Bold',
   montserratExtraBold: 'Montserrat-ExtraBold',
   
-  // Inter variants
-  interRegular: 'Inter-Regular',
-  interMedium: 'Inter-Medium',
-  interSemiBold: 'Inter-SemiBold',
-  interBold: 'Inter-Bold',
+  // Poppins variants
+  poppinsRegular: 'Poppins-Regular',
+  poppinsMedium: 'Poppins-Medium',
+  poppinsSemiBold: 'Poppins-SemiBold',
+  poppinsBold: 'Poppins-Bold',
 };
 
 // Font Sizes - Based on Design System Type Scale
@@ -115,7 +115,7 @@ export const Typography = {
     lineHeight: LineHeight.h4,
   },
   
-  // Body Text (Inter)
+  // Body Text (Poppins)
   bodyLarge: {
     fontFamily: FontFamily.body,
     fontSize: FontSize.bodyLarge,
