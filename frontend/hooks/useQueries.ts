@@ -3,7 +3,6 @@ import {
   productService, 
   vendorService, 
   reviewService,
-  authService,
   orderService,
   promoCodeService,
 } from '../services/supabaseService';
@@ -16,17 +15,29 @@ export const queryKeys = {
     list: (filters?: ProductFilters) => ['products', 'list', filters] as const,
     detail: (id: string) => ['products', 'detail', id] as const,
     byVendor: (vendorId: string) => ['products', 'vendor', vendorId] as const,
+    byCategory: (category: string) => ['products', 'category', category] as const,
     search: (query: string, filters?: ProductFilters) => ['products', 'search', query, filters] as const,
+    featured: ['products', 'featured'] as const,
   },
   vendors: {
     all: ['vendors'] as const,
     list: (filters?: VendorFilters) => ['vendors', 'list', filters] as const,
     detail: (id: string) => ['vendors', 'detail', id] as const,
+    featured: ['vendors', 'featured'] as const,
+    nearby: (lat: number, lng: number) => ['vendors', 'nearby', lat, lng] as const,
   },
   reviews: {
     all: ['reviews'] as const,
     byProduct: (productId: string) => ['reviews', 'product', productId] as const,
     byVendor: (vendorId: string) => ['reviews', 'vendor', vendorId] as const,
+  },
+  orders: {
+    all: ['orders'] as const,
+    byUser: (userId: string) => ['orders', 'user', userId] as const,
+    detail: (orderId: string) => ['orders', 'detail', orderId] as const,
+  },
+  promoCodes: {
+    validate: (code: string) => ['promo', 'validate', code] as const,
   },
 };
 
@@ -49,59 +60,72 @@ export interface VendorFilters {
   hasDelivery?: boolean;
 }
 
+// ============== Helper Functions ==============
+const applyProductFilters = (products: Product[], filters?: ProductFilters): Product[] => {
+  if (!filters) return products;
+  
+  let result = [...products];
+  
+  if (filters.category) {
+    result = result.filter(p => p.category?.toLowerCase() === filters.category?.toLowerCase());
+  }
+  if (filters.region) {
+    result = result.filter(p => p.cultural_region?.toLowerCase().includes(filters.region?.toLowerCase() || ''));
+  }
+  if (filters.minPrice !== undefined) {
+    result = result.filter(p => p.price >= (filters.minPrice || 0));
+  }
+  if (filters.maxPrice !== undefined) {
+    result = result.filter(p => p.price <= (filters.maxPrice || Infinity));
+  }
+  if (filters.minRating !== undefined) {
+    result = result.filter(p => (p.rating || 0) >= (filters.minRating || 0));
+  }
+  if (filters.inStock) {
+    result = result.filter(p => p.stock_quantity > 0);
+  }
+  
+  // Apply sorting
+  if (filters.sortBy) {
+    switch (filters.sortBy) {
+      case 'price_asc':
+        result.sort((a, b) => a.price - b.price);
+        break;
+      case 'price_desc':
+        result.sort((a, b) => b.price - a.price);
+        break;
+      case 'rating':
+        result.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+        break;
+      case 'name':
+        result.sort((a, b) => a.name.localeCompare(b.name));
+        break;
+      case 'newest':
+        result.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+        break;
+    }
+  }
+  
+  return result;
+};
+
 // ============== Product Hooks ==============
 export function useProducts(filters?: ProductFilters) {
   return useQuery({
     queryKey: queryKeys.products.list(filters),
-    queryFn: () => {
-      let products = productService.getAll();
-      
-      // Apply filters
-      if (filters) {
-        if (filters.category) {
-          products = products.filter(p => p.category.toLowerCase() === filters.category?.toLowerCase());
-        }
-        if (filters.region) {
-          products = products.filter(p => p.cultural_region?.toLowerCase().includes(filters.region?.toLowerCase() || ''));
-        }
-        if (filters.minPrice !== undefined) {
-          products = products.filter(p => p.price >= (filters.minPrice || 0));
-        }
-        if (filters.maxPrice !== undefined) {
-          products = products.filter(p => p.price <= (filters.maxPrice || Infinity));
-        }
-        if (filters.minRating !== undefined) {
-          products = products.filter(p => (p.rating || 0) >= (filters.minRating || 0));
-        }
-        if (filters.inStock) {
-          products = products.filter(p => p.stock_quantity > 0);
-        }
-        
-        // Apply sorting
-        if (filters.sortBy) {
-          switch (filters.sortBy) {
-            case 'price_asc':
-              products.sort((a, b) => a.price - b.price);
-              break;
-            case 'price_desc':
-              products.sort((a, b) => b.price - a.price);
-              break;
-            case 'rating':
-              products.sort((a, b) => (b.rating || 0) - (a.rating || 0));
-              break;
-            case 'name':
-              products.sort((a, b) => a.name.localeCompare(b.name));
-              break;
-            case 'newest':
-              // Already sorted by default
-              break;
-          }
-        }
-      }
-      
-      return products;
+    queryFn: async () => {
+      const products = await productService.getAll();
+      return applyProductFilters(products, filters);
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
+  });
+}
+
+export function useFeaturedProducts() {
+  return useQuery({
+    queryKey: queryKeys.products.featured,
+    queryFn: () => productService.getFeatured(),
+    staleTime: 5 * 60 * 1000,
   });
 }
 
@@ -121,34 +145,21 @@ export function useProductsByVendor(vendorId: string) {
   });
 }
 
+export function useProductsByCategory(category: string) {
+  return useQuery({
+    queryKey: queryKeys.products.byCategory(category),
+    queryFn: () => productService.getByCategory(category),
+    enabled: !!category,
+  });
+}
+
 export function useProductSearch(query: string, filters?: ProductFilters) {
   return useQuery({
     queryKey: queryKeys.products.search(query, filters),
-    queryFn: () => {
+    queryFn: async () => {
       if (!query || query.length < 2) return [];
-      
-      let results = productService.search(query);
-      
-      // Apply additional filters
-      if (filters) {
-        if (filters.category) {
-          results = results.filter(p => p.category.toLowerCase() === filters.category?.toLowerCase());
-        }
-        if (filters.region) {
-          results = results.filter(p => p.cultural_region?.toLowerCase().includes(filters.region?.toLowerCase() || ''));
-        }
-        if (filters.minPrice !== undefined) {
-          results = results.filter(p => p.price >= (filters.minPrice || 0));
-        }
-        if (filters.maxPrice !== undefined) {
-          results = results.filter(p => p.price <= (filters.maxPrice || Infinity));
-        }
-        if (filters.minRating !== undefined) {
-          results = results.filter(p => (p.rating || 0) >= (filters.minRating || 0));
-        }
-      }
-      
-      return results;
+      const results = await productService.search(query);
+      return applyProductFilters(results, filters);
     },
     enabled: query.length >= 2,
     staleTime: 2 * 60 * 1000, // 2 minutes for search results
@@ -159,19 +170,19 @@ export function useProductSearch(query: string, filters?: ProductFilters) {
 export function useVendors(filters?: VendorFilters) {
   return useQuery({
     queryKey: queryKeys.vendors.list(filters),
-    queryFn: () => {
-      let vendors = vendorService.getAll();
+    queryFn: async () => {
+      let vendors = await vendorService.getAll();
       
       // Apply filters
       if (filters) {
         if (filters.category) {
           vendors = vendors.filter(v => 
-            v.categories.some(c => c.toLowerCase().includes(filters.category?.toLowerCase() || ''))
+            v.categories?.some((c: string) => c.toLowerCase().includes(filters.category?.toLowerCase() || ''))
           );
         }
         if (filters.region) {
           vendors = vendors.filter(v => 
-            v.cultural_specialties?.some(s => s.toLowerCase().includes(filters.region?.toLowerCase() || ''))
+            v.cultural_specialties?.some((s: string) => s.toLowerCase().includes(filters.region?.toLowerCase() || ''))
           );
         }
         if (filters.minRating !== undefined) {
@@ -185,11 +196,28 @@ export function useVendors(filters?: VendorFilters) {
   });
 }
 
+export function useFeaturedVendors() {
+  return useQuery({
+    queryKey: queryKeys.vendors.featured,
+    queryFn: () => vendorService.getFeatured(),
+    staleTime: 5 * 60 * 1000,
+  });
+}
+
 export function useVendor(id: string) {
   return useQuery({
     queryKey: queryKeys.vendors.detail(id),
     queryFn: () => vendorService.getById(id),
     enabled: !!id,
+  });
+}
+
+export function useNearbyVendors(lat: number, lng: number, radiusKm: number = 10) {
+  return useQuery({
+    queryKey: queryKeys.vendors.nearby(lat, lng),
+    queryFn: () => vendorService.getNearby(lat, lng, radiusKm),
+    enabled: !!lat && !!lng,
+    staleTime: 1 * 60 * 1000, // 1 minute for location-based data
   });
 }
 
@@ -210,7 +238,34 @@ export function useVendorReviews(vendorId: string) {
   });
 }
 
-// ============== Review Mutation ==============
+// ============== Order Hooks ==============
+export function useUserOrders(userId: string) {
+  return useQuery({
+    queryKey: queryKeys.orders.byUser(userId),
+    queryFn: () => orderService.getByUser(userId),
+    enabled: !!userId,
+  });
+}
+
+export function useOrder(orderId: string) {
+  return useQuery({
+    queryKey: queryKeys.orders.detail(orderId),
+    queryFn: () => orderService.getById(orderId),
+    enabled: !!orderId,
+  });
+}
+
+// ============== Promo Code Hook ==============
+export function useValidatePromoCode(code: string) {
+  return useQuery({
+    queryKey: queryKeys.promoCodes.validate(code),
+    queryFn: () => promoCodeService.validate(code),
+    enabled: !!code && code.length >= 3,
+    staleTime: 0, // Always check fresh
+  });
+}
+
+// ============== Mutations ==============
 export interface CreateReviewInput {
   productId?: string;
   vendorId?: string;
@@ -226,17 +281,13 @@ export function useCreateReview() {
   
   return useMutation({
     mutationFn: async (input: CreateReviewInput) => {
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      const newReview = reviewService.create({
+      const newReview = await reviewService.create({
         product_id: input.productId,
         vendor_id: input.vendorId,
         rating: input.rating,
         title: input.title,
-        comment: input.comment,
-        user_name: input.userName,
-        user_avatar: input.userAvatar,
+        body: input.comment,
+        user_id: 'current_user', // Would come from auth context
       });
       
       return newReview;
@@ -255,13 +306,59 @@ export function useCreateReview() {
   });
 }
 
-// ============== Categories & Regions ==============
+export interface CreateOrderInput {
+  userId: string;
+  items: Array<{
+    productId: string;
+    quantity: number;
+    price: number;
+  }>;
+  subtotal: number;
+  deliveryFee: number;
+  total: number;
+  deliveryAddress: string;
+  paymentMethod: string;
+}
+
+export function useCreateOrder() {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: async (input: CreateOrderInput) => {
+      const order = await orderService.create({
+        user_id: input.userId,
+        items: input.items,
+        subtotal: input.subtotal,
+        delivery_fee: input.deliveryFee,
+        total: input.total,
+        delivery_address: input.deliveryAddress,
+        status: 'pending',
+        payment_status: 'pending',
+      });
+      
+      return order;
+    },
+    onSuccess: (data, variables) => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.orders.byUser(variables.userId) });
+    },
+  });
+}
+
+export function useApplyPromoCode() {
+  return useMutation({
+    mutationFn: async (code: string) => {
+      return promoCodeService.apply(code);
+    },
+  });
+}
+
+// ============== Categories & Regions (derived from products) ==============
 export function useCategories() {
   return useQuery({
     queryKey: ['categories'],
-    queryFn: () => {
-      const products = productService.getAll();
-      const categories = [...new Set(products.map(p => p.category))];
+    queryFn: async () => {
+      const products = await productService.getAll();
+      const categories = [...new Set(products.map(p => p.category).filter(Boolean))];
       return categories.sort();
     },
     staleTime: 30 * 60 * 1000, // 30 minutes - categories don't change often
@@ -271,8 +368,8 @@ export function useCategories() {
 export function useRegions() {
   return useQuery({
     queryKey: ['regions'],
-    queryFn: () => {
-      const products = productService.getAll();
+    queryFn: async () => {
+      const products = await productService.getAll();
       const regions = [...new Set(products.map(p => p.cultural_region).filter(Boolean))] as string[];
       return regions.sort();
     },
@@ -283,8 +380,8 @@ export function useRegions() {
 export function usePriceRange() {
   return useQuery({
     queryKey: ['priceRange'],
-    queryFn: () => {
-      const products = productService.getAll();
+    queryFn: async () => {
+      const products = await productService.getAll();
       const prices = products.map(p => p.price);
       return {
         min: Math.floor(Math.min(...prices)),
@@ -294,3 +391,6 @@ export function usePriceRange() {
     staleTime: 30 * 60 * 1000,
   });
 }
+
+// Export types for external use
+export type { Product, Vendor, Review, Order, PromoCode };
