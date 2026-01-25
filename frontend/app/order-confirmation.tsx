@@ -90,6 +90,11 @@ const RECOMMENDED_PRODUCTS = [
 export default function OrderConfirmationScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const { orderId } = useLocalSearchParams<{ orderId?: string }>();
+  
+  // Generate QR code data
+  const orderNumber = orderId || 'ZAM-2024-1234';
+  const qrData = orderQRService.getOrderQRData(orderNumber);
 
   // Get estimated delivery date (3 days from now)
   const deliveryDate = new Date();
@@ -99,8 +104,7 @@ export default function OrderConfirmationScreen() {
   const formattedDate = `${days[deliveryDate.getDay()]}, ${months[deliveryDate.getMonth()]} ${deliveryDate.getDate()}`;
 
   const handleTrackOrder = () => {
-    // Navigate to order tracking
-    console.log('Track order clicked');
+    router.push(`/order-tracking/${orderNumber}`);
   };
 
   const handleContinueShopping = () => {
