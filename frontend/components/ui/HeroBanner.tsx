@@ -1,10 +1,11 @@
 import React from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity, Dimensions } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
+import { ArrowRight } from 'phosphor-react-native';
 import { Colors } from '../../constants/colors';
-import { BorderRadius, Spacing } from '../../constants/spacing';
+import { BorderRadius, Spacing, Heights } from '../../constants/spacing';
 import { FontSize, FontFamily } from '../../constants/typography';
 import { Banner } from '../../types';
-import { Button } from './Button';
 
 const { width } = Dimensions.get('window');
 
@@ -15,27 +16,30 @@ interface HeroBannerProps {
 
 export const HeroBanner: React.FC<HeroBannerProps> = ({ banner, onPress }) => {
   return (
-    <TouchableOpacity style={styles.container} onPress={onPress} activeOpacity={0.9}>
+    <TouchableOpacity style={styles.container} onPress={onPress} activeOpacity={0.95}>
       <Image
         source={{ uri: banner.image_url }}
         style={styles.image}
         resizeMode="cover"
       />
-      <View style={styles.gradient} />
+      {/* Gradient overlay for text readability */}
+      <LinearGradient
+        colors={['transparent', 'rgba(34, 23, 16, 0.4)', 'rgba(34, 23, 16, 0.95)']}
+        locations={[0, 0.4, 1]}
+        style={styles.gradient}
+      />
       <View style={styles.content}>
         {banner.badge && (
           <View style={styles.badge}>
-            <Text style={styles.badgeText}>{banner.badge}</Text>
+            <Text style={styles.badgeText}>{banner.badge.toUpperCase()}</Text>
           </View>
         )}
         <Text style={styles.title}>{banner.title}</Text>
-        <Text style={styles.subtitle}>{banner.subtitle}</Text>
-        <Button
-          title={banner.cta_text}
-          variant="primary"
-          size="medium"
-          style={styles.button}
-        />
+        <Text style={styles.subtitle} numberOfLines={2}>{banner.subtitle}</Text>
+        <TouchableOpacity style={styles.ctaButton} activeOpacity={0.8}>
+          <Text style={styles.ctaText}>{banner.cta_text}</Text>
+          <ArrowRight size={18} color={Colors.textPrimary} weight="bold" />
+        </TouchableOpacity>
       </View>
     </TouchableOpacity>
   );
@@ -44,7 +48,7 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({ banner, onPress }) => {
 const styles = StyleSheet.create({
   container: {
     width: width - 32,
-    height: 200,
+    height: 260,
     borderRadius: BorderRadius.lg,
     overflow: 'hidden',
     marginHorizontal: Spacing.base,
@@ -59,8 +63,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    height: '80%',
-    backgroundColor: 'rgba(34, 23, 16, 0.7)',
+    height: '100%',
   },
   content: {
     position: 'absolute',
@@ -72,8 +75,8 @@ const styles = StyleSheet.create({
   badge: {
     backgroundColor: Colors.primary,
     paddingHorizontal: Spacing.sm,
-    paddingVertical: 4,
-    borderRadius: BorderRadius.sm,
+    paddingVertical: 3,
+    borderRadius: BorderRadius.xs,
     alignSelf: 'flex-start',
     marginBottom: Spacing.sm,
   },
@@ -81,21 +84,36 @@ const styles = StyleSheet.create({
     fontFamily: FontFamily.bodyBold,
     color: Colors.textPrimary,
     fontSize: FontSize.tiny,
+    letterSpacing: 0.5,
   },
   title: {
     fontFamily: FontFamily.display,
     color: Colors.textPrimary,
-    fontSize: FontSize.h3,
+    fontSize: FontSize.h2,
+    lineHeight: 30,
     marginBottom: Spacing.xs,
   },
   subtitle: {
     fontFamily: FontFamily.body,
-    color: Colors.textMuted,
+    color: 'rgba(255, 255, 255, 0.7)',
     fontSize: FontSize.small,
+    lineHeight: 20,
     marginBottom: Spacing.md,
   },
-  button: {
+  ctaButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: Colors.primary,
+    paddingHorizontal: Spacing.base,
+    paddingVertical: Spacing.sm,
+    borderRadius: BorderRadius.lg,
     alignSelf: 'flex-start',
+    gap: Spacing.sm,
+  },
+  ctaText: {
+    fontFamily: FontFamily.bodySemiBold,
+    color: Colors.textPrimary,
+    fontSize: FontSize.small,
   },
 });
 

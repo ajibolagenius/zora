@@ -15,3 +15,4 @@ export { VendorCard } from './VendorCard';
 export { RegionCard } from './RegionCard';
 export { SearchBar } from './SearchBar';
 export { HeroBanner } from './HeroBanner';
+export { FeaturedSlider } from './FeaturedSlider';

@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import {
   View,
   Text,
@@ -9,6 +9,7 @@ import {
   ActivityIndicator,
   Modal,
   Pressable,
+  Keyboard,
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -20,8 +21,20 @@ import {
   Star,
   Check,
   CaretDown,
+  ClockCounterClockwise,
+  TrendUp,
 } from 'phosphor-react-native';
 import { useProductSearch, useCategories, useRegions, usePriceRange, type ProductFilters } from '../hooks/useQueries';
+
+// Popular/trending searches
+const TRENDING_SEARCHES = [
+  'Jollof rice',
+  'Plantain',
+  'Egusi',
+  'Palm oil',
+  'Suya spice',
+  'Fufu',
+];
 
 const SORT_OPTIONS = [
   { id: 'rating', label: 'Top Rated' },
@@ -40,6 +53,11 @@ export default function SearchScreen() {
   // Search state
   const [searchQuery, setSearchQuery] = useState('');
   const [showFilters, setShowFilters] = useState(false);
+  const [showDropdown, setShowDropdown] = useState(true);
+  const [recentSearches, setRecentSearches] = useState<string[]>([
+    'Palm oil', 'Garri', 'Suya spice'
+  ]);
+  const [isInputFocused, setIsInputFocused] = useState(true);
   
   // Filter state
   const [filters, setFilters] = useState<ProductFilters>({});
@@ -84,6 +102,34 @@ export default function SearchScreen() {
     router.push(`/product/${productId}`);
   };
 
+  // Handle selecting a suggestion
+  const handleSuggestionPress = (suggestion: string) => {
+    setSearchQuery(suggestion);
+    setShowDropdown(false);
+    Keyboard.dismiss();
+    // Add to recent searches
+    if (!recentSearches.includes(suggestion)) {
+      setRecentSearches(prev => [suggestion, ...prev.slice(0, 4)]);
+    }
+  };
+
+  // Clear a recent search
+  const removeRecentSearch = (search: string) => {
+    setRecentSearches(prev => prev.filter(s => s !== search));
+  };
+
+  // Dynamic suggestions based on current query
+  const dynamicSuggestions = useMemo(() => {
+    if (searchQuery.length < 1) return [];
+    const query = searchQuery.toLowerCase();
+    return searchResults
+      .slice(0, 5)
+      .map(p => p.name);
+  }, [searchQuery, searchResults]);
+
+  // Should show dropdown
+  const shouldShowDropdown = isInputFocused && (searchQuery.length < 2 || showDropdown);
+
   return (
     <View className="flex-1 bg-bg-dark">
       <SafeAreaView className="flex-1" edges={['top']}>
@@ -97,19 +143,30 @@ export default function SearchScreen() {
           </TouchableOpacity>
           
           {/* Search Input */}
-          <View className="flex-1 flex-row items-center bg-card-dark rounded-xl px-4 h-12">
+          <View className="flex-1 flex-row items-center bg-card-dark rounded-full px-4 h-12">
             <MagnifyingGlass size={20} color="#CBA990" weight="regular" />
             <TextInput
               className="flex-1 ml-3 text-text-primary font-body text-base"
               placeholder="Search products..."
               placeholderTextColor="#CBA990"
               value={searchQuery}
-              onChangeText={setSearchQuery}
+              onChangeText={(text) => {
+                setSearchQuery(text);
+                setShowDropdown(true);
+              }}
+              onFocus={() => setIsInputFocused(true)}
+              onBlur={() => setTimeout(() => setIsInputFocused(false), 200)}
               autoFocus
               returnKeyType="search"
+              onSubmitEditing={() => {
+                setShowDropdown(false);
+                if (searchQuery && !recentSearches.includes(searchQuery)) {
+                  setRecentSearches(prev => [searchQuery, ...prev.slice(0, 4)]);
+                }
+              }}
             />
             {searchQuery.length > 0 && (
-              <TouchableOpacity onPress={() => setSearchQuery('')}>
+              <TouchableOpacity onPress={() => { setSearchQuery(''); setShowDropdown(true); }}>
                 <X size={18} color="#CBA990" weight="bold" />
               </TouchableOpacity>
             )}
@@ -176,6 +233,79 @@ export default function SearchScreen() {
           </ScrollView>
         )}
         
+        {/* Search Suggestions Dropdown */}
+        {shouldShowDropdown && searchQuery.length < 2 && (
+          <View className="px-4">
+            {/* Recent Searches */}
+            {recentSearches.length > 0 && (
+              <View className="mb-6">
+                <View className="flex-row items-center justify-between mb-3">
+                  <Text className="text-text-primary text-base font-semibold">Recent Searches</Text>
+                  <TouchableOpacity onPress={() => setRecentSearches([])}>
+                    <Text className="text-zora-red text-sm">Clear</Text>
+                  </TouchableOpacity>
+                </View>
+                <View className="gap-2">
+                  {recentSearches.map((search, index) => (
+                    <TouchableOpacity
+                      key={index}
+                      className="flex-row items-center py-2"
+                      onPress={() => handleSuggestionPress(search)}
+                    >
+                      <ClockCounterClockwise size={18} color="#CBA990" weight="duotone" />
+                      <Text className="flex-1 ml-3 text-text-primary text-sm">{search}</Text>
+                      <TouchableOpacity 
+                        onPress={() => removeRecentSearch(search)}
+                        hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                      >
+                        <X size={16} color="#CBA990" weight="bold" />
+                      </TouchableOpacity>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              </View>
+            )}
+
+            {/* Trending Searches */}
+            <View className="mb-6">
+              <View className="flex-row items-center mb-3">
+                <TrendUp size={18} color="#CC0000" weight="fill" />
+                <Text className="text-text-primary text-base font-semibold ml-2">Trending</Text>
+              </View>
+              <View className="flex-row flex-wrap gap-2">
+                {TRENDING_SEARCHES.map((search, index) => (
+                  <TouchableOpacity
+                    key={index}
+                    className="px-4 py-2 rounded-full border border-white/15"
+                    onPress={() => handleSuggestionPress(search)}
+                  >
+                    <Text className="text-text-primary text-sm">{search}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </View>
+          </View>
+        )}
+
+        {/* Dynamic Suggestions Dropdown */}
+        {isInputFocused && searchQuery.length >= 1 && searchQuery.length < 2 && dynamicSuggestions.length > 0 && (
+          <View className="px-4 mb-4">
+            <Text className="text-text-muted text-sm mb-2">Suggestions</Text>
+            <View className="bg-card-dark rounded-xl overflow-hidden">
+              {dynamicSuggestions.map((suggestion, index) => (
+                <TouchableOpacity
+                  key={index}
+                  className={`flex-row items-center py-3 px-4 ${index > 0 ? 'border-t border-white/5' : ''}`}
+                  onPress={() => handleSuggestionPress(suggestion)}
+                >
+                  <MagnifyingGlass size={16} color="#CBA990" weight="regular" />
+                  <Text className="ml-3 text-text-primary text-sm">{suggestion}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </View>
+        )}
+
         {/* Results */}
         <ScrollView className="flex-1 px-4" showsVerticalScrollIndicator={false}>
           {/* Results Count */}
@@ -405,7 +535,7 @@ export default function SearchScreen() {
             <View className="px-4 py-4 border-t border-card-dark">
               <TouchableOpacity
                 onPress={applyFilters}
-                className="bg-zora-red rounded-full py-4 items-center"
+                className="bg-zora-red rounded-xl py-4 items-center"
                 activeOpacity={0.8}
               >
                 <Text className="text-white text-base font-bold">Apply Filters</Text>

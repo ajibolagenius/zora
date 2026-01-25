@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import {
   View,
   Text,
@@ -10,6 +10,8 @@ import {
   Dimensions,
   Platform,
   useWindowDimensions,
+  Animated,
+  Easing,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -21,9 +23,9 @@ import {
   Sliders,
 } from 'phosphor-react-native';
 import { Colors } from '../../constants/colors';
-import { Spacing, BorderRadius } from '../../constants/spacing';
-import { FontSize, FontWeight, FontFamily } from '../../constants/typography';
-import { HeroBanner, RegionCard, VendorCard, ProductCard } from '../../components/ui';
+import { Spacing, BorderRadius, Heights } from '../../constants/spacing';
+import { FontSize, FontFamily } from '../../constants/typography';
+import { FeaturedSlider, RegionCard, VendorCard, ProductCard } from '../../components/ui';
 import { 
   vendorService, 
   productService, 
@@ -57,6 +59,10 @@ export default function HomeScreen() {
   const [selectedRegion, setSelectedRegion] = useState<string | null>(null);
   const addToCart = useCartStore((state) => state.addItem);
 
+  // Animation values
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const slideAnim = useRef(new Animated.Value(20)).current;
+
   const fetchHomeData = async () => {
     try {
       // Use mock data service instead of API
@@ -83,6 +89,26 @@ export default function HomeScreen() {
     fetchHomeData();
   }, []);
 
+  // Animate content when data loads
+  useEffect(() => {
+    if (!loading && homeData) {
+      Animated.parallel([
+        Animated.timing(fadeAnim, {
+          toValue: 1,
+          duration: 400,
+          easing: Easing.out(Easing.cubic),
+          useNativeDriver: true,
+        }),
+        Animated.timing(slideAnim, {
+          toValue: 0,
+          duration: 400,
+          easing: Easing.out(Easing.cubic),
+          useNativeDriver: true,
+        }),
+      ]).start();
+    }
+  }, [loading, homeData]);
+
   const onRefresh = () => {
     setRefreshing(true);
     fetchHomeData();
@@ -97,7 +123,17 @@ export default function HomeScreen() {
   };
 
   const handleAddToCart = (product: Product) => {
-    addToCart(product, 1);
+    // Map mockDataService Product to types Product for cart compatibility
+    const cartProduct = {
+      ...product,
+      currency: 'GBP',
+      image_url: product.image_urls?.[0] || '',
+      images: product.image_urls || [],
+      region: product.cultural_region || '',
+      in_stock: product.stock_quantity > 0,
+      attributes: {},
+    };
+    addToCart(cartProduct as any, 1);
   };
 
   const handleRegionPress = (region: Region) => {
@@ -115,7 +151,7 @@ export default function HomeScreen() {
   }
 
   const filteredProducts = selectedRegion
-    ? homeData?.popular_products.filter((p) => p.region === selectedRegion)
+    ? homeData?.popular_products.filter((p) => p.cultural_region?.toLowerCase().includes(selectedRegion.toLowerCase()))
     : homeData?.popular_products;
 
   return (
@@ -166,92 +202,100 @@ export default function HomeScreen() {
           />
         }
       >
-        {/* Hero Banner */}
-        {homeData?.banners && homeData.banners.length > 0 && (
-          <View style={styles.bannerContainer}>
-            <HeroBanner banner={homeData.banners[0]} />
-          </View>
-        )}
+        <Animated.View style={{ opacity: fadeAnim, transform: [{ translateY: slideAnim }] }}>
+          {/* Featured Collection Slider */}
+          {homeData?.banners && homeData.banners.length > 0 && (
+            <FeaturedSlider 
+              banners={homeData.banners}
+              autoPlay={true}
+              autoPlayInterval={5000}
+            />
+          )}
 
-        {/* Shop by Region */}
-        <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Shop by Region</Text>
-            <TouchableOpacity>
-              <Text style={styles.seeAllText}>See All</Text>
-            </TouchableOpacity>
-          </View>
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.regionsContainer}
-          >
-            {homeData?.regions.map((region) => (
-              <RegionCard
-                key={region.id}
-                region={region}
-                selected={selectedRegion === region.id}
-                onPress={() => handleRegionPress(region)}
-              />
-            ))}
-          </ScrollView>
-        </View>
-
-        {/* Featured Vendors */}
-        <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Featured Vendors</Text>
-            <TouchableOpacity onPress={() => router.push('/(tabs)/explore')}>
-              <Text style={styles.seeAllText}>See All</Text>
-            </TouchableOpacity>
-          </View>
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.vendorsContainer}
-          >
-            {homeData?.featured_vendors.map((vendor) => (
-              <VendorCard
-                key={vendor.id}
-                vendor={vendor}
-                onPress={() => handleVendorPress(vendor)}
-              />
-            ))}
-          </ScrollView>
-        </View>
-
-        {/* Popular Products */}
-        <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>
-              {selectedRegion ? `Products from ${selectedRegion.replace('-', ' ')}` : 'Popular Products'}
-            </Text>
-            <TouchableOpacity>
-              <Text style={styles.seeAllText}>See All</Text>
-            </TouchableOpacity>
-          </View>
-          <View style={styles.productsGrid}>
-            {filteredProducts?.map((product, index) => (
-              <View 
-                key={product.id} 
-                style={{
-                  width: productCardWidth,
-                  marginRight: index % 2 === 0 ? PRODUCT_GAP : 0,
-                  marginBottom: PRODUCT_GAP,
-                }}
-              >
-                <ProductCard
-                  product={product}
-                  onPress={() => handleProductPress(product)}
-                  onAddToCart={() => handleAddToCart(product)}
+          {/* Shop by Region */}
+          <View style={styles.section}>
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionTitle}>Shop by Region</Text>
+              <TouchableOpacity onPress={() => router.push('/regions')} activeOpacity={0.7}>
+                <Text style={styles.seeAllText}>See All</Text>
+              </TouchableOpacity>
+            </View>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.regionsContainer}
+            >
+              {homeData?.regions.map((region) => (
+                <RegionCard
+                  key={region.id}
+                  region={region}
+                  selected={selectedRegion === region.id}
+                  onPress={() => handleRegionPress(region)}
                 />
-              </View>
-            ))}
+              ))}
+            </ScrollView>
           </View>
-        </View>
 
-        {/* Bottom padding for tab bar */}
-        <View style={{ height: 100 }} />
+          {/* Featured Vendors */}
+          <View style={styles.section}>
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionTitle}>Featured Vendors</Text>
+              <TouchableOpacity onPress={() => router.push('/vendors')} activeOpacity={0.7}>
+                <Text style={styles.seeAllText}>See All</Text>
+              </TouchableOpacity>
+            </View>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.vendorsContainer}
+            >
+              {homeData?.featured_vendors.map((vendor) => (
+                <VendorCard
+                  key={vendor.id}
+                  vendor={vendor}
+                  variant="carousel"
+                  onPress={() => handleVendorPress(vendor)}
+                />
+              ))}
+            </ScrollView>
+          </View>
+
+          {/* Popular Products */}
+          <View style={styles.section}>
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionTitle}>
+                {selectedRegion ? `Products from ${selectedRegion.replace('-', ' ')}` : 'Popular Products'}
+              </Text>
+              <TouchableOpacity 
+                onPress={() => router.push(selectedRegion ? `/products?region=${selectedRegion}` : '/products')} 
+                activeOpacity={0.7}
+              >
+                <Text style={styles.seeAllText}>See All</Text>
+              </TouchableOpacity>
+            </View>
+            <View style={styles.productsGrid}>
+              {filteredProducts?.map((product, index) => (
+                <View 
+                  key={product.id} 
+                  style={{
+                    width: productCardWidth,
+                    marginRight: index % 2 === 0 ? PRODUCT_GAP : 0,
+                    marginBottom: PRODUCT_GAP,
+                  }}
+                >
+                  <ProductCard
+                    product={product}
+                    onPress={() => handleProductPress(product)}
+                    onAddToCart={() => handleAddToCart(product)}
+                  />
+                </View>
+              ))}
+            </View>
+          </View>
+
+          {/* Bottom padding for tab bar */}
+          <View style={{ height: 100 }} />
+        </Animated.View>
       </ScrollView>
     </SafeAreaView>
   );
@@ -270,17 +314,6 @@ const styles = StyleSheet.create({
   stickyHeader: {
     backgroundColor: Colors.backgroundDark,
     zIndex: 10,
-    ...Platform.select({
-      ios: {
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
-      },
-      android: {
-        elevation: 4,
-      },
-    }),
   },
   header: {
     flexDirection: 'row',
@@ -296,21 +329,24 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.sm,
     borderRadius: BorderRadius.full,
-    gap: Spacing.xs,
+    gap: 6,
   },
   locationText: {
-    fontFamily: FontFamily.bodyMedium,
+    fontFamily: FontFamily.bodySemiBold,
     color: Colors.textPrimary,
     fontSize: FontSize.small,
   },
   notificationButton: {
     position: 'relative',
-    padding: Spacing.sm,
+    width: 44,
+    height: 44,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   notificationBadge: {
     position: 'absolute',
-    top: 8,
-    right: 8,
+    top: 10,
+    right: 10,
     width: 8,
     height: 8,
     borderRadius: 4,
@@ -324,21 +360,22 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: Colors.cardDark,
-    borderRadius: BorderRadius.lg,
-    paddingHorizontal: Spacing.md,
-    height: 48,
+    borderRadius: BorderRadius.full,
+    paddingLeft: Spacing.md,
+    paddingRight: Spacing.xs,
+    height: Heights.input,
     gap: Spacing.sm,
   },
   searchPlaceholder: {
     flex: 1,
     fontFamily: FontFamily.body,
     color: Colors.textMuted,
-    fontSize: FontSize.body,
+    fontSize: FontSize.small,
   },
   filterButton: {
     width: 36,
     height: 36,
-    borderRadius: BorderRadius.md,
+    borderRadius: 18,
     backgroundColor: Colors.backgroundDark,
     justifyContent: 'center',
     alignItems: 'center',
@@ -347,23 +384,20 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    paddingBottom: 20,
-  },
-  bannerContainer: {
-    marginBottom: Spacing.lg,
+    paddingTop: Spacing.sm,
   },
   section: {
-    marginBottom: Spacing.lg,
+    marginBottom: Spacing.xl,
   },
   sectionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: Spacing.base,
-    marginBottom: Spacing.sm,
+    marginBottom: Spacing.md,
   },
   sectionTitle: {
-    fontFamily: FontFamily.displayMedium,
+    fontFamily: FontFamily.displaySemiBold,
     color: Colors.textPrimary,
     fontSize: FontSize.h4,
   },

@@ -12,7 +12,8 @@ import { Platform } from 'react-native';
 export const FontFamily = {
   // Display & Headlines: Montserrat
   display: 'Montserrat-Bold',
-  displayMedium: 'Montserrat-SemiBold',
+  displayMedium: 'Montserrat-Medium',
+  displaySemiBold: 'Montserrat-SemiBold',
   displayExtraBold: 'Montserrat-ExtraBold',
   
   // Body Text: Poppins
