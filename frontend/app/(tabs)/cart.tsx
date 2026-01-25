@@ -525,6 +525,17 @@ const styles = StyleSheet.create({
   },
   
   // Checkout Button
+  checkoutContainer: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: 'rgba(34, 23, 16, 0.95)',
+    paddingHorizontal: Spacing.base,
+    paddingTop: 16,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(255, 255, 255, 0.05)',
+  },
   checkoutButton: {
     flexDirection: 'row',
     justifyContent: 'space-between',
