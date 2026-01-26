@@ -15,9 +15,11 @@ import { Colors } from '../../constants/colors';
 import { BorderRadius, Spacing } from '../../constants/spacing';
 import { FontSize, FontFamily } from '../../constants/typography';
 
+import { UiConfig } from '../../constants';
+
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
-const CARD_WIDTH = SCREEN_WIDTH - 32;
-const CARD_MARGIN = 8;
+const CARD_WIDTH = SCREEN_WIDTH - UiConfig.screenPadding * 2;
+const CARD_MARGIN = UiConfig.cardMargin;
 
 // Generic banner interface that works with both types and mockDataService
 interface SliderBanner {

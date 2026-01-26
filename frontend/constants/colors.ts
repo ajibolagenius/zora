@@ -23,6 +23,12 @@ export const Colors = {
   error: '#CC0000',
   info: '#3B82F6',
   
+  // Status Color Aliases (for consistency with component usage)
+  statusYellow: '#FFCC00',  // Alias for warning/secondary
+  statusBlue: '#3B82F6',    // Alias for info
+  statusGreen: '#22C55E',   // Alias for success
+  statusRed: '#CC0000',     // Alias for error/primary
+  
   // Border Colors
   borderDark: 'rgba(255, 255, 255, 0.05)',
   borderLight: 'rgba(0, 0, 0, 0.05)',

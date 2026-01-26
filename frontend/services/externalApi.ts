@@ -1,10 +1,11 @@
 import axios from 'axios';
 import { Product, Vendor, Region } from '../types';
+import { ApiEndpoints } from '../constants';
 
-// External API endpoints
-const MEAL_DB_API = 'https://www.themealdb.com/api/json/v1/1';
-const FOODISH_API = 'https://foodish-api.com/api';
-const PLATZI_API = 'https://api.escuelajs.co/api/v1';
+// External API endpoints (using constants)
+const MEAL_DB_API = ApiEndpoints.mealDb;
+const FOODISH_API = ApiEndpoints.foodish;
+const PLATZI_API = ApiEndpoints.platzi;
 
 // African regions data
 export const AFRICAN_REGIONS: Region[] = [

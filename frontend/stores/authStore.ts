@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { User } from '../types';
 import { supabase, getSupabaseClient, isSupabaseConfigured, getCredentialsError } from '../lib/supabase';
 import { Session, AuthError } from '@supabase/supabase-js';
+import { ApiConfig } from '../constants';
 
 // ============================================
 // DEV MOCK USER - For testing without Supabase
@@ -35,7 +36,9 @@ const withTimeout = <T>(promise: Promise<T>, ms: number, errorMessage: string): 
   return Promise.race([promise, timeout]);
 };
 
-const AUTH_TIMEOUT_MS = 15000; // 15 seconds
+import { ApiConfig } from '../constants';
+
+const AUTH_TIMEOUT_MS = ApiConfig.authTimeout;
 
 interface AuthState {
   user: User | null;

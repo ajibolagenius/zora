@@ -1,4 +1,5 @@
 import axios, { AxiosInstance } from 'axios';
+import { ApiConfig, ApiHeaders } from '../constants';
 
 /**
  * External API client for third-party services
@@ -9,9 +10,9 @@ import axios, { AxiosInstance } from 'axios';
 export const createApiClient = (baseURL: string): AxiosInstance => {
   const client = axios.create({
     baseURL,
-    timeout: 30000,
+    timeout: ApiConfig.timeout,
     headers: {
-      'Content-Type': 'application/json',
+      'Content-Type': ApiHeaders.contentType,
     },
   });
 

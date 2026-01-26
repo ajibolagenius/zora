@@ -34,11 +34,11 @@ import { Colors } from '../../constants/colors';
 import { Spacing, BorderRadius, Heights } from '../../constants/spacing';
 import { FontSize, FontFamily } from '../../constants/typography';
 
-// Status colors matching design system
-const STATUS_YELLOW = '#FFCC00';
-const STATUS_BLUE = '#3B82F6';
-const STATUS_GREEN = '#22C55E';
-const STATUS_RED = '#CC0000';
+// Status colors matching design system (using constants)
+const STATUS_YELLOW = Colors.statusYellow;
+const STATUS_BLUE = Colors.statusBlue;
+const STATUS_GREEN = Colors.statusGreen;
+const STATUS_RED = Colors.statusRed;
 
 type TabType = 'active' | 'completed' | 'cancelled';
 type OrderStatus = 'preparing' | 'out_for_delivery' | 'delivered' | 'cancelled';
