@@ -9,8 +9,9 @@ import {
   Dimensions,
   Animated,
   Easing,
+  useWindowDimensions,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { ArrowLeft, ArrowRight, Check } from 'phosphor-react-native';
 import { Colors } from '../../constants/colors';
@@ -54,11 +55,23 @@ const REGIONS = [
 
 export default function HeritageScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
+  const { height: screenHeight } = useWindowDimensions();
   const [selectedRegions, setSelectedRegions] = useState<string[]>([]);
   
   // Animation values
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(30)).current;
+  
+  // Calculate available height for cards
+  // Screen height - safe area top - header - title section - footer - padding
+  const headerHeight = 44 + insets.top + (Spacing.sm * 2); // back button + padding
+  const titleHeight = 120; // Approximate title section height (title + subtitle + margin)
+  const footerHeight = Heights.button + (Spacing.lg * 2) + insets.bottom; // button + padding + safe area bottom
+  const scrollPadding = Spacing.base * 2; // top and bottom padding in scroll content
+  const availableHeight = screenHeight - headerHeight - titleHeight - footerHeight - scrollPadding;
+  const gapHeight = Spacing.md * (REGIONS.length - 1); // Total gap between cards
+  const cardHeight = Math.max((availableHeight - gapHeight) / REGIONS.length, 80); // Minimum 80px
 
   useEffect(() => {
     Animated.parallel([
@@ -129,6 +142,7 @@ export default function HeritageScreen() {
                 key={region.id}
                 style={[
                   styles.regionCard,
+                  { height: Math.max(cardHeight, 80) }, // Minimum 80px height
                   isSelected && styles.regionCardSelected,
                 ]}
                 onPress={() => toggleRegion(region.id)}
@@ -225,13 +239,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.base,
     paddingBottom: Spacing.base,
     gap: Spacing.md,
+    flexGrow: 1,
   },
   regionCard: {
-    height: 88,
     borderRadius: BorderRadius.lg,
     overflow: 'hidden',
     borderWidth: 2,
     borderColor: 'transparent',
+    minHeight: 80,
   },
   regionCardSelected: {
     borderColor: Colors.primary,
