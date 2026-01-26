@@ -6,7 +6,6 @@ import {
   ScrollView,
   TouchableOpacity,
   TextInput,
-  Image,
   KeyboardAvoidingView,
   Platform,
   Animated,
@@ -21,7 +20,7 @@ import {
   Robot,
 } from 'phosphor-react-native';
 import { Colors } from '../../constants/colors';
-import { Spacing, BorderRadius, Heights } from '../../constants/spacing';
+import { Spacing, BorderRadius, Shadows } from '../../constants/spacing';
 import { FontSize, FontFamily } from '../../constants/typography';
 
 interface Message {
@@ -35,10 +34,10 @@ interface Message {
 const INITIAL_MESSAGES: Message[] = [
   {
     id: '1',
-    text: 'Hello! I see you have a question about your recent order of Jollof Rice spices. How can I help you today?',
+    text: 'Hello! I see you have a question about your recent order. How can I help you today?',
     sender: 'bot',
     timestamp: '10:23 AM',
-    senderName: 'Zora Bot',
+    senderName: 'Zora Support',
   },
   {
     id: '2',
@@ -51,7 +50,7 @@ const INITIAL_MESSAGES: Message[] = [
     text: "I'm sorry to hear that. Sometimes carriers mark packages as delivered a few hours early. Would you like me to open an investigation with the carrier?",
     sender: 'bot',
     timestamp: '10:25 AM',
-    senderName: 'Zora Bot',
+    senderName: 'Zora Support',
   },
 ];
 
@@ -70,7 +69,7 @@ export default function OrderSupportScreen() {
   
   const [messages, setMessages] = useState<Message[]>(INITIAL_MESSAGES);
   const [inputText, setInputText] = useState('');
-  const [isTyping, setIsTyping] = useState(true);
+  const [isTyping, setIsTyping] = useState(false);
   const scrollViewRef = useRef<ScrollView>(null);
 
   // Animation values
@@ -81,18 +80,26 @@ export default function OrderSupportScreen() {
     Animated.parallel([
       Animated.timing(fadeAnim, {
         toValue: 1,
-        duration: 400,
+        duration: 300,
         easing: Easing.out(Easing.cubic),
         useNativeDriver: true,
       }),
       Animated.timing(slideAnim, {
         toValue: 0,
-        duration: 400,
+        duration: 300,
         easing: Easing.out(Easing.cubic),
         useNativeDriver: true,
       }),
     ]).start();
   }, []);
+
+  const handleBack = () => {
+    if (router.canGoBack()) {
+      router.back();
+    } else {
+      router.replace('/(tabs)/orders');
+    }
+  };
 
   const handleSend = () => {
     if (!inputText.trim()) return;
@@ -101,10 +108,14 @@ export default function OrderSupportScreen() {
       id: Date.now().toString(),
       text: inputText.trim(),
       sender: 'user',
-      timestamp: new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }),
+      timestamp: new Date().toLocaleTimeString('en-US', { 
+        hour: 'numeric', 
+        minute: '2-digit', 
+        hour12: true 
+      }),
     };
     
-    setMessages([...messages, newMessage]);
+    setMessages(prev => [...prev, newMessage]);
     setInputText('');
     setIsTyping(true);
     
@@ -120,8 +131,12 @@ export default function OrderSupportScreen() {
         id: (Date.now() + 1).toString(),
         text: "Thank you for your message. I'm looking into this for you. Is there anything else I can help with?",
         sender: 'bot',
-        timestamp: new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }),
-        senderName: 'Zora Bot',
+        timestamp: new Date().toLocaleTimeString('en-US', { 
+          hour: 'numeric', 
+          minute: '2-digit', 
+          hour12: true 
+        }),
+        senderName: 'Zora Support',
       };
       setMessages(prev => [...prev, botResponse]);
       setTimeout(() => {
@@ -132,6 +147,44 @@ export default function OrderSupportScreen() {
 
   const handleQuickReply = (reply: string) => {
     setInputText(reply);
+    // Auto-send quick reply
+    setTimeout(() => {
+      const newMessage: Message = {
+        id: Date.now().toString(),
+        text: reply,
+        sender: 'user',
+        timestamp: new Date().toLocaleTimeString('en-US', { 
+          hour: 'numeric', 
+          minute: '2-digit', 
+          hour12: true 
+        }),
+      };
+      setMessages(prev => [...prev, newMessage]);
+      setIsTyping(true);
+      setTimeout(() => {
+        scrollViewRef.current?.scrollToEnd({ animated: true });
+      }, 100);
+      
+      // Bot response
+      setTimeout(() => {
+        setIsTyping(false);
+        const botResponse: Message = {
+          id: (Date.now() + 1).toString(),
+          text: "I understand. Let me help you with that right away.",
+          sender: 'bot',
+          timestamp: new Date().toLocaleTimeString('en-US', { 
+            hour: 'numeric', 
+            minute: '2-digit', 
+            hour12: true 
+          }),
+          senderName: 'Zora Support',
+        };
+        setMessages(prev => [...prev, botResponse]);
+        setTimeout(() => {
+          scrollViewRef.current?.scrollToEnd({ animated: true });
+        }, 100);
+      }, 1500);
+    }, 300);
   };
 
   const renderMessage = (message: Message, index: number) => {
@@ -183,7 +236,8 @@ export default function OrderSupportScreen() {
       <View style={styles.header}>
         <TouchableOpacity
           style={styles.backButton}
-          onPress={() => router.back()}
+          onPress={handleBack}
+          activeOpacity={0.8}
         >
           <ArrowLeft size={24} color={Colors.textPrimary} weight="bold" />
         </TouchableOpacity>
@@ -227,38 +281,43 @@ export default function OrderSupportScreen() {
           )}
           
           {/* Bottom padding */}
-          <View style={{ height: 16 }} />
+          <View style={{ height: Spacing.base }} />
         </ScrollView>
 
         {/* Bottom Section */}
-        <View style={[styles.bottomSection, { paddingBottom: Math.max(insets.bottom, 16) }]}>
+        <View style={[styles.bottomSection, { paddingBottom: Math.max(insets.bottom, Spacing.base) }]}>
           {/* Quick Replies */}
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.quickRepliesContainer}
-          >
-            {QUICK_REPLIES.map((reply, index) => (
-              <TouchableOpacity
-                key={index}
-                style={styles.quickReplyChip}
-                onPress={() => handleQuickReply(reply)}
-                activeOpacity={0.7}
-              >
-                <Text style={styles.quickReplyText}>{reply}</Text>
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
+          {QUICK_REPLIES.length > 0 && (
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.quickRepliesContainer}
+            >
+              {QUICK_REPLIES.map((reply, index) => (
+                <TouchableOpacity
+                  key={index}
+                  style={styles.quickReplyChip}
+                  onPress={() => handleQuickReply(reply)}
+                  activeOpacity={0.8}
+                >
+                  <Text style={styles.quickReplyText}>{reply}</Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          )}
 
           {/* Message Input */}
           <View style={styles.inputContainer}>
-            <TouchableOpacity style={styles.attachButton}>
-              <Paperclip size={22} color="rgba(255,255,255,0.5)" weight="regular" />
+            <TouchableOpacity 
+              style={styles.attachButton}
+              activeOpacity={0.8}
+            >
+              <Paperclip size={22} color={Colors.textMuted} weight="regular" />
             </TouchableOpacity>
             <TextInput
               style={styles.textInput}
               placeholder="Type a message..."
-              placeholderTextColor="rgba(255,255,255,0.3)"
+              placeholderTextColor={Colors.textMuted}
               value={inputText}
               onChangeText={setInputText}
               multiline
@@ -271,8 +330,13 @@ export default function OrderSupportScreen() {
               ]}
               onPress={handleSend}
               disabled={!inputText.trim()}
+              activeOpacity={0.8}
             >
-              <PaperPlaneRight size={22} color="#FFFFFF" weight="fill" />
+              <PaperPlaneRight 
+                size={22} 
+                color={Colors.textPrimary} 
+                weight={inputText.trim() ? "fill" : "regular"} 
+              />
             </TouchableOpacity>
           </View>
         </View>
@@ -286,21 +350,21 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Colors.backgroundDark,
   },
-  
-  // Header
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: Spacing.base,
     paddingVertical: Spacing.md,
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255, 255, 255, 0.05)',
+    borderBottomColor: Colors.borderDark,
   },
   backButton: {
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: 'rgba(0, 0, 0, 0.3)',
+    backgroundColor: Colors.cardDark,
+    borderWidth: 1,
+    borderColor: Colors.borderDark,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -309,7 +373,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   headerTitle: {
-    fontFamily: FontFamily.displaySemiBold,
+    fontFamily: FontFamily.display,
     fontSize: FontSize.h4,
     color: Colors.textPrimary,
   },
@@ -322,13 +386,9 @@ const styles = StyleSheet.create({
   headerRight: {
     width: 44,
   },
-  
-  // Keyboard View
   keyboardView: {
     flex: 1,
   },
-  
-  // Chat Area
   chatArea: {
     flex: 1,
   },
@@ -337,22 +397,21 @@ const styles = StyleSheet.create({
     paddingTop: Spacing.md,
     gap: Spacing.lg,
   },
-  
-  // Timestamp
   timestampContainer: {
     alignItems: 'center',
+    marginBottom: Spacing.sm,
   },
   timestampText: {
-    fontFamily: FontFamily.bodySemiBold,
+    fontFamily: FontFamily.bodyMedium,
     fontSize: FontSize.caption,
     color: Colors.textMuted,
     backgroundColor: Colors.cardDark,
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.xs,
     borderRadius: BorderRadius.full,
+    borderWidth: 1,
+    borderColor: Colors.borderDark,
   },
-  
-  // Message
   messageContainer: {
     flexDirection: 'row',
     alignItems: 'flex-end',
@@ -374,7 +433,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
+    borderColor: Colors.borderDark,
+    ...Shadows.sm,
   },
   messageContent: {
     gap: Spacing.xs,
@@ -384,12 +444,16 @@ const styles = StyleSheet.create({
     alignItems: 'flex-end',
   },
   messageBubble: {
-    padding: Spacing.md,
+    paddingHorizontal: Spacing.base,
+    paddingVertical: Spacing.md,
     borderRadius: BorderRadius.lg,
     maxWidth: '100%',
+    ...Shadows.sm,
   },
   messageBubbleBot: {
     backgroundColor: Colors.cardDark,
+    borderWidth: 1,
+    borderColor: Colors.borderDark,
     borderBottomLeftRadius: Spacing.xs,
   },
   messageBubbleUser: {
@@ -412,8 +476,6 @@ const styles = StyleSheet.create({
     marginRight: Spacing.xs,
     marginLeft: 0,
   },
-  
-  // Typing Indicator
   typingContainer: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -444,16 +506,12 @@ const styles = StyleSheet.create({
     fontSize: FontSize.caption,
     color: Colors.textMuted,
   },
-  
-  // Bottom Section
   bottomSection: {
     backgroundColor: Colors.backgroundDark,
     borderTopWidth: 1,
-    borderTopColor: 'rgba(255, 255, 255, 0.05)',
+    borderTopColor: Colors.borderDark,
     paddingTop: Spacing.md,
   },
-  
-  // Quick Replies
   quickRepliesContainer: {
     paddingHorizontal: Spacing.base,
     gap: Spacing.sm,
@@ -462,7 +520,7 @@ const styles = StyleSheet.create({
   quickReplyChip: {
     backgroundColor: 'transparent',
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.15)',
+    borderColor: Colors.borderOutline,
     paddingHorizontal: Spacing.base,
     paddingVertical: Spacing.sm,
     borderRadius: BorderRadius.full,
@@ -472,8 +530,6 @@ const styles = StyleSheet.create({
     fontSize: FontSize.small,
     color: Colors.textPrimary,
   },
-  
-  // Input
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'flex-end',
@@ -485,12 +541,15 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 22,
+    backgroundColor: Colors.cardDark,
+    borderWidth: 1,
+    borderColor: Colors.borderDark,
     justifyContent: 'center',
     alignItems: 'center',
   },
   textInput: {
     flex: 1,
-    minHeight: Heights.input,
+    minHeight: 44,
     maxHeight: 120,
     backgroundColor: Colors.cardDark,
     borderRadius: BorderRadius.full,
@@ -500,7 +559,7 @@ const styles = StyleSheet.create({
     fontSize: FontSize.body,
     color: Colors.textPrimary,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.05)',
+    borderColor: Colors.borderDark,
   },
   sendButton: {
     width: 44,
@@ -509,27 +568,12 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.primary,
     justifyContent: 'center',
     alignItems: 'center',
-    ...Platform.select({
-      ios: {
-        shadowColor: Colors.primary,
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.3,
-        shadowRadius: 4,
-      },
-      android: {
-        elevation: 4,
-      },
-    }),
+    ...Shadows.md,
   },
   sendButtonDisabled: {
-    backgroundColor: 'rgba(204, 0, 0, 0.3)',
-    ...Platform.select({
-      ios: {
-        shadowOpacity: 0,
-      },
-      android: {
-        elevation: 0,
-      },
-    }),
+    backgroundColor: Colors.cardDark,
+    borderWidth: 1,
+    borderColor: Colors.borderDark,
+    ...Shadows.sm,
   },
 });
