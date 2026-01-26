@@ -8,32 +8,62 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 CREATE EXTENSION IF NOT EXISTS "postgis";
 
 -- ============== PROFILES TABLE (extends auth.users) ==============
--- Add missing columns to existing profiles table if they don't exist
+-- Create profiles table if it doesn't exist, then add Zora-specific columns
+CREATE TABLE IF NOT EXISTS public.profiles (
+    id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+    role TEXT,
+    username TEXT,
+    full_name TEXT,
+    display_name TEXT,
+    avatar_url TEXT,
+    location TEXT,
+    bio TEXT,
+    is_verified BOOLEAN,
+    status TEXT,
+    starting_price INTEGER,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW(),
+    push_notifications_enabled BOOLEAN,
+    admin_notes TEXT,
+    is_suspended BOOLEAN,
+    suspension_reason TEXT,
+    suspended_at TIMESTAMPTZ,
+    suspended_by UUID
+);
+
+-- Add Zora-specific columns if they don't exist
 DO $$ 
 BEGIN
-    -- Add columns if they don't exist
-    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'profiles' AND column_name = 'email') THEN
-        ALTER TABLE public.profiles ADD COLUMN email TEXT UNIQUE;
-    END IF;
-    
-    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'profiles' AND column_name = 'membership_tier') THEN
-        ALTER TABLE public.profiles ADD COLUMN membership_tier TEXT DEFAULT 'bronze' CHECK (membership_tier IN ('bronze', 'silver', 'gold', 'platinum'));
-    END IF;
-    
-    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'profiles' AND column_name = 'zora_credits') THEN
-        ALTER TABLE public.profiles ADD COLUMN zora_credits DECIMAL(10,2) DEFAULT 0.00;
-    END IF;
-    
-    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'profiles' AND column_name = 'loyalty_points') THEN
-        ALTER TABLE public.profiles ADD COLUMN loyalty_points INTEGER DEFAULT 0;
-    END IF;
-    
-    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'profiles' AND column_name = 'referral_code') THEN
-        ALTER TABLE public.profiles ADD COLUMN referral_code TEXT UNIQUE;
-    END IF;
-    
-    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'profiles' AND column_name = 'cultural_interests') THEN
-        ALTER TABLE public.profiles ADD COLUMN cultural_interests TEXT[] DEFAULT '{}';
+    -- Check if table exists first
+    IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'profiles') THEN
+        -- Add columns if they don't exist
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'profiles' AND column_name = 'email') THEN
+            ALTER TABLE public.profiles ADD COLUMN email TEXT UNIQUE;
+        END IF;
+        
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'profiles' AND column_name = 'phone') THEN
+            ALTER TABLE public.profiles ADD COLUMN phone TEXT;
+        END IF;
+        
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'profiles' AND column_name = 'membership_tier') THEN
+            ALTER TABLE public.profiles ADD COLUMN membership_tier TEXT DEFAULT 'bronze' CHECK (membership_tier IN ('bronze', 'silver', 'gold', 'platinum'));
+        END IF;
+        
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'profiles' AND column_name = 'zora_credits') THEN
+            ALTER TABLE public.profiles ADD COLUMN zora_credits DECIMAL(10,2) DEFAULT 0.00;
+        END IF;
+        
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'profiles' AND column_name = 'loyalty_points') THEN
+            ALTER TABLE public.profiles ADD COLUMN loyalty_points INTEGER DEFAULT 0;
+        END IF;
+        
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'profiles' AND column_name = 'referral_code') THEN
+            ALTER TABLE public.profiles ADD COLUMN referral_code TEXT UNIQUE;
+        END IF;
+        
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'profiles' AND column_name = 'cultural_interests') THEN
+            ALTER TABLE public.profiles ADD COLUMN cultural_interests TEXT[] DEFAULT '{}';
+        END IF;
     END IF;
 END $$;
 
