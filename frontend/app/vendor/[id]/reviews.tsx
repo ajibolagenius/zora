@@ -153,7 +153,7 @@ export default function VendorReviewsScreen() {
         <View style={styles.headerCenter}>
           <Text style={styles.headerTitle}>Vendor Reviews</Text>
           {vendor && (
-            <Text style={styles.headerSubtitle}>{vendor.name}</Text>
+            <Text style={styles.headerSubtitle}>{vendor.shop_name}</Text>
           )}
         </View>
         <View style={styles.headerRight} />
@@ -299,7 +299,7 @@ export default function VendorReviewsScreen() {
         {/* Write Review Button */}
         <TouchableOpacity
           style={styles.writeReviewButton}
-          onPress={() => router.push(`/write-review?vendorId=${id}&vendorName=${encodeURIComponent(vendor?.name || '')}`)}
+          onPress={() => router.push(`/write-review?vendorId=${id}&vendorName=${encodeURIComponent(vendor?.shop_name || '')}`)}
           activeOpacity={0.8}
         >
           <PencilSimple size={18} color={Colors.textPrimary} weight="bold" />
@@ -373,7 +373,7 @@ export default function VendorReviewsScreen() {
             {filterBy === 'all' && (
               <TouchableOpacity
                 style={styles.firstReviewButton}
-                onPress={() => router.push(`/write-review?vendorId=${id}&vendorName=${encodeURIComponent(vendor?.name || '')}`)}
+                onPress={() => router.push(`/write-review?vendorId=${id}&vendorName=${encodeURIComponent(vendor?.shop_name || '')}`)}
                 activeOpacity={0.8}
               >
                 <Text style={styles.firstReviewText}>Write a Review</Text>

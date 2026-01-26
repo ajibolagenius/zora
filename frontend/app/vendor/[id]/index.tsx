@@ -366,7 +366,7 @@ export default function VendorScreen() {
                 </View>
               </View>
               <Link 
-                href={`/write-review?vendorId=${id}&vendorName=${encodeURIComponent(vendor.name)}`}
+                href={`/write-review?vendorId=${id}&vendorName=${encodeURIComponent(vendor.shop_name)}`}
                 asChild
               >
                 <TouchableOpacity style={styles.writeReviewButton}>
@@ -432,7 +432,7 @@ export default function VendorScreen() {
               <View style={styles.noReviews}>
                 <Text style={styles.noReviewsText}>No reviews yet. Be the first to review!</Text>
                 <Link 
-                  href={`/write-review?vendorId=${id}&vendorName=${encodeURIComponent(vendor.name)}`}
+                  href={`/write-review?vendorId=${id}&vendorName=${encodeURIComponent(vendor.shop_name)}`}
                   asChild
                 >
                   <TouchableOpacity style={styles.firstReviewButton}>
