@@ -25,6 +25,7 @@ import {
   TrendUp,
 } from 'phosphor-react-native';
 import { useProductSearch, useCategories, useRegions, usePriceRange, type ProductFilters } from '../hooks/useQueries';
+import { Colors } from '../constants/colors';
 
 // Popular/trending searches
 const TRENDING_SEARCHES = [

@@ -13,6 +13,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
+import { vendorService } from '../../services/mockDataService';
 import {
     ShoppingBag,
     CaretRight,
@@ -55,6 +56,7 @@ interface OrderItem {
     orderNumber: string;
     date: string;
     vendorName: string;
+    vendorId?: string; // Optional vendor ID for navigation
     itemCount: number;
     total: number;
     status: OrderStatus;
@@ -301,6 +303,28 @@ export default function OrdersTab() {
         router.push(`/product/${productId}`);
     };
 
+    const handleVendorPress = (order: OrderItem) => {
+        // If vendorId is available, use it directly
+        if (order.vendorId) {
+            router.push(`/vendor/${order.vendorId}`);
+            return;
+        }
+        
+        // Otherwise, try to find vendor by name
+        const vendors = vendorService.getAll();
+        const vendor = vendors.find(v => 
+            v.shop_name.toLowerCase() === order.vendorName.toLowerCase() ||
+            v.shop_name.toLowerCase().includes(order.vendorName.toLowerCase())
+        );
+        
+        if (vendor) {
+            router.push(`/vendor/${vendor.id}`);
+        } else {
+            // Fallback: navigate to vendors list if not found
+            console.warn(`Vendor not found: ${order.vendorName}`);
+        }
+    };
+
     const renderEmptyState = () => {
         const isSearching = searchQuery.trim().length > 0;
         
@@ -358,7 +382,9 @@ export default function OrdersTab() {
         const itemHeight = 50 + (Spacing.sm * 2); // image height + padding
         const gapHeight = Spacing.sm;
         const containerPadding = Spacing.sm + Spacing.xs;
-        const totalHeight = containerPadding + (order.products.length * itemHeight) + ((order.products.length - 1) * gapHeight);
+        // Use Math.max to prevent negative gap calculation when products.length is 0
+        const gapCount = Math.max(0, order.products.length - 1);
+        const totalHeight = containerPadding + (order.products.length * itemHeight) + (gapCount * gapHeight);
         const maxHeight = expandAnim.interpolate({
             inputRange: [0, 1],
             outputRange: [0, totalHeight],
@@ -426,7 +452,12 @@ export default function OrdersTab() {
                         ))}
                     </View>
                     <View style={styles.vendorInfo}>
-                        <Text style={styles.vendorName}>{order.vendorName}</Text>
+                        <TouchableOpacity
+                            onPress={() => handleVendorPress(order)}
+                            activeOpacity={0.7}
+                        >
+                            <Text style={styles.vendorName}>{order.vendorName}</Text>
+                        </TouchableOpacity>
                         <Text style={styles.itemCount}>{order.itemCount} {order.itemCount === 1 ? 'Item' : 'Items'}</Text>
                     </View>
                 </View>
@@ -758,7 +789,7 @@ const styles = StyleSheet.create({
     vendorName: {
         fontFamily: FontFamily.bodySemiBold,
         fontSize: FontSize.body,
-        color: Colors.textPrimary,
+        color: Colors.primary,
     },
     itemCount: {
         fontFamily: FontFamily.body,
