@@ -67,7 +67,7 @@ export default function ProductScreen() {
     if (!productSlug) return;
     try {
       setLoading(true);
-      // Decode the Base62 slug to UUID and fetch product
+      // getBySlug handles both Base62-encoded UUIDs and legacy IDs
       const productData = await productService.getBySlug(productSlug);
       if (productData) {
         setProduct(productData);

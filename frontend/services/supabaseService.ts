@@ -13,6 +13,36 @@ import { getFeaturedVendors, getFeaturedProducts } from './rankingService';
 import type { Vendor as MockVendor, Product as MockProduct } from './mockDataService';
 import { encodeProductSlug } from '../lib/slugUtils';
 
+/**
+ * Safely gets the Supabase client's from method
+ * Returns null if Supabase is not configured or not initialized
+ */
+function getSupabaseFrom() {
+  if (!isSupabaseConfigured()) {
+    return null;
+  }
+  const fromMethod = supabase.from;
+  if (!fromMethod) {
+    return null;
+  }
+  return fromMethod;
+}
+
+/**
+ * Safely gets the Supabase client's rpc method
+ * Returns null if Supabase is not configured or not initialized
+ */
+function getSupabaseRpc() {
+  if (!isSupabaseConfigured()) {
+    return null;
+  }
+  const rpcMethod = (supabase as any).rpc;
+  if (!rpcMethod) {
+    return null;
+  }
+  return rpcMethod;
+}
+
 // ============== AUTH SERVICE ==============
 export const authService = {
   // Sign up with email
@@ -32,15 +62,18 @@ export const authService = {
     
     if (data.user && !error) {
       // Create user profile
-      await supabase.from('users').insert({
-        id: data.user.id,
-        email,
-        name,
-        membership_tier: 'bronze',
-        zora_credits: 5.0,
-        loyalty_points: 100,
-        cultural_interests: [],
-      });
+      const fromMethod = getSupabaseFrom();
+      if (fromMethod) {
+        await fromMethod('users').insert({
+          id: data.user.id,
+          email,
+          name,
+          membership_tier: 'bronze',
+          zora_credits: 5.0,
+          loyalty_points: 100,
+          cultural_interests: [],
+        });
+      }
     }
     
     return { user: data.user, error };
@@ -155,8 +188,18 @@ export const vendorService = {
       })) as unknown as Vendor[];
     }
     
-    const { data, error } = await supabase
-      .from('vendors')
+    const fromMethod = getSupabaseFrom();
+    if (!fromMethod) {
+      // Fallback to mock data if Supabase not available
+      return mockDatabase.vendors.map(v => ({
+        ...v,
+        latitude: v.location.coordinates[1],
+        longitude: v.location.coordinates[0],
+        updated_at: v.created_at,
+      })) as unknown as Vendor[];
+    }
+    
+    const { data, error } = await fromMethod('vendors')
       .select('*')
       .order('is_featured', { ascending: false });
     
@@ -176,8 +219,18 @@ export const vendorService = {
     }
     
     // Fetch all vendors and rank them
-    const { data } = await supabase
-      .from('vendors')
+    const fromMethod = getSupabaseFrom();
+    if (!fromMethod) {
+      const featured = getFeaturedVendors(mockDatabase.vendors as MockVendor[], userRegion, limit);
+      return featured.map(v => ({
+        ...v,
+        latitude: v.location.coordinates[1],
+        longitude: v.location.coordinates[0],
+        updated_at: v.created_at,
+      })) as unknown as Vendor[];
+    }
+    
+    const { data } = await fromMethod('vendors')
       .select('*');
     
     if (!data || data.length === 0) return [];
@@ -216,8 +269,19 @@ export const vendorService = {
       } as unknown as Vendor;
     }
     
-    const { data } = await supabase
-      .from('vendors')
+    const fromMethod = getSupabaseFrom();
+    if (!fromMethod) {
+      const vendor = mockDatabase.vendors.find(v => v.id === id);
+      if (!vendor) return null;
+      return {
+        ...vendor,
+        latitude: vendor.location.coordinates[1],
+        longitude: vendor.location.coordinates[0],
+        updated_at: vendor.created_at,
+      } as unknown as Vendor;
+    }
+    
+    const { data } = await fromMethod('vendors')
       .select('*')
       .eq('id', id)
       .single();
@@ -243,8 +307,25 @@ export const vendorService = {
       } as unknown as Vendor;
     }
     
-    const { data } = await supabase
-      .from('vendors')
+    // Check if supabase client is available
+    const fromMethod = supabase.from;
+    if (!fromMethod) {
+      console.warn('Supabase client not initialized, falling back to mock data');
+      const vendor = mockDatabase.vendors.find(v => {
+        const vendorSlug = (v as any).slug || 
+          v.shop_name?.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+        return vendorSlug === slug || v.id === slug;
+      });
+      if (!vendor) return null;
+      return {
+        ...vendor,
+        latitude: vendor.location.coordinates[1],
+        longitude: vendor.location.coordinates[0],
+        updated_at: vendor.created_at,
+      } as unknown as Vendor;
+    }
+    
+    const { data } = await fromMethod('vendors')
       .select('*')
       .eq('slug', slug)
       .single();
@@ -263,8 +344,17 @@ export const vendorService = {
       return !existing;
     }
     
-    const { data } = await supabase
-      .from('vendors')
+    const fromMethod = getSupabaseFrom();
+    if (!fromMethod) {
+      const existing = mockDatabase.vendors.find(v => {
+        const vendorSlug = (v as any).slug || 
+          v.shop_name?.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+        return vendorSlug === slug && (!excludeVendorId || v.id !== excludeVendorId);
+      });
+      return !existing;
+    }
+    
+    const { data } = await fromMethod('vendors')
       .select('id')
       .eq('slug', slug)
       .limit(1);
@@ -301,7 +391,28 @@ export const vendorService = {
     }
     
     // Using PostGIS for proper geospatial queries in Supabase
-    const { data } = await supabase.rpc('get_nearby_vendors', {
+    const rpcMethod = getSupabaseRpc();
+    if (!rpcMethod) {
+      // Fallback to mock data
+      return mockDatabase.vendors
+        .filter(v => {
+          const vLat = v.location.coordinates[1];
+          const vLng = v.location.coordinates[0];
+          const distance = Math.sqrt(
+            Math.pow((vLat - lat) * 111, 2) + 
+            Math.pow((vLng - lng) * 111 * Math.cos(lat * Math.PI / 180), 2)
+          );
+          return distance <= radiusKm;
+        })
+        .map(v => ({
+          ...v,
+          latitude: v.location.coordinates[1],
+          longitude: v.location.coordinates[0],
+          updated_at: v.created_at,
+        })) as unknown as Vendor[];
+    }
+    
+    const { data } = await rpcMethod('get_nearby_vendors', {
       user_lat: lat,
       user_lng: lng,
       radius_km: radiusKm,
@@ -320,8 +431,14 @@ export const productService = {
         .map(p => ({ ...p, updated_at: p.created_at })) as unknown as Product[];
     }
     
-    const { data } = await supabase
-      .from('products')
+    const fromMethod = getSupabaseFrom();
+    if (!fromMethod) {
+      return mockDatabase.products
+        .filter(p => p.is_active)
+        .map(p => ({ ...p, updated_at: p.created_at })) as unknown as Product[];
+    }
+    
+    const { data } = await fromMethod('products')
       .select('*')
       .eq('is_active', true)
       .order('is_featured', { ascending: false });
@@ -337,8 +454,13 @@ export const productService = {
     }
     
     // Fetch all active products and rank them
-    const { data } = await supabase
-      .from('products')
+    const fromMethod = getSupabaseFrom();
+    if (!fromMethod) {
+      const featured = getFeaturedProducts(mockDatabase.products as MockProduct[], userRegion, limit);
+      return featured.map(p => ({ ...p, updated_at: p.created_at })) as unknown as Product[];
+    }
+    
+    const { data } = await fromMethod('products')
       .select('*')
       .eq('is_active', true);
     
@@ -364,8 +486,14 @@ export const productService = {
       return { ...product, updated_at: product.created_at } as unknown as Product;
     }
     
-    const { data } = await supabase
-      .from('products')
+    const fromMethod = getSupabaseFrom();
+    if (!fromMethod) {
+      const product = mockDatabase.products.find(p => p.id === id);
+      if (!product) return null;
+      return { ...product, updated_at: product.created_at } as unknown as Product;
+    }
+    
+    const { data } = await fromMethod('products')
       .select('*')
       .eq('id', id)
       .single();
@@ -375,18 +503,25 @@ export const productService = {
   
   getBySlug: async (slug: string): Promise<Product | null> => {
     // Import slug utilities
-    const { decodeProductSlug } = await import('../lib/slugUtils');
+    const { decodeProductSlug, isValidProductSlug } = await import('../lib/slugUtils');
     
-    try {
-      // Decode the Base62 slug to UUID
-      const uuid = decodeProductSlug(slug);
-      
-      // Use the decoded UUID to fetch the product
-      return await productService.getById(uuid);
-    } catch (error) {
-      console.error('Error decoding product slug:', error);
-      return null;
+    // Check if slug is a valid Base62 slug (for UUIDs) or a legacy ID
+    if (isValidProductSlug(slug)) {
+      try {
+        // Try to decode the Base62 slug to UUID
+        const uuid = decodeProductSlug(slug);
+        
+        // Use the decoded UUID to fetch the product
+        return await productService.getById(uuid);
+      } catch (error) {
+        console.error('Error decoding product slug:', error);
+        // Fall through to try as legacy ID
+      }
     }
+    
+    // Fallback: try to fetch by slug as if it's a legacy ID (for backward compatibility)
+    // This handles cases where product IDs are not UUIDs (e.g., "prd_011")
+    return await productService.getById(slug);
   },
   
   getByVendor: async (vendorId: string): Promise<Product[]> => {
@@ -396,8 +531,14 @@ export const productService = {
         .map(p => ({ ...p, updated_at: p.created_at })) as unknown as Product[];
     }
     
-    const { data } = await supabase
-      .from('products')
+    const fromMethod = getSupabaseFrom();
+    if (!fromMethod) {
+      return mockDatabase.products
+        .filter(p => p.vendor_id === vendorId && p.is_active)
+        .map(p => ({ ...p, updated_at: p.created_at })) as unknown as Product[];
+    }
+    
+    const { data } = await fromMethod('products')
       .select('*')
       .eq('vendor_id', vendorId)
       .eq('is_active', true);
@@ -412,8 +553,14 @@ export const productService = {
         .map(p => ({ ...p, updated_at: p.created_at })) as unknown as Product[];
     }
     
-    const { data } = await supabase
-      .from('products')
+    const fromMethod = getSupabaseFrom();
+    if (!fromMethod) {
+      return mockDatabase.products
+        .filter(p => p.category.toLowerCase() === category.toLowerCase() && p.is_active)
+        .map(p => ({ ...p, updated_at: p.created_at })) as unknown as Product[];
+    }
+    
+    const { data } = await fromMethod('products')
       .select('*')
       .ilike('category', category)
       .eq('is_active', true);
@@ -435,8 +582,21 @@ export const productService = {
         .map(p => ({ ...p, updated_at: p.created_at })) as unknown as Product[];
     }
     
-    const { data } = await supabase
-      .from('products')
+    const fromMethod = getSupabaseFrom();
+    if (!fromMethod) {
+      const lowerQuery = query.toLowerCase();
+      return mockDatabase.products
+        .filter(p => 
+          p.is_active && (
+            p.name.toLowerCase().includes(lowerQuery) ||
+            p.description.toLowerCase().includes(lowerQuery) ||
+            p.category.toLowerCase().includes(lowerQuery)
+          )
+        )
+        .map(p => ({ ...p, updated_at: p.created_at })) as unknown as Product[];
+    }
+    
+    const { data } = await fromMethod('products')
       .select('*')
       .eq('is_active', true)
       .or(`name.ilike.%${query}%,description.ilike.%${query}%,category.ilike.%${query}%`);

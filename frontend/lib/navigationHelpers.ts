@@ -4,23 +4,38 @@
  * Provides utilities to navigate to vendor and product routes using slugs
  */
 
-import { encodeProductSlug } from './slugUtils';
+import { encodeProductSlug, isValidProductSlug } from './slugUtils';
 import { generateVendorSlug } from './slugUtils';
 
 /**
+ * Checks if a string is a valid UUID format
+ */
+function isValidUUID(str: string): boolean {
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  return uuidRegex.test(str);
+}
+
+/**
  * Gets the product route URL using slug
- * @param productId - Product UUID
- * @returns Route path with Base62-encoded slug
+ * @param productId - Product UUID or legacy ID
+ * @returns Route path with Base62-encoded slug (for UUIDs) or legacy ID (for non-UUIDs)
  */
 export function getProductRoute(productId: string): string {
-  try {
-    const slug = encodeProductSlug(productId);
-    return `/product/${slug}`;
-  } catch (error) {
-    console.error('Error encoding product slug:', error);
-    // Fallback to ID-based route for backward compatibility
-    return `/product/${productId}`;
+  // Only encode if it's a valid UUID
+  if (isValidUUID(productId)) {
+    try {
+      const slug = encodeProductSlug(productId);
+      return `/product/${slug}`;
+    } catch (error) {
+      console.error('Error encoding product slug:', error);
+      // Fallback to ID-based route
+      return `/product/${productId}`;
+    }
   }
+  
+  // For non-UUID IDs (like "prd_011"), use the ID directly
+  // The product route will handle both UUID slugs and legacy IDs
+  return `/product/${productId}`;
 }
 
 /**
