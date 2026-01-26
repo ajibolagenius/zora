@@ -116,35 +116,38 @@ export default function VendorChatScreen() {
         }
     };
 
-    const handleSend = useCallback(() => {
-        if (!inputText.trim() || !vendor || !id) return;
+  const handleSend = useCallback(() => {
+    if (!inputText.trim() || !vendor || !id) return;
 
-        const conversationId = messageService.getConversationId(id, 'current_user');
+    const conversationId = messageService.getConversationId(id, 'current_user');
+    
+    // Capture message text before clearing input
+    const messageText = inputText.trim();
+    
+    // Send user message
+    const userMessage = messageService.send({
+      conversation_id: conversationId,
+      sender_id: 'current_user',
+      sender_type: 'user',
+      sender_name: 'You',
+      text: messageText,
+    });
 
-        // Send user message
-        const userMessage = messageService.send({
-            conversation_id: conversationId,
-            sender_id: 'current_user',
-            sender_type: 'user',
-            sender_name: 'You',
-            text: inputText.trim(),
-        });
+    setMessages(prev => [...prev, userMessage]);
+    setInputText('');
+    setIsTyping(true);
 
-        setMessages(prev => [...prev, userMessage]);
-        setInputText('');
-        setIsTyping(true);
+    // Scroll to bottom
+    setTimeout(() => {
+      scrollViewRef.current?.scrollToEnd({ animated: true });
+    }, 100);
 
-        // Scroll to bottom
-        setTimeout(() => {
-            scrollViewRef.current?.scrollToEnd({ animated: true });
-        }, 100);
-
-        // Simulate vendor response (with realistic delay)
-        setTimeout(() => {
-            setIsTyping(false);
-
-            // Generate contextual response based on message content
-            const userText = inputText.toLowerCase();
+    // Simulate vendor response (with realistic delay)
+    setTimeout(() => {
+      setIsTyping(false);
+      
+      // Generate contextual response based on message content
+      const userText = messageText.toLowerCase();
             let responseText = '';
 
             if (userText.includes('delivery') || userText.includes('deliver')) {
@@ -483,7 +486,6 @@ const styles = StyleSheet.create({
         borderBottomWidth: 1,
         borderBottomColor: Colors.borderDark,
         position: 'relative',
-        backgroundColor: Colors.backgroundDark,
     },
     headerGradient: {
         position: 'absolute',
@@ -494,10 +496,12 @@ const styles = StyleSheet.create({
         backgroundColor: Colors.borderDark,
     },
     backButton: {
-        width: 40,
-        height: 40,
-        borderRadius: 20,
-        backgroundColor: Colors.white10,
+        width: 44,
+        height: 44,
+        borderRadius: 22,
+        backgroundColor: Colors.cardDark,
+        borderWidth: 1,
+        borderColor: Colors.borderDark,
         justifyContent: 'center',
         alignItems: 'center',
         marginRight: Spacing.sm,

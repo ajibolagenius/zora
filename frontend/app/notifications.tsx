@@ -279,7 +279,6 @@ const styles = StyleSheet.create({
 
   // Header
   header: {
-    backgroundColor: Colors.tabBarBackground,
     borderBottomWidth: 1,
     borderBottomColor: Colors.borderDark,
   },

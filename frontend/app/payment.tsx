@@ -441,13 +441,17 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.base,
     paddingVertical: Spacing.md,
     borderBottomWidth: 1,
-    borderBottomColor: 'Colors.borderDark',
+    borderBottomColor: Colors.borderDark,
   },
   backButton: {
     width: 44,
     height: 44,
+    borderRadius: 22,
+    backgroundColor: Colors.cardDark,
+    borderWidth: 1,
+    borderColor: Colors.borderDark,
     justifyContent: 'center',
-    alignItems: 'flex-start',
+    alignItems: 'center',
   },
   headerTitle: {
     fontFamily: FontFamily.displaySemiBold,
@@ -488,7 +492,7 @@ const styles = StyleSheet.create({
     padding: Spacing.base,
     marginBottom: Spacing.lg,
     borderWidth: 1,
-    borderColor: 'Colors.borderDark',
+    borderColor: Colors.borderDark,
   },
   zoraCreditLeft: {
     flexDirection: 'row',
@@ -550,7 +554,7 @@ const styles = StyleSheet.create({
     borderRadius: BorderRadius.lg,
     padding: Spacing.base,
     borderWidth: 1.5,
-    borderColor: 'Colors.borderDark',
+    borderColor: Colors.borderDark,
   },
   methodCardSelected: {
     borderColor: Colors.primary,
@@ -609,7 +613,7 @@ const styles = StyleSheet.create({
     borderRadius: BorderRadius.lg,
     padding: Spacing.base,
     borderWidth: 1,
-    borderColor: 'Colors.borderDark',
+    borderColor: Colors.borderDark,
   },
   orderSummaryTitle: {
     fontFamily: FontFamily.displaySemiBold,
@@ -628,7 +632,7 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.sm,
     paddingBottom: Spacing.sm,
     borderBottomWidth: 1,
-    borderBottomColor: 'Colors.borderDark',
+    borderBottomColor: Colors.borderDark,
     borderStyle: 'dashed',
   },
   summaryLabel: {
@@ -682,7 +686,7 @@ const styles = StyleSheet.create({
     paddingTop: Spacing.base,
     backgroundColor: Colors.backgroundDark,
     borderTopWidth: 1,
-    borderTopColor: 'Colors.borderDark',
+    borderTopColor: Colors.borderDark,
   },
   footerTotalRow: {
     flexDirection: 'row',

@@ -486,7 +486,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: Colors.black30 + '50', // ~15% opacity
+    backgroundColor: 'rgba(0, 0, 0, 0.15)', // 15% opacity
   },
   removeImageButton: {
     position: 'absolute',

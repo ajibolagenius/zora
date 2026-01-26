@@ -139,16 +139,16 @@ export default function SearchScreen() {
             onPress={() => router.back()}
             className="w-11 h-11 rounded-full bg-card-dark items-center justify-center"
           >
-            <ArrowLeft size={24} color="#FFFFFF" weight="bold" />
+            <ArrowLeft size={24} color={Colors.textPrimary} weight="bold" />
           </TouchableOpacity>
           
           {/* Search Input */}
           <View className="flex-1 flex-row items-center bg-card-dark rounded-full px-4 h-12">
-            <MagnifyingGlass size={20} color="#CBA990" weight="regular" />
+            <MagnifyingGlass size={20} color={Colors.textMuted} weight="regular" />
             <TextInput
               className="flex-1 ml-3 text-text-primary font-body text-base"
               placeholder="Search products..."
-              placeholderTextColor="#CBA990"
+              placeholderTextColor={Colors.textMuted}
               value={searchQuery}
               onChangeText={(text) => {
                 setSearchQuery(text);
@@ -167,7 +167,7 @@ export default function SearchScreen() {
             />
             {searchQuery.length > 0 && (
               <TouchableOpacity onPress={() => { setSearchQuery(''); setShowDropdown(true); }}>
-                <X size={18} color="#CBA990" weight="bold" />
+                <X size={18} color={Colors.textMuted} weight="bold" />
               </TouchableOpacity>
             )}
           </View>
@@ -177,7 +177,7 @@ export default function SearchScreen() {
             onPress={openFilters}
             className="w-11 h-11 rounded-full bg-card-dark items-center justify-center relative"
           >
-            <SlidersHorizontal size={22} color="#FFFFFF" weight="bold" />
+            <SlidersHorizontal size={22} color={Colors.textPrimary} weight="bold" />
             {activeFilterCount > 0 && (
               <View className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-zora-red items-center justify-center">
                 <Text className="text-white text-xs font-bold">{activeFilterCount}</Text>
@@ -252,13 +252,13 @@ export default function SearchScreen() {
                       className="flex-row items-center py-2"
                       onPress={() => handleSuggestionPress(search)}
                     >
-                      <ClockCounterClockwise size={18} color="#CBA990" weight="duotone" />
+                      <ClockCounterClockwise size={18} color={Colors.textMuted} weight="duotone" />
                       <Text className="flex-1 ml-3 text-text-primary text-sm">{search}</Text>
                       <TouchableOpacity 
                         onPress={() => removeRecentSearch(search)}
                         hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
                       >
-                        <X size={16} color="#CBA990" weight="bold" />
+                        <X size={16} color={Colors.textMuted} weight="bold" />
                       </TouchableOpacity>
                     </TouchableOpacity>
                   ))}
@@ -298,7 +298,7 @@ export default function SearchScreen() {
                   className={`flex-row items-center py-3 px-4 ${index > 0 ? 'border-t border-white/5' : ''}`}
                   onPress={() => handleSuggestionPress(suggestion)}
                 >
-                  <MagnifyingGlass size={16} color="#CBA990" weight="regular" />
+                  <MagnifyingGlass size={16} color={Colors.textMuted} weight="regular" />
                   <Text className="ml-3 text-text-primary text-sm">{suggestion}</Text>
                 </TouchableOpacity>
               ))}
@@ -325,7 +325,7 @@ export default function SearchScreen() {
           {/* Empty State */}
           {!isLoading && searchQuery.length >= 2 && searchResults.length === 0 && (
             <View className="py-12 items-center">
-              <MagnifyingGlass size={48} color="#CBA990" weight="duotone" />
+              <MagnifyingGlass size={48} color={Colors.textMuted} weight="duotone" />
               <Text className="text-text-primary text-lg font-semibold mt-4">No results found</Text>
               <Text className="text-text-muted text-sm mt-2 text-center">
                 Try adjusting your search or filters
@@ -336,7 +336,7 @@ export default function SearchScreen() {
           {/* Prompt to Search */}
           {searchQuery.length < 2 && (
             <View className="py-12 items-center">
-              <MagnifyingGlass size={48} color="#CBA990" weight="duotone" />
+              <MagnifyingGlass size={48} color={Colors.textMuted} weight="duotone" />
               <Text className="text-text-primary text-lg font-semibold mt-4">Search for products</Text>
               <Text className="text-text-muted text-sm mt-2 text-center">
                 Enter at least 2 characters to search
@@ -399,7 +399,7 @@ export default function SearchScreen() {
             {/* Modal Header */}
             <View className="flex-row items-center justify-between px-4 py-3 border-b border-card-dark">
               <TouchableOpacity onPress={() => setShowFilters(false)}>
-                <X size={24} color="#FFFFFF" weight="bold" />
+                <X size={24} color={Colors.textPrimary} weight="bold" />
               </TouchableOpacity>
               <Text className="text-text-primary text-lg font-bold">Filters</Text>
               <TouchableOpacity onPress={clearFilters}>
@@ -502,7 +502,7 @@ export default function SearchScreen() {
                     <TextInput
                       className="bg-card-dark rounded-lg px-4 py-3 text-text-primary"
                       placeholder={`£${priceRange?.min || 0}`}
-                      placeholderTextColor="#CBA990"
+                      placeholderTextColor={Colors.textMuted}
                       keyboardType="numeric"
                       value={tempFilters.minPrice?.toString() || ''}
                       onChangeText={(text) => {
@@ -516,7 +516,7 @@ export default function SearchScreen() {
                     <TextInput
                       className="bg-card-dark rounded-lg px-4 py-3 text-text-primary"
                       placeholder={`£${priceRange?.max || 100}`}
-                      placeholderTextColor="#CBA990"
+                      placeholderTextColor={Colors.textMuted}
                       keyboardType="numeric"
                       value={tempFilters.maxPrice?.toString() || ''}
                       onChangeText={(text) => {

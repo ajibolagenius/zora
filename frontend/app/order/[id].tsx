@@ -95,11 +95,11 @@ export default function OrderDetailScreen() {
     <SafeAreaView style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()}>
+        <TouchableOpacity style={styles.backButton} onPress={() => router.back()} activeOpacity={0.8}>
           <MaterialCommunityIcons name="arrow-left" size={24} color={Colors.textPrimary} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>{order.order_number}</Text>
-        <View style={{ width: 24 }} />
+        <View style={styles.headerRight} />
       </View>
 
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
@@ -222,11 +222,26 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: Spacing.base,
     paddingVertical: Spacing.md,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.borderDark,
+  },
+  backButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: Colors.cardDark,
+    borderWidth: 1,
+    borderColor: Colors.borderDark,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   headerTitle: {
+    fontFamily: FontFamily.displaySemiBold,
+    fontSize: FontSize.h4,
     color: Colors.textPrimary,
-    fontSize: FontSize.body,
-    fontWeight: FontWeight.semiBold,
+  },
+  headerRight: {
+    width: 44,
   },
   scrollView: {
     flex: 1,

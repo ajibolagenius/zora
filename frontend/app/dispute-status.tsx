@@ -304,17 +304,18 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: Spacing.base,
     paddingVertical: Spacing.md,
-    backgroundColor: Colors.backgroundDark,
     borderBottomWidth: 1,
-    borderBottomColor: 'Colors.borderDark',
+    borderBottomColor: Colors.borderDark,
   },
   backButton: {
     width: 44,
     height: 44,
+    borderRadius: 22,
+    backgroundColor: Colors.cardDark,
+    borderWidth: 1,
+    borderColor: Colors.borderDark,
     justifyContent: 'center',
     alignItems: 'center',
-    borderRadius: 22,
-    backgroundColor: Colors.black30,
   },
   headerTitle: {
     fontFamily: FontFamily.displaySemiBold,
@@ -340,7 +341,7 @@ const styles = StyleSheet.create({
     borderRadius: BorderRadius.xl,
     padding: Spacing.lg,
     borderWidth: 1,
-    borderColor: 'Colors.borderDark',
+    borderColor: Colors.borderDark,
   },
   headerCardTop: {
     flexDirection: 'row',
@@ -394,7 +395,7 @@ const styles = StyleSheet.create({
   },
   headerDivider: {
     height: 1,
-    backgroundColor: 'Colors.white08',
+    backgroundColor: Colors.white08,
     marginBottom: Spacing.base,
   },
   headerCardBottom: {
@@ -443,10 +444,10 @@ const styles = StyleSheet.create({
     top: 32,
     bottom: 0,
     width: 2,
-    backgroundColor: 'Colors.white10',
+    backgroundColor: Colors.white10,
   },
   timelineLineCompleted: {
-    backgroundColor: 'Colors.primary30',
+    backgroundColor: Colors.primary30,
   },
   timelineLineActive: {
     backgroundColor: Colors.primary,
@@ -463,7 +464,7 @@ const styles = StyleSheet.create({
     width: 20,
     height: 20,
     borderRadius: 10,
-    backgroundColor: 'Colors.primary20',
+    backgroundColor: Colors.primary20,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -520,7 +521,7 @@ const styles = StyleSheet.create({
     borderRadius: BorderRadius.xl,
     padding: Spacing.lg,
     borderWidth: 1,
-    borderColor: 'Colors.borderDark',
+    borderColor: Colors.borderDark,
     gap: Spacing.lg,
   },
   detailSection: {
@@ -556,7 +557,7 @@ const styles = StyleSheet.create({
     padding: Spacing.md,
     borderRadius: BorderRadius.md,
     borderWidth: 1,
-    borderColor: 'Colors.borderDark',
+    borderColor: Colors.borderDark,
   },
   itemName: {
     fontFamily: FontFamily.body,
@@ -575,7 +576,7 @@ const styles = StyleSheet.create({
     padding: Spacing.md,
     borderRadius: BorderRadius.md,
     borderWidth: 1,
-    borderColor: 'Colors.borderDark',
+    borderColor: Colors.borderDark,
   },
   descriptionText: {
     fontFamily: FontFamily.body,
@@ -595,7 +596,7 @@ const styles = StyleSheet.create({
     borderRadius: BorderRadius.md,
     overflow: 'hidden',
     borderWidth: 1,
-    borderColor: 'Colors.white10',
+    borderColor: Colors.white10,
   },
   evidenceImage: {
     width: '100%',
@@ -620,7 +621,7 @@ const styles = StyleSheet.create({
     padding: Spacing.xl,
     borderWidth: 1.5,
     borderStyle: 'dashed',
-    borderColor: 'Colors.white10',
+    borderColor: Colors.white10,
     alignItems: 'center',
     gap: Spacing.md,
   },
@@ -655,7 +656,7 @@ const styles = StyleSheet.create({
     paddingBottom: Spacing.xl,
     backgroundColor: Colors.backgroundDark,
     borderTopWidth: 1,
-    borderTopColor: 'Colors.borderDark',
+    borderTopColor: Colors.borderDark,
   },
   contactButton: {
     flexDirection: 'row',

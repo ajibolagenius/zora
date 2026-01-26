@@ -399,7 +399,7 @@ const styles = StyleSheet.create({
         height: 20,
         borderRadius: BorderRadius.sm,
         borderWidth: 1.5, // Per Design System
-        borderColor: Colors.white20 + '4D', // 30% opacity
+        borderColor: 'rgba(255, 255, 255, 0.3)', // 30% opacity
         backgroundColor: 'transparent',
         justifyContent: 'center',
         alignItems: 'center',

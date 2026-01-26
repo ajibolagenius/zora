@@ -162,7 +162,7 @@ export default function ProductScreen() {
                       resizeMode="cover"
                     >
                       <LinearGradient
-                        colors={[Colors.black40, 'transparent', Colors.black50 + '99']} // 0.6 opacity = 99 hex
+                        colors={[Colors.black40, 'transparent', 'rgba(0, 0, 0, 0.6)']} // 60% opacity
                         style={styles.heroGradient}
                       />
                     </ImageBackground>
@@ -213,7 +213,7 @@ export default function ProductScreen() {
                 resizeMode="cover"
               >
                 <LinearGradient
-                  colors={[Colors.black40, 'transparent', Colors.black50 + '99']} // 0.6 opacity = 99 hex
+                  colors={[Colors.black40, 'transparent', 'rgba(0, 0, 0, 0.6)']} // 60% opacity
                   style={styles.heroGradient}
                 />
               </ImageBackground>
@@ -226,7 +226,7 @@ export default function ProductScreen() {
               style={styles.heroButton}
               onPress={() => router.back()}
             >
-              <ArrowLeft size={20} color="#FFFFFF" weight="bold" />
+              <ArrowLeft size={20} color={Colors.textPrimary} weight="bold" />
             </TouchableOpacity>
             <View style={styles.heroHeaderRight}>
               <TouchableOpacity
