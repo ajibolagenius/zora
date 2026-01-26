@@ -29,6 +29,7 @@ import {
 import { Colors } from '../../constants/colors';
 import { Spacing, BorderRadius } from '../../constants/spacing';
 import { FontSize, FontFamily } from '../../constants/typography';
+import { AnimationDuration, AnimationEasing, ImageUrlBuilders } from '../../constants';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
@@ -63,14 +64,14 @@ export default function OrderTrackingScreen() {
     Animated.parallel([
       Animated.timing(fadeAnim, {
         toValue: 1,
-        duration: 400,
-        easing: Easing.out(Easing.cubic),
+        duration: AnimationDuration.default,
+        easing: AnimationEasing.standard,
         useNativeDriver: true,
       }),
       Animated.timing(slideAnim, {
         toValue: 0,
-        duration: 400,
-        easing: Easing.out(Easing.cubic),
+        duration: AnimationDuration.default,
+        easing: AnimationEasing.standard,
         useNativeDriver: true,
       }),
     ]).start();
@@ -188,7 +189,7 @@ export default function OrderTrackingScreen() {
           <View style={styles.driverCard}>
             <View style={styles.driverPhoto}>
               <Image
-                source={{ uri: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200' }}
+                source={{ uri: ImageUrlBuilders.dicebearAvatar('David') }}
                 style={styles.driverImage}
               />
               <View style={styles.ratingBadge}>

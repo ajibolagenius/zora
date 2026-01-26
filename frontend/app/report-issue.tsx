@@ -19,6 +19,7 @@ import {
 import { Colors } from '../constants/colors';
 import { Spacing, BorderRadius, Heights } from '../constants/spacing';
 import { FontSize, FontFamily } from '../constants/typography';
+import { AnimationDuration, AnimationEasing, PlaceholderImages } from '../constants';
 
 interface IssueType {
   id: string;
@@ -46,7 +47,7 @@ const ORDER_ITEMS: OrderItem[] = [
     id: '1',
     name: 'Plantain Chips',
     price: 4.99,
-    image: 'https://images.unsplash.com/photo-1621447504864-d8686e12698c?w=200',
+    image: PlaceholderImages.image200,
   },
   {
     id: '2',
@@ -88,14 +89,14 @@ export default function ReportIssueScreen() {
     Animated.parallel([
       Animated.timing(fadeAnim, {
         toValue: 1,
-        duration: 400,
-        easing: Easing.out(Easing.cubic),
+        duration: AnimationDuration.default,
+        easing: AnimationEasing.standard,
         useNativeDriver: true,
       }),
       Animated.timing(slideAnim, {
         toValue: 0,
-        duration: 400,
-        easing: Easing.out(Easing.cubic),
+        duration: AnimationDuration.default,
+        easing: AnimationEasing.standard,
         useNativeDriver: true,
       }),
     ]).start();

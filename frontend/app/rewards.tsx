@@ -23,6 +23,7 @@ import {
 import { Colors } from '../constants/colors';
 import { Spacing, BorderRadius } from '../constants/spacing';
 import { FontSize, FontFamily, LetterSpacing } from '../constants/typography';
+import { PlaceholderImages } from '../constants';
 import { useAuthStore } from '../stores/authStore';
 
 // Available colors from Design System for randomized icons
@@ -109,7 +110,7 @@ const EARN_CARDS_BASE: Omit<EarnCard, 'icon' | 'color'>[] = [
     description: 'Share your thoughts on your recent purchase.',
     points: '+50 POINTS',
     buttonText: 'Write Review',
-    imageUrl: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=400',
+    imageUrl: PlaceholderImages.image400,
   },
   {
     id: '2',
@@ -117,7 +118,7 @@ const EARN_CARDS_BASE: Omit<EarnCard, 'icon' | 'color'>[] = [
     description: 'Stay updated with our latest offers.',
     points: '+20 POINTS',
     buttonText: 'Follow Us',
-    imageUrl: 'https://images.unsplash.com/photo-1611262588024-d12430b98920?w=400',
+    imageUrl: PlaceholderImages.image400,
   },
   {
     id: '3',
@@ -125,7 +126,7 @@ const EARN_CARDS_BASE: Omit<EarnCard, 'icon' | 'color'>[] = [
     description: 'Give £5, get £5 when they order.',
     points: '+100 POINTS',
     buttonText: 'Invite',
-    imageUrl: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=400',
+    imageUrl: PlaceholderImages.image400,
   },
 ];
 

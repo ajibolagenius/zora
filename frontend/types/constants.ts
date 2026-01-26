@@ -2,7 +2,7 @@
 // Provides TypeScript types for all constant objects
 
 import type { Colors } from '../constants/colors';
-import type { Spacing, BorderRadius, Shadows, IconSize, Heights, TouchTarget, Dimensions, BorderWidths, Gaps } from '../constants/spacing';
+import type { Spacing, BorderRadius, Shadows, IconSize, Heights, TouchTarget, ComponentDimensions, BorderWidths, Gaps } from '../constants/spacing';
 import type { Typography, FontFamily, FontSize, FontWeight, LineHeight, LetterSpacing } from '../constants/typography';
 import type { AnimationDuration, AnimationDelay, AnimationEasing, AnimationValues, Animations } from '../constants/animations';
 import type { ApiEndpoints, ApiConfig, HttpStatus, ApiHeaders } from '../constants/api';
@@ -25,7 +25,7 @@ export type {
   IconSize,
   Heights,
   TouchTarget,
-  Dimensions,
+  ComponentDimensions,
   BorderWidths,
   Gaps,
   Typography,

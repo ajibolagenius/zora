@@ -23,6 +23,7 @@ import {
 import { Colors } from '../constants/colors';
 import { Spacing, BorderRadius, Heights } from '../constants/spacing';
 import { FontSize, FontFamily } from '../constants/typography';
+import { PlaceholderImages } from '../constants';
 
 interface TimelineStep {
   id: string;
@@ -69,8 +70,8 @@ const AFFECTED_ITEMS = [
 ];
 
 const EVIDENCE_IMAGES = [
-  'https://images.unsplash.com/photo-1596040033229-a9821ebd058d?w=200',
-  'https://images.unsplash.com/photo-1571771894821-ce9b6c11b08e?w=200',
+  PlaceholderImages.image200,
+  PlaceholderImages.image200,
 ];
 
 export default function DisputeStatusScreen() {

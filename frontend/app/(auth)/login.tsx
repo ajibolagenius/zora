@@ -27,7 +27,7 @@ import {
 import { Colors } from '../../constants/colors';
 import { Spacing, BorderRadius, Heights } from '../../constants/spacing';
 import { FontSize, FontFamily } from '../../constants/typography';
-import { ErrorMessages } from '../../constants';
+import { ErrorMessages, Placeholders } from '../../constants';
 import { useAuthStore } from '../../stores/authStore';
 
 type AuthMode = 'signin' | 'signup';
@@ -169,7 +169,7 @@ export default function LoginScreen() {
                                     <User size={20} color={Colors.textMuted} weight="duotone" />
                                     <TextInput
                                         style={styles.input}
-                                        placeholder="Full Name"
+                                        placeholder={Placeholders.auth.fullName}
                                         placeholderTextColor={Colors.textMuted}
                                         value={name}
                                         onChangeText={setName}
@@ -182,7 +182,7 @@ export default function LoginScreen() {
                                 <Envelope size={20} color={Colors.textMuted} weight="duotone" />
                                 <TextInput
                                     style={styles.input}
-                                    placeholder="Email Address"
+                                    placeholder={Placeholders.auth.email}
                                     placeholderTextColor={Colors.textMuted}
                                     value={email}
                                     onChangeText={setEmail}
@@ -195,7 +195,7 @@ export default function LoginScreen() {
                                 <Lock size={20} color={Colors.textMuted} weight="duotone" />
                                 <TextInput
                                     style={styles.input}
-                                    placeholder="Password"
+                                    placeholder={Placeholders.auth.password}
                                     placeholderTextColor={Colors.textMuted}
                                     value={password}
                                     onChangeText={setPassword}

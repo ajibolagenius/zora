@@ -24,7 +24,7 @@ import {
 import { Colors } from '../../constants/colors';
 import { Spacing, BorderRadius, Heights } from '../../constants/spacing';
 import { FontSize, FontFamily } from '../../constants/typography';
-import { Placeholders, AnimationDuration, AnimationEasing } from '../../constants';
+import { Placeholders, AnimationDuration, AnimationEasing, ValidationPatterns } from '../../constants';
 import { useAuthStore } from '../../stores/authStore';
 
 type ScreenState = 'input' | 'sent';
@@ -79,7 +79,7 @@ export default function ForgotPasswordScreen() {
         }
 
         // Basic email validation
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        const emailRegex = ValidationPatterns.email;
         if (!emailRegex.test(email)) {
             Alert.alert('Invalid Email', 'Please enter a valid email address');
             return;

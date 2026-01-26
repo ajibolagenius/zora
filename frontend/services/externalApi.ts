@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { Product, Vendor, Region } from '../types';
-import { ApiEndpoints } from '../constants';
+import { ApiEndpoints, CommonImages, PlaceholderImages, ImageUrlBuilders } from '../constants';
 
 // External API endpoints (using constants)
 const MEAL_DB_API = ApiEndpoints.mealDb;
@@ -12,27 +12,27 @@ export const AFRICAN_REGIONS: Region[] = [
   {
     id: 'west-africa',
     name: 'West Africa',
-    image: 'https://images.unsplash.com/photo-1590001155093-a3c66ab0c3ff?w=600',
+    image: CommonImages.westAfrica,
   },
   {
     id: 'east-africa',
     name: 'East Africa',
-    image: 'https://images.unsplash.com/photo-1489392191049-fc10c97e64b6?w=600',
+    image: CommonImages.eastAfrica,
   },
   {
     id: 'north-africa',
     name: 'North Africa',
-    image: 'https://images.unsplash.com/photo-1539635278303-d4002c07eae3?w=600',
+    image: CommonImages.northAfrica,
   },
   {
     id: 'southern-africa',
     name: 'Southern Africa',
-    image: 'https://images.unsplash.com/photo-1484318571209-661cf29a69c3?w=600',
+    image: CommonImages.southernAfrica,
   },
   {
     id: 'central-africa',
     name: 'Central Africa',
-    image: 'https://images.unsplash.com/photo-1523805009345-7448845a9e53?w=600',
+    image: CommonImages.centralAfrica,
   },
 ];
 
@@ -105,8 +105,8 @@ const generateVendors = (): Vendor[] => {
     {
       id: 'vendor-1',
       name: "Mama Africa's Kitchen",
-      avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=200',
-      cover_image: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800',
+      avatar: ImageUrlBuilders.dicebearAvatar('Vendor1'),
+      cover_image: PlaceholderImages.image800,
       category: 'African Groceries',
       regions: ['west-africa', 'east-africa'],
       rating: 4.9,
@@ -123,8 +123,8 @@ const generateVendors = (): Vendor[] => {
     {
       id: 'vendor-2',
       name: 'Lagos Fresh Market',
-      avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200',
-      cover_image: 'https://images.unsplash.com/photo-1606787366850-de6330128bfc?w=800',
+      avatar: ImageUrlBuilders.dicebearAvatar('Vendor2'),
+      cover_image: PlaceholderImages.image800,
       category: 'Fresh Produce & Meats',
       regions: ['west-africa'],
       rating: 4.7,
@@ -141,8 +141,8 @@ const generateVendors = (): Vendor[] => {
     {
       id: 'vendor-3',
       name: 'Cairo Spice Emporium',
-      avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=200',
-      cover_image: 'https://images.unsplash.com/photo-1596040033229-a9821ebd058d?w=800',
+      avatar: ImageUrlBuilders.dicebearAvatar('Vendor3'),
+      cover_image: PlaceholderImages.image800,
       category: 'Spices & Seasonings',
       regions: ['north-africa', 'east-africa'],
       rating: 4.8,
@@ -159,8 +159,8 @@ const generateVendors = (): Vendor[] => {
     {
       id: 'vendor-4',
       name: 'Ethiopian Delights',
-      avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200',
-      cover_image: 'https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=800',
+      avatar: ImageUrlBuilders.dicebearAvatar('Vendor4'),
+      cover_image: PlaceholderImages.image800,
       category: 'Ethiopian Cuisine',
       regions: ['east-africa'],
       rating: 4.6,
@@ -176,8 +176,8 @@ const generateVendors = (): Vendor[] => {
     {
       id: 'vendor-5',
       name: 'Cape Town Organics',
-      avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200',
-      cover_image: 'https://images.unsplash.com/photo-1490818387583-1baba5e638af?w=800',
+      avatar: ImageUrlBuilders.dicebearAvatar('Vendor5'),
+      cover_image: PlaceholderImages.image800,
       category: 'Organic & Natural',
       regions: ['southern-africa'],
       rating: 4.5,
@@ -206,7 +206,7 @@ export const fetchFoodImages = async (count: number = 20): Promise<string[]> => 
   } catch (error) {
     console.error('Error fetching food images:', error);
     // Fallback to static images
-    return Array(count).fill('https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=400');
+    return Array(count).fill(PlaceholderImages.image400);
   }
 };
 
@@ -306,7 +306,7 @@ export const externalApiService = {
       const response = await axios.get(FOODISH_API);
       return response.data.image;
     } catch (error) {
-      return 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=400';
+      return PlaceholderImages.image400;
     }
   },
 };

@@ -33,6 +33,7 @@ import {
 import { Colors } from '../../constants/colors';
 import { Spacing, BorderRadius, Heights } from '../../constants/spacing';
 import { FontSize, FontFamily } from '../../constants/typography';
+import { PlaceholderImages } from '../../constants';
 
 // Status colors matching design system (using constants)
 const STATUS_YELLOW = Colors.statusYellow;
@@ -76,13 +77,13 @@ const MOCK_ORDERS: OrderItem[] = [
         total: 45.50,
         status: 'preparing',
         thumbnails: [
-            'https://images.unsplash.com/photo-1596040033229-a9821ebd058d?w=100',
-            'https://images.unsplash.com/photo-1586201375761-83865001e31c?w=100',
-            'https://images.unsplash.com/photo-1540420773420-3366772f4999?w=100',
+            PlaceholderImages.image100,
+            PlaceholderImages.image100,
+            PlaceholderImages.image100,
         ],
         products: [
-            { id: 'prod_001', name: 'Premium Jollof Spice Blend', image_url: 'https://images.unsplash.com/photo-1596040033229-a9821ebd058d?w=100', quantity: 2, price: 18.50 },
-            { id: 'prod_002', name: 'Nigerian Curry Powder', image_url: 'https://images.unsplash.com/photo-1586201375761-83865001e31c?w=100', quantity: 1, price: 8.50 },
+            { id: 'prod_001', name: 'Premium Jollof Spice Blend', image_url: PlaceholderImages.image100, quantity: 2, price: 18.50 },
+            { id: 'prod_002', name: 'Nigerian Curry Powder', image_url: PlaceholderImages.image100, quantity: 1, price: 8.50 },
         ],
     },
     {
@@ -95,12 +96,12 @@ const MOCK_ORDERS: OrderItem[] = [
         total: 22.00,
         status: 'out_for_delivery',
         thumbnails: [
-            'https://images.unsplash.com/photo-1542838132-92c53300491e?w=100',
-            'https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=100',
+            PlaceholderImages.image100,
+            PlaceholderImages.image100,
         ],
         products: [
-            { id: 'prod_003', name: 'Fresh Palm Oil', image_url: 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=100', quantity: 1, price: 12.00 },
-            { id: 'prod_004', name: 'Garri Premium', image_url: 'https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=100', quantity: 1, price: 10.00 },
+            { id: 'prod_003', name: 'Fresh Palm Oil', image_url: PlaceholderImages.image100, quantity: 1, price: 12.00 },
+            { id: 'prod_004', name: 'Garri Premium', image_url: PlaceholderImages.image100, quantity: 1, price: 10.00 },
         ],
     },
     {
@@ -113,10 +114,10 @@ const MOCK_ORDERS: OrderItem[] = [
         total: 15.00,
         status: 'delivered',
         thumbnails: [
-            'https://images.unsplash.com/photo-1559056199-641a0ac8b55e?w=100',
+            PlaceholderImages.image100,
         ],
         products: [
-            { id: 'prod_005', name: 'Shea Butter Body Cream', image_url: 'https://images.unsplash.com/photo-1559056199-641a0ac8b55e?w=100', quantity: 1, price: 15.00 },
+            { id: 'prod_005', name: 'Shea Butter Body Cream', image_url: PlaceholderImages.image100, quantity: 1, price: 15.00 },
         ],
     },
     {
@@ -129,14 +130,14 @@ const MOCK_ORDERS: OrderItem[] = [
         total: 30.00,
         status: 'cancelled',
         thumbnails: [
-            'https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?w=100',
-            'https://images.unsplash.com/photo-1600857544200-b2f666a9a2ec?w=100',
-            'https://images.unsplash.com/photo-1556910096-6f5e72db6803?w=100',
+            PlaceholderImages.image100,
+            PlaceholderImages.image100,
+            PlaceholderImages.image100,
         ],
         products: [
-            { id: 'prod_006', name: 'Raw Shea Butter', image_url: 'https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?w=100', quantity: 2, price: 12.00 },
-            { id: 'prod_007', name: 'Cocoa Butter', image_url: 'https://images.unsplash.com/photo-1600857544200-b2f666a9a2ec?w=100', quantity: 1, price: 8.00 },
-            { id: 'prod_008', name: 'Mango Butter', image_url: 'https://images.unsplash.com/photo-1556910096-6f5e72db6803?w=100', quantity: 1, price: 10.00 },
+            { id: 'prod_006', name: 'Raw Shea Butter', image_url: PlaceholderImages.image100, quantity: 2, price: 12.00 },
+            { id: 'prod_007', name: 'Cocoa Butter', image_url: PlaceholderImages.image100, quantity: 1, price: 8.00 },
+            { id: 'prod_008', name: 'Mango Butter', image_url: PlaceholderImages.image100, quantity: 1, price: 10.00 },
         ],
     },
 ];

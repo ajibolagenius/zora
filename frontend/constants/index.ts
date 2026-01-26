@@ -1,7 +1,7 @@
 // Design Tokens
 export { Colors, default as colors } from './colors';
 export { Typography, FontFamily, FontSize, FontWeight, LineHeight, LetterSpacing } from './typography';
-export { Spacing, BorderRadius, Shadows, IconSize, Heights, TouchTarget, Dimensions, BorderWidths, Gaps } from './spacing';
+export { Spacing, BorderRadius, Shadows, IconSize, Heights, TouchTarget, ComponentDimensions, BorderWidths, Gaps } from './spacing';
 
 // Animations
 export {

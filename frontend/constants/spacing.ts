@@ -91,7 +91,7 @@ export const Heights = {
 };
 
 // Common Component Dimensions
-export const Dimensions = {
+export const ComponentDimensions = {
     // Avatar sizes (complementing AvatarStyles)
     avatar: {
         tiny: 24,
@@ -151,8 +151,5 @@ export const Gaps = {
     '3xl': 24,
     '4xl': 32,
 } as const;
-
-// Export all spacing-related constants
-export { Dimensions, BorderWidths, Gaps };
 
 export default Spacing;

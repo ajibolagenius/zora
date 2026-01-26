@@ -22,6 +22,7 @@ import {
 import { Colors } from '../constants/colors';
 import { Spacing, BorderRadius, Heights } from '../constants/spacing';
 import { FontSize, FontFamily } from '../constants/typography';
+import { AnimationDuration, AnimationEasing } from '../constants';
 
 export default function OrderConfirmationScreen() {
   const router = useRouter();
@@ -41,8 +42,8 @@ export default function OrderConfirmationScreen() {
       Animated.parallel([
         Animated.timing(fadeAnim, {
           toValue: 1,
-          duration: 400,
-          easing: Easing.out(Easing.cubic),
+          duration: AnimationDuration.default,
+          easing: AnimationEasing.standard,
           useNativeDriver: true,
         }),
         Animated.spring(scaleAnim, {
@@ -54,7 +55,7 @@ export default function OrderConfirmationScreen() {
       ]),
       Animated.timing(slideAnim, {
         toValue: 0,
-        duration: 300,
+        duration: AnimationDuration.normal,
         easing: Easing.out(Easing.cubic),
         useNativeDriver: true,
       }),
