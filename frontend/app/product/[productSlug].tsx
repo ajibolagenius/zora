@@ -40,8 +40,9 @@ import { productService, vendorService, reviewService } from '../../services/sup
 import type { Product, Vendor, Review } from '../../types/supabase';
 import { useCartStore } from '../../stores/cartStore';
 import FloatingTabBar from '../../components/ui/FloatingTabBar';
-import { decodeProductSlug } from '../../lib/slugUtils';
-import { getVendorRoute } from '../../lib/navigationHelpers';
+import { decodeProductSlug, isValidProductSlug } from '../../lib/slugUtils';
+import { getVendorRoute, isValidRouteParam } from '../../lib/navigationHelpers';
+import NotFoundScreen from '../../components/errors/NotFoundScreen';
 
 type SectionType = 'description' | 'nutrition' | 'heritage';
 
@@ -65,6 +66,13 @@ export default function ProductScreen() {
 
   const fetchData = useCallback(async () => {
     if (!productSlug) return;
+    
+    // Validate slug format
+    if (!isValidRouteParam(productSlug, 'slug')) {
+      setLoading(false);
+      return; // Will show NotFoundScreen
+    }
+    
     try {
       setLoading(true);
       // getBySlug handles both Base62-encoded UUIDs and legacy IDs
@@ -125,11 +133,11 @@ export default function ProductScreen() {
 
   if (!product) {
     return (
-      <View style={styles.container}>
-        <View style={styles.loadingContainer}>
-          <Text style={styles.errorText}>Product not found</Text>
-        </View>
-      </View>
+      <NotFoundScreen
+        title="Product Not Found"
+        message="This product doesn't exist or may have been removed. It might have been deleted or the link is incorrect."
+        onBack={() => router.back()}
+      />
     );
   }
 

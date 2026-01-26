@@ -1,19 +1,9 @@
-/**
- * Navigation Helpers for Slug-based Routes
- * 
- * Provides utilities to navigate to vendor and product routes using slugs
- */
-
-import { encodeProductSlug, isValidProductSlug } from './slugUtils';
-import { generateVendorSlug } from './slugUtils';
+import { decodeProductSlug, encodeProductSlug, isValidUUID } from './slugUtils';
 
 /**
- * Checks if a string is a valid UUID format
+ * Navigation Helper Functions
+ * Utilities for generating routes and handling navigation
  */
-function isValidUUID(str: string): boolean {
-  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-  return uuidRegex.test(str);
-}
 
 /**
  * Gets the product route URL using slug
@@ -44,25 +34,80 @@ export function getProductRoute(productId: string): string {
  * @param vendorId - Optional vendor ID as fallback
  * @returns Route path with semantic slug
  */
-export function getVendorRoute(vendor?: { shop_name?: string; slug?: string; name?: string }, vendorId?: string): string {
-  if (vendor) {
-    // Use existing slug if available
-    if (vendor.slug) {
-      return `/store/${vendor.slug}`;
-    }
-    
-    // Generate slug from shop name
+export function getVendorRoute(vendor?: { slug?: string; shop_name?: string; name?: string }, vendorId?: string): string {
+  // Prefer slug if available
+  if (vendor?.slug) {
+    return `/store/${vendor.slug}`;
+  }
+  
+  // Generate slug from shop_name or name
+  if (vendor?.shop_name || vendor?.name) {
     const shopName = vendor.shop_name || vendor.name || '';
-    if (shopName) {
-      const slug = generateVendorSlug(shopName);
+    const slug = shopName
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '');
+    if (slug) {
       return `/store/${slug}`;
     }
   }
   
-  // Fallback to ID-based route
+  // Fallback to ID-based route if no slug available
   if (vendorId) {
     return `/vendor/${vendorId}`;
   }
   
+  // Ultimate fallback
   return '/vendors';
+}
+
+/**
+ * Handles redirect for invalid or not found resources
+ * @param router - Expo Router instance
+ * @param type - Type of resource (product, vendor, order, etc.)
+ * @param fallbackRoute - Route to redirect to if back navigation isn't available
+ */
+export function handleNotFoundRedirect(
+  router: any,
+  type: 'product' | 'vendor' | 'store' | 'order' | 'page',
+  fallbackRoute?: string
+): void {
+  const routes: Record<string, string> = {
+    product: '/(tabs)/explore',
+    vendor: '/vendors',
+    store: '/vendors',
+    order: '/(tabs)/orders',
+    page: '/(tabs)',
+  };
+
+  const defaultRoute = fallbackRoute || routes[type] || '/(tabs)';
+
+  if (router.canGoBack()) {
+    router.back();
+  } else {
+    router.replace(defaultRoute);
+  }
+}
+
+/**
+ * Validates if a route parameter is valid
+ * @param param - Route parameter value
+ * @param type - Type of parameter (uuid, slug, id)
+ * @returns true if valid, false otherwise
+ */
+export function isValidRouteParam(param: string | undefined, type: 'uuid' | 'slug' | 'id' = 'id'): boolean {
+  if (!param || typeof param !== 'string') return false;
+
+  switch (type) {
+    case 'uuid':
+      return isValidUUID(param);
+    case 'slug':
+      // Basic slug validation: alphanumeric, hyphens, underscores
+      return /^[a-z0-9_-]+$/i.test(param) && param.length > 0 && param.length <= 100;
+    case 'id':
+      // Basic ID validation: non-empty string
+      return param.length > 0 && param.length <= 255;
+    default:
+      return false;
+  }
 }

@@ -18,6 +18,8 @@ import { Button } from '../../components/ui';
 import { orderService } from '../../services/dataService';
 import { Order } from '../../types';
 import { useAuthStore } from '../../stores/authStore';
+import NotFoundScreen from '../../components/errors/NotFoundScreen';
+import { isValidRouteParam } from '../../lib/navigationHelpers';
 
 const getStatusColor = (status: string) => {
   switch (status) {
@@ -49,7 +51,15 @@ export default function OrderDetailScreen() {
 
   useEffect(() => {
     if (id && sessionToken) {
+      // Validate order ID format
+      if (!isValidRouteParam(id, 'id')) {
+        setLoading(false);
+        return; // Will show NotFoundScreen
+      }
       fetchOrder();
+    } else if (id && !sessionToken) {
+      // No session token, can't fetch order
+      setLoading(false);
     }
   }, [id, sessionToken]);
 
@@ -81,11 +91,11 @@ export default function OrderDetailScreen() {
 
   if (!order) {
     return (
-      <SafeAreaView style={styles.container}>
-        <View style={styles.loadingContainer}>
-          <Text style={styles.errorText}>Order not found</Text>
-        </View>
-      </SafeAreaView>
+      <NotFoundScreen
+        title="Order Not Found"
+        message="This order doesn't exist or you don't have permission to view it. It might have been deleted or the order ID is incorrect."
+        onBack={() => router.back()}
+      />
     );
   }
 

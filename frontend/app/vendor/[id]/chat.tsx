@@ -26,6 +26,7 @@ import { Spacing, BorderRadius, Shadows } from '../../../constants/spacing';
 import { FontSize, FontFamily } from '../../../constants/typography';
 import { vendorService, messageService, type Vendor, type Message } from '../../../services/mockDataService';
 import { QuickReplies, Placeholders, AnimationDuration, AnimationEasing } from '../../../constants';
+import NotFoundScreen from '../../../components/errors/NotFoundScreen';
 
 export default function VendorChatScreen() {
     const router = useRouter();
@@ -315,11 +316,11 @@ export default function VendorChatScreen() {
 
     if (!vendor) {
         return (
-            <SafeAreaView style={styles.container} edges={['top']}>
-                <View style={styles.loadingContainer}>
-                    <Text style={styles.errorText}>Vendor not found</Text>
-                </View>
-            </SafeAreaView>
+            <NotFoundScreen
+                title="Vendor Not Found"
+                message="This vendor doesn't exist or may have been removed. It might have been deleted or the link is incorrect."
+                onBack={() => router.back()}
+            />
         );
     }
 

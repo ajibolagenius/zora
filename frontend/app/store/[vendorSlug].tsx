@@ -35,7 +35,9 @@ import type { Vendor, Product, Review } from '../../types/supabase';
 import { Link } from 'expo-router';
 import { useCartStore } from '../../stores/cartStore';
 import FloatingTabBar from '../../components/ui/FloatingTabBar';
-import { encodeProductSlug } from '../../lib/slugUtils';
+import { encodeProductSlug, isValidVendorSlug } from '../../lib/slugUtils';
+import { isValidRouteParam } from '../../lib/navigationHelpers';
+import NotFoundScreen from '../../components/errors/NotFoundScreen';
 
 type TabType = 'products' | 'reviews' | 'about';
 
@@ -64,6 +66,13 @@ export default function StoreScreen() {
 
     const fetchData = useCallback(async () => {
         if (!vendorSlug) return;
+        
+        // Validate slug format
+        if (!isValidRouteParam(vendorSlug, 'slug') || !isValidVendorSlug(vendorSlug)) {
+            setLoading(false);
+            return; // Will show NotFoundScreen
+        }
+        
         try {
             setLoading(true);
             // Use slug-based lookup
@@ -148,11 +157,11 @@ export default function StoreScreen() {
 
     if (!vendor) {
         return (
-            <View style={styles.container}>
-                <View style={styles.loadingContainer}>
-                    <Text style={styles.errorText}>Store not found</Text>
-                </View>
-            </View>
+            <NotFoundScreen
+                title="Store Not Found"
+                message="This store doesn't exist or may have been removed. It might have been deleted or the link is incorrect."
+                onBack={() => router.back()}
+            />
         );
     }
 

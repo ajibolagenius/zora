@@ -178,3 +178,18 @@ export function isValidProductSlug(slug: string): boolean {
   // Check if all characters are valid Base62 characters
   return /^[0-9a-zA-Z]+$/.test(slug);
 }
+
+/**
+ * Validates if a string is a valid UUID format
+ * @param uuid - The string to validate
+ * @returns true if valid UUID format, false otherwise
+ */
+export function isValidUUID(uuid: string): boolean {
+  if (!uuid || typeof uuid !== 'string') {
+    return false;
+  }
+  
+  // UUID format: 8-4-4-4-12 hexadecimal characters
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  return uuidRegex.test(uuid);
+}

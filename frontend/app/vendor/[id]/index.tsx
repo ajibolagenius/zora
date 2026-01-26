@@ -37,6 +37,7 @@ import { Link } from 'expo-router';
 import { useCartStore } from '../../../stores/cartStore';
 import FloatingTabBar from '../../../components/ui/FloatingTabBar';
 import { getProductRoute } from '../../../lib/navigationHelpers';
+import NotFoundScreen from '../../../components/errors/NotFoundScreen';
 
 type TabType = 'products' | 'reviews' | 'about';
 
@@ -147,11 +148,11 @@ export default function VendorScreen() {
 
     if (!vendor) {
         return (
-            <View style={styles.container}>
-                <View style={styles.loadingContainer}>
-                    <Text style={styles.errorText}>Vendor not found</Text>
-                </View>
-            </View>
+            <NotFoundScreen
+                title="Vendor Not Found"
+                message="This vendor doesn't exist or may have been removed. It might have been deleted or the link is incorrect."
+                onBack={() => router.back()}
+            />
         );
     }
 
