@@ -244,7 +244,7 @@ export default function VendorProductsScreen() {
                   <Text style={styles.reviewCount}>({product.review_count})</Text>
                 </View>
                 <View style={styles.productFooter}>
-                  <Text style={styles.productPrice}>${product.price.toFixed(2)}</Text>
+                  <Text style={styles.productPrice}>£{product.price.toFixed(2)}</Text>
                   <TouchableOpacity
                     style={styles.addButton}
                     onPress={() => handleAddToCart(product)}

@@ -326,7 +326,7 @@ export default function VendorScreen() {
                     <Text style={styles.productWeight}>{product.weight}</Text>
                     <View style={styles.productFooter}>
                       <Text style={styles.productPrice}>
-                        ${product.price.toFixed(2)}
+                        £{product.price.toFixed(2)}
                       </Text>
                       <TouchableOpacity
                         style={styles.addButton}
@@ -480,7 +480,7 @@ export default function VendorScreen() {
                   <Text style={styles.infoLabel}>Delivery Fee</Text>
                 </View>
                 <Text style={[styles.infoValue, vendor.delivery_fee === 0 && styles.infoValueFree]}>
-                  {vendor.delivery_fee === 0 ? 'Free' : `$${vendor.delivery_fee.toFixed(2)}`}
+                  {vendor.delivery_fee === 0 ? 'Free' : `£${vendor.delivery_fee.toFixed(2)}`}
                 </Text>
               </View>
               <View style={styles.infoRowDivider} />
@@ -488,7 +488,7 @@ export default function VendorScreen() {
                 <View style={styles.infoRowLeft}>
                   <Text style={styles.infoLabel}>Minimum Order</Text>
                 </View>
-                <Text style={styles.infoValue}>${vendor.minimum_order.toFixed(2)}</Text>
+                <Text style={styles.infoValue}>£{vendor.minimum_order.toFixed(2)}</Text>
               </View>
             </View>
 
