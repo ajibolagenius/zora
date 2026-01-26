@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import {
   View,
   Text,
@@ -58,11 +58,42 @@ const CATEGORIES = [
   },
 ];
 
+// Available colors from Design System
+const DESIGN_SYSTEM_COLORS = [
+  Colors.primary,        // #CC0000 - Zora Red
+  Colors.secondary,      // #FFCC00 - Zora Yellow
+  Colors.success,        // #22C55E - Green
+  Colors.info,           // #3B82F6 - Blue
+  Colors.badgeEcoFriendly, // #14B8A6 - Teal
+];
+
+// Shuffle array function for random color assignment
+const shuffleArray = <T,>(array: T[]): T[] => {
+  const shuffled = [...array];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+};
+
+// Assign random colors to categories (shuffled once per render)
+const getCategoriesWithColors = () => {
+  const shuffledColors = shuffleArray(DESIGN_SYSTEM_COLORS);
+  return CATEGORIES.map((category, index) => ({
+    ...category,
+    color: shuffledColors[index % shuffledColors.length],
+  }));
+};
+
 export default function CategoriesScreen() {
   const router = useRouter();
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const { width } = useWindowDimensions();
   const cardWidth = Math.max(140, (width - Spacing.base * 2 - Spacing.md) / 2);
+  
+  // Get categories with random colors assigned (computed once on mount)
+  const categoriesWithColors = useMemo(() => getCategoriesWithColors(), []);
   
   // Animation values
   const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -140,7 +171,7 @@ export default function CategoriesScreen() {
           showsVerticalScrollIndicator={false}
         >
           <View style={styles.grid}>
-            {CATEGORIES.map((category) => {
+            {categoriesWithColors.map((category) => {
               const isSelected = selectedCategories.includes(category.id);
               const IconComponent = category.icon;
               return (
@@ -161,10 +192,10 @@ export default function CategoriesScreen() {
                     </View>
                   )}
                   
-                  {/* Icon - No background per design */}
+                  {/* Icon with random color from design system */}
                   <IconComponent
                     size={28}
-                    color={Colors.primary}
+                    color={category.color}
                     weight="duotone"
                   />
                   

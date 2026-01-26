@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import {
   View,
   Text,
@@ -9,6 +9,8 @@ import {
   ActivityIndicator,
   useWindowDimensions,
   ImageBackground,
+  FlatList,
+  Animated,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -28,6 +30,7 @@ import {
   Minus,
   Plus,
   PencilSimple,
+  ShareNetwork,
 } from 'phosphor-react-native';
 import { Colors } from '../../constants/colors';
 import { Spacing, BorderRadius, TouchTarget } from '../../constants/spacing';
@@ -50,8 +53,11 @@ export default function ProductScreen() {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
-  const [expandedSections, setExpandedSections] = useState<SectionType[]>(['description']);
+  const [activeTab, setActiveTab] = useState<SectionType>('description');
   const [isFavorite, setIsFavorite] = useState(false);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const scrollX = useRef(new Animated.Value(0)).current;
+  const flatListRef = useRef<FlatList>(null);
 
   const fetchData = useCallback(async () => {
     if (!id) return;
@@ -78,12 +84,17 @@ export default function ProductScreen() {
     fetchData();
   }, [fetchData]);
 
-  const toggleSection = (section: SectionType) => {
-    setExpandedSections((prev) =>
-      prev.includes(section)
-        ? prev.filter((s) => s !== section)
-        : [...prev, section]
-    );
+  const productImages = product?.image_urls || [];
+  const { width: screenWidth } = useWindowDimensions();
+  
+  const handleImageScroll = Animated.event(
+    [{ nativeEvent: { contentOffset: { x: scrollX } } }],
+    { useNativeDriver: false }
+  );
+
+  const handleMomentumScrollEnd = (event: any) => {
+    const index = Math.round(event.nativeEvent.contentOffset.x / screenWidth);
+    setCurrentImageIndex(index);
   };
 
   const incrementQuantity = () => setQuantity((q) => q + 1);
@@ -125,26 +136,99 @@ export default function ProductScreen() {
         showsVerticalScrollIndicator={false}
         bounces={false}
       >
-        {/* Hero Image Section - 45vh */}
-        <View style={[styles.heroSection, { height: screenHeight * 0.45 }]}>
-          <ImageBackground
-            source={{ uri: product.image_urls?.[0] || '' }}
-            style={styles.heroImage}
-            resizeMode="cover"
-          >
-            <LinearGradient
-              colors={['rgba(0,0,0,0.4)', 'transparent', 'rgba(0,0,0,0.6)']}
-              style={styles.heroGradient}
-            />
-            
-            {/* Header Buttons */}
-            <View style={[styles.heroHeader, { paddingTop: insets.top + 12 }]}>
-              <TouchableOpacity
-                style={styles.heroButton}
-                onPress={() => router.back()}
+        {/* Hero Image Section - 45vh with Slider */}
+        <View style={styles.imageSliderWrapper}>
+          {productImages.length > 1 ? (
+            <>
+              <FlatList
+                ref={flatListRef}
+                data={productImages}
+                horizontal
+                pagingEnabled
+                showsHorizontalScrollIndicator={false}
+                onScroll={handleImageScroll}
+                onMomentumScrollEnd={handleMomentumScrollEnd}
+                keyExtractor={(item, index) => `image-${index}`}
+                getItemLayout={(_, index) => ({
+                  length: screenWidth,
+                  offset: screenWidth * index,
+                  index,
+                })}
+                renderItem={({ item }) => (
+                  <View style={[styles.heroSection, { height: screenHeight * 0.45, width: screenWidth }]}>
+                    <ImageBackground
+                      source={{ uri: item }}
+                      style={styles.heroImage}
+                      resizeMode="cover"
+                    >
+                      <LinearGradient
+                        colors={['rgba(0,0,0,0.4)', 'transparent', 'rgba(0,0,0,0.6)']}
+                        style={styles.heroGradient}
+                      />
+                    </ImageBackground>
+                  </View>
+                )}
+              />
+              
+              {/* Pagination Dots */}
+              {productImages.length > 1 && (
+                <View style={styles.paginationDots}>
+                  {productImages.map((_, index) => {
+                    const inputRange = [
+                      (index - 1) * screenWidth,
+                      index * screenWidth,
+                      (index + 1) * screenWidth,
+                    ];
+                    
+                    const dotWidth = scrollX.interpolate({
+                      inputRange,
+                      outputRange: [6, 20, 6],
+                      extrapolate: 'clamp',
+                    });
+                    
+                    const opacity = scrollX.interpolate({
+                      inputRange,
+                      outputRange: [0.4, 1, 0.4],
+                      extrapolate: 'clamp',
+                    });
+
+                    return (
+                      <Animated.View
+                        key={index}
+                        style={[
+                          styles.paginationDot,
+                          { width: dotWidth, opacity },
+                        ]}
+                      />
+                    );
+                  })}
+                </View>
+              )}
+            </>
+          ) : (
+            <View style={[styles.heroSection, { height: screenHeight * 0.45 }]}>
+              <ImageBackground
+                source={{ uri: productImages[0] || '' }}
+                style={styles.heroImage}
+                resizeMode="cover"
               >
-                <ArrowLeft size={20} color="#FFFFFF" weight="bold" />
-              </TouchableOpacity>
+                <LinearGradient
+                  colors={['rgba(0,0,0,0.4)', 'transparent', 'rgba(0,0,0,0.6)']}
+                  style={styles.heroGradient}
+                />
+              </ImageBackground>
+            </View>
+          )}
+          
+          {/* Header Buttons - Overlay on images */}
+          <View style={[styles.heroHeader, { paddingTop: insets.top + 12 }]}>
+            <TouchableOpacity
+              style={styles.heroButton}
+              onPress={() => router.back()}
+            >
+              <ArrowLeft size={20} color="#FFFFFF" weight="bold" />
+            </TouchableOpacity>
+            <View style={styles.heroHeaderRight}>
               <TouchableOpacity
                 style={styles.heroButton}
                 onPress={() => setIsFavorite(!isFavorite)}
@@ -155,8 +239,17 @@ export default function ProductScreen() {
                   weight={isFavorite ? 'fill' : 'regular'} 
                 />
               </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.heroButton}
+                onPress={() => {
+                  // Share functionality
+                  console.log('Share product');
+                }}
+              >
+                <ShareNetwork size={20} color="#FFFFFF" weight="duotone" />
+              </TouchableOpacity>
             </View>
-          </ImageBackground>
+          </View>
         </View>
 
         {/* Content Card - Overlapping hero */}
@@ -225,22 +318,37 @@ export default function ProductScreen() {
             </TouchableOpacity>
           )}
 
-          {/* Expandable Sections */}
-          <View style={styles.sectionsContainer}>
-            {/* Product Description */}
+          {/* Tabs for Sections */}
+          <View style={styles.tabsContainer}>
             <TouchableOpacity
-              style={styles.sectionHeader}
-              onPress={() => toggleSection('description')}
-              activeOpacity={0.7}
+              style={[styles.tab, activeTab === 'description' && styles.tabActive]}
+              onPress={() => setActiveTab('description')}
             >
-              <Text style={styles.sectionTitle}>Product Description</Text>
-              {expandedSections.includes('description') ? (
-                <CaretUp size={20} color={Colors.textMuted} weight="bold" />
-              ) : (
-                <CaretDown size={20} color={Colors.textMuted} weight="bold" />
-              )}
+              <Text style={[styles.tabText, activeTab === 'description' && styles.tabTextActive]}>
+                Description
+              </Text>
             </TouchableOpacity>
-            {expandedSections.includes('description') && (
+            <TouchableOpacity
+              style={[styles.tab, activeTab === 'nutrition' && styles.tabActive]}
+              onPress={() => setActiveTab('nutrition')}
+            >
+              <Text style={[styles.tabText, activeTab === 'nutrition' && styles.tabTextActive]}>
+                Nutrition
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.tab, activeTab === 'heritage' && styles.tabActive]}
+              onPress={() => setActiveTab('heritage')}
+            >
+              <Text style={[styles.tabText, activeTab === 'heritage' && styles.tabTextActive]}>
+                Heritage Story
+              </Text>
+            </TouchableOpacity>
+          </View>
+
+          {/* Tab Content */}
+          <View style={styles.tabContent}>
+            {activeTab === 'description' && (
               <View style={styles.sectionContent}>
                 <Text style={styles.sectionText}>
                   {product.description || 'Premium quality product sourced from the finest ingredients. Perfect for traditional African dishes and modern fusion cuisine.'}
@@ -248,20 +356,7 @@ export default function ProductScreen() {
               </View>
             )}
 
-            {/* Nutrition */}
-            <TouchableOpacity
-              style={styles.sectionHeader}
-              onPress={() => toggleSection('nutrition')}
-              activeOpacity={0.7}
-            >
-              <Text style={styles.sectionTitle}>Nutrition</Text>
-              {expandedSections.includes('nutrition') ? (
-                <CaretUp size={20} color={Colors.textMuted} weight="bold" />
-              ) : (
-                <CaretDown size={20} color={Colors.textMuted} weight="bold" />
-              )}
-            </TouchableOpacity>
-            {expandedSections.includes('nutrition') && (
+            {activeTab === 'nutrition' && (
               <View style={styles.sectionContent}>
                 <View style={styles.nutritionGrid}>
                   <View style={styles.nutritionItem}>
@@ -284,20 +379,7 @@ export default function ProductScreen() {
               </View>
             )}
 
-            {/* Heritage Story */}
-            <TouchableOpacity
-              style={[styles.sectionHeader, styles.sectionHeaderLast]}
-              onPress={() => toggleSection('heritage')}
-              activeOpacity={0.7}
-            >
-              <Text style={styles.sectionTitle}>Heritage Story</Text>
-              {expandedSections.includes('heritage') ? (
-                <CaretUp size={20} color={Colors.textMuted} weight="bold" />
-              ) : (
-                <CaretDown size={20} color={Colors.textMuted} weight="bold" />
-              )}
-            </TouchableOpacity>
-            {expandedSections.includes('heritage') && (
+            {activeTab === 'heritage' && (
               <View style={styles.sectionContent}>
                 <Text style={styles.sectionText}>
                   {product.heritage_story || 'Sourced directly from family-owned farms that have practiced sustainable cultivation for generations. Every product tells a story of tradition and respect for the land.'}
@@ -455,7 +537,7 @@ export default function ProductScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#000000',
+    backgroundColor: Colors.backgroundDark,
   },
   loadingContainer: {
     flex: 1,
@@ -491,6 +573,9 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: Spacing.lg,
   },
+  imageSliderWrapper: {
+    position: 'relative',
+  },
   heroButton: {
     width: 40,
     height: 40,
@@ -500,6 +585,25 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(255, 255, 255, 0.05)',
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  heroHeaderRight: {
+    flexDirection: 'row',
+    gap: Spacing.sm,
+  },
+  paginationDots: {
+    position: 'absolute',
+    bottom: Spacing.base,
+    left: 0,
+    right: 0,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: Spacing.xs,
+  },
+  paginationDot: {
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: Colors.textPrimary,
   },
 
   // Content Card
@@ -511,6 +615,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.lg,
     paddingTop: 32,
     minHeight: 500,
+    paddingBottom: Spacing.xl,
   },
   dragHandle: {
     width: 48,
@@ -643,26 +748,37 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
 
-  // Sections
-  sectionsContainer: {
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(255, 255, 255, 0.1)',
-  },
-  sectionHeader: {
+  // Tabs
+  tabsContainer: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: Spacing.base,
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
+    borderBottomColor: 'rgba(255, 255, 255, 0.05)',
+    marginTop: Spacing.lg,
+    marginBottom: Spacing.base,
   },
-  sectionHeaderLast: {
-    borderBottomWidth: 0,
+  tab: {
+    flex: 1,
+    alignItems: 'center',
+    paddingVertical: Spacing.md,
+    position: 'relative',
   },
-  sectionTitle: {
-    fontFamily: FontFamily.displayMedium,
-    fontSize: FontSize.bodyLarge,
-    color: Colors.textPrimary,
+  tabActive: {
+    borderBottomWidth: 3,
+    borderBottomColor: Colors.primary,
+  },
+  tabText: {
+    fontFamily: FontFamily.body,
+    fontSize: FontSize.body,
+    color: Colors.textMuted,
+  },
+  tabTextActive: {
+    fontFamily: FontFamily.bodySemiBold,
+    fontSize: FontSize.body,
+    color: Colors.primary,
+  },
+  tabContent: {
+    paddingTop: Spacing.base,
+    paddingBottom: Spacing.base,
   },
   sectionContent: {
     paddingBottom: Spacing.base,
