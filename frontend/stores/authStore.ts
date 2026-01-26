@@ -11,6 +11,7 @@ import {
 import {
   logSecurityEvent,
   SecurityEventType,
+  securityLogger,
 } from '../lib/security/securityLogger';
 import {
   createAuditLog,
@@ -117,6 +118,8 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
     set({ session });
     // Start session timeout tracking when session is set
     if (session) {
+      // Reset sessionExpiringSoon flag when starting a new session
+      set({ sessionExpiringSoon: false });
       sessionTimeoutManager.startSession(
         (minutesLeft) => {
           set({ sessionExpiringSoon: true });
@@ -140,6 +143,7 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
       );
     } else {
       sessionTimeoutManager.endSession();
+      set({ sessionExpiringSoon: false });
     }
   },
   setLoading: (isLoading) => set({ isLoading }),
@@ -222,7 +226,9 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
     if (!rateLimitCheck.allowed) {
       recordLoginAttempt(sanitizedEmail);
       logSecurityEvent.rateLimitExceeded(sanitizedEmail, 'login');
-      createSecurityAlert.multipleFailedLogins('', rateLimitCheck.remaining);
+      // Note: Don't create security alert for unauthenticated users
+      // The rate limit logging already tracks this by email
+      // Alert will be created after successful login if needed
       const error = new Error(rateLimitCheck.errorMessage || 'Too many login attempts');
       throw error;
     }
@@ -661,7 +667,7 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
   },
 
   refreshSession: async () => {
-    const { session } = get();
+    const { session, user } = get();
     if (!session) return;
 
     try {
@@ -671,8 +677,20 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
       if (error) throw error;
 
       if (data.session) {
+        // Reset sessionExpiringSoon flag when session is refreshed
+        set({ sessionExpiringSoon: false });
         get().setSession(data.session);
-        logSecurityEvent.sessionExpired('', ''); // Will be updated with actual user
+        
+        // Log session refresh with actual user info
+        if (user) {
+          securityLogger.log({
+            type: SecurityEventType.SESSION_REFRESHED,
+            userId: user.user_id,
+            email: user.email,
+            severity: 'low',
+          });
+        }
+        
         sessionTimeoutManager.refreshSession();
       }
     } catch (error) {
