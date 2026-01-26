@@ -27,6 +27,7 @@ import {
     XCircle,
     Warning,
     Headset,
+    CaretDown,
 } from 'phosphor-react-native';
 import { Colors } from '../../constants/colors';
 import { Spacing, BorderRadius, Heights } from '../../constants/spacing';
@@ -41,6 +42,14 @@ const STATUS_RED = '#CC0000';
 type TabType = 'active' | 'completed' | 'cancelled';
 type OrderStatus = 'preparing' | 'out_for_delivery' | 'delivered' | 'cancelled';
 
+interface OrderProduct {
+    id: string;
+    name: string;
+    image_url: string;
+    quantity: number;
+    price: number;
+}
+
 interface OrderItem {
     id: string;
     orderNumber: string;
@@ -50,6 +59,7 @@ interface OrderItem {
     total: number;
     status: OrderStatus;
     thumbnails: string[];
+    products: OrderProduct[];
 }
 
 // Mock order data
@@ -67,6 +77,10 @@ const MOCK_ORDERS: OrderItem[] = [
             'https://images.unsplash.com/photo-1586201375761-83865001e31c?w=100',
             'https://images.unsplash.com/photo-1540420773420-3366772f4999?w=100',
         ],
+        products: [
+            { id: 'prod_001', name: 'Premium Jollof Spice Blend', image_url: 'https://images.unsplash.com/photo-1596040033229-a9821ebd058d?w=100', quantity: 2, price: 18.50 },
+            { id: 'prod_002', name: 'Nigerian Curry Powder', image_url: 'https://images.unsplash.com/photo-1586201375761-83865001e31c?w=100', quantity: 1, price: 8.50 },
+        ],
     },
     {
         id: '2',
@@ -80,6 +94,10 @@ const MOCK_ORDERS: OrderItem[] = [
             'https://images.unsplash.com/photo-1542838132-92c53300491e?w=100',
             'https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=100',
         ],
+        products: [
+            { id: 'prod_003', name: 'Fresh Palm Oil', image_url: 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=100', quantity: 1, price: 12.00 },
+            { id: 'prod_004', name: 'Garri Premium', image_url: 'https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=100', quantity: 1, price: 10.00 },
+        ],
     },
     {
         id: '3',
@@ -91,6 +109,9 @@ const MOCK_ORDERS: OrderItem[] = [
         status: 'delivered',
         thumbnails: [
             'https://images.unsplash.com/photo-1559056199-641a0ac8b55e?w=100',
+        ],
+        products: [
+            { id: 'prod_005', name: 'Shea Butter Body Cream', image_url: 'https://images.unsplash.com/photo-1559056199-641a0ac8b55e?w=100', quantity: 1, price: 15.00 },
         ],
     },
     {
@@ -105,6 +126,11 @@ const MOCK_ORDERS: OrderItem[] = [
             'https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?w=100',
             'https://images.unsplash.com/photo-1600857544200-b2f666a9a2ec?w=100',
             'https://images.unsplash.com/photo-1556910096-6f5e72db6803?w=100',
+        ],
+        products: [
+            { id: 'prod_006', name: 'Raw Shea Butter', image_url: 'https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?w=100', quantity: 2, price: 12.00 },
+            { id: 'prod_007', name: 'Cocoa Butter', image_url: 'https://images.unsplash.com/photo-1600857544200-b2f666a9a2ec?w=100', quantity: 1, price: 8.00 },
+            { id: 'prod_008', name: 'Mango Butter', image_url: 'https://images.unsplash.com/photo-1556910096-6f5e72db6803?w=100', quantity: 1, price: 10.00 },
         ],
     },
 ];
@@ -186,6 +212,8 @@ export default function OrdersTab() {
     const router = useRouter();
     const [activeTab, setActiveTab] = useState<TabType>('active');
     const [searchQuery, setSearchQuery] = useState('');
+    const [expandedOrders, setExpandedOrders] = useState<Set<string>>(new Set());
+    const expandAnimations = useRef<{ [key: string]: Animated.Value }>({});
 
     // Animation values
     const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -234,6 +262,45 @@ export default function OrdersTab() {
         router.push(`/report-issue?orderId=${orderId}`);
     };
 
+    const toggleOrderExpansion = (orderId: string) => {
+        const isExpanded = expandedOrders.has(orderId);
+        
+        // Initialize animation value if not exists
+        if (!expandAnimations.current[orderId]) {
+            expandAnimations.current[orderId] = new Animated.Value(isExpanded ? 1 : 0);
+        }
+        
+        const animValue = expandAnimations.current[orderId];
+        
+        if (isExpanded) {
+            // Collapse
+            setExpandedOrders(prev => {
+                const newSet = new Set(prev);
+                newSet.delete(orderId);
+                return newSet;
+            });
+            Animated.timing(animValue, {
+                toValue: 0,
+                duration: 300,
+                easing: Easing.out(Easing.cubic),
+                useNativeDriver: false,
+            }).start();
+        } else {
+            // Expand
+            setExpandedOrders(prev => new Set(prev).add(orderId));
+            Animated.timing(animValue, {
+                toValue: 1,
+                duration: 300,
+                easing: Easing.out(Easing.cubic),
+                useNativeDriver: false,
+            }).start();
+        }
+    };
+
+    const handleProductPress = (productId: string) => {
+        router.push(`/product/${productId}`);
+    };
+
     const renderEmptyState = () => {
         const isSearching = searchQuery.trim().length > 0;
         
@@ -279,6 +346,27 @@ export default function OrdersTab() {
     const renderOrderCard = (order: OrderItem, index: number) => {
         const statusConfig = getStatusConfig(order.status);
         const isCompleted = order.status === 'delivered' || order.status === 'cancelled';
+        const isExpanded = expandedOrders.has(order.id);
+        
+        // Initialize animation value if not exists
+        if (!expandAnimations.current[order.id]) {
+            expandAnimations.current[order.id] = new Animated.Value(isExpanded ? 1 : 0);
+        }
+        
+        const expandAnim = expandAnimations.current[order.id];
+        // Calculate height: padding (sm + xs) + (item height + gap) * count
+        const itemHeight = 50 + (Spacing.sm * 2); // image height + padding
+        const gapHeight = Spacing.sm;
+        const containerPadding = Spacing.sm + Spacing.xs;
+        const totalHeight = containerPadding + (order.products.length * itemHeight) + ((order.products.length - 1) * gapHeight);
+        const maxHeight = expandAnim.interpolate({
+            inputRange: [0, 1],
+            outputRange: [0, totalHeight],
+        });
+        const opacity = expandAnim.interpolate({
+            inputRange: [0, 1],
+            outputRange: [0, 1],
+        });
 
         return (
             <Animated.View
@@ -291,19 +379,37 @@ export default function OrdersTab() {
                     },
                 ]}
             >
-                {/* Header: Order Number & Status */}
-                <View style={styles.orderHeader}>
-                    <View>
-                        <Text style={styles.orderNumber}>Order {order.orderNumber}</Text>
-                        <Text style={styles.orderDate}>{order.date}</Text>
+                {/* Clickable Header: Order Number & Status */}
+                <TouchableOpacity
+                    style={styles.orderCardHeader}
+                    onPress={() => toggleOrderExpansion(order.id)}
+                    activeOpacity={0.8}
+                >
+                    <View style={styles.orderHeader}>
+                        <View>
+                            <Text style={styles.orderNumber}>Order {order.orderNumber}</Text>
+                            <Text style={styles.orderDate}>{order.date}</Text>
+                        </View>
+                        <View style={styles.headerRightSection}>
+                            <View style={[styles.statusBadge, { backgroundColor: statusConfig.bgColor }]}>
+                                <StatusIcon icon={statusConfig.icon} color={statusConfig.textColor} size={14} />
+                                <Text style={[styles.statusText, { color: statusConfig.textColor }]}>
+                                    {statusConfig.label}
+                                </Text>
+                            </View>
+                            <Animated.View
+                                style={{
+                                    transform: [{ rotate: expandAnim.interpolate({
+                                        inputRange: [0, 1],
+                                        outputRange: ['0deg', '180deg'],
+                                    }) }],
+                                }}
+                            >
+                                <CaretDown size={20} color={Colors.textMuted} weight="bold" />
+                            </Animated.View>
+                        </View>
                     </View>
-                    <View style={[styles.statusBadge, { backgroundColor: statusConfig.bgColor }]}>
-                        <StatusIcon icon={statusConfig.icon} color={statusConfig.textColor} size={14} />
-                        <Text style={[styles.statusText, { color: statusConfig.textColor }]}>
-                            {statusConfig.label}
-                        </Text>
-                    </View>
-                </View>
+                </TouchableOpacity>
 
                 {/* Vendor & Items Preview */}
                 <View style={styles.vendorSection}>
@@ -325,9 +431,49 @@ export default function OrdersTab() {
                     </View>
                 </View>
 
+                {/* Expandable Product Items */}
+                <Animated.View
+                    style={{
+                        maxHeight,
+                        opacity,
+                        overflow: 'hidden',
+                    }}
+                >
+                    <View style={styles.orderItemsContainer}>
+                        {order.products.map((product, productIndex) => (
+                            <TouchableOpacity
+                                key={product.id}
+                                style={styles.orderItemRow}
+                                onPress={() => handleProductPress(product.id)}
+                                activeOpacity={0.8}
+                            >
+                                <Image
+                                    source={{ uri: product.image_url }}
+                                    style={styles.orderItemImage}
+                                    resizeMode="cover"
+                                />
+                                <View style={styles.orderItemInfo}>
+                                    <Text style={styles.orderItemName} numberOfLines={1}>
+                                        {product.name}
+                                    </Text>
+                                    <Text style={styles.orderItemDetails}>
+                                        Qty: {product.quantity} × £{product.price.toFixed(2)}
+                                    </Text>
+                                </View>
+                                <View style={styles.orderItemPrice}>
+                                    <Text style={styles.orderItemTotal}>
+                                        £{(product.quantity * product.price).toFixed(2)}
+                                    </Text>
+                                </View>
+                                <CaretRight size={16} color={Colors.textMuted} weight="bold" />
+                            </TouchableOpacity>
+                        ))}
+                    </View>
+                </Animated.View>
+
                 {/* Footer: Price & Actions */}
                 <View style={styles.orderFooter}>
-                    <Text style={styles.orderTotal}>${order.total.toFixed(2)}</Text>
+                    <Text style={styles.orderTotal}>£{order.total.toFixed(2)}</Text>
                     <View style={styles.footerActions}>
                         {/* Report Issue Button - Only for delivered orders */}
                         {order.status === 'delivered' && (
@@ -633,6 +779,56 @@ const styles = StyleSheet.create({
     orderTotal: {
         fontFamily: FontFamily.displaySemiBold,
         fontSize: FontSize.h4,
+        color: Colors.textPrimary,
+    },
+    orderCardHeader: {
+        marginBottom: Spacing.sm,
+    },
+    headerRightSection: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: Spacing.sm,
+    },
+    orderItemsContainer: {
+        paddingTop: Spacing.sm,
+        paddingBottom: Spacing.xs,
+        gap: Spacing.sm,
+    },
+    orderItemRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: Spacing.sm,
+        paddingVertical: Spacing.sm,
+        paddingHorizontal: Spacing.sm,
+        backgroundColor: Colors.backgroundDark,
+        borderRadius: BorderRadius.md,
+    },
+    orderItemImage: {
+        width: 50,
+        height: 50,
+        borderRadius: BorderRadius.sm,
+        backgroundColor: Colors.cardDark,
+    },
+    orderItemInfo: {
+        flex: 1,
+        gap: 2,
+    },
+    orderItemName: {
+        fontFamily: FontFamily.bodySemiBold,
+        fontSize: FontSize.small,
+        color: Colors.textPrimary,
+    },
+    orderItemDetails: {
+        fontFamily: FontFamily.body,
+        fontSize: FontSize.caption,
+        color: Colors.textMuted,
+    },
+    orderItemPrice: {
+        alignItems: 'flex-end',
+    },
+    orderItemTotal: {
+        fontFamily: FontFamily.bodySemiBold,
+        fontSize: FontSize.small,
         color: Colors.textPrimary,
     },
     footerActions: {
