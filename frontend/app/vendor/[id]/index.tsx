@@ -205,17 +205,17 @@ export default function VendorScreen() {
                                 style={styles.avatar}
                                 resizeMode="cover"
                             />
-                            {vendor.is_verified && (
-                                <View style={styles.verifiedBadge}>
-                                    <SealCheck size={16} color="#3B82F6" weight="fill" />
-                                </View>
-                            )}
                         </View>
                     </View>
 
                     {/* Vendor Name */}
                     <View style={styles.vendorNameRow}>
                         <Text style={styles.vendorName}>{vendor.shop_name}</Text>
+                        {vendor.is_verified && (
+                            <View style={styles.verifiedBadgeInline}>
+                                <SealCheck size={20} color="#3B82F6" weight="fill" />
+                            </View>
+                        )}
                     </View>
 
                     {/* Location and Rating */}
@@ -645,15 +645,23 @@ const styles = StyleSheet.create({
     vendorNameRow: {
         flexDirection: 'row',
         alignItems: 'center',
-        justifyContent: 'center',
+        justifyContent: 'flex-start',
         gap: Spacing.sm,
         marginBottom: Spacing.xs,
+    },
+    verifiedBadgeInline: {
+        width: 24,
+        height: 24,
+        borderRadius: 12,
+        backgroundColor: Colors.backgroundDark,
+        justifyContent: 'center',
+        alignItems: 'center',
     },
     vendorName: {
         fontFamily: FontFamily.displaySemiBold,
         fontSize: FontSize.h2,
         color: Colors.textPrimary,
-        textAlign: 'center',
+        textAlign: 'left',
     },
     vendorMeta: {
         flexDirection: 'row',
