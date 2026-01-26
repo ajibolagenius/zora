@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   View,
   Text,
@@ -6,6 +6,7 @@ import {
   ScrollView,
   TouchableOpacity,
   Image,
+  Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -28,14 +29,8 @@ import {
 } from 'phosphor-react-native';
 import { Colors } from '../../constants/colors';
 import { Spacing, BorderRadius } from '../../constants/spacing';
-import { FontSize, FontFamily } from '../../constants/typography';
-
-// Zora Brand Colors
-const ZORA_RED = '#C1272D';
-const ZORA_YELLOW = '#FFCC00';
-const ZORA_CARD = '#3A2A21';
-const SURFACE_DARK = '#2D1E18';
-const ICON_BG = '#221710';
+import { FontSize, FontFamily, LetterSpacing } from '../../constants/typography';
+import { useAuthStore } from '../../stores/authStore';
 
 interface MenuItem {
   id: string;
@@ -45,6 +40,26 @@ interface MenuItem {
   isLogout?: boolean;
 }
 
+// Available colors from Design System for randomized icons
+const DESIGN_SYSTEM_COLORS = [
+  Colors.primary,        // #CC0000 - Zora Red
+  Colors.secondary,      // #FFCC00 - Zora Yellow
+  Colors.success,        // #22C55E - Green
+  Colors.info,           // #3B82F6 - Blue
+  Colors.badgeEcoFriendly, // #14B8A6 - Teal
+];
+
+// Shuffle array function for random color assignment
+const shuffleArray = <T,>(array: T[]): T[] => {
+  const shuffled = [...array];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+};
+
+// Menu items - removed redundant ones, verified routes
 const MENU_ITEMS: MenuItem[] = [
   { id: '1', icon: User, label: 'Personal Information', route: '/settings/personal' },
   { id: '2', icon: Package, label: 'My Orders', route: '/orders' },
@@ -65,6 +80,17 @@ const STATS = [
 
 export default function ProfileTab() {
   const router = useRouter();
+  const { user, logout } = useAuthStore();
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+  // Assign random colors to menu items (computed once on mount)
+  const menuItemsWithColors = useMemo(() => {
+    const shuffledColors = shuffleArray(DESIGN_SYSTEM_COLORS);
+    return MENU_ITEMS.map((item, index) => ({
+      ...item,
+      color: shuffledColors[index % shuffledColors.length],
+    }));
+  }, []);
 
   const handleMenuPress = (item: MenuItem) => {
     if (item.route) {
@@ -72,15 +98,50 @@ export default function ProfileTab() {
     }
   };
 
-  const handleLogout = () => {
-    console.log('Logout pressed');
-    // TODO: Implement logout logic
+  const handleLogout = async () => {
+    Alert.alert(
+      'Log Out',
+      'Are you sure you want to log out?',
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+        {
+          text: 'Log Out',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              setIsLoggingOut(true);
+              await logout();
+              // Navigate to login screen after logout
+              router.replace('/(auth)/login');
+            } catch (error) {
+              console.error('Logout error:', error);
+              Alert.alert('Error', 'Failed to log out. Please try again.');
+            } finally {
+              setIsLoggingOut(false);
+            }
+          },
+        },
+      ]
+    );
   };
 
   const handleRefreshCode = () => {
-    console.log('Refresh code pressed');
     // TODO: Implement QR code refresh
+    Alert.alert('Refresh Code', 'QR code refresh feature coming soon!');
   };
+
+  const handleSettingsPress = () => {
+    // Settings button - could navigate to a settings screen or show options
+    router.push('/settings/personal');
+  };
+
+  // Get user display name
+  const displayName = user?.name || 'User';
+  const membershipTier = user?.membership_tier || 'bronze';
+  const loyaltyPoints = user?.loyalty_points || 0;
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
@@ -88,8 +149,12 @@ export default function ProfileTab() {
       <View style={styles.header}>
         <View style={styles.headerLeft} />
         <Text style={styles.headerTitle}>My Profile</Text>
-        <TouchableOpacity style={styles.settingsButton}>
-          <Gear size={24} color={Colors.textPrimary} weight="regular" />
+        <TouchableOpacity 
+          style={styles.settingsButton}
+          onPress={handleSettingsPress}
+          activeOpacity={0.8}
+        >
+          <Gear size={24} color={Colors.textPrimary} weight="duotone" />
         </TouchableOpacity>
       </View>
 
@@ -103,18 +168,25 @@ export default function ProfileTab() {
           {/* Avatar */}
           <View style={styles.avatarContainer}>
             <Image
-              source={{ uri: 'https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=200' }}
+              source={{ 
+                uri: user?.picture || 'https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=200' 
+              }}
               style={styles.avatar}
             />
-            <TouchableOpacity style={styles.cameraButton}>
+            <TouchableOpacity 
+              style={styles.cameraButton}
+              activeOpacity={0.8}
+            >
               <Camera size={16} color={Colors.textPrimary} weight="fill" />
             </TouchableOpacity>
           </View>
           
           {/* Name & Badge */}
-          <Text style={styles.userName}>Adaeze Johnson</Text>
+          <Text style={styles.userName}>{displayName}</Text>
           <View style={styles.memberBadge}>
-            <Text style={styles.memberBadgeText}>Gold Member ⭐</Text>
+            <Text style={styles.memberBadgeText}>
+              {membershipTier.charAt(0).toUpperCase() + membershipTier.slice(1)} Member ⭐
+            </Text>
           </View>
         </View>
 
@@ -141,11 +213,13 @@ export default function ProfileTab() {
           activeOpacity={0.8}
         >
           <View style={styles.rewardsIconContainer}>
-            <Gift size={24} color={ZORA_YELLOW} weight="fill" />
+            <Gift size={24} color={Colors.secondary} weight="duotone" />
           </View>
           <View style={styles.rewardsContent}>
             <Text style={styles.rewardsTitle}>Zora Rewards</Text>
-            <Text style={styles.rewardsSubtitle}>2,450 points · Gold Tier</Text>
+            <Text style={styles.rewardsSubtitle}>
+              {loyaltyPoints.toLocaleString()} points · {membershipTier.charAt(0).toUpperCase() + membershipTier.slice(1)} Tier
+            </Text>
           </View>
           <CaretRight size={20} color={Colors.textMuted} weight="bold" />
         </TouchableOpacity>
@@ -164,14 +238,18 @@ export default function ProfileTab() {
           {/* QR Code */}
           <View style={styles.qrCodeContainer}>
             <Image
-              source={{ uri: 'https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=ZORA-ADAEZE-2024-GOLD&bgcolor=FFFFFF&color=000000' }}
+              source={{ 
+                uri: `https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=ZORA-${(user as any)?.id?.substring(0, 8) || (user?.user_id?.substring(0, 8)) || 'USER'}-${membershipTier.toUpperCase()}&bgcolor=FFFFFF&color=000000` 
+              }}
               style={styles.qrCode}
               resizeMode="contain"
             />
           </View>
           
           {/* Customer ID */}
-          <Text style={styles.customerId}>ZORA-ADA-2024-G</Text>
+          <Text style={styles.customerId}>
+            {user?.referral_code || `ZORA-${(user as any)?.id?.substring(0, 8) || user?.user_id?.substring(0, 8) || 'USER'}-${membershipTier.charAt(0).toUpperCase()}`}
+          </Text>
           
           {/* Refresh Button */}
           <TouchableOpacity 
@@ -179,14 +257,14 @@ export default function ProfileTab() {
             onPress={handleRefreshCode}
             activeOpacity={0.7}
           >
-            <ArrowsClockwise size={18} color={ZORA_RED} weight="bold" />
+            <ArrowsClockwise size={18} color={Colors.primary} weight="duotone" />
             <Text style={styles.refreshText}>Refresh Code</Text>
           </TouchableOpacity>
         </View>
 
         {/* Menu Options */}
         <View style={styles.menuSection}>
-          {MENU_ITEMS.map((item) => {
+          {menuItemsWithColors.map((item) => {
             const IconComponent = item.icon;
             return (
               <TouchableOpacity
@@ -195,8 +273,8 @@ export default function ProfileTab() {
                 onPress={() => handleMenuPress(item)}
                 activeOpacity={0.7}
               >
-                <View style={styles.menuItemIcon}>
-                  <IconComponent size={22} color={Colors.textMuted} weight="regular" />
+                <View style={[styles.menuItemIcon, { backgroundColor: `${item.color}15` }]}>
+                  <IconComponent size={22} color={item.color} weight="duotone" />
                 </View>
                 <Text style={styles.menuItemLabel}>{item.label}</Text>
                 <CaretRight size={20} color={Colors.textMuted} weight="regular" />
@@ -209,9 +287,12 @@ export default function ProfileTab() {
             style={styles.logoutButton}
             onPress={handleLogout}
             activeOpacity={0.7}
+            disabled={isLoggingOut}
           >
-            <SignOut size={22} color={ZORA_RED} weight="regular" />
-            <Text style={styles.logoutText}>Log Out</Text>
+            <SignOut size={22} color={Colors.primary} weight="duotone" />
+            <Text style={styles.logoutText}>
+              {isLoggingOut ? 'Logging out...' : 'Log Out'}
+            </Text>
           </TouchableOpacity>
         </View>
 
@@ -234,7 +315,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: Spacing.base,
-    paddingVertical: Spacing.md,
+    paddingTop: Spacing.sm,
+    paddingBottom: Spacing.md,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.borderDark,
   },
   headerLeft: {
     width: 44,
@@ -249,6 +333,10 @@ const styles = StyleSheet.create({
     height: 44,
     justifyContent: 'center',
     alignItems: 'center',
+    borderRadius: 22,
+    backgroundColor: Colors.cardDark,
+    borderWidth: 1,
+    borderColor: Colors.borderDark,
   },
   
   // Scroll View
@@ -257,13 +345,14 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingHorizontal: Spacing.base,
-    gap: 24,
+    paddingTop: Spacing.lg,
+    gap: Spacing.xl,
   },
   
   // Profile Section
   profileSection: {
     alignItems: 'center',
-    gap: 12,
+    gap: Spacing.md,
   },
   avatarContainer: {
     position: 'relative',
@@ -273,7 +362,8 @@ const styles = StyleSheet.create({
     height: 100,
     borderRadius: 50,
     borderWidth: 4,
-    borderColor: ZORA_CARD,
+    borderColor: Colors.cardDark,
+    backgroundColor: Colors.cardDark,
   },
   cameraButton: {
     position: 'absolute',
@@ -282,80 +372,80 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: ZORA_CARD,
+    backgroundColor: Colors.cardDark,
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 2,
-    borderColor: ICON_BG,
+    borderColor: Colors.backgroundDark,
   },
   userName: {
     fontFamily: FontFamily.display,
-    fontSize: 22,
+    fontSize: FontSize.h2,
     color: Colors.textPrimary,
   },
   memberBadge: {
-    backgroundColor: ZORA_CARD,
-    paddingHorizontal: 14,
-    paddingVertical: 6,
+    backgroundColor: Colors.cardDark,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.sm,
     borderRadius: BorderRadius.full,
     borderWidth: 1,
-    borderColor: 'rgba(255, 204, 0, 0.2)',
+    borderColor: `${Colors.secondary}33`,
   },
   memberBadgeText: {
     fontFamily: FontFamily.bodyBold,
-    fontSize: 12,
-    color: ZORA_YELLOW,
-    letterSpacing: 1,
+    fontSize: FontSize.caption,
+    color: Colors.secondary,
+    letterSpacing: LetterSpacing.wider,
     textTransform: 'uppercase',
   },
   
   // Stats Row
   statsRow: {
     flexDirection: 'row',
-    backgroundColor: SURFACE_DARK,
+    backgroundColor: Colors.cardDark,
     borderRadius: BorderRadius.lg,
     borderWidth: 1,
-    borderColor: 'rgba(74, 53, 53, 0.3)',
+    borderColor: Colors.borderDark,
     overflow: 'hidden',
   },
   statItem: {
     flex: 1,
     alignItems: 'center',
-    paddingVertical: 16,
+    paddingVertical: Spacing.base,
   },
   statItemBorder: {
     borderRightWidth: 1,
-    borderRightColor: 'rgba(74, 53, 53, 0.3)',
+    borderRightColor: Colors.borderDark,
   },
   statValue: {
     fontFamily: FontFamily.display,
-    fontSize: 24,
-    color: ZORA_YELLOW,
+    fontSize: FontSize.h2,
+    color: Colors.secondary,
   },
   statLabel: {
     fontFamily: FontFamily.bodyMedium,
-    fontSize: 12,
+    fontSize: FontSize.caption,
     color: Colors.textMuted,
-    marginTop: 4,
+    marginTop: Spacing.xs,
   },
   
   // Rewards Card
   rewardsCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 16,
-    backgroundColor: SURFACE_DARK,
+    gap: Spacing.base,
+    backgroundColor: Colors.cardDark,
     paddingHorizontal: Spacing.base,
     paddingVertical: Spacing.base,
     borderRadius: BorderRadius.lg,
     borderWidth: 1,
-    borderColor: 'rgba(255, 204, 0, 0.2)',
+    borderColor: `${Colors.secondary}33`,
   },
   rewardsIconContainer: {
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: 'rgba(255, 204, 0, 0.15)',
+    backgroundColor: `${Colors.secondary}20`,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -370,19 +460,19 @@ const styles = StyleSheet.create({
   rewardsSubtitle: {
     fontFamily: FontFamily.body,
     fontSize: FontSize.small,
-    color: ZORA_YELLOW,
+    color: Colors.secondary,
     marginTop: 2,
   },
   
   // QR Card
   qrCard: {
-    backgroundColor: SURFACE_DARK,
+    backgroundColor: Colors.cardDark,
     borderRadius: BorderRadius.lg,
-    padding: 24,
+    padding: Spacing.xl,
     alignItems: 'center',
-    gap: 16,
+    gap: Spacing.base,
     borderWidth: 1,
-    borderColor: 'rgba(74, 53, 53, 0.5)',
+    borderColor: Colors.borderDark,
     position: 'relative',
     overflow: 'hidden',
   },
@@ -393,7 +483,7 @@ const styles = StyleSheet.create({
     width: 120,
     height: 120,
     borderRadius: 60,
-    backgroundColor: 'rgba(193, 39, 45, 0.05)',
+    backgroundColor: `${Colors.primary}10`,
   },
   qrDecorBottom: {
     position: 'absolute',
@@ -402,11 +492,11 @@ const styles = StyleSheet.create({
     width: 120,
     height: 120,
     borderRadius: 60,
-    backgroundColor: 'rgba(255, 204, 0, 0.05)',
+    backgroundColor: `${Colors.secondary}10`,
   },
   qrHeader: {
     alignItems: 'center',
-    gap: 4,
+    gap: Spacing.xs,
     zIndex: 10,
   },
   qrTitle: {
@@ -421,7 +511,7 @@ const styles = StyleSheet.create({
   },
   qrCodeContainer: {
     backgroundColor: '#FFFFFF',
-    padding: 12,
+    padding: Spacing.md,
     borderRadius: BorderRadius.lg,
     zIndex: 10,
   },
@@ -431,44 +521,45 @@ const styles = StyleSheet.create({
   },
   customerId: {
     fontFamily: FontFamily.bodyMedium,
-    fontSize: 12,
+    fontSize: FontSize.caption,
     color: Colors.textMuted,
-    letterSpacing: 2,
+    letterSpacing: LetterSpacing.wider,
     zIndex: 10,
   },
   refreshButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
-    paddingHorizontal: 16,
-    paddingVertical: 8,
+    gap: Spacing.sm,
+    paddingHorizontal: Spacing.base,
+    paddingVertical: Spacing.sm,
     borderRadius: BorderRadius.lg,
     zIndex: 10,
   },
   refreshText: {
     fontFamily: FontFamily.bodyBold,
     fontSize: FontSize.small,
-    color: ZORA_RED,
+    color: Colors.primary,
   },
   
   // Menu Section
   menuSection: {
-    gap: 8,
+    gap: Spacing.sm,
   },
   menuItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 16,
-    backgroundColor: SURFACE_DARK,
+    gap: Spacing.base,
+    backgroundColor: Colors.cardDark,
     paddingHorizontal: Spacing.base,
     paddingVertical: Spacing.base,
     borderRadius: BorderRadius.lg,
+    borderWidth: 1,
+    borderColor: Colors.borderDark,
   },
   menuItemIcon: {
     width: 40,
     height: 40,
     borderRadius: BorderRadius.md,
-    backgroundColor: ICON_BG,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -482,13 +573,17 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 8,
-    paddingVertical: 16,
-    marginTop: 8,
+    gap: Spacing.sm,
+    paddingVertical: Spacing.base,
+    marginTop: Spacing.sm,
+    borderRadius: BorderRadius.lg,
+    backgroundColor: Colors.cardDark,
+    borderWidth: 1,
+    borderColor: `${Colors.primary}33`,
   },
   logoutText: {
     fontFamily: FontFamily.bodyBold,
     fontSize: FontSize.body,
-    color: ZORA_RED,
+    color: Colors.primary,
   },
 });

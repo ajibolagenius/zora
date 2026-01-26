@@ -263,7 +263,7 @@ export default function CheckoutScreen() {
       <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom, 16) }]}>
         <View style={styles.footerTotalRow}>
           <Text style={styles.footerTotalLabel}>Estimated Total</Text>
-          <Text style={styles.footerTotalValue}>${estimatedTotal.toFixed(2)}</Text>
+          <Text style={styles.footerTotalValue}>£{estimatedTotal.toFixed(2)}</Text>
         </View>
         <TouchableOpacity 
           style={styles.continueButton}
