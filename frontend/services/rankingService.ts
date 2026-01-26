@@ -198,8 +198,9 @@ export function getFeaturedVendors(
   limit: number = 10
 ): Vendor[] {
   // Filter for minimum quality threshold
+  // Manually featured vendors are always eligible, regardless of other metrics
   const eligibleVendors = vendors.filter(v => 
-    v.is_verified || v.rating >= 3.5 || v.review_count >= 5
+    v.is_featured || v.is_verified || v.rating >= 3.5 || v.review_count >= 5
   );
 
   // If no eligible vendors, fall back to all vendors
@@ -217,10 +218,11 @@ export function getFeaturedProducts(
   limit: number = 20
 ): Product[] {
   // Filter for minimum quality threshold (active, in stock, decent rating)
+  // Manually featured products are always eligible (if active), regardless of rating/review thresholds
   const eligibleProducts = products.filter(p => 
     p.is_active && 
     p.stock_quantity > 0 && 
-    (p.rating >= 3.5 || p.review_count >= 3)
+    (p.is_featured || p.rating >= 3.5 || p.review_count >= 3)
   );
 
   // If no eligible products, fall back to active products
