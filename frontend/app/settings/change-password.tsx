@@ -209,15 +209,15 @@ export default function ChangePasswordScreen() {
                 )}
               </TouchableOpacity>
             </View>
-            {confirmPassword && newPassword !== confirmPassword && (
+            {confirmPassword && newPassword !== confirmPassword ? (
               <Text style={styles.errorText}>Passwords do not match</Text>
-            )}
-            {confirmPassword && newPassword === confirmPassword && (
+            ) : null}
+            {confirmPassword && newPassword === confirmPassword ? (
               <View style={styles.successRow}>
                 <CheckCircle size={16} color={Colors.success} weight="duotone" />
                 <Text style={styles.successText}>Passwords match</Text>
               </View>
-            )}
+            ) : null}
           </View>
         </View>
 

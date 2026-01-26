@@ -23,15 +23,17 @@ export default function QRScannerScreen() {
   // Check if CameraView is available (may not be on web)
   const isCameraAvailable = Platform.OS !== 'web' && CameraView !== undefined;
   
+  // Always call the hook (hooks must be called unconditionally)
   const [permission, requestPermission] = useCameraPermissions();
+  
   const [scanned, setScanned] = useState(false);
   const [torch, setTorch] = useState(false);
 
   useEffect(() => {
-    if (permission && !permission.granted) {
+    if (permission && requestPermission && !permission.granted) {
       requestPermission();
     }
-  }, [permission]);
+  }, [permission, requestPermission]);
 
   const handleBarCodeScanned = async ({ type, data }: { type: string; data: string }) => {
     if (scanned) return;
@@ -101,14 +103,48 @@ export default function QRScannerScreen() {
     }
   };
 
-  if (!permission) {
+  // First check: Camera unavailable on this platform (web/unsupported)
+  if (!isCameraAvailable || !CameraView) {
     return (
       <View style={styles.container}>
-        <Text style={styles.permissionText}>Requesting camera permission...</Text>
+        <SafeAreaView style={styles.permissionContainer}>
+          <View style={styles.permissionIconContainer}>
+            <QrCode size={64} color={Colors.textMuted} weight="duotone" />
+          </View>
+          <Text style={styles.permissionTitle}>QR Scanner</Text>
+          <Text style={styles.permissionText}>
+            QR code scanning is not available on this platform. Please use the mobile app to scan QR codes.
+          </Text>
+          <TouchableOpacity 
+            style={styles.cancelButton} 
+            onPress={() => router.back()}
+            activeOpacity={0.8}
+          >
+            <Text style={styles.cancelButtonText}>Go Back</Text>
+          </TouchableOpacity>
+        </SafeAreaView>
       </View>
     );
   }
 
+  // Second check: Permission is loading (null state)
+  if (!permission) {
+    return (
+      <View style={styles.container}>
+        <SafeAreaView style={styles.permissionContainer}>
+          <View style={styles.permissionIconContainer}>
+            <QrCode size={64} color={Colors.textMuted} weight="duotone" />
+          </View>
+          <Text style={styles.permissionTitle}>QR Scanner</Text>
+          <Text style={styles.permissionText}>
+            Requesting camera permission...
+          </Text>
+        </SafeAreaView>
+      </View>
+    );
+  }
+
+  // Third check: Permission not granted
   if (!permission.granted) {
     return (
       <View style={styles.container}>
@@ -139,30 +175,7 @@ export default function QRScannerScreen() {
     );
   }
 
-  // Web/Unavailable fallback - CameraView not available on web or if undefined
-  if (!isCameraAvailable || !CameraView) {
-    return (
-      <View style={styles.container}>
-        <SafeAreaView style={styles.permissionContainer}>
-          <View style={styles.permissionIconContainer}>
-            <QrCode size={64} color={Colors.textMuted} weight="duotone" />
-          </View>
-          <Text style={styles.permissionTitle}>QR Scanner</Text>
-          <Text style={styles.permissionText}>
-            QR code scanning is not available on this platform. Please use the mobile app to scan QR codes.
-          </Text>
-          <TouchableOpacity 
-            style={styles.cancelButton} 
-            onPress={() => router.back()}
-            activeOpacity={0.8}
-          >
-            <Text style={styles.cancelButtonText}>Go Back</Text>
-          </TouchableOpacity>
-        </SafeAreaView>
-      </View>
-    );
-  }
-
+  // All checks passed - render camera view
   return (
     <View style={styles.container}>
       <CameraView

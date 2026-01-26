@@ -11,10 +11,6 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import {
   ArrowLeft,
-  InstagramLogo,
-  TwitterLogo,
-  FacebookLogo,
-  TiktokLogo,
   Globe,
   Envelope,
   CaretRight,
@@ -28,7 +24,17 @@ import {
   Award,
   MapPin,
   Phone,
+  ShareNetwork,
 } from 'phosphor-react-native';
+
+// Import social logos - they might not exist in all versions, so we'll use dynamic import
+import * as PhosphorIcons from 'phosphor-react-native';
+
+// Get social icons with fallbacks
+const InstagramLogo = (PhosphorIcons as any).InstagramLogo || ShareNetwork;
+const TwitterLogo = (PhosphorIcons as any).TwitterLogo || ShareNetwork;
+const FacebookLogo = (PhosphorIcons as any).FacebookLogo || ShareNetwork;
+const TiktokLogo = (PhosphorIcons as any).TiktokLogo || ShareNetwork;
 import { Colors } from '../../constants/colors';
 import { Spacing, BorderRadius } from '../../constants/spacing';
 import { FontSize, FontFamily, LetterSpacing } from '../../constants/typography';
@@ -60,11 +66,32 @@ interface SocialLink {
   color: string;
 }
 
+// Define social links with fallbacks for icons that might not exist
 const SOCIAL_LINKS_BASE: Omit<SocialLink, 'color'>[] = [
-  { id: 'instagram', icon: InstagramLogo, label: 'Instagram', url: 'https://instagram.com/zoramarket' },
-  { id: 'twitter', icon: TwitterLogo, label: 'Twitter', url: 'https://twitter.com/zoramarket' },
-  { id: 'facebook', icon: FacebookLogo, label: 'Facebook', url: 'https://facebook.com/zoramarket' },
-  { id: 'tiktok', icon: TiktokLogo, label: 'TikTok', url: 'https://tiktok.com/@zoramarket' },
+  { 
+    id: 'instagram', 
+    icon: InstagramLogo || ShareNetwork, 
+    label: 'Instagram', 
+    url: 'https://instagram.com/zoramarket' 
+  },
+  { 
+    id: 'twitter', 
+    icon: TwitterLogo || ShareNetwork, 
+    label: 'Twitter', 
+    url: 'https://twitter.com/zoramarket' 
+  },
+  { 
+    id: 'facebook', 
+    icon: FacebookLogo || ShareNetwork, 
+    label: 'Facebook', 
+    url: 'https://facebook.com/zoramarket' 
+  },
+  { 
+    id: 'tiktok', 
+    icon: TiktokLogo || ShareNetwork, 
+    label: 'TikTok', 
+    url: 'https://tiktok.com/@zoramarket' 
+  },
 ];
 
 interface LegalLink {
@@ -102,13 +129,19 @@ export default function AboutScreen() {
   const stats = useMemo(() => {
     const shuffledColors = shuffleArray(DESIGN_SYSTEM_COLORS);
     return STATS_BASE.map((stat, index) => {
-      const IconComponent = STAT_ICONS[index];
-      if (!IconComponent) {
-        console.warn(`Icon at index ${index} is undefined`);
+      const IconComponent = STAT_ICONS[index] || ShoppingBag;
+      // Ensure icon is a valid component
+      if (!IconComponent || typeof IconComponent !== 'function') {
+        console.warn(`Invalid icon at index ${index}, using ShoppingBag fallback`);
+        return {
+          ...stat,
+          icon: ShoppingBag,
+          color: shuffledColors[index % shuffledColors.length],
+        };
       }
       return {
         ...stat,
-        icon: IconComponent || ShoppingBag, // Fallback to ShoppingBag if undefined
+        icon: IconComponent,
         color: shuffledColors[index % shuffledColors.length],
       };
     });
@@ -117,19 +150,43 @@ export default function AboutScreen() {
   // Assign random colors to social links
   const socialLinks = useMemo(() => {
     const shuffledColors = shuffleArray(DESIGN_SYSTEM_COLORS);
-    return SOCIAL_LINKS_BASE.map((link, index) => ({
-      ...link,
-      color: shuffledColors[index % shuffledColors.length],
-    }));
+    return SOCIAL_LINKS_BASE.map((link, index) => {
+      // Ensure icon is valid - double check it's a function
+      const IconComponent = link.icon;
+      if (!IconComponent || typeof IconComponent !== 'function' || IconComponent === undefined) {
+        console.warn(`Invalid social icon for ${link.id}, using ShareNetwork fallback`);
+        return {
+          ...link,
+          icon: ShareNetwork, // Fallback to ShareNetwork which definitely exists
+          color: shuffledColors[index % shuffledColors.length],
+        };
+      }
+      return {
+        ...link,
+        icon: IconComponent, // Ensure we use the validated icon
+        color: shuffledColors[index % shuffledColors.length],
+      };
+    });
   }, []);
 
   // Assign random colors to legal links
   const legalLinks = useMemo(() => {
     const shuffledColors = shuffleArray(DESIGN_SYSTEM_COLORS);
-    return LEGAL_LINKS_BASE.map((link, index) => ({
-      ...link,
-      color: shuffledColors[index % shuffledColors.length],
-    }));
+    return LEGAL_LINKS_BASE.map((link, index) => {
+      // Ensure icon is valid
+      if (!link.icon || typeof link.icon !== 'function') {
+        console.warn(`Invalid legal icon for ${link.id}`);
+        return {
+          ...link,
+          icon: FileText, // Fallback
+          color: shuffledColors[index % shuffledColors.length],
+        };
+      }
+      return {
+        ...link,
+        color: shuffledColors[index % shuffledColors.length],
+      };
+    });
   }, []);
 
   const handleOpenLink = (url: string) => {
@@ -193,8 +250,10 @@ export default function AboutScreen() {
         <View style={styles.statsRow}>
           {stats.map((stat, index) => {
             const IconComponent = stat.icon;
-            if (!IconComponent) {
-              return null; // Skip rendering if icon is undefined
+            // Validate icon is a valid React component
+            if (!IconComponent || typeof IconComponent !== 'function') {
+              console.warn(`Invalid stat icon at index ${index}, skipping`);
+              return null;
             }
             return (
               <View key={index} style={styles.statCard}>
@@ -214,8 +273,10 @@ export default function AboutScreen() {
           <View style={styles.socialGrid}>
             {socialLinks.map((social) => {
               const IconComponent = social.icon;
-              if (!IconComponent) {
-                return null; // Skip rendering if icon is undefined
+              // Validate icon is a valid React component
+              if (!IconComponent || typeof IconComponent !== 'function') {
+                console.warn(`Invalid social icon for ${social.id}, skipping`);
+                return null;
               }
               return (
                 <TouchableOpacity
@@ -311,8 +372,10 @@ export default function AboutScreen() {
           <View style={styles.legalCard}>
             {legalLinks.map((link, index) => {
               const IconComponent = link.icon;
-              if (!IconComponent) {
-                return null; // Skip rendering if icon is undefined
+              // Validate icon is a valid React component
+              if (!IconComponent || typeof IconComponent !== 'function') {
+                console.warn(`Invalid legal icon for ${link.id}, skipping`);
+                return null;
               }
               return (
                 <View key={link.id}>
