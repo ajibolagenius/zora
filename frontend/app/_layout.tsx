@@ -1,5 +1,5 @@
 import { useEffect, useCallback, useState } from 'react';
-import { View, ActivityIndicator, StyleSheet, Platform } from 'react-native';
+import { View, ActivityIndicator, StyleSheet, Platform, Linking } from 'react-native';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import * as SplashScreen from 'expo-splash-screen';
@@ -73,6 +73,56 @@ export default function RootLayout() {
     getSupabaseClient().catch((error) => {
       console.error('Failed to initialize Supabase client:', error);
     });
+  }, []);
+
+  // Handle deep links for OAuth callbacks (native only)
+  useEffect(() => {
+    if (Platform.OS === 'web') {
+      // For web, Supabase handles URL hash automatically via detectSessionInUrl
+      return;
+    }
+
+    if (!isSupabaseConfigured()) return;
+
+    // For native, handle deep links
+    const handleDeepLink = async (url: string) => {
+      try {
+        // Check if this is an OAuth callback
+        if (url.includes('auth/callback') || url.includes('auth#') || url.includes('auth?')) {
+          const client = await getSupabaseClient();
+          
+          // Supabase will automatically extract tokens from the URL
+          // Just check if we have a session now
+          const { data: { session }, error } = await client.auth.getSession();
+          
+          if (session && !error) {
+            // Session exists, refresh auth state
+            const { checkAuth } = useAuthStore.getState();
+            await checkAuth();
+          }
+        }
+      } catch (error) {
+        console.error('Deep link handling error:', error);
+      }
+    };
+
+    // Get initial URL if app was opened via deep link
+    Linking.getInitialURL().then((url) => {
+      if (url) {
+        handleDeepLink(url);
+      }
+    }).catch((error) => {
+      console.error('Error getting initial URL:', error);
+    });
+
+    // Listen for deep links while app is running
+    const subscription = Linking.addEventListener('url', (event) => {
+      handleDeepLink(event.url);
+    });
+
+    return () => {
+      subscription.remove();
+    };
   }, []);
 
   // Auth state listener for session management

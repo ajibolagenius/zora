@@ -93,17 +93,27 @@ export const authService = {
     });
     
     if (data.user && !error) {
-      // Create user profile
+      // Profile is automatically created by handle_new_user() trigger
+      // But ensure it exists with correct data
       const fromMethod = await getSupabaseFrom();
       if (fromMethod) {
-        await fromMethod('users').insert({
+        // Try to insert, but handle conflict if trigger already created it
+        await fromMethod('profiles').insert({
           id: data.user.id,
-          email,
-          name,
+          email: data.user.email,
+          full_name: name,
           membership_tier: 'bronze',
           zora_credits: 5.0,
           loyalty_points: 100,
           cultural_interests: [],
+          referral_code: `ZORA${data.user.id.substring(0, 6).toUpperCase()}`,
+        }).then(() => {
+          // Success
+        }).catch(() => {
+          // Profile already exists (created by trigger), update it if needed
+          fromMethod('profiles')
+            .update({ full_name: name, email: data.user.email })
+            .eq('id', data.user.id);
         });
       }
     }
@@ -195,7 +205,7 @@ export const authService = {
       } as User;
     }
     
-    const { data, error } = await fromMethod('users')
+    const { data, error } = await fromMethod('profiles')
       .select('*')
       .eq('id', userId)
       .single();
@@ -214,7 +224,7 @@ export const authService = {
       return { data: updates, error: null };
     }
     
-    const { data, error } = await fromMethod('users')
+    const { data, error } = await fromMethod('profiles')
       .update(updates)
       .eq('id', userId)
       .select()

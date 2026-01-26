@@ -3,6 +3,7 @@ import { User } from '../types';
 import { supabase, getSupabaseClient, isSupabaseConfigured, getCredentialsError } from '../lib/supabase';
 import { Session, AuthError } from '@supabase/supabase-js';
 import { ApiConfig } from '../constants';
+import { Platform } from 'react-native';
 import {
   checkLoginRateLimit,
   recordLoginAttempt,
@@ -163,14 +164,24 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
     try {
       set({ isLoading: true });
       const client = await getSupabaseClient();
+      
+      // For React Native, we need to use the proper redirect URL
+      // The redirect URL should match what's configured in Supabase Dashboard
+      // Use the app scheme from app.json: zoramarket
+      const redirectUrl = Platform.OS === 'web' 
+        ? (typeof window !== 'undefined' ? `${window.location.origin}/auth/callback` : 'http://localhost:3000/auth/callback')
+        : 'zoramarket://auth/callback';
+      
       const { data, error } = await client.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: 'zora://auth/callback',
+          redirectTo: redirectUrl,
           queryParams: {
             access_type: 'offline',
             prompt: 'consent',
           },
+          // Pass user metadata to be stored in profile
+          skipBrowserRedirect: Platform.OS !== 'web', // For native, we'll handle redirect manually
         },
       });
       
@@ -180,12 +191,25 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
           success: false,
           errorMessage: error.message,
         });
+        set({ isLoading: false });
         throw error;
       }
 
-      // Log OAuth attempt
+      // For web, the redirect will happen automatically
+      // For native, we need to open the URL manually
+      if (Platform.OS !== 'web' && data.url) {
+        const { Linking } = await import('react-native');
+        await Linking.openURL(data.url);
+        // The session will be handled by the auth state listener when user returns
+        // Don't set isLoading to false here - let the auth listener handle it
+      } else {
+        // For web, the redirect happens automatically
+        // The session will be handled by the auth state listener
+        set({ isLoading: false });
+      }
+
+      // Log OAuth attempt (actual success will be logged by auth listener)
       logSecurityEvent.loginSuccess('', 'OAuth');
-      // The session will be handled by the auth state listener
     } catch (error: any) {
       console.error('Google sign in error:', error);
       set({ isLoading: false });
@@ -348,22 +372,71 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
       if (error) throw error;
       
       if (data.user) {
-        // Create profile in profiles table with timeout
-        await withTimeout(
-          client.from('profiles').insert({
-            id: data.user.id,
-            email: data.user.email,
-            full_name: name,
-            membership_tier: 'bronze',
-            zora_credits: 5.0, // Welcome bonus
-            loyalty_points: 100,
-            referral_code: `ZORA${data.user.id.substring(0, 6).toUpperCase()}`,
-          }),
-          AUTH_TIMEOUT_MS,
-          'Failed to create profile. Please try again.'
-        );
+        // Profile is automatically created by the handle_new_user() trigger
+        // But we should ensure it exists and has the correct data
+        // Wait a moment for the trigger to complete, then fetch the profile
+        await new Promise(resolve => setTimeout(resolve, 500));
         
-        const user = mapSupabaseUser(data.user, { full_name: name });
+        // Fetch or create profile with timeout
+        let profile;
+        try {
+          const { data: existingProfile } = await withTimeout(
+            client.from('profiles').select('*').eq('id', data.user.id).single(),
+            AUTH_TIMEOUT_MS,
+            'Failed to load profile. Please try again.'
+          );
+          profile = existingProfile;
+          
+          // If profile doesn't exist (trigger might have failed), create it
+          if (!profile) {
+            const { data: newProfile } = await withTimeout(
+              client.from('profiles').insert({
+                id: data.user.id,
+                email: data.user.email,
+                full_name: name,
+                membership_tier: 'bronze',
+                zora_credits: 5.0, // Welcome bonus
+                loyalty_points: 100,
+                referral_code: `ZORA${data.user.id.substring(0, 6).toUpperCase()}`,
+              }).select().single(),
+              AUTH_TIMEOUT_MS,
+              'Failed to create profile. Please try again.'
+            );
+            profile = newProfile;
+          } else {
+            // Update profile with signup data if needed
+            if (!profile.full_name && name) {
+              await client.from('profiles')
+                .update({ full_name: name })
+                .eq('id', data.user.id);
+              profile = { ...profile, full_name: name };
+            }
+          }
+        } catch (profileError: any) {
+          // If profile fetch fails, try to create it
+          console.warn('Profile fetch failed, attempting to create:', profileError);
+          try {
+            const { data: newProfile } = await withTimeout(
+              client.from('profiles').insert({
+                id: data.user.id,
+                email: data.user.email,
+                full_name: name,
+                membership_tier: 'bronze',
+                zora_credits: 5.0,
+                loyalty_points: 100,
+                referral_code: `ZORA${data.user.id.substring(0, 6).toUpperCase()}`,
+              }).select().single(),
+              AUTH_TIMEOUT_MS,
+              'Failed to create profile. Please try again.'
+            );
+            profile = newProfile;
+          } catch (createError) {
+            console.error('Failed to create profile:', createError);
+            // Continue anyway - profile might be created by trigger later
+          }
+        }
+        
+        const user = mapSupabaseUser(data.user, profile);
         const emailVerified = data.user.email_confirmed_at !== null;
         
         set({
@@ -468,11 +541,58 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
       
       if (session?.user) {
         // Fetch user profile
-        const { data: profile } = await client
-          .from('profiles')
-          .select('*')
-          .eq('id', session.user.id)
-          .single();
+        let profile;
+        try {
+          const { data: profileData } = await client
+            .from('profiles')
+            .select('*')
+            .eq('id', session.user.id)
+            .single();
+          profile = profileData;
+          
+          // If profile doesn't exist (e.g., from OAuth), create it
+          if (!profile) {
+            const { data: newProfile } = await client
+              .from('profiles')
+              .insert({
+                id: session.user.id,
+                email: session.user.email,
+                full_name: session.user.user_metadata?.full_name || session.user.email?.split('@')[0] || 'User',
+                avatar_url: session.user.user_metadata?.avatar_url || session.user.user_metadata?.picture,
+                referral_code: `ZORA${session.user.id.substring(0, 6).toUpperCase()}`,
+                membership_tier: 'bronze',
+                zora_credits: 5.0,
+                loyalty_points: 100,
+              })
+              .select()
+              .single();
+            profile = newProfile;
+          } else {
+            // Update profile with OAuth data if available and missing
+            const updates: any = {};
+            if (!profile.email && session.user.email) updates.email = session.user.email;
+            if (!profile.full_name && session.user.user_metadata?.full_name) {
+              updates.full_name = session.user.user_metadata.full_name;
+            }
+            if (!profile.avatar_url && (session.user.user_metadata?.avatar_url || session.user.user_metadata?.picture)) {
+              updates.avatar_url = session.user.user_metadata?.avatar_url || session.user.user_metadata?.picture;
+            }
+            
+            if (Object.keys(updates).length > 0) {
+              const { data: updatedProfile } = await client
+                .from('profiles')
+                .update(updates)
+                .eq('id', session.user.id)
+                .select()
+                .single();
+              profile = updatedProfile || profile;
+            }
+          }
+        } catch (profileError: any) {
+          console.error('Profile fetch/creation error:', profileError);
+          // Continue with basic user data if profile fetch fails
+          profile = null;
+        }
         
         const user = mapSupabaseUser(session.user, profile);
         const emailVerified = session.user.email_confirmed_at !== null;
