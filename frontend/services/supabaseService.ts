@@ -36,7 +36,7 @@ function getSupabaseRpc() {
   if (!isSupabaseConfigured()) {
     return null;
   }
-  const rpcMethod = (supabase as any).rpc;
+  const rpcMethod = supabase.rpc;
   if (!rpcMethod) {
     return null;
   }

@@ -113,17 +113,83 @@ const getSupabaseClient = async (): Promise<SupabaseClient<Database>> => {
   return supabaseInstance;
 };
 
+// Initialize client immediately if configured (for synchronous access)
+if (isSupabaseConfigured()) {
+  // Initialize synchronously for web, async for native
+  if (Platform.OS === 'web' && typeof window !== 'undefined') {
+    try {
+      supabaseInstance = createClient<Database>(supabaseUrl, supabaseAnonKey, {
+        auth: {
+          autoRefreshToken: true,
+          persistSession: true,
+          detectSessionInUrl: true,
+        },
+      });
+    } catch (error) {
+      console.error('Failed to initialize Supabase client:', error);
+    }
+  }
+}
+
 // For backwards compatibility, export a getter that returns the singleton instance
 // This avoids creating multiple GoTrueClient instances
 export const supabase = {
   get auth() {
-    if (!supabaseInstance) {
-      console.warn('Supabase client not initialized. Call getSupabaseClient() first.');
+    if (!supabaseInstance && isSupabaseConfigured()) {
+      // Try to initialize if not already done
+      if (Platform.OS === 'web' && typeof window !== 'undefined') {
+        try {
+          supabaseInstance = createClient<Database>(supabaseUrl, supabaseAnonKey, {
+            auth: {
+              autoRefreshToken: true,
+              persistSession: true,
+              detectSessionInUrl: true,
+            },
+          });
+        } catch (error) {
+          console.error('Failed to initialize Supabase client:', error);
+        }
+      }
     }
     return supabaseInstance?.auth;
   },
   get from() {
-    return supabaseInstance?.from.bind(supabaseInstance);
+    if (!supabaseInstance && isSupabaseConfigured()) {
+      // Try to initialize if not already done
+      if (Platform.OS === 'web' && typeof window !== 'undefined') {
+        try {
+          supabaseInstance = createClient<Database>(supabaseUrl, supabaseAnonKey, {
+            auth: {
+              autoRefreshToken: true,
+              persistSession: true,
+              detectSessionInUrl: true,
+            },
+          });
+        } catch (error) {
+          console.error('Failed to initialize Supabase client:', error);
+        }
+      }
+    }
+    return supabaseInstance?.from?.bind(supabaseInstance);
+  },
+  get rpc() {
+    if (!supabaseInstance && isSupabaseConfigured()) {
+      // Try to initialize if not already done
+      if (Platform.OS === 'web' && typeof window !== 'undefined') {
+        try {
+          supabaseInstance = createClient<Database>(supabaseUrl, supabaseAnonKey, {
+            auth: {
+              autoRefreshToken: true,
+              persistSession: true,
+              detectSessionInUrl: true,
+            },
+          });
+        } catch (error) {
+          console.error('Failed to initialize Supabase client:', error);
+        }
+      }
+    }
+    return supabaseInstance?.rpc?.bind(supabaseInstance);
   },
 };
 
