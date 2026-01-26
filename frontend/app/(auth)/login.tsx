@@ -96,11 +96,13 @@ export default function LoginScreen() {
 
             if (mode === 'signin') {
                 await signInWithEmail(email, password);
+                // Login → home screen
+                router.replace('/(tabs)');
             } else {
                 await signUpWithEmail(email, password, name);
+                // Register → onboarding
+                router.replace('/onboarding/heritage');
             }
-
-            router.replace('/onboarding/heritage');
         } catch (error: any) {
             console.error('Auth error:', error);
             Alert.alert(
