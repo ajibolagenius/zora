@@ -98,23 +98,28 @@ export const authService = {
       const fromMethod = await getSupabaseFrom();
       if (fromMethod) {
         // Try to insert, but handle conflict if trigger already created it
-        await fromMethod('profiles').insert({
-          id: data.user.id,
-          email: data.user.email,
-          full_name: name,
-          membership_tier: 'bronze',
-          zora_credits: 5.0,
-          loyalty_points: 100,
-          cultural_interests: [],
-          referral_code: `ZORA${data.user.id.substring(0, 6).toUpperCase()}`,
-        }).then(() => {
-          // Success
-        }).catch(() => {
+        try {
+          await fromMethod('profiles').insert({
+            id: data.user.id,
+            email: data.user.email,
+            full_name: name,
+            membership_tier: 'bronze',
+            zora_credits: 5.0,
+            loyalty_points: 100,
+            cultural_interests: [],
+            referral_code: `ZORA${data.user.id.substring(0, 6).toUpperCase()}`,
+          });
+        } catch (insertError: any) {
           // Profile already exists (created by trigger), update it if needed
-          fromMethod('profiles')
-            .update({ full_name: name, email: data.user.email })
-            .eq('id', data.user.id);
-        });
+          try {
+            await fromMethod('profiles')
+              .update({ full_name: name, email: data.user.email })
+              .eq('id', data.user.id);
+          } catch (updateError) {
+            console.error('Failed to update existing profile:', updateError);
+            // Log error but don't throw - profile exists, just couldn't update metadata
+          }
+        }
       }
     }
     

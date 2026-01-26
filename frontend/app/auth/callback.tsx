@@ -12,7 +12,7 @@ import { Colors } from '../../constants/colors';
  */
 export default function AuthCallbackScreen() {
   const router = useRouter();
-  const { checkAuth, isAuthenticated } = useAuthStore();
+  const { checkAuth } = useAuthStore();
 
   useEffect(() => {
     const handleAuthCallback = async () => {
@@ -38,14 +38,21 @@ export default function AuthCallbackScreen() {
           // Session exists, refresh auth state
           await checkAuth();
           
-          // Wait a moment for auth state to update
-          setTimeout(() => {
-            if (isAuthenticated) {
-              router.replace('/(tabs)');
-            } else {
-              router.replace('/(auth)/login');
-            }
-          }, 500);
+          // Get the current auth state after checkAuth completes
+          // Use getState() to get the latest value, not the closure value
+          const { isAuthenticated: currentAuthState } = useAuthStore.getState();
+          
+          // Wait a moment for any async state updates to complete
+          await new Promise(resolve => setTimeout(resolve, 500));
+          
+          // Check auth state again after the delay
+          const { isAuthenticated: finalAuthState } = useAuthStore.getState();
+          
+          if (finalAuthState) {
+            router.replace('/(tabs)');
+          } else {
+            router.replace('/(auth)/login');
+          }
         } else {
           // No session, redirect to login
           router.replace('/(auth)/login');
@@ -57,7 +64,8 @@ export default function AuthCallbackScreen() {
     };
 
     handleAuthCallback();
-  }, [router, checkAuth, isAuthenticated]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Only run once on mount
 
   return (
     <View style={styles.container}>

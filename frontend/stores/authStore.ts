@@ -3,7 +3,7 @@ import { User } from '../types';
 import { supabase, getSupabaseClient, isSupabaseConfigured, getCredentialsError } from '../lib/supabase';
 import { Session, AuthError } from '@supabase/supabase-js';
 import { ApiConfig } from '../constants';
-import { Platform } from 'react-native';
+import { Platform, AppState } from 'react-native';
 import {
   checkLoginRateLimit,
   recordLoginAttempt,
@@ -59,6 +59,10 @@ const withTimeout = <T>(promise: Promise<T>, ms: number, errorMessage: string): 
 };
 
 const AUTH_TIMEOUT_MS = ApiConfig.authTimeout;
+
+// Track OAuth timeout for native platforms to reset isLoading if user cancels
+let oauthTimeoutId: NodeJS.Timeout | null = null;
+const OAUTH_TIMEOUT_MS = 60 * 1000; // 60 seconds
 
 interface AuthState {
   user: User | null;
@@ -119,6 +123,12 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
     set({ session });
     // Start session timeout tracking when session is set
     if (session) {
+      // Clear OAuth timeout if it exists (auth succeeded)
+      if (oauthTimeoutId) {
+        clearTimeout(oauthTimeoutId);
+        oauthTimeoutId = null;
+      }
+      
       // Reset sessionExpiringSoon flag when starting a new session
       set({ sessionExpiringSoon: false });
       sessionTimeoutManager.startSession(
@@ -200,8 +210,71 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
       if (Platform.OS !== 'web' && data.url) {
         const { Linking } = await import('react-native');
         await Linking.openURL(data.url);
-        // The session will be handled by the auth state listener when user returns
-        // Don't set isLoading to false here - let the auth listener handle it
+        
+        // Set a timeout to reset isLoading if user cancels OAuth or doesn't return
+        // This prevents the loading state from persisting indefinitely
+        // The timeout will be cleared if auth succeeds (in setSession or checkAuth)
+        oauthTimeoutId = setTimeout(() => {
+          const { isLoading, isAuthenticated } = get();
+          // Only reset if still loading and not authenticated
+          // (auth might have succeeded via deep link while app was in background)
+          if (isLoading && !isAuthenticated) {
+            set({ isLoading: false });
+            console.log('OAuth timeout: Resetting loading state (user may have cancelled)');
+          }
+          oauthTimeoutId = null;
+        }, OAUTH_TIMEOUT_MS);
+        
+        // Also listen for app state changes to check auth when app comes back to foreground
+        let appStateSubscription: { remove: () => void } | null = null;
+        const handleAppStateChange = async (nextAppState: string) => {
+          if (nextAppState === 'active' && oauthTimeoutId) {
+            // App came back to foreground, wait a moment for deep link to process
+            setTimeout(async () => {
+              const { isLoading, isAuthenticated } = get();
+              if (isLoading && !isAuthenticated && oauthTimeoutId) {
+                // Check if we have a session now
+                try {
+                  const client = await getSupabaseClient();
+                  const { data: { session } } = await client.auth.getSession();
+                  if (!session) {
+                    // No session after returning to app, user likely cancelled
+                    set({ isLoading: false });
+                    if (oauthTimeoutId) {
+                      clearTimeout(oauthTimeoutId);
+                      oauthTimeoutId = null;
+                    }
+                    if (appStateSubscription) {
+                      appStateSubscription.remove();
+                      appStateSubscription = null;
+                    }
+                  }
+                } catch (error) {
+                  // Error checking session, reset loading anyway
+                  set({ isLoading: false });
+                  if (oauthTimeoutId) {
+                    clearTimeout(oauthTimeoutId);
+                    oauthTimeoutId = null;
+                  }
+                  if (appStateSubscription) {
+                    appStateSubscription.remove();
+                    appStateSubscription = null;
+                  }
+                }
+              }
+            }, 1500); // Wait 1.5 seconds for deep link to process
+          }
+        };
+        
+        appStateSubscription = AppState.addEventListener('change', handleAppStateChange);
+        
+        // Clean up listener after timeout
+        setTimeout(() => {
+          if (appStateSubscription) {
+            appStateSubscription.remove();
+            appStateSubscription = null;
+          }
+        }, OAUTH_TIMEOUT_MS);
       } else {
         // For web, the redirect happens automatically
         // The session will be handled by the auth state listener
@@ -212,6 +285,13 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
       logSecurityEvent.loginSuccess('', 'OAuth');
     } catch (error: any) {
       console.error('Google sign in error:', error);
+      
+      // Clear OAuth timeout if it exists
+      if (oauthTimeoutId) {
+        clearTimeout(oauthTimeoutId);
+        oauthTimeoutId = null;
+      }
+      
       set({ isLoading: false });
       
       // Provide user-friendly error messages
@@ -406,10 +486,19 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
           } else {
             // Update profile with signup data if needed
             if (!profile.full_name && name) {
-              await client.from('profiles')
-                .update({ full_name: name })
-                .eq('id', data.user.id);
-              profile = { ...profile, full_name: name };
+              try {
+                const { data: updatedProfile } = await client
+                  .from('profiles')
+                  .update({ full_name: name })
+                  .eq('id', data.user.id)
+                  .select()
+                  .single();
+                profile = updatedProfile || { ...profile, full_name: name };
+              } catch (updateError) {
+                console.error('Failed to update profile full_name:', updateError);
+                // Continue with existing profile data
+                profile = { ...profile, full_name: name };
+              }
             }
           }
         } catch (profileError: any) {
@@ -596,6 +685,12 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
         
         const user = mapSupabaseUser(session.user, profile);
         const emailVerified = session.user.email_confirmed_at !== null;
+        
+        // Clear OAuth timeout if it exists (auth succeeded)
+        if (oauthTimeoutId) {
+          clearTimeout(oauthTimeoutId);
+          oauthTimeoutId = null;
+        }
         
         set({
           user,
