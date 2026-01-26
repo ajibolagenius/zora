@@ -37,6 +37,7 @@ import {
   type Banner,
 } from '../../services/mockDataService';
 import { useCartStore } from '../../stores/cartStore';
+import { useAuthStore } from '../../stores/authStore';
 
 interface HomeData {
   banners: Banner[];
@@ -58,6 +59,10 @@ export default function HomeScreen() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedRegion, setSelectedRegion] = useState<string | null>(null);
   const addToCart = useCartStore((state) => state.addItem);
+  const { user } = useAuthStore();
+  
+  // Get user's primary cultural region for personalized ranking
+  const userRegion = user?.cultural_interests?.[0] || undefined;
 
   // Animation values
   const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -68,8 +73,9 @@ export default function HomeScreen() {
       // Use mock data service instead of API
       const banners = bannerService.getActive();
       const regions = regionService.getAll();
-      const featured_vendors = vendorService.getFeatured();
-      const popular_products = productService.getFeatured();
+      // Use ranking system with user's cultural region for personalized results
+      const featured_vendors = vendorService.getFeatured(userRegion, 10);
+      const popular_products = productService.getFeatured(userRegion, 20);
       
       setHomeData({
         banners,
@@ -87,7 +93,7 @@ export default function HomeScreen() {
 
   useEffect(() => {
     fetchHomeData();
-  }, []);
+  }, [userRegion]); // Refetch when user region changes
 
   // Animate content when data loads
   useEffect(() => {

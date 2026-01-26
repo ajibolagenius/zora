@@ -4,6 +4,7 @@
  */
 
 import mockDatabase from '../data/mock_database.json';
+import { getFeaturedVendors, getFeaturedProducts } from './rankingService';
 
 // Type definitions based on mock database structure
 export interface Vendor {
@@ -139,7 +140,13 @@ const db = mockDatabase as {
 export const vendorService = {
     getAll: (): Vendor[] => db.vendors,
 
-    getFeatured: (): Vendor[] => db.vendors.filter(v => v.is_featured),
+    /**
+     * Get featured vendors using ranking system
+     * Combines multiple criteria: is_featured, is_verified, rating, review_count, delivery performance
+     */
+    getFeatured: (userRegion?: string, limit: number = 10): Vendor[] => {
+        return getFeaturedVendors(db.vendors, userRegion, limit);
+    },
 
     getById: (id: string): Vendor | undefined => {
         // Support both full ID and slug-style lookups
@@ -157,7 +164,13 @@ export const vendorService = {
 export const productService = {
     getAll: (): Product[] => db.products.filter(p => p.is_active),
 
-    getFeatured: (): Product[] => db.products.filter(p => p.is_featured && p.is_active),
+    /**
+     * Get featured products using ranking system
+     * Combines multiple criteria: is_featured, is_active, stock_quantity, rating, review_count, recency
+     */
+    getFeatured: (userRegion?: string, limit: number = 20): Product[] => {
+        return getFeaturedProducts(db.products, userRegion, limit);
+    },
 
     getById: (id: string): Product | undefined => db.products.find(p => p.id === id),
 

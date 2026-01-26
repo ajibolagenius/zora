@@ -9,6 +9,8 @@
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import type { User, Vendor, Product, Order, Review, PromoCode } from '../types/supabase';
 import mockDatabase from '../data/mock_database.json';
+import { getFeaturedVendors, getFeaturedProducts } from './rankingService';
+import type { Vendor as MockVendor, Product as MockProduct } from './mockDataService';
 
 // ============== AUTH SERVICE ==============
 export const authService = {
@@ -160,24 +162,45 @@ export const vendorService = {
     return data || [];
   },
   
-  getFeatured: async (): Promise<Vendor[]> => {
+  getFeatured: async (userRegion?: string, limit: number = 10): Promise<Vendor[]> => {
     if (!isSupabaseConfigured()) {
-      return mockDatabase.vendors
-        .filter(v => v.is_featured)
-        .map(v => ({
-          ...v,
-          latitude: v.location.coordinates[1],
-          longitude: v.location.coordinates[0],
-          updated_at: v.created_at,
-        })) as unknown as Vendor[];
+      // Use ranking system for mock data
+      const featured = getFeaturedVendors(mockDatabase.vendors as MockVendor[], userRegion, limit);
+      return featured.map(v => ({
+        ...v,
+        latitude: v.location.coordinates[1],
+        longitude: v.location.coordinates[0],
+        updated_at: v.created_at,
+      })) as unknown as Vendor[];
     }
     
+    // Fetch all vendors and rank them
     const { data } = await supabase
       .from('vendors')
-      .select('*')
-      .eq('is_featured', true);
+      .select('*');
     
-    return data || [];
+    if (!data || data.length === 0) return [];
+    
+    // Convert Supabase vendors to mock format for ranking, then convert back
+    const vendorsForRanking = data.map(v => ({
+      ...v,
+      location: {
+        type: 'Point',
+        coordinates: [v.longitude, v.latitude],
+      },
+      cultural_specialties: v.cultural_specialties || [],
+      categories: v.categories || [],
+    })) as unknown as MockVendor[];
+    
+    const ranked = getFeaturedVendors(vendorsForRanking, userRegion, limit);
+    
+    // Convert back to Supabase format
+    return ranked.map(v => ({
+      ...v,
+      latitude: v.location.coordinates[1],
+      longitude: v.location.coordinates[0],
+      updated_at: v.created_at || new Date().toISOString(),
+    })) as unknown as Vendor[];
   },
   
   getById: async (id: string): Promise<Vendor | null> => {
@@ -251,20 +274,32 @@ export const productService = {
     return data || [];
   },
   
-  getFeatured: async (): Promise<Product[]> => {
+  getFeatured: async (userRegion?: string, limit: number = 20): Promise<Product[]> => {
     if (!isSupabaseConfigured()) {
-      return mockDatabase.products
-        .filter(p => p.is_featured && p.is_active)
-        .map(p => ({ ...p, updated_at: p.created_at })) as unknown as Product[];
+      // Use ranking system for mock data
+      const featured = getFeaturedProducts(mockDatabase.products as MockProduct[], userRegion, limit);
+      return featured.map(p => ({ ...p, updated_at: p.created_at })) as unknown as Product[];
     }
     
+    // Fetch all active products and rank them
     const { data } = await supabase
       .from('products')
       .select('*')
-      .eq('is_featured', true)
       .eq('is_active', true);
     
-    return data || [];
+    if (!data || data.length === 0) return [];
+    
+    // Convert Supabase products to mock format for ranking
+    const productsForRanking = data.map(p => ({
+      ...p,
+      image_urls: Array.isArray(p.image_urls) ? p.image_urls : [p.image_urls || ''],
+      certifications: Array.isArray(p.certifications) ? p.certifications : [],
+    })) as unknown as MockProduct[];
+    
+    const ranked = getFeaturedProducts(productsForRanking, userRegion, limit);
+    
+    // Convert back to Supabase format
+    return ranked.map(p => ({ ...p, updated_at: p.created_at || new Date().toISOString() })) as unknown as Product[];
   },
   
   getById: async (id: string): Promise<Product | null> => {

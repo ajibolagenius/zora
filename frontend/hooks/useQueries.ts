@@ -17,13 +17,13 @@ export const queryKeys = {
     byVendor: (vendorId: string) => ['products', 'vendor', vendorId] as const,
     byCategory: (category: string) => ['products', 'category', category] as const,
     search: (query: string, filters?: ProductFilters) => ['products', 'search', query, filters] as const,
-    featured: ['products', 'featured'] as const,
+    featured: (userRegion?: string) => ['products', 'featured', userRegion] as const,
   },
   vendors: {
     all: ['vendors'] as const,
     list: (filters?: VendorFilters) => ['vendors', 'list', filters] as const,
     detail: (id: string) => ['vendors', 'detail', id] as const,
-    featured: ['vendors', 'featured'] as const,
+    featured: (userRegion?: string) => ['vendors', 'featured', userRegion] as const,
     nearby: (lat: number, lng: number) => ['vendors', 'nearby', lat, lng] as const,
   },
   reviews: {
@@ -121,10 +121,10 @@ export function useProducts(filters?: ProductFilters) {
   });
 }
 
-export function useFeaturedProducts() {
+export function useFeaturedProducts(userRegion?: string, limit: number = 20) {
   return useQuery({
-    queryKey: queryKeys.products.featured,
-    queryFn: () => productService.getFeatured(),
+    queryKey: queryKeys.products.featured(userRegion),
+    queryFn: () => productService.getFeatured(userRegion, limit),
     staleTime: 5 * 60 * 1000,
   });
 }
@@ -196,10 +196,10 @@ export function useVendors(filters?: VendorFilters) {
   });
 }
 
-export function useFeaturedVendors() {
+export function useFeaturedVendors(userRegion?: string, limit: number = 10) {
   return useQuery({
-    queryKey: queryKeys.vendors.featured,
-    queryFn: () => vendorService.getFeatured(),
+    queryKey: queryKeys.vendors.featured(userRegion),
+    queryFn: () => vendorService.getFeatured(userRegion, limit),
     staleTime: 5 * 60 * 1000,
   });
 }
