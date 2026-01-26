@@ -71,6 +71,7 @@ const MOCK_ORDERS: OrderItem[] = [
         orderNumber: '#29384',
         date: 'Oct 24, 2023 at 10:30 AM',
         vendorName: "Zora's Spices",
+        vendorId: 'vnd_001', // Maps to "Mama Africa's Spices"
         itemCount: 3,
         total: 45.50,
         status: 'preparing',
@@ -89,6 +90,7 @@ const MOCK_ORDERS: OrderItem[] = [
         orderNumber: '#29312',
         date: 'Oct 23, 2023 at 4:15 PM',
         vendorName: 'Lagos Market Direct',
+        vendorId: 'vnd_002', // Maps to "Lagos Fresh Mart"
         itemCount: 2,
         total: 22.00,
         status: 'out_for_delivery',
@@ -106,6 +108,7 @@ const MOCK_ORDERS: OrderItem[] = [
         orderNumber: '#28100',
         date: 'Oct 20, 2023 at 1:00 PM',
         vendorName: 'African Beauty Store',
+        vendorId: 'vnd_003', // Maps to "Zuri Beauty Supply"
         itemCount: 1,
         total: 15.00,
         status: 'delivered',
@@ -121,6 +124,7 @@ const MOCK_ORDERS: OrderItem[] = [
         orderNumber: '#27999',
         date: 'Oct 18, 2023 at 9:00 AM',
         vendorName: 'Shea Butter Co',
+        vendorId: 'vnd_003', // Maps to "Zuri Beauty Supply" (shea butter products)
         itemCount: 4,
         total: 30.00,
         status: 'cancelled',
@@ -310,18 +314,39 @@ export default function OrdersTab() {
             return;
         }
         
-        // Otherwise, try to find vendor by name
+        // Otherwise, try to find vendor by name with improved matching
         const vendors = vendorService.getAll();
-        const vendor = vendors.find(v => 
-            v.shop_name.toLowerCase() === order.vendorName.toLowerCase() ||
-            v.shop_name.toLowerCase().includes(order.vendorName.toLowerCase())
+        const orderNameLower = order.vendorName.toLowerCase();
+        
+        // Try exact match first
+        let vendor = vendors.find(v => 
+            v.shop_name.toLowerCase() === orderNameLower
         );
+        
+        // Try partial match (vendor name contains order name or vice versa)
+        if (!vendor) {
+            vendor = vendors.find(v => {
+                const shopNameLower = v.shop_name.toLowerCase();
+                return shopNameLower.includes(orderNameLower) || 
+                       orderNameLower.includes(shopNameLower);
+            });
+        }
+        
+        // Try fuzzy matching for common words (e.g., "Lagos", "Spices", "Beauty")
+        if (!vendor) {
+            const orderWords = orderNameLower.split(/\s+/).filter(w => w.length > 3);
+            vendor = vendors.find(v => {
+                const shopNameLower = v.shop_name.toLowerCase();
+                return orderWords.some(word => shopNameLower.includes(word));
+            });
+        }
         
         if (vendor) {
             router.push(`/vendor/${vendor.id}`);
         } else {
             // Fallback: navigate to vendors list if not found
             console.warn(`Vendor not found: ${order.vendorName}`);
+            router.push('/vendors');
         }
     };
 

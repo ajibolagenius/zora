@@ -23,7 +23,6 @@ import {
     EyeSlash,
     Check,
     GoogleLogo,
-    AppleLogo,
 } from 'phosphor-react-native';
 import { Colors } from '../../constants/colors';
 import { Spacing, BorderRadius, Heights } from '../../constants/spacing';
@@ -80,10 +79,6 @@ export default function LoginScreen() {
         }
     };
 
-    const handleAppleLogin = async () => {
-        // Apple Sign-In would be implemented here using expo-apple-authentication
-        Alert.alert('Coming Soon', 'Apple Sign-In will be available soon!');
-    };
 
     const handleEmailAuth = async () => {
         if (!email || !password) {
@@ -263,28 +258,16 @@ export default function LoginScreen() {
                             <View style={styles.dividerLine} />
                         </View>
 
-                        {/* Social Login Buttons */}
-                        <View style={styles.socialContainer}>
-                            <TouchableOpacity
-                                style={[styles.socialButton, loading && styles.socialButtonDisabled]}
-                                onPress={handleGoogleLogin}
-                                disabled={loading}
-                                activeOpacity={0.8}
-                            >
-                                <GoogleLogo size={22} color="#DB4437" weight="bold" />
-                                <Text style={styles.socialButtonText}>Google</Text>
-                            </TouchableOpacity>
-
-                            <TouchableOpacity
-                                style={[styles.socialButton, loading && styles.socialButtonDisabled]}
-                                onPress={handleAppleLogin}
-                                disabled={loading}
-                                activeOpacity={0.8}
-                            >
-                                <AppleLogo size={22} color="#000000" weight="fill" />
-                                <Text style={styles.socialButtonText}>Apple</Text>
-                            </TouchableOpacity>
-                        </View>
+                        {/* Google Login Button */}
+                        <TouchableOpacity
+                            style={[styles.googleButton, loading && styles.googleButtonDisabled]}
+                            onPress={handleGoogleLogin}
+                            disabled={loading}
+                            activeOpacity={0.8}
+                        >
+                            <GoogleLogo size={24} color="#DB4437" weight="bold" />
+                            <Text style={styles.googleButtonText}>Continue with Google</Text>
+                        </TouchableOpacity>
 
                         {/* Terms */}
                         <Text style={styles.terms}>
@@ -455,13 +438,8 @@ const styles = StyleSheet.create({
         marginHorizontal: Spacing.md,
     },
     
-    // Social Buttons - Per Design System (48px height, white bg)
-    socialContainer: {
-        flexDirection: 'row',
-        gap: Spacing.md,
-    },
-    socialButton: {
-        flex: 1,
+    // Google Button - Major/Primary social login
+    googleButton: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
@@ -469,14 +447,15 @@ const styles = StyleSheet.create({
         borderRadius: BorderRadius.lg,
         height: Heights.button, // 48px per Design System
         gap: Spacing.sm,
+        marginTop: Spacing.sm,
     },
-    socialButtonDisabled: {
+    googleButtonDisabled: {
         opacity: 0.7,
     },
-    socialButtonText: {
-        fontFamily: FontFamily.bodySemiBold,
+    googleButtonText: {
+        fontFamily: FontFamily.bodyBold,
         color: Colors.backgroundDark,
-        fontSize: FontSize.small,
+        fontSize: FontSize.body,
     },
     
     // Terms
