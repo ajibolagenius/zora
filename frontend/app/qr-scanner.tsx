@@ -6,16 +6,23 @@ import {
   TouchableOpacity,
   Alert,
   Vibration,
+  Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { X, FlashlightOn, FlashlightOff, QrCode } from 'phosphor-react-native';
 import { Colors } from '../constants/colors';
+import { Spacing, BorderRadius } from '../constants/spacing';
+import { FontSize, FontFamily } from '../constants/typography';
 import { qrCodeScanner, promoQRService } from '../services/qrCodeService';
 
 export default function QRScannerScreen() {
   const router = useRouter();
+  
+  // Check if CameraView is available (may not be on web)
+  const isCameraAvailable = Platform.OS !== 'web' && CameraView !== undefined;
+  
   const [permission, requestPermission] = useCameraPermissions();
   const [scanned, setScanned] = useState(false);
   const [torch, setTorch] = useState(false);
@@ -106,16 +113,50 @@ export default function QRScannerScreen() {
     return (
       <View style={styles.container}>
         <SafeAreaView style={styles.permissionContainer}>
-          <QrCode size={64} color={Colors.textMuted} weight="duotone" />
+          <View style={styles.permissionIconContainer}>
+            <QrCode size={64} color={Colors.textMuted} weight="duotone" />
+          </View>
           <Text style={styles.permissionTitle}>Camera Access Required</Text>
           <Text style={styles.permissionText}>
             To scan QR codes, please allow camera access
           </Text>
-          <TouchableOpacity style={styles.permissionButton} onPress={requestPermission}>
+          <TouchableOpacity 
+            style={styles.permissionButton} 
+            onPress={requestPermission}
+            activeOpacity={0.8}
+          >
             <Text style={styles.permissionButtonText}>Grant Permission</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.cancelButton} onPress={() => router.back()}>
+          <TouchableOpacity 
+            style={styles.cancelButton} 
+            onPress={() => router.back()}
+            activeOpacity={0.8}
+          >
             <Text style={styles.cancelButtonText}>Cancel</Text>
+          </TouchableOpacity>
+        </SafeAreaView>
+      </View>
+    );
+  }
+
+  // Web/Unavailable fallback - CameraView not available on web or if undefined
+  if (!isCameraAvailable || !CameraView) {
+    return (
+      <View style={styles.container}>
+        <SafeAreaView style={styles.permissionContainer}>
+          <View style={styles.permissionIconContainer}>
+            <QrCode size={64} color={Colors.textMuted} weight="duotone" />
+          </View>
+          <Text style={styles.permissionTitle}>QR Scanner</Text>
+          <Text style={styles.permissionText}>
+            QR code scanning is not available on this platform. Please use the mobile app to scan QR codes.
+          </Text>
+          <TouchableOpacity 
+            style={styles.cancelButton} 
+            onPress={() => router.back()}
+            activeOpacity={0.8}
+          >
+            <Text style={styles.cancelButtonText}>Go Back</Text>
           </TouchableOpacity>
         </SafeAreaView>
       </View>
@@ -125,7 +166,7 @@ export default function QRScannerScreen() {
   return (
     <View style={styles.container}>
       <CameraView
-        style={StyleSheet.absoluteFillObject}
+        style={styles.camera}
         onBarcodeScanned={scanned ? undefined : handleBarCodeScanned}
         barcodeScannerSettings={{
           barcodeTypes: ['qr'],
@@ -137,15 +178,23 @@ export default function QRScannerScreen() {
       <View style={styles.overlay}>
         {/* Header */}
         <SafeAreaView style={styles.header} edges={['top']}>
-          <TouchableOpacity style={styles.closeButton} onPress={() => router.back()}>
-            <X size={24} color="#FFFFFF" weight="bold" />
+          <TouchableOpacity 
+            style={styles.closeButton} 
+            onPress={() => router.back()}
+            activeOpacity={0.8}
+          >
+            <X size={24} color={Colors.textPrimary} weight="bold" />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Scan QR Code</Text>
-          <TouchableOpacity style={styles.torchButton} onPress={() => setTorch(!torch)}>
+          <TouchableOpacity 
+            style={styles.torchButton} 
+            onPress={() => setTorch(!torch)}
+            activeOpacity={0.8}
+          >
             {torch ? (
-              <FlashlightOff size={24} color="#FFFFFF" weight="fill" />
+              <FlashlightOff size={24} color={Colors.textPrimary} weight="fill" />
             ) : (
-              <FlashlightOn size={24} color="#FFFFFF" weight="fill" />
+              <FlashlightOn size={24} color={Colors.textPrimary} weight="duotone" />
             )}
           </TouchableOpacity>
         </SafeAreaView>
@@ -177,45 +226,59 @@ export default function QRScannerScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#000000',
+    backgroundColor: Colors.backgroundDark,
+  },
+  camera: {
+    flex: 1,
   },
   permissionContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 24,
+    padding: Spacing.xl,
+  },
+  permissionIconContainer: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    backgroundColor: Colors.cardDark,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: Spacing.xl,
   },
   permissionTitle: {
-    fontSize: 20,
-    fontWeight: '600',
+    fontFamily: FontFamily.display,
+    fontSize: FontSize.h3,
     color: Colors.textPrimary,
-    marginTop: 16,
-    marginBottom: 8,
+    marginTop: Spacing.base,
+    marginBottom: Spacing.sm,
   },
   permissionText: {
-    fontSize: 14,
+    fontFamily: FontFamily.body,
+    fontSize: FontSize.body,
     color: Colors.textMuted,
     textAlign: 'center',
-    marginBottom: 24,
+    marginBottom: Spacing.xl,
   },
   permissionButton: {
     backgroundColor: Colors.primary,
-    paddingHorizontal: 32,
-    paddingVertical: 14,
-    borderRadius: 24,
-    marginBottom: 12,
+    paddingHorizontal: Spacing['2xl'],
+    paddingVertical: Spacing.md,
+    borderRadius: BorderRadius.full,
+    marginBottom: Spacing.md,
   },
   permissionButtonText: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: '600',
+    color: Colors.textPrimary,
+    fontFamily: FontFamily.bodyBold,
+    fontSize: FontSize.body,
   },
   cancelButton: {
-    paddingVertical: 12,
+    paddingVertical: Spacing.md,
   },
   cancelButtonText: {
     color: Colors.textMuted,
-    fontSize: 14,
+    fontFamily: FontFamily.body,
+    fontSize: FontSize.body,
   },
   overlay: {
     ...StyleSheet.absoluteFillObject,
@@ -225,8 +288,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingHorizontal: Spacing.base,
+    paddingVertical: Spacing.md,
   },
   closeButton: {
     width: 44,
@@ -235,11 +298,14 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
     justifyContent: 'center',
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: Colors.borderDark,
   },
   headerTitle: {
-    fontSize: 18,
+    fontFamily: FontFamily.display,
+    fontSize: FontSize.h4,
     fontWeight: '600',
-    color: '#FFFFFF',
+    color: Colors.textPrimary,
   },
   torchButton: {
     width: 44,
@@ -248,6 +314,8 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
     justifyContent: 'center',
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: Colors.borderDark,
   },
   scannerContainer: {
     flex: 1,
@@ -295,19 +363,20 @@ const styles = StyleSheet.create({
   },
   instructions: {
     alignItems: 'center',
-    paddingHorizontal: 24,
+    paddingHorizontal: Spacing.xl,
     paddingBottom: 60,
   },
   instructionText: {
-    fontSize: 16,
-    fontWeight: '500',
-    color: '#FFFFFF',
+    fontFamily: FontFamily.bodySemiBold,
+    fontSize: FontSize.body,
+    color: Colors.textPrimary,
     textAlign: 'center',
-    marginBottom: 8,
+    marginBottom: Spacing.sm,
   },
   instructionSubtext: {
-    fontSize: 14,
-    color: 'rgba(255, 255, 255, 0.7)',
+    fontFamily: FontFamily.body,
+    fontSize: FontSize.small,
+    color: Colors.textMuted,
     textAlign: 'center',
   },
 });

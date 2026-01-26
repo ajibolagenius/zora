@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   View,
   Text,
@@ -25,24 +25,36 @@ import {
 } from 'phosphor-react-native';
 import { Colors } from '../constants/colors';
 import { Spacing, BorderRadius } from '../constants/spacing';
-import { FontSize, FontFamily } from '../constants/typography';
+import { FontSize, FontFamily, LetterSpacing } from '../constants/typography';
 
-// Zora Brand Colors
-const ZORA_RED = '#CC0000';
-const ZORA_CARD = '#342418';
-const BACKGROUND_DARK = '#221710';
-const SURFACE_LIGHT = '#ffffff';
-const MUTED_TEXT = '#94A3B8';
-const ICON_BG = 'rgba(204, 0, 0, 0.1)';
+// Available colors from Design System for randomized icons
+const DESIGN_SYSTEM_COLORS = [
+  Colors.primary,
+  Colors.secondary,
+  Colors.success,
+  Colors.info,
+  Colors.badgeEcoFriendly,
+];
+
+// Shuffle array function for random color assignment
+const shuffleArray = <T,>(array: T[]): T[] => {
+  const shuffled = [...array];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+};
 
 interface QuickAction {
   id: string;
   icon: React.ComponentType<any>;
   label: string;
   route?: string;
+  color: string;
 }
 
-const QUICK_ACTIONS: QuickAction[] = [
+const QUICK_ACTIONS_BASE: Omit<QuickAction, 'color'>[] = [
   { id: 'track', icon: Truck, label: 'Track Order', route: '/(tabs)/orders' },
   { id: 'chat', icon: ChatCircle, label: 'Live Chat' },
   { id: 'call', icon: Phone, label: 'Call Us' },
@@ -54,9 +66,10 @@ interface TopicItem {
   icon: React.ComponentType<any>;
   label: string;
   route?: string;
+  color: string;
 }
 
-const FAQ_TOPICS: TopicItem[] = [
+const FAQ_TOPICS_BASE: Omit<TopicItem, 'color'>[] = [
   { id: '1', icon: Package, label: 'Orders & Delivery' },
   { id: '2', icon: CreditCard, label: 'Payments & Refunds' },
   { id: '3', icon: ArrowsLeftRight, label: 'Returns & Exchanges' },
@@ -73,6 +86,24 @@ const POPULAR_QUESTIONS = [
 export default function HelpCenterScreen() {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState('');
+
+  // Assign random colors to quick actions
+  const quickActions = useMemo(() => {
+    const shuffledColors = shuffleArray(DESIGN_SYSTEM_COLORS);
+    return QUICK_ACTIONS_BASE.map((action, index) => ({
+      ...action,
+      color: shuffledColors[index % shuffledColors.length],
+    }));
+  }, []);
+
+  // Assign random colors to topics
+  const faqTopics = useMemo(() => {
+    const shuffledColors = shuffleArray(DESIGN_SYSTEM_COLORS);
+    return FAQ_TOPICS_BASE.map((topic, index) => ({
+      ...topic,
+      color: shuffledColors[index % shuffledColors.length],
+    }));
+  }, []);
 
   const handleQuickAction = (action: QuickAction) => {
     if (action.route) {
@@ -93,7 +124,7 @@ export default function HelpCenterScreen() {
   };
 
   const handleContactUs = () => {
-    console.log('Contact Us pressed');
+    router.push('/order-support/ord_001');
   };
 
   return (
@@ -104,6 +135,7 @@ export default function HelpCenterScreen() {
           <TouchableOpacity
             style={styles.backButton}
             onPress={() => router.back()}
+            activeOpacity={0.8}
           >
             <ArrowLeft size={24} color={Colors.textPrimary} weight="bold" />
           </TouchableOpacity>
@@ -114,11 +146,11 @@ export default function HelpCenterScreen() {
         {/* Search Bar */}
         <View style={styles.searchContainer}>
           <View style={styles.searchInputWrapper}>
-            <MagnifyingGlass size={20} color={MUTED_TEXT} weight="regular" />
+            <MagnifyingGlass size={20} color={Colors.textMuted} weight="duotone" />
             <TextInput
               style={styles.searchInput}
               placeholder="How can we help?"
-              placeholderTextColor={MUTED_TEXT}
+              placeholderTextColor={Colors.textMuted}
               value={searchQuery}
               onChangeText={setSearchQuery}
             />
@@ -135,7 +167,7 @@ export default function HelpCenterScreen() {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Quick Actions</Text>
           <View style={styles.quickActionsGrid}>
-            {QUICK_ACTIONS.map((action) => {
+            {quickActions.map((action) => {
               const IconComponent = action.icon;
               return (
                 <TouchableOpacity
@@ -144,8 +176,8 @@ export default function HelpCenterScreen() {
                   onPress={() => handleQuickAction(action)}
                   activeOpacity={0.8}
                 >
-                  <View style={styles.quickActionIcon}>
-                    <IconComponent size={24} color={ZORA_RED} weight="fill" />
+                  <View style={[styles.quickActionIcon, { backgroundColor: `${action.color}20` }]}>
+                    <IconComponent size={24} color={action.color} weight="duotone" />
                   </View>
                   <Text style={styles.quickActionLabel}>{action.label}</Text>
                 </TouchableOpacity>
@@ -158,7 +190,7 @@ export default function HelpCenterScreen() {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Browse by Topic</Text>
           <View style={styles.topicsList}>
-            {FAQ_TOPICS.map((topic) => {
+            {faqTopics.map((topic) => {
               const IconComponent = topic.icon;
               return (
                 <TouchableOpacity
@@ -168,12 +200,12 @@ export default function HelpCenterScreen() {
                   activeOpacity={0.8}
                 >
                   <View style={styles.topicLeft}>
-                    <View style={styles.topicIconContainer}>
-                      <IconComponent size={20} color={ZORA_RED} weight="fill" />
+                    <View style={[styles.topicIconContainer, { backgroundColor: `${topic.color}20` }]}>
+                      <IconComponent size={20} color={topic.color} weight="duotone" />
                     </View>
                     <Text style={styles.topicLabel}>{topic.label}</Text>
                   </View>
-                  <CaretRight size={20} color={MUTED_TEXT} weight="bold" />
+                  <CaretRight size={20} color={Colors.textMuted} weight="bold" />
                 </TouchableOpacity>
               );
             })}
@@ -194,7 +226,7 @@ export default function HelpCenterScreen() {
                 activeOpacity={0.7}
               >
                 <Text style={styles.questionText}>{item.question}</Text>
-                <CaretRight size={20} color={MUTED_TEXT} weight="regular" />
+                <CaretRight size={20} color={Colors.textMuted} weight="regular" />
               </TouchableOpacity>
             ))}
           </View>
@@ -208,7 +240,7 @@ export default function HelpCenterScreen() {
           
           <View style={styles.contactContent}>
             <View style={styles.contactIconContainer}>
-              <Headset size={24} color={ZORA_RED} weight="fill" />
+              <Headset size={24} color={Colors.primary} weight="duotone" />
             </View>
             <Text style={styles.contactTitle}>Still need help?</Text>
             <Text style={styles.contactSubtitle}>
@@ -234,27 +266,33 @@ export default function HelpCenterScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: BACKGROUND_DARK,
+    backgroundColor: Colors.backgroundDark,
   },
 
   // Header
   header: {
-    backgroundColor: BACKGROUND_DARK,
-    paddingBottom: 8,
+    backgroundColor: Colors.backgroundDark,
+    paddingBottom: Spacing.sm,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.borderDark,
   },
   headerTop: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: Spacing.base,
-    paddingVertical: Spacing.sm,
+    paddingTop: Spacing.sm,
+    paddingBottom: Spacing.sm,
   },
   backButton: {
-    width: 40,
-    height: 40,
+    width: 44,
+    height: 44,
     justifyContent: 'center',
     alignItems: 'center',
-    borderRadius: 20,
+    borderRadius: 22,
+    backgroundColor: Colors.cardDark,
+    borderWidth: 1,
+    borderColor: Colors.borderDark,
   },
   headerTitle: {
     fontFamily: FontFamily.display,
@@ -262,24 +300,26 @@ const styles = StyleSheet.create({
     color: Colors.textPrimary,
     flex: 1,
     textAlign: 'center',
-    marginRight: 40,
+    marginRight: 44,
   },
   headerRight: {
-    width: 40,
+    width: 44,
   },
 
   // Search Bar
   searchContainer: {
     paddingHorizontal: Spacing.base,
-    paddingTop: 4,
+    paddingTop: Spacing.xs,
   },
   searchInputWrapper: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: ZORA_CARD,
+    backgroundColor: Colors.cardDark,
     borderRadius: BorderRadius.lg,
     paddingHorizontal: Spacing.base,
     height: 52,
+    borderWidth: 1,
+    borderColor: Colors.borderDark,
   },
   searchInput: {
     flex: 1,
@@ -295,68 +335,69 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingHorizontal: Spacing.base,
-    paddingTop: 24,
+    paddingTop: Spacing.xl,
   },
 
   // Sections
   section: {
-    marginBottom: 32,
+    marginBottom: Spacing['2xl'],
   },
   sectionTitle: {
     fontFamily: FontFamily.display,
     fontSize: FontSize.h4,
     color: Colors.textPrimary,
-    marginBottom: 16,
-    paddingHorizontal: 4,
+    marginBottom: Spacing.base,
+    paddingHorizontal: Spacing.xs,
   },
 
   // Quick Actions
   quickActionsGrid: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    gap: Spacing.sm,
   },
   quickAction: {
     alignItems: 'center',
-    gap: 8,
+    gap: Spacing.sm,
     flex: 1,
   },
   quickActionIcon: {
     width: 56,
     height: 56,
     borderRadius: 28,
-    backgroundColor: ZORA_CARD,
     justifyContent: 'center',
     alignItems: 'center',
   },
   quickActionLabel: {
     fontFamily: FontFamily.bodyMedium,
-    fontSize: 12,
-    color: 'rgba(255, 255, 255, 0.8)',
+    fontSize: FontSize.caption,
+    color: Colors.textPrimary,
     textAlign: 'center',
   },
 
   // Topics List
   topicsList: {
-    gap: 12,
+    gap: Spacing.md,
   },
   topicItem: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: ZORA_CARD,
+    backgroundColor: Colors.cardDark,
     borderRadius: BorderRadius.lg,
     padding: Spacing.base,
+    borderWidth: 1,
+    borderColor: Colors.borderDark,
   },
   topicLeft: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 16,
+    gap: Spacing.base,
   },
   topicIconContainer: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: ICON_BG,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -368,34 +409,38 @@ const styles = StyleSheet.create({
 
   // Questions Card
   questionsCard: {
-    backgroundColor: ZORA_CARD,
+    backgroundColor: Colors.cardDark,
     borderRadius: BorderRadius.xl,
     paddingHorizontal: Spacing.base,
+    borderWidth: 1,
+    borderColor: Colors.borderDark,
   },
   questionItem: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingVertical: 16,
+    paddingVertical: Spacing.base,
   },
   questionItemBorder: {
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255, 255, 255, 0.05)',
+    borderBottomColor: Colors.borderDark,
   },
   questionText: {
     fontFamily: FontFamily.bodyMedium,
     fontSize: FontSize.small,
-    color: 'rgba(255, 255, 255, 0.8)',
+    color: Colors.textPrimary,
     flex: 1,
   },
 
   // Contact Card
   contactCard: {
-    backgroundColor: ZORA_CARD,
+    backgroundColor: Colors.cardDark,
     borderRadius: BorderRadius.xl,
-    padding: 24,
+    padding: Spacing.xl,
     overflow: 'hidden',
     position: 'relative',
+    borderWidth: 1,
+    borderColor: Colors.borderDark,
   },
   decorativeCircle1: {
     position: 'absolute',
@@ -404,7 +449,7 @@ const styles = StyleSheet.create({
     width: 128,
     height: 128,
     borderRadius: 64,
-    backgroundColor: 'rgba(204, 0, 0, 0.05)',
+    backgroundColor: `${Colors.primary}0D`,
   },
   decorativeCircle2: {
     position: 'absolute',
@@ -413,7 +458,7 @@ const styles = StyleSheet.create({
     width: 96,
     height: 96,
     borderRadius: 48,
-    backgroundColor: 'rgba(204, 0, 0, 0.05)',
+    backgroundColor: `${Colors.primary}0D`,
   },
   contactContent: {
     alignItems: 'center',
@@ -424,29 +469,29 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: ICON_BG,
+    backgroundColor: `${Colors.primary}20`,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: Spacing.base,
   },
   contactTitle: {
     fontFamily: FontFamily.display,
-    fontSize: 20,
+    fontSize: FontSize.h3,
     color: Colors.textPrimary,
-    marginBottom: 8,
+    marginBottom: Spacing.sm,
   },
   contactSubtitle: {
     fontFamily: FontFamily.body,
     fontSize: FontSize.small,
-    color: MUTED_TEXT,
+    color: Colors.textMuted,
     textAlign: 'center',
-    marginBottom: 24,
+    marginBottom: Spacing.xl,
     maxWidth: 240,
   },
   contactButton: {
     width: '100%',
-    backgroundColor: ZORA_RED,
-    paddingVertical: 14,
+    backgroundColor: Colors.primary,
+    paddingVertical: Spacing.md,
     borderRadius: BorderRadius.full,
     alignItems: 'center',
   },

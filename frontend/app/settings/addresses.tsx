@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   View,
   Text,
@@ -22,14 +22,26 @@ import {
 } from 'phosphor-react-native';
 import { Colors } from '../../constants/colors';
 import { Spacing, BorderRadius } from '../../constants/spacing';
-import { FontSize, FontFamily } from '../../constants/typography';
+import { FontSize, FontFamily, LetterSpacing } from '../../constants/typography';
 
-// Zora Brand Colors
-const ZORA_RED = '#CC0000';
-const ZORA_YELLOW = '#FFCC00';
-const ZORA_CARD = '#342418';
-const BACKGROUND_DARK = '#221710';
-const MUTED_TEXT = '#bc9a9a';
+// Available colors from Design System for randomized icons
+const DESIGN_SYSTEM_COLORS = [
+  Colors.primary,
+  Colors.secondary,
+  Colors.success,
+  Colors.info,
+  Colors.badgeEcoFriendly,
+];
+
+// Shuffle array function for random color assignment
+const shuffleArray = <T,>(array: T[]): T[] => {
+  const shuffled = [...array];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+};
 
 interface Address {
   id: string;
@@ -39,9 +51,11 @@ interface Address {
   city: string;
   postcode: string;
   isDefault: boolean;
+  icon: React.ComponentType<any>;
+  color: string;
 }
 
-const ADDRESSES: Address[] = [
+const ADDRESSES_BASE: Omit<Address, 'icon' | 'color'>[] = [
   {
     id: '1',
     label: 'Home',
@@ -84,7 +98,17 @@ const getAddressIcon = (type: string) => {
 
 export default function SavedAddressesScreen() {
   const router = useRouter();
-  const [addresses, setAddresses] = useState(ADDRESSES);
+  const [addresses, setAddresses] = useState(ADDRESSES_BASE);
+
+  // Assign icons and colors to addresses
+  const addressesWithIcons = useMemo(() => {
+    const shuffledColors = shuffleArray(DESIGN_SYSTEM_COLORS);
+    return addresses.map((address, index) => ({
+      ...address,
+      icon: getAddressIcon(address.type),
+      color: shuffledColors[index % shuffledColors.length],
+    }));
+  }, [addresses]);
 
   const handleSetDefault = (id: string) => {
     setAddresses(addresses.map(a => ({
@@ -123,6 +147,7 @@ export default function SavedAddressesScreen() {
         <TouchableOpacity
           style={styles.backButton}
           onPress={() => router.back()}
+          activeOpacity={0.8}
         >
           <ArrowLeft size={24} color={Colors.textPrimary} weight="bold" />
         </TouchableOpacity>
@@ -137,8 +162,8 @@ export default function SavedAddressesScreen() {
       >
         {/* Addresses List */}
         <View style={styles.addressesList}>
-          {addresses.map((address) => {
-            const IconComponent = getAddressIcon(address.type);
+          {addressesWithIcons.map((address) => {
+            const IconComponent = address.icon;
             return (
               <View
                 key={address.id}
@@ -150,8 +175,8 @@ export default function SavedAddressesScreen() {
                 {/* Header Row */}
                 <View style={styles.addressHeader}>
                   <View style={styles.addressLabelRow}>
-                    <View style={styles.addressIconContainer}>
-                      <IconComponent size={20} color={ZORA_RED} weight="fill" />
+                    <View style={[styles.addressIconContainer, { backgroundColor: `${address.color}20` }]}>
+                      <IconComponent size={20} color={address.color} weight="duotone" />
                     </View>
                     <Text style={styles.addressLabel}>{address.label}</Text>
                     {address.isDefault && (
@@ -164,14 +189,16 @@ export default function SavedAddressesScreen() {
                     <TouchableOpacity
                       style={styles.actionButton}
                       onPress={() => handleEdit(address.id)}
+                      activeOpacity={0.8}
                     >
-                      <PencilSimple size={18} color={MUTED_TEXT} weight="regular" />
+                      <PencilSimple size={18} color={Colors.textMuted} weight="duotone" />
                     </TouchableOpacity>
                     <TouchableOpacity
                       style={styles.actionButton}
                       onPress={() => handleDelete(address.id)}
+                      activeOpacity={0.8}
                     >
-                      <Trash size={18} color="#EF4444" weight="regular" />
+                      <Trash size={18} color={Colors.error} weight="duotone" />
                     </TouchableOpacity>
                   </View>
                 </View>
@@ -187,8 +214,9 @@ export default function SavedAddressesScreen() {
                   <TouchableOpacity
                     style={styles.setDefaultButton}
                     onPress={() => handleSetDefault(address.id)}
+                    activeOpacity={0.8}
                   >
-                    <CheckCircle size={16} color={MUTED_TEXT} weight="regular" />
+                    <CheckCircle size={16} color={Colors.textMuted} weight="duotone" />
                     <Text style={styles.setDefaultText}>Set as Default</Text>
                   </TouchableOpacity>
                 )}
@@ -204,7 +232,7 @@ export default function SavedAddressesScreen() {
           activeOpacity={0.8}
         >
           <View style={styles.addAddressIcon}>
-            <Plus size={24} color={ZORA_RED} weight="bold" />
+            <Plus size={24} color={Colors.primary} weight="bold" />
           </View>
           <View style={styles.addAddressContent}>
             <Text style={styles.addAddressTitle}>Add New Address</Text>
@@ -214,7 +242,9 @@ export default function SavedAddressesScreen() {
 
         {/* Delivery Info */}
         <View style={styles.infoCard}>
-          <MapPin size={24} color={ZORA_YELLOW} weight="fill" />
+          <View style={styles.infoIconContainer}>
+            <MapPin size={24} color={Colors.secondary} weight="duotone" />
+          </View>
           <View style={styles.infoContent}>
             <Text style={styles.infoTitle}>Delivery Areas</Text>
             <Text style={styles.infoDescription}>
@@ -233,7 +263,7 @@ export default function SavedAddressesScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: BACKGROUND_DARK,
+    backgroundColor: Colors.backgroundDark,
   },
 
   // Header
@@ -242,10 +272,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: Spacing.base,
-    paddingVertical: Spacing.sm,
-    backgroundColor: `${BACKGROUND_DARK}F2`,
+    paddingTop: Spacing.sm,
+    paddingBottom: Spacing.md,
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255, 255, 255, 0.05)',
+    borderBottomColor: Colors.borderDark,
   },
   backButton: {
     width: 44,
@@ -253,12 +283,14 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     borderRadius: 22,
+    backgroundColor: Colors.cardDark,
+    borderWidth: 1,
+    borderColor: Colors.borderDark,
   },
   headerTitle: {
     fontFamily: FontFamily.display,
     fontSize: FontSize.h4,
     color: Colors.textPrimary,
-    letterSpacing: -0.3,
   },
   headerRight: {
     width: 44,
@@ -270,39 +302,38 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     padding: Spacing.base,
-    gap: 16,
+    gap: Spacing.base,
   },
 
   // Addresses List
   addressesList: {
-    gap: 12,
+    gap: Spacing.md,
   },
   addressCard: {
-    backgroundColor: ZORA_CARD,
+    backgroundColor: Colors.cardDark,
     borderRadius: BorderRadius.xl,
-    padding: 16,
+    padding: Spacing.base,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.05)',
+    borderColor: Colors.borderDark,
   },
   addressCardDefault: {
-    borderColor: `${ZORA_RED}40`,
+    borderColor: `${Colors.primary}40`,
   },
   addressHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: Spacing.md,
   },
   addressLabelRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 10,
+    gap: Spacing.sm,
   },
   addressIconContainer: {
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: 'rgba(204, 0, 0, 0.1)',
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -312,77 +343,77 @@ const styles = StyleSheet.create({
     color: Colors.textPrimary,
   },
   defaultBadge: {
-    backgroundColor: 'rgba(204, 0, 0, 0.15)',
-    paddingHorizontal: 10,
-    paddingVertical: 4,
+    backgroundColor: `${Colors.primary}20`,
+    paddingHorizontal: Spacing.sm,
+    paddingVertical: Spacing.xs,
     borderRadius: BorderRadius.full,
   },
   defaultBadgeText: {
     fontFamily: FontFamily.bodySemiBold,
-    fontSize: 10,
-    color: ZORA_RED,
+    fontSize: FontSize.tiny,
+    color: Colors.primary,
     textTransform: 'uppercase',
-    letterSpacing: 0.5,
+    letterSpacing: LetterSpacing.wide,
   },
   addressActions: {
     flexDirection: 'row',
-    gap: 8,
+    gap: Spacing.sm,
   },
   actionButton: {
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    backgroundColor: Colors.backgroundDark,
     justifyContent: 'center',
     alignItems: 'center',
   },
   addressDetails: {
-    paddingLeft: 46,
+    paddingLeft: 52,
   },
   addressStreet: {
     fontFamily: FontFamily.bodyMedium,
     fontSize: FontSize.small,
     color: Colors.textPrimary,
-    marginBottom: 4,
+    marginBottom: Spacing.xs,
   },
   addressCity: {
     fontFamily: FontFamily.body,
     fontSize: FontSize.small,
-    color: MUTED_TEXT,
+    color: Colors.textMuted,
   },
   setDefaultButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 6,
-    marginTop: 16,
-    paddingVertical: 10,
-    backgroundColor: 'rgba(255, 255, 255, 0.03)',
+    gap: Spacing.xs,
+    marginTop: Spacing.base,
+    paddingVertical: Spacing.sm,
+    backgroundColor: Colors.backgroundDark,
     borderRadius: BorderRadius.lg,
   },
   setDefaultText: {
     fontFamily: FontFamily.bodyMedium,
     fontSize: FontSize.small,
-    color: MUTED_TEXT,
+    color: Colors.textMuted,
   },
 
   // Add Address Button
   addAddressButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 16,
-    backgroundColor: 'rgba(204, 0, 0, 0.05)',
+    gap: Spacing.base,
+    backgroundColor: `${Colors.primary}0D`,
     borderRadius: BorderRadius.xl,
-    padding: 16,
+    padding: Spacing.base,
     borderWidth: 1,
     borderStyle: 'dashed',
-    borderColor: `${ZORA_RED}40`,
+    borderColor: `${Colors.primary}40`,
   },
   addAddressIcon: {
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: 'rgba(204, 0, 0, 0.1)',
+    backgroundColor: `${Colors.primary}20`,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -392,12 +423,12 @@ const styles = StyleSheet.create({
   addAddressTitle: {
     fontFamily: FontFamily.bodySemiBold,
     fontSize: FontSize.body,
-    color: ZORA_RED,
+    color: Colors.primary,
   },
   addAddressSubtitle: {
     fontFamily: FontFamily.body,
     fontSize: FontSize.small,
-    color: MUTED_TEXT,
+    color: Colors.textMuted,
     marginTop: 2,
   },
 
@@ -405,11 +436,19 @@ const styles = StyleSheet.create({
   infoCard: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    gap: 16,
-    backgroundColor: ZORA_CARD,
+    gap: Spacing.base,
+    backgroundColor: Colors.cardDark,
     borderRadius: BorderRadius.xl,
-    padding: 16,
-    marginTop: 8,
+    padding: Spacing.base,
+    marginTop: Spacing.sm,
+  },
+  infoIconContainer: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: `${Colors.secondary}20`,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   infoContent: {
     flex: 1,
@@ -417,13 +456,13 @@ const styles = StyleSheet.create({
   infoTitle: {
     fontFamily: FontFamily.bodySemiBold,
     fontSize: FontSize.small,
-    color: ZORA_YELLOW,
-    marginBottom: 4,
+    color: Colors.secondary,
+    marginBottom: Spacing.xs,
   },
   infoDescription: {
     fontFamily: FontFamily.body,
     fontSize: FontSize.small,
-    color: MUTED_TEXT,
+    color: Colors.textMuted,
     lineHeight: 20,
   },
 });

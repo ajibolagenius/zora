@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   View,
   Text,
@@ -22,15 +22,27 @@ import {
 } from 'phosphor-react-native';
 import { Colors } from '../constants/colors';
 import { Spacing, BorderRadius } from '../constants/spacing';
-import { FontSize, FontFamily } from '../constants/typography';
+import { FontSize, FontFamily, LetterSpacing } from '../constants/typography';
+import { useAuthStore } from '../stores/authStore';
 
-// Zora Brand Colors
-const ZORA_RED = '#CC0000';
-const ZORA_YELLOW = '#FFCC00';
-const ZORA_GREEN = '#4CAF50';
-const ZORA_CARD = '#342418';
-const SURFACE_DARK = '#2D1E18';
-const MUTED_TEXT = '#bc9a9a';
+// Available colors from Design System for randomized icons
+const DESIGN_SYSTEM_COLORS = [
+  Colors.primary,
+  Colors.secondary,
+  Colors.success,
+  Colors.info,
+  Colors.badgeEcoFriendly,
+];
+
+// Shuffle array function for random color assignment
+const shuffleArray = <T,>(array: T[]): T[] => {
+  const shuffled = [...array];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+};
 
 // Mock data for the rewards screen
 const CURRENT_BENEFITS = [
@@ -47,9 +59,11 @@ interface ActivityItem {
   amount: string;
   isPositive: boolean;
   isPoints?: boolean;
+  icon: React.ComponentType<any>;
+  color: string;
 }
 
-const RECENT_ACTIVITY: ActivityItem[] = [
+const RECENT_ACTIVITY_BASE: Omit<ActivityItem, 'icon' | 'color'>[] = [
   {
     id: '1',
     type: 'referral',
@@ -84,9 +98,11 @@ interface EarnCard {
   points: string;
   buttonText: string;
   imageUrl: string;
+  icon: React.ComponentType<any>;
+  color: string;
 }
 
-const EARN_CARDS: EarnCard[] = [
+const EARN_CARDS_BASE: Omit<EarnCard, 'icon' | 'color'>[] = [
   {
     id: '1',
     title: 'Leave a Review',
@@ -113,35 +129,43 @@ const EARN_CARDS: EarnCard[] = [
   },
 ];
 
-// User rewards data (would come from API in real app)
-const USER_REWARDS = {
-  credit: 12.50,
-  totalPoints: 2450,
-  tier: 'Gold',
-  nextTier: 'Platinum',
-  pointsToNextTier: 550,
-  progressPercent: 82,
-};
-
 export default function RewardsScreen() {
   const router = useRouter();
+  const { user } = useAuthStore();
 
-  const getActivityIcon = (type: string) => {
-    switch (type) {
-      case 'referral':
-        return <UserPlus size={20} color={ZORA_GREEN} weight="fill" />;
-      case 'purchase':
-        return <ShoppingBag size={20} color={Colors.textPrimary} weight="fill" />;
-      case 'challenge':
-        return <Star size={20} color={ZORA_YELLOW} weight="fill" />;
-      default:
-        return <Star size={20} color={Colors.textPrimary} weight="fill" />;
-    }
+  // Assign icons and colors to activities
+  const recentActivity = useMemo(() => {
+    const shuffledColors = shuffleArray(DESIGN_SYSTEM_COLORS);
+    return RECENT_ACTIVITY_BASE.map((item, index) => ({
+      ...item,
+      icon: item.type === 'referral' ? UserPlus : item.type === 'purchase' ? ShoppingBag : Star,
+      color: shuffledColors[index % shuffledColors.length],
+    }));
+  }, []);
+
+  // Assign icons and colors to earn cards
+  const earnCards = useMemo(() => {
+    const shuffledColors = shuffleArray(DESIGN_SYSTEM_COLORS);
+    return EARN_CARDS_BASE.map((card, index) => ({
+      ...card,
+      icon: card.id === '1' ? PencilSimple : card.id === '2' ? InstagramLogo : UsersThree,
+      color: shuffledColors[index % shuffledColors.length],
+    }));
+  }, []);
+
+  // User rewards data
+  const userRewards = {
+    credit: user?.zora_credits || 12.50,
+    totalPoints: user?.loyalty_points || 2450,
+    tier: user?.membership_tier || 'gold',
+    nextTier: user?.membership_tier === 'gold' ? 'Platinum' : 'Gold',
+    pointsToNextTier: 550,
+    progressPercent: 82,
   };
 
   const getAmountColor = (item: ActivityItem) => {
-    if (item.isPoints) return ZORA_YELLOW;
-    if (item.isPositive) return ZORA_GREEN;
+    if (item.isPoints) return Colors.secondary;
+    if (item.isPositive) return Colors.success;
     return Colors.textPrimary;
   };
 
@@ -152,6 +176,7 @@ export default function RewardsScreen() {
         <TouchableOpacity
           style={styles.backButton}
           onPress={() => router.back()}
+          activeOpacity={0.8}
         >
           <ArrowLeft size={24} color={Colors.textPrimary} weight="bold" />
         </TouchableOpacity>
@@ -171,22 +196,24 @@ export default function RewardsScreen() {
             {/* Zora Credit */}
             <View style={styles.balanceItem}>
               <Text style={styles.balanceLabel}>ZORA CREDIT</Text>
-              <Text style={styles.creditValue}>£{USER_REWARDS.credit.toFixed(2)}</Text>
+              <Text style={styles.creditValue}>£{userRewards.credit.toFixed(2)}</Text>
             </View>
 
             {/* Total Points */}
             <View style={[styles.balanceItem, styles.balanceItemRight]}>
               <Text style={styles.balanceLabel}>TOTAL POINTS</Text>
-              <Text style={styles.pointsValue}>{USER_REWARDS.totalPoints.toLocaleString()}</Text>
+              <Text style={styles.pointsValue}>{userRewards.totalPoints.toLocaleString()}</Text>
             </View>
           </View>
 
           {/* Tier Progress */}
           <View style={styles.tierSection}>
             <View style={styles.tierRow}>
-              <Text style={styles.tierName}>{USER_REWARDS.tier} Tier</Text>
+              <Text style={styles.tierName}>
+                {userRewards.tier.charAt(0).toUpperCase() + userRewards.tier.slice(1)} Tier
+              </Text>
               <Text style={styles.tierProgress}>
-                {USER_REWARDS.pointsToNextTier} points to {USER_REWARDS.nextTier}
+                {userRewards.pointsToNextTier} points to {userRewards.nextTier}
               </Text>
             </View>
             {/* Progress Bar */}
@@ -194,7 +221,7 @@ export default function RewardsScreen() {
               <View
                 style={[
                   styles.progressBarFill,
-                  { width: `${USER_REWARDS.progressPercent}%` },
+                  { width: `${userRewards.progressPercent}%` },
                 ]}
               />
             </View>
@@ -207,13 +234,13 @@ export default function RewardsScreen() {
           <View style={styles.benefitsCard}>
             {/* Gold Badge Icon */}
             <View style={styles.badgeContainer}>
-              <Medal size={32} color={Colors.textPrimary} weight="fill" />
+              <Medal size={32} color={Colors.secondary} weight="duotone" />
             </View>
             {/* Benefits List */}
             <View style={styles.benefitsList}>
               {CURRENT_BENEFITS.map((benefit, index) => (
                 <View key={index} style={styles.benefitItem}>
-                  <CheckCircle size={20} color={ZORA_RED} weight="fill" />
+                  <CheckCircle size={20} color={Colors.primary} weight="duotone" />
                   <Text style={styles.benefitText}>{benefit}</Text>
                 </View>
               ))}
@@ -225,31 +252,34 @@ export default function RewardsScreen() {
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Recent Activity</Text>
-            <TouchableOpacity>
+            <TouchableOpacity activeOpacity={0.7}>
               <Text style={styles.seeAllText}>See all</Text>
             </TouchableOpacity>
           </View>
           <View style={styles.activityCard}>
-            {RECENT_ACTIVITY.map((item, index) => (
-              <View
-                key={item.id}
-                style={[
-                  styles.activityItem,
-                  index < RECENT_ACTIVITY.length - 1 && styles.activityItemBorder,
-                ]}
-              >
-                <View style={styles.activityIcon}>
-                  {getActivityIcon(item.type)}
+            {recentActivity.map((item, index) => {
+              const IconComponent = item.icon;
+              return (
+                <View
+                  key={item.id}
+                  style={[
+                    styles.activityItem,
+                    index < recentActivity.length - 1 && styles.activityItemBorder,
+                  ]}
+                >
+                  <View style={[styles.activityIcon, { backgroundColor: `${item.color}20` }]}>
+                    <IconComponent size={20} color={item.color} weight="duotone" />
+                  </View>
+                  <View style={styles.activityContent}>
+                    <Text style={styles.activityTitle}>{item.title}</Text>
+                    <Text style={styles.activityDate}>{item.date}</Text>
+                  </View>
+                  <Text style={[styles.activityAmount, { color: getAmountColor(item) }]}>
+                    {item.amount}
+                  </Text>
                 </View>
-                <View style={styles.activityContent}>
-                  <Text style={styles.activityTitle}>{item.title}</Text>
-                  <Text style={styles.activityDate}>{item.date}</Text>
-                </View>
-                <Text style={[styles.activityAmount, { color: getAmountColor(item) }]}>
-                  {item.amount}
-                </Text>
-              </View>
-            ))}
+              );
+            })}
           </View>
         </View>
 
@@ -261,37 +291,51 @@ export default function RewardsScreen() {
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={styles.earnCardsContainer}
           >
-            {EARN_CARDS.map((card) => (
-              <View key={card.id} style={styles.earnCard}>
-                {/* Card Image */}
-                <View style={styles.earnImageContainer}>
-                  <Image
-                    source={{ uri: card.imageUrl }}
-                    style={styles.earnImage}
-                    resizeMode="cover"
-                  />
-                  {/* Gradient Overlay */}
-                  <View style={styles.earnImageOverlay} />
-                  {/* Points Badge */}
-                  <View style={styles.pointsBadge}>
-                    <Text style={styles.pointsBadgeText}>{card.points}</Text>
+            {earnCards.map((card) => {
+              const IconComponent = card.icon;
+              return (
+                <View key={card.id} style={styles.earnCard}>
+                  {/* Card Image */}
+                  <View style={styles.earnImageContainer}>
+                    <Image
+                      source={{ uri: card.imageUrl }}
+                      style={styles.earnImage}
+                      resizeMode="cover"
+                    />
+                    {/* Gradient Overlay */}
+                    <View style={styles.earnImageOverlay} />
+                    {/* Points Badge */}
+                    <View style={styles.pointsBadge}>
+                      <Text style={styles.pointsBadgeText}>{card.points}</Text>
+                    </View>
+                    {/* Icon Badge */}
+                    <View style={[styles.iconBadge, { backgroundColor: `${card.color}20` }]}>
+                      <IconComponent size={24} color={card.color} weight="duotone" />
+                    </View>
+                  </View>
+                  {/* Card Content */}
+                  <View style={styles.earnContent}>
+                    <Text style={styles.earnTitle}>{card.title}</Text>
+                    <Text style={styles.earnDescription}>{card.description}</Text>
+                    <TouchableOpacity 
+                      style={styles.earnButton}
+                      onPress={() => {
+                        if (card.id === '1') router.push('/write-review');
+                        else if (card.id === '3') router.push('/referrals');
+                      }}
+                      activeOpacity={0.8}
+                    >
+                      <Text style={styles.earnButtonText}>{card.buttonText}</Text>
+                    </TouchableOpacity>
                   </View>
                 </View>
-                {/* Card Content */}
-                <View style={styles.earnContent}>
-                  <Text style={styles.earnTitle}>{card.title}</Text>
-                  <Text style={styles.earnDescription}>{card.description}</Text>
-                  <TouchableOpacity style={styles.earnButton}>
-                    <Text style={styles.earnButtonText}>{card.buttonText}</Text>
-                  </TouchableOpacity>
-                </View>
-              </View>
-            ))}
+              );
+            })}
           </ScrollView>
         </View>
 
         {/* Bottom padding for safe area */}
-        <View style={{ height: 40 }} />
+        <View style={{ height: 100 }} />
       </ScrollView>
     </SafeAreaView>
   );
@@ -309,26 +353,31 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: Spacing.base,
-    paddingVertical: Spacing.md,
-    backgroundColor: 'rgba(34, 23, 16, 0.95)',
+    paddingTop: Spacing.sm,
+    paddingBottom: Spacing.md,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.borderDark,
   },
   backButton: {
-    width: 48,
-    height: 48,
+    width: 44,
+    height: 44,
     justifyContent: 'center',
     alignItems: 'center',
-    borderRadius: 24,
+    borderRadius: 22,
+    backgroundColor: Colors.cardDark,
+    borderWidth: 1,
+    borderColor: Colors.borderDark,
   },
   headerTitle: {
     flex: 1,
     fontFamily: FontFamily.display,
-    fontSize: FontSize.h4,
+    fontSize: FontSize.h3,
     color: Colors.textPrimary,
     textAlign: 'center',
-    marginRight: 48,
+    marginRight: 44,
   },
   headerRight: {
-    width: 48,
+    width: 44,
   },
 
   // Scroll View
@@ -337,22 +386,22 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingHorizontal: Spacing.base,
-    paddingTop: Spacing.md,
-    gap: 24,
+    paddingTop: Spacing.lg,
+    gap: Spacing.xl,
   },
 
   // Balance Card
   balanceCard: {
-    backgroundColor: ZORA_CARD,
+    backgroundColor: Colors.cardDark,
     borderRadius: BorderRadius.lg,
-    padding: 24,
+    padding: Spacing.xl,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.05)',
+    borderColor: Colors.borderDark,
   },
   balanceRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 24,
+    marginBottom: Spacing.xl,
   },
   balanceItem: {
     flexDirection: 'column',
@@ -363,10 +412,10 @@ const styles = StyleSheet.create({
   balanceLabel: {
     fontFamily: FontFamily.bodyMedium,
     fontSize: FontSize.caption,
-    color: MUTED_TEXT,
+    color: Colors.textMuted,
     textTransform: 'uppercase',
-    letterSpacing: 1,
-    marginBottom: 4,
+    letterSpacing: LetterSpacing.wider,
+    marginBottom: Spacing.xs,
   },
   creditValue: {
     fontFamily: FontFamily.display,
@@ -377,11 +426,11 @@ const styles = StyleSheet.create({
   pointsValue: {
     fontFamily: FontFamily.display,
     fontSize: 28,
-    color: ZORA_YELLOW,
+    color: Colors.secondary,
     lineHeight: 32,
   },
   tierSection: {
-    gap: 8,
+    gap: Spacing.sm,
   },
   tierRow: {
     flexDirection: 'row',
@@ -396,23 +445,23 @@ const styles = StyleSheet.create({
   tierProgress: {
     fontFamily: FontFamily.body,
     fontSize: FontSize.caption,
-    color: MUTED_TEXT,
+    color: Colors.textMuted,
   },
   progressBarBg: {
     height: 12,
-    backgroundColor: '#181010',
+    backgroundColor: Colors.backgroundDark,
     borderRadius: 6,
     overflow: 'hidden',
   },
   progressBarFill: {
     height: '100%',
-    backgroundColor: ZORA_RED,
+    backgroundColor: Colors.primary,
     borderRadius: 6,
   },
 
   // Sections
   section: {
-    gap: 12,
+    gap: Spacing.md,
   },
   sectionHeader: {
     flexDirection: 'row',
@@ -427,69 +476,70 @@ const styles = StyleSheet.create({
   seeAllText: {
     fontFamily: FontFamily.bodyMedium,
     fontSize: FontSize.small,
-    color: MUTED_TEXT,
+    color: Colors.textMuted,
   },
 
   // Benefits Card
   benefitsCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 16,
-    backgroundColor: ZORA_CARD,
+    gap: Spacing.base,
+    backgroundColor: Colors.cardDark,
     borderRadius: BorderRadius.lg,
-    padding: 16,
+    padding: Spacing.base,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.05)',
+    borderColor: Colors.borderDark,
   },
   badgeContainer: {
     width: 64,
     height: 64,
     borderRadius: 32,
-    backgroundColor: ZORA_YELLOW,
+    backgroundColor: `${Colors.secondary}20`,
     justifyContent: 'center',
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: `${Colors.secondary}33`,
   },
   benefitsList: {
     flex: 1,
-    gap: 8,
+    gap: Spacing.sm,
   },
   benefitItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: Spacing.sm,
   },
   benefitText: {
     fontFamily: FontFamily.bodyMedium,
     fontSize: FontSize.small,
-    color: 'rgba(255, 255, 255, 0.9)',
+    color: Colors.textPrimary,
     flex: 1,
   },
 
   // Activity Card
   activityCard: {
-    backgroundColor: ZORA_CARD,
+    backgroundColor: Colors.cardDark,
     borderRadius: BorderRadius.lg,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.05)',
+    borderColor: Colors.borderDark,
     overflow: 'hidden',
   },
   activityItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 16,
+    padding: Spacing.base,
   },
   activityItemBorder: {
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255, 255, 255, 0.05)',
+    borderBottomColor: Colors.borderDark,
   },
   activityIcon: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 12,
+    marginRight: Spacing.md,
   },
   activityContent: {
     flex: 1,
@@ -502,7 +552,7 @@ const styles = StyleSheet.create({
   activityDate: {
     fontFamily: FontFamily.body,
     fontSize: FontSize.caption,
-    color: MUTED_TEXT,
+    color: Colors.textMuted,
     marginTop: 2,
   },
   activityAmount: {
@@ -513,15 +563,15 @@ const styles = StyleSheet.create({
   // Earn Cards
   earnCardsContainer: {
     paddingRight: Spacing.base,
-    gap: 16,
+    gap: Spacing.base,
   },
   earnCard: {
     width: 240,
-    backgroundColor: ZORA_CARD,
+    backgroundColor: Colors.cardDark,
     borderRadius: BorderRadius.lg,
     overflow: 'hidden',
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.05)',
+    borderColor: Colors.borderDark,
   },
   earnImageContainer: {
     height: 128,
@@ -538,27 +588,36 @@ const styles = StyleSheet.create({
     right: 0,
     height: 64,
     backgroundColor: 'transparent',
-    // Gradient effect simulated with opacity
     opacity: 0.8,
   },
   pointsBadge: {
     position: 'absolute',
-    bottom: 8,
-    left: 12,
-    backgroundColor: 'rgba(204, 0, 0, 0.9)',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
+    bottom: Spacing.sm,
+    left: Spacing.md,
+    backgroundColor: Colors.primary,
+    paddingHorizontal: Spacing.sm,
+    paddingVertical: Spacing.xs,
     borderRadius: BorderRadius.full,
   },
   pointsBadgeText: {
     fontFamily: FontFamily.bodyBold,
-    fontSize: 10,
+    fontSize: FontSize.tiny,
     color: Colors.textPrimary,
-    letterSpacing: 0.5,
+    letterSpacing: LetterSpacing.wide,
+  },
+  iconBadge: {
+    position: 'absolute',
+    top: Spacing.sm,
+    right: Spacing.sm,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   earnContent: {
-    padding: 12,
-    gap: 4,
+    padding: Spacing.md,
+    gap: Spacing.xs,
     flex: 1,
   },
   earnTitle: {
@@ -569,13 +628,13 @@ const styles = StyleSheet.create({
   earnDescription: {
     fontFamily: FontFamily.body,
     fontSize: FontSize.caption,
-    color: MUTED_TEXT,
-    marginBottom: 8,
+    color: Colors.textMuted,
+    marginBottom: Spacing.sm,
   },
   earnButton: {
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-    paddingVertical: 8,
-    borderRadius: BorderRadius.sm,
+    backgroundColor: Colors.backgroundDark,
+    paddingVertical: Spacing.sm,
+    borderRadius: BorderRadius.md,
     alignItems: 'center',
     marginTop: 'auto',
   },

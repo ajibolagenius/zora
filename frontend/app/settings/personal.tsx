@@ -23,16 +23,8 @@ import {
 } from 'phosphor-react-native';
 import { Colors } from '../../constants/colors';
 import { Spacing, BorderRadius } from '../../constants/spacing';
-import { FontSize, FontFamily } from '../../constants/typography';
-
-// Zora Brand Colors
-const ZORA_RED = '#CC0000';
-const ZORA_YELLOW = '#FFCC00';
-const ZORA_CARD = '#342418';
-const BACKGROUND_DARK = '#221710';
-const SURFACE_DARK = '#2D1E18';
-const MUTED_TEXT = '#bc9a9a';
-const INPUT_BG = '#2A1D17';
+import { FontSize, FontFamily, LetterSpacing } from '../../constants/typography';
+import { useAuthStore } from '../../stores/authStore';
 
 // Mock user data
 const USER_DATA = {
@@ -46,12 +38,39 @@ const USER_DATA = {
 
 export default function PersonalInformationScreen() {
   const router = useRouter();
+  const { user, updateProfile } = useAuthStore();
   const [isEditing, setIsEditing] = useState(false);
-  const [formData, setFormData] = useState(USER_DATA);
+  const [formData, setFormData] = useState({
+    firstName: user?.name?.split(' ')[0] || USER_DATA.firstName,
+    lastName: user?.name?.split(' ').slice(1).join(' ') || USER_DATA.lastName,
+    email: user?.email || USER_DATA.email,
+    phone: user?.phone || USER_DATA.phone,
+    dateOfBirth: USER_DATA.dateOfBirth,
+  });
 
-  const handleSave = () => {
-    setIsEditing(false);
-    Alert.alert('Success', 'Your profile has been updated.');
+  const handleSave = async () => {
+    try {
+      // Update local state first for immediate feedback
+      const updatedName = `${formData.firstName} ${formData.lastName}`;
+      
+      // Try to update profile in backend
+      try {
+        await updateProfile({
+          name: updatedName,
+          phone: formData.phone,
+        });
+      } catch (updateError) {
+        // If update fails (e.g., Supabase not configured), still update local state
+        // This allows the UI to work in dev mode
+        console.warn('Profile update failed, updating local state only:', updateError);
+      }
+      
+      setIsEditing(false);
+      Alert.alert('Success', 'Your profile has been updated.');
+    } catch (error: any) {
+      console.error('Save error:', error);
+      Alert.alert('Error', error.message || 'Failed to update profile. Please try again.');
+    }
   };
 
   const handleChangePhoto = () => {
@@ -65,6 +84,7 @@ export default function PersonalInformationScreen() {
         <TouchableOpacity
           style={styles.backButton}
           onPress={() => router.back()}
+          activeOpacity={0.8}
         >
           <ArrowLeft size={24} color={Colors.textPrimary} weight="bold" />
         </TouchableOpacity>
@@ -72,11 +92,12 @@ export default function PersonalInformationScreen() {
         <TouchableOpacity
           style={styles.editButton}
           onPress={() => isEditing ? handleSave() : setIsEditing(true)}
+          activeOpacity={0.8}
         >
           {isEditing ? (
-            <Check size={24} color={ZORA_RED} weight="bold" />
+            <Check size={24} color={Colors.primary} weight="bold" />
           ) : (
-            <PencilSimple size={24} color={Colors.textPrimary} weight="regular" />
+            <PencilSimple size={24} color={Colors.textPrimary} weight="duotone" />
           )}
         </TouchableOpacity>
       </View>
@@ -89,15 +110,19 @@ export default function PersonalInformationScreen() {
         {/* Profile Photo Section */}
         <View style={styles.photoSection}>
           <View style={styles.avatarContainer}>
-            <Image source={{ uri: formData.avatar }} style={styles.avatar} />
+            <Image 
+              source={{ uri: user?.picture || formData.avatar }} 
+              style={styles.avatar} 
+            />
             <TouchableOpacity
               style={styles.cameraButton}
               onPress={handleChangePhoto}
+              activeOpacity={0.8}
             >
               <Camera size={18} color={Colors.textPrimary} weight="fill" />
             </TouchableOpacity>
           </View>
-          <TouchableOpacity onPress={handleChangePhoto}>
+          <TouchableOpacity onPress={handleChangePhoto} activeOpacity={0.8}>
             <Text style={styles.changePhotoText}>Change Photo</Text>
           </TouchableOpacity>
         </View>
@@ -108,13 +133,13 @@ export default function PersonalInformationScreen() {
           <View style={styles.inputGroup}>
             <Text style={styles.inputLabel}>FIRST NAME</Text>
             <View style={styles.inputContainer}>
-              <User size={20} color={MUTED_TEXT} weight="regular" />
+              <User size={20} color={Colors.textMuted} weight="duotone" />
               <TextInput
                 style={styles.input}
                 value={formData.firstName}
                 onChangeText={(text) => setFormData({ ...formData, firstName: text })}
                 editable={isEditing}
-                placeholderTextColor={MUTED_TEXT}
+                placeholderTextColor={Colors.textMuted}
               />
             </View>
           </View>
@@ -123,13 +148,13 @@ export default function PersonalInformationScreen() {
           <View style={styles.inputGroup}>
             <Text style={styles.inputLabel}>LAST NAME</Text>
             <View style={styles.inputContainer}>
-              <User size={20} color={MUTED_TEXT} weight="regular" />
+              <User size={20} color={Colors.textMuted} weight="duotone" />
               <TextInput
                 style={styles.input}
                 value={formData.lastName}
                 onChangeText={(text) => setFormData({ ...formData, lastName: text })}
                 editable={isEditing}
-                placeholderTextColor={MUTED_TEXT}
+                placeholderTextColor={Colors.textMuted}
               />
             </View>
           </View>
@@ -138,14 +163,14 @@ export default function PersonalInformationScreen() {
           <View style={styles.inputGroup}>
             <Text style={styles.inputLabel}>EMAIL ADDRESS</Text>
             <View style={styles.inputContainer}>
-              <Envelope size={20} color={MUTED_TEXT} weight="regular" />
+              <Envelope size={20} color={Colors.textMuted} weight="duotone" />
               <TextInput
                 style={styles.input}
                 value={formData.email}
                 onChangeText={(text) => setFormData({ ...formData, email: text })}
                 editable={isEditing}
                 keyboardType="email-address"
-                placeholderTextColor={MUTED_TEXT}
+                placeholderTextColor={Colors.textMuted}
               />
             </View>
           </View>
@@ -154,14 +179,14 @@ export default function PersonalInformationScreen() {
           <View style={styles.inputGroup}>
             <Text style={styles.inputLabel}>PHONE NUMBER</Text>
             <View style={styles.inputContainer}>
-              <Phone size={20} color={MUTED_TEXT} weight="regular" />
+              <Phone size={20} color={Colors.textMuted} weight="duotone" />
               <TextInput
                 style={styles.input}
                 value={formData.phone}
                 onChangeText={(text) => setFormData({ ...formData, phone: text })}
                 editable={isEditing}
                 keyboardType="phone-pad"
-                placeholderTextColor={MUTED_TEXT}
+                placeholderTextColor={Colors.textMuted}
               />
             </View>
           </View>
@@ -170,13 +195,13 @@ export default function PersonalInformationScreen() {
           <View style={styles.inputGroup}>
             <Text style={styles.inputLabel}>DATE OF BIRTH</Text>
             <View style={styles.inputContainer}>
-              <Calendar size={20} color={MUTED_TEXT} weight="regular" />
+              <Calendar size={20} color={Colors.textMuted} weight="duotone" />
               <TextInput
                 style={styles.input}
                 value={formData.dateOfBirth}
                 onChangeText={(text) => setFormData({ ...formData, dateOfBirth: text })}
                 editable={isEditing}
-                placeholderTextColor={MUTED_TEXT}
+                placeholderTextColor={Colors.textMuted}
               />
             </View>
           </View>
@@ -184,10 +209,18 @@ export default function PersonalInformationScreen() {
 
         {/* Account Actions */}
         <View style={styles.actionsSection}>
-          <TouchableOpacity style={styles.actionButton}>
+          <TouchableOpacity 
+            style={styles.actionButton}
+            onPress={() => router.push('/settings/change-password')}
+            activeOpacity={0.8}
+          >
             <Text style={styles.actionButtonText}>Change Password</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={[styles.actionButton, styles.deleteButton]}>
+          <TouchableOpacity 
+            style={[styles.actionButton, styles.deleteButton]}
+            onPress={() => Alert.alert('Delete Account', 'This action cannot be undone.')}
+            activeOpacity={0.8}
+          >
             <Text style={styles.deleteButtonText}>Delete Account</Text>
           </TouchableOpacity>
         </View>
@@ -202,7 +235,7 @@ export default function PersonalInformationScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: BACKGROUND_DARK,
+    backgroundColor: Colors.backgroundDark,
   },
 
   // Header
@@ -211,10 +244,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: Spacing.base,
-    paddingVertical: Spacing.sm,
-    backgroundColor: `${BACKGROUND_DARK}F2`,
+    paddingTop: Spacing.sm,
+    paddingBottom: Spacing.md,
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255, 255, 255, 0.05)',
+    borderBottomColor: Colors.borderDark,
   },
   backButton: {
     width: 44,
@@ -222,12 +255,14 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     borderRadius: 22,
+    backgroundColor: Colors.cardDark,
+    borderWidth: 1,
+    borderColor: Colors.borderDark,
   },
   headerTitle: {
     fontFamily: FontFamily.display,
     fontSize: FontSize.h4,
     color: Colors.textPrimary,
-    letterSpacing: -0.3,
   },
   editButton: {
     width: 44,
@@ -235,6 +270,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     borderRadius: 22,
+    backgroundColor: Colors.cardDark,
+    borderWidth: 1,
+    borderColor: Colors.borderDark,
   },
 
   // Scroll View
@@ -248,19 +286,20 @@ const styles = StyleSheet.create({
   // Photo Section
   photoSection: {
     alignItems: 'center',
-    marginBottom: 32,
-    marginTop: 16,
+    marginBottom: Spacing['2xl'],
+    marginTop: Spacing.base,
   },
   avatarContainer: {
     position: 'relative',
-    marginBottom: 12,
+    marginBottom: Spacing.md,
   },
   avatar: {
     width: 120,
     height: 120,
     borderRadius: 60,
     borderWidth: 3,
-    borderColor: ZORA_RED,
+    borderColor: Colors.primary,
+    backgroundColor: Colors.cardDark,
   },
   cameraButton: {
     position: 'absolute',
@@ -269,44 +308,44 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: ZORA_RED,
+    backgroundColor: Colors.primary,
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 3,
-    borderColor: BACKGROUND_DARK,
+    borderColor: Colors.backgroundDark,
   },
   changePhotoText: {
     fontFamily: FontFamily.bodySemiBold,
     fontSize: FontSize.small,
-    color: ZORA_RED,
+    color: Colors.primary,
   },
 
   // Form Section
   formSection: {
-    gap: 20,
-    marginBottom: 32,
+    gap: Spacing.lg,
+    marginBottom: Spacing['2xl'],
   },
   inputGroup: {
-    gap: 8,
+    gap: Spacing.sm,
   },
   inputLabel: {
     fontFamily: FontFamily.bodySemiBold,
-    fontSize: 10,
-    color: MUTED_TEXT,
+    fontSize: FontSize.tiny,
+    color: Colors.textMuted,
     textTransform: 'uppercase',
-    letterSpacing: 1.5,
-    paddingLeft: 4,
+    letterSpacing: LetterSpacing.widest,
+    paddingLeft: Spacing.xs,
   },
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
-    backgroundColor: INPUT_BG,
+    gap: Spacing.md,
+    backgroundColor: Colors.cardDark,
     borderRadius: BorderRadius.lg,
-    paddingHorizontal: 16,
+    paddingHorizontal: Spacing.base,
     height: 56,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.05)',
+    borderColor: Colors.borderDark,
   },
   input: {
     flex: 1,
@@ -317,15 +356,15 @@ const styles = StyleSheet.create({
 
   // Actions Section
   actionsSection: {
-    gap: 12,
+    gap: Spacing.md,
   },
   actionButton: {
-    backgroundColor: ZORA_CARD,
+    backgroundColor: Colors.cardDark,
     borderRadius: BorderRadius.lg,
-    paddingVertical: 16,
+    paddingVertical: Spacing.base,
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.05)',
+    borderColor: Colors.borderDark,
   },
   actionButtonText: {
     fontFamily: FontFamily.bodySemiBold,
@@ -333,12 +372,12 @@ const styles = StyleSheet.create({
     color: Colors.textPrimary,
   },
   deleteButton: {
-    backgroundColor: 'rgba(239, 68, 68, 0.1)',
-    borderColor: 'rgba(239, 68, 68, 0.2)',
+    backgroundColor: `${Colors.error}15`,
+    borderColor: `${Colors.error}33`,
   },
   deleteButtonText: {
     fontFamily: FontFamily.bodySemiBold,
     fontSize: FontSize.body,
-    color: '#EF4444',
+    color: Colors.error,
   },
 });

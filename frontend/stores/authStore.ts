@@ -339,7 +339,18 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
   
   updateProfile: async (updates: Partial<User>) => {
     const { session, user } = get();
-    if (!session || !user) throw new Error('Not authenticated');
+    if (!user) throw new Error('Not authenticated');
+    
+    // If Supabase is not configured or using mock user, just update local state
+    if (!isSupabaseConfigured() || !session) {
+      set({
+        user: {
+          ...user,
+          ...updates,
+        },
+      });
+      return;
+    }
     
     try {
       const client = await getSupabaseClient();

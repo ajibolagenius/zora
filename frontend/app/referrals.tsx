@@ -1,11 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   ScrollView,
   TouchableOpacity,
-  Image,
   Share,
   Alert,
 } from 'react-native';
@@ -15,7 +14,7 @@ import {
   ArrowLeft,
   Question,
   Copy,
-  Export,
+  ShareNetwork,
   ChatCircle,
   ChatText,
   Envelope,
@@ -27,18 +26,30 @@ import {
 import * as Clipboard from 'expo-clipboard';
 import { Colors } from '../constants/colors';
 import { Spacing, BorderRadius } from '../constants/spacing';
-import { FontSize, FontFamily } from '../constants/typography';
+import { FontSize, FontFamily, LetterSpacing } from '../constants/typography';
+import { useAuthStore } from '../stores/authStore';
 
-// Zora Brand Colors
-const ZORA_RED = '#CC0000';
-const ZORA_YELLOW = '#FFCC00';
-const ZORA_CARD = '#342418';
-const SURFACE_DARK = '#2D1E18';
-const MUTED_TEXT = '#bc9a9a';
+// Available colors from Design System for randomized icons
+const DESIGN_SYSTEM_COLORS = [
+  Colors.primary,
+  Colors.secondary,
+  Colors.success,
+  Colors.info,
+  Colors.badgeEcoFriendly,
+];
+
+// Shuffle array function for random color assignment
+const shuffleArray = <T,>(array: T[]): T[] => {
+  const shuffled = [...array];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+};
 
 // Mock user referral data
 const USER_REFERRAL = {
-  code: 'ADAEZE10',
   friendsJoined: 5,
   totalEarned: 50,
 };
@@ -58,14 +69,28 @@ const REFERRAL_ACTIVITY: ReferralActivity[] = [
   { id: '3', initials: 'DA', name: 'David A.', status: 'pending', amount: 0, color: '#6B7280' },
 ];
 
-const SHARE_OPTIONS = [
+interface ShareOption {
+  id: string;
+  icon: React.ComponentType<any>;
+  label: string;
+  color: string;
+}
+
+const SHARE_OPTIONS_BASE: Omit<ShareOption, 'color'>[] = [
   { id: 'whatsapp', icon: ChatCircle, label: 'WhatsApp' },
   { id: 'sms', icon: ChatText, label: 'SMS' },
   { id: 'email', icon: Envelope, label: 'Email' },
   { id: 'qr', icon: QrCode, label: 'QR Code' },
 ];
 
-const HOW_IT_WORKS = [
+interface HowItWorks {
+  step: number;
+  icon: React.ComponentType<any>;
+  text: string;
+  color: string;
+}
+
+const HOW_IT_WORKS_BASE: Omit<HowItWorks, 'color'>[] = [
   { step: 1, icon: PaperPlaneTilt, text: 'Send your code to a friend' },
   { step: 2, icon: ShoppingBag, text: 'They place their 1st order' },
   { step: 3, icon: CurrencyCircleDollar, text: 'You both get £10 credit' },
@@ -73,10 +98,31 @@ const HOW_IT_WORKS = [
 
 export default function ReferralsScreen() {
   const router = useRouter();
+  const { user } = useAuthStore();
   const [copied, setCopied] = useState(false);
 
+  // Assign random colors to share options
+  const shareOptions = useMemo(() => {
+    const shuffledColors = shuffleArray(DESIGN_SYSTEM_COLORS);
+    return SHARE_OPTIONS_BASE.map((option, index) => ({
+      ...option,
+      color: shuffledColors[index % shuffledColors.length],
+    }));
+  }, []);
+
+  // Assign random colors to how it works steps
+  const howItWorks = useMemo(() => {
+    const shuffledColors = shuffleArray(DESIGN_SYSTEM_COLORS);
+    return HOW_IT_WORKS_BASE.map((step, index) => ({
+      ...step,
+      color: shuffledColors[index % shuffledColors.length],
+    }));
+  }, []);
+
+  const referralCode = user?.referral_code || 'ZORA-REF-2024';
+
   const handleCopyCode = async () => {
-    await Clipboard.setStringAsync(USER_REFERRAL.code);
+    await Clipboard.setStringAsync(referralCode);
     setCopied(true);
     Alert.alert('Copied!', 'Referral code copied to clipboard');
     setTimeout(() => setCopied(false), 2000);
@@ -85,7 +131,7 @@ export default function ReferralsScreen() {
   const handleShare = async () => {
     try {
       await Share.share({
-        message: `Join Zora African Market with my code ${USER_REFERRAL.code} and get £10 off your first order! 🛒🌍`,
+        message: `Join Zora African Market with my code ${referralCode} and get £10 off your first order! 🛒🌍`,
         title: 'Share Zora African Market',
       });
     } catch (error) {
@@ -94,8 +140,11 @@ export default function ReferralsScreen() {
   };
 
   const handleShareOption = (option: string) => {
-    // In a real app, these would open specific sharing intents
-    handleShare();
+    if (option === 'qr') {
+      router.push('/qr-scanner');
+    } else {
+      handleShare();
+    }
   };
 
   return (
@@ -105,12 +154,17 @@ export default function ReferralsScreen() {
         <TouchableOpacity
           style={styles.headerButton}
           onPress={() => router.back()}
+          activeOpacity={0.8}
         >
           <ArrowLeft size={24} color={Colors.textPrimary} weight="bold" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Referrals</Text>
-        <TouchableOpacity style={styles.headerButton}>
-          <Question size={24} color={Colors.textPrimary} weight="regular" />
+        <TouchableOpacity 
+          style={styles.headerButton}
+          onPress={() => router.push('/help')}
+          activeOpacity={0.8}
+        >
+          <Question size={24} color={Colors.textPrimary} weight="duotone" />
         </TouchableOpacity>
       </View>
 
@@ -119,15 +173,16 @@ export default function ReferralsScreen() {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        {/* Hero Section */}
+        {/* Hero Section - Geometric Shapes */}
         <View style={styles.heroSection}>
-          <Image
-            source={{ uri: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=600' }}
-            style={styles.heroImage}
-            resizeMode="cover"
-          />
-          {/* Gradient Overlay */}
-          <View style={styles.heroGradient} />
+          {/* Geometric Background Shapes */}
+          <View style={styles.geometricContainer}>
+            <View style={[styles.geometricShape, styles.shape1]} />
+            <View style={[styles.geometricShape, styles.shape2]} />
+            <View style={[styles.geometricShape, styles.shape3]} />
+            <View style={[styles.geometricShape, styles.shape4]} />
+            <View style={[styles.geometricShape, styles.shape5]} />
+          </View>
           {/* Hero Content */}
           <View style={styles.heroContent}>
             <Text style={styles.heroTitle}>Give £10, Get £10</Text>
@@ -139,7 +194,7 @@ export default function ReferralsScreen() {
         <View style={styles.referralCard}>
           <Text style={styles.codeLabel}>YOUR UNIQUE REFERRAL CODE</Text>
           <View style={styles.codeContainer}>
-            <Text style={styles.codeText}>{USER_REFERRAL.code}</Text>
+            <Text style={styles.codeText}>{referralCode}</Text>
             <TouchableOpacity
               style={styles.copyButton}
               onPress={handleCopyCode}
@@ -154,14 +209,14 @@ export default function ReferralsScreen() {
             onPress={handleShare}
             activeOpacity={0.8}
           >
-            <Export size={20} color={Colors.textPrimary} weight="bold" />
+            <ShareNetwork size={20} color={Colors.textPrimary} weight="duotone" />
             <Text style={styles.shareButtonText}>Share Invite Link</Text>
           </TouchableOpacity>
         </View>
 
         {/* Social Share Options */}
         <View style={styles.shareOptionsRow}>
-          {SHARE_OPTIONS.map((option) => {
+          {shareOptions.map((option) => {
             const IconComponent = option.icon;
             return (
               <TouchableOpacity
@@ -170,8 +225,8 @@ export default function ReferralsScreen() {
                 onPress={() => handleShareOption(option.id)}
                 activeOpacity={0.8}
               >
-                <View style={styles.shareOptionIcon}>
-                  <IconComponent size={24} color={Colors.textPrimary} weight="fill" />
+                <View style={[styles.shareOptionIcon, { backgroundColor: `${option.color}20` }]}>
+                  <IconComponent size={24} color={option.color} weight="duotone" />
                 </View>
                 <Text style={styles.shareOptionLabel}>{option.label}</Text>
               </TouchableOpacity>
@@ -183,7 +238,7 @@ export default function ReferralsScreen() {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>How it works</Text>
           <View style={styles.stepsContainer}>
-            {HOW_IT_WORKS.map((step, index) => {
+            {howItWorks.map((step, index) => {
               const IconComponent = step.icon;
               return (
                 <View
@@ -193,10 +248,10 @@ export default function ReferralsScreen() {
                     index === 2 && styles.stepCardHighlighted,
                   ]}
                 >
-                  <View style={styles.stepNumber}>
-                    <Text style={styles.stepNumberText}>{step.step}</Text>
+                  <View style={[styles.stepNumber, { backgroundColor: `${step.color}20` }]}>
+                    <Text style={[styles.stepNumberText, { color: step.color }]}>{step.step}</Text>
                   </View>
-                  <IconComponent size={28} color={ZORA_RED} weight="fill" />
+                  <IconComponent size={28} color={step.color} weight="duotone" />
                   <Text style={styles.stepText}>{step.text}</Text>
                 </View>
               );
@@ -257,7 +312,7 @@ export default function ReferralsScreen() {
                 </Text>
               </View>
             ))}
-            <TouchableOpacity style={styles.viewAllButton}>
+            <TouchableOpacity style={styles.viewAllButton} activeOpacity={0.8}>
               <Text style={styles.viewAllText}>View all history</Text>
             </TouchableOpacity>
           </View>
@@ -282,10 +337,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: Spacing.base,
-    paddingVertical: Spacing.md,
-    backgroundColor: 'rgba(34, 23, 16, 0.95)',
+    paddingTop: Spacing.sm,
+    paddingBottom: Spacing.md,
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255, 255, 255, 0.05)',
+    borderBottomColor: Colors.borderDark,
   },
   headerButton: {
     width: 44,
@@ -293,6 +348,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     borderRadius: 22,
+    backgroundColor: Colors.cardDark,
+    borderWidth: 1,
+    borderColor: Colors.borderDark,
   },
   headerTitle: {
     fontFamily: FontFamily.display,
@@ -314,36 +372,74 @@ const styles = StyleSheet.create({
     aspectRatio: 4 / 3,
     maxHeight: 320,
     position: 'relative',
+    backgroundColor: Colors.cardDark,
+    overflow: 'hidden',
   },
-  heroImage: {
-    width: '100%',
-    height: '100%',
+  geometricContainer: {
+    ...StyleSheet.absoluteFillObject,
   },
-  heroGradient: {
+  geometricShape: {
     position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    height: '100%',
-    backgroundColor: 'transparent',
-    // Simulating gradient with multiple views would be complex
-    // Using a semi-transparent overlay instead
+    opacity: 0.15,
+  },
+  shape1: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    backgroundColor: Colors.primary,
+    top: -40,
+    left: -40,
+  },
+  shape2: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: Colors.secondary,
+    top: 60,
+    right: 20,
+  },
+  shape3: {
+    width: 100,
+    height: 100,
+    borderRadius: 20,
+    backgroundColor: Colors.primary,
+    transform: [{ rotate: '45deg' }],
+    bottom: 80,
+    left: 40,
+  },
+  shape4: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: Colors.secondary,
+    bottom: 40,
+    right: 60,
+  },
+  shape5: {
+    width: 90,
+    height: 90,
+    borderRadius: 10,
+    backgroundColor: Colors.primary,
+    transform: [{ rotate: '-30deg' }],
+    top: 120,
+    left: '50%',
+    marginLeft: -45,
   },
   heroContent: {
     position: 'absolute',
     bottom: 0,
     left: 0,
     right: 0,
-    padding: 24,
-    paddingBottom: 32,
-    backgroundColor: 'rgba(34, 23, 16, 0.7)',
+    padding: Spacing.xl,
+    paddingBottom: Spacing['2xl'],
+    backgroundColor: 'rgba(34, 23, 16, 0.85)',
   },
   heroTitle: {
     fontFamily: FontFamily.display,
     fontSize: 32,
     color: Colors.textPrimary,
     textAlign: 'center',
-    marginBottom: 8,
+    marginBottom: Spacing.sm,
     textShadowColor: 'rgba(0, 0, 0, 0.5)',
     textShadowOffset: { width: 0, height: 2 },
     textShadowRadius: 4,
@@ -351,7 +447,7 @@ const styles = StyleSheet.create({
   heroSubtitle: {
     fontFamily: FontFamily.bodyMedium,
     fontSize: FontSize.body,
-    color: 'rgba(255, 255, 255, 0.9)',
+    color: Colors.textPrimary,
     textAlign: 'center',
   },
 
@@ -359,48 +455,48 @@ const styles = StyleSheet.create({
   referralCard: {
     marginHorizontal: Spacing.base,
     marginTop: -16,
-    backgroundColor: ZORA_CARD,
+    backgroundColor: Colors.cardDark,
     borderRadius: BorderRadius.lg,
-    padding: 20,
+    padding: Spacing.lg,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.05)',
+    borderColor: Colors.borderDark,
     zIndex: 10,
   },
   codeLabel: {
     fontFamily: FontFamily.bodySemiBold,
-    fontSize: 10,
-    color: 'rgba(255, 255, 255, 0.6)',
+    fontSize: FontSize.tiny,
+    color: Colors.textMuted,
     textTransform: 'uppercase',
-    letterSpacing: 1.5,
+    letterSpacing: LetterSpacing.widest,
     textAlign: 'center',
-    marginBottom: 8,
+    marginBottom: Spacing.sm,
   },
   codeContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: 'rgba(0, 0, 0, 0.2)',
+    backgroundColor: Colors.backgroundDark,
     borderRadius: BorderRadius.lg,
     borderWidth: 1,
     borderStyle: 'dashed',
-    borderColor: 'rgba(255, 255, 255, 0.1)',
-    padding: 4,
-    paddingLeft: 16,
-    marginBottom: 16,
+    borderColor: Colors.borderDark,
+    padding: Spacing.xs,
+    paddingLeft: Spacing.base,
+    marginBottom: Spacing.base,
   },
   codeText: {
     fontFamily: FontFamily.display,
-    fontSize: 24,
-    color: ZORA_YELLOW,
-    letterSpacing: 4,
+    fontSize: FontSize.h2,
+    color: Colors.secondary,
+    letterSpacing: LetterSpacing.wider,
   },
   copyButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
-    backgroundColor: ZORA_RED,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+    gap: Spacing.xs,
+    backgroundColor: Colors.primary,
+    paddingHorizontal: Spacing.base,
+    paddingVertical: Spacing.md,
     borderRadius: BorderRadius.lg,
   },
   copyButtonText: {
@@ -412,12 +508,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 8,
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-    paddingVertical: 14,
+    gap: Spacing.sm,
+    backgroundColor: Colors.backgroundDark,
+    paddingVertical: Spacing.md,
     borderRadius: BorderRadius.lg,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.05)',
+    borderColor: Colors.borderDark,
   },
   shareButtonText: {
     fontFamily: FontFamily.bodySemiBold,
@@ -430,98 +526,97 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     paddingHorizontal: Spacing.base,
-    paddingVertical: 32,
+    paddingVertical: Spacing['2xl'],
   },
   shareOption: {
-    flex: 1,
     alignItems: 'center',
-    gap: 8,
+    gap: Spacing.sm,
+    flex: 1,
   },
   shareOptionIcon: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: ZORA_RED,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
     justifyContent: 'center',
     alignItems: 'center',
   },
   shareOptionLabel: {
     fontFamily: FontFamily.bodyMedium,
-    fontSize: 10,
-    color: 'rgba(255, 255, 255, 0.6)',
+    fontSize: FontSize.caption,
+    color: Colors.textMuted,
+    textAlign: 'center',
   },
 
   // Section
   section: {
     paddingHorizontal: Spacing.base,
-    marginBottom: 32,
+    marginBottom: Spacing['2xl'],
   },
   sectionTitle: {
     fontFamily: FontFamily.display,
     fontSize: FontSize.h4,
     color: Colors.textPrimary,
-    marginBottom: 16,
+    marginBottom: Spacing.base,
   },
 
   // Steps
   stepsContainer: {
     flexDirection: 'row',
-    gap: 12,
+    gap: Spacing.md,
   },
   stepCard: {
     flex: 1,
-    backgroundColor: ZORA_CARD,
+    backgroundColor: Colors.cardDark,
     borderRadius: BorderRadius.lg,
-    padding: 12,
+    padding: Spacing.md,
     alignItems: 'center',
-    gap: 12,
+    gap: Spacing.md,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.05)',
+    borderColor: Colors.borderDark,
   },
   stepCardHighlighted: {
-    backgroundColor: `${ZORA_RED}08`,
+    backgroundColor: `${Colors.primary}0D`,
+    borderColor: `${Colors.primary}33`,
   },
   stepNumber: {
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: `${ZORA_RED}33`,
     justifyContent: 'center',
     alignItems: 'center',
   },
   stepNumberText: {
     fontFamily: FontFamily.bodyBold,
     fontSize: FontSize.small,
-    color: ZORA_RED,
   },
   stepText: {
     fontFamily: FontFamily.body,
-    fontSize: 11,
-    color: 'rgba(255, 255, 255, 0.8)',
+    fontSize: FontSize.caption,
+    color: Colors.textPrimary,
     textAlign: 'center',
-    lineHeight: 14,
+    lineHeight: 16,
   },
 
   // Impact Card
   impactCard: {
     marginHorizontal: Spacing.base,
-    backgroundColor: ZORA_CARD,
+    backgroundColor: Colors.cardDark,
     borderRadius: BorderRadius.lg,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.05)',
+    borderColor: Colors.borderDark,
     overflow: 'hidden',
   },
   impactHeader: {
-    padding: 20,
-    backgroundColor: SURFACE_DARK,
+    padding: Spacing.lg,
+    backgroundColor: Colors.backgroundDark,
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255, 255, 255, 0.05)',
+    borderBottomColor: Colors.borderDark,
   },
   impactTitle: {
     fontFamily: FontFamily.display,
     fontSize: FontSize.h4,
     color: Colors.textPrimary,
-    marginBottom: 16,
+    marginBottom: Spacing.base,
   },
   statsRow: {
     flexDirection: 'row',
@@ -537,46 +632,46 @@ const styles = StyleSheet.create({
     lineHeight: 36,
   },
   statValueYellow: {
-    color: ZORA_YELLOW,
+    color: Colors.secondary,
   },
   statLabel: {
     fontFamily: FontFamily.bodyMedium,
     fontSize: FontSize.caption,
-    color: 'rgba(255, 255, 255, 0.6)',
-    marginTop: 4,
+    color: Colors.textMuted,
+    marginTop: Spacing.xs,
   },
   statDivider: {
     width: 1,
     height: 40,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    marginHorizontal: 16,
+    backgroundColor: Colors.borderDark,
+    marginHorizontal: Spacing.base,
   },
 
   // Activity Section
   activitySection: {
-    padding: 8,
+    padding: Spacing.sm,
   },
   activityHeader: {
     fontFamily: FontFamily.bodyBold,
-    fontSize: 10,
-    color: 'rgba(255, 255, 255, 0.4)',
+    fontSize: FontSize.tiny,
+    color: Colors.textMuted,
     textTransform: 'uppercase',
-    letterSpacing: 2,
-    paddingHorizontal: 12,
-    paddingTop: 12,
-    paddingBottom: 8,
+    letterSpacing: LetterSpacing.widest,
+    paddingHorizontal: Spacing.md,
+    paddingTop: Spacing.md,
+    paddingBottom: Spacing.sm,
   },
   activityItem: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    padding: 12,
+    padding: Spacing.md,
     borderRadius: BorderRadius.lg,
   },
   activityLeft: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
+    gap: Spacing.md,
   },
   activityAvatar: {
     width: 32,
@@ -587,7 +682,7 @@ const styles = StyleSheet.create({
   },
   activityInitials: {
     fontFamily: FontFamily.bodyBold,
-    fontSize: 11,
+    fontSize: FontSize.caption,
   },
   activityInfo: {
     gap: 2,
@@ -599,31 +694,31 @@ const styles = StyleSheet.create({
   },
   activityStatus: {
     fontFamily: FontFamily.body,
-    fontSize: 10,
+    fontSize: FontSize.tiny,
   },
   statusCompleted: {
-    color: '#4CAF50',
+    color: Colors.success,
   },
   statusPending: {
-    color: 'rgba(255, 255, 255, 0.4)',
+    color: Colors.textMuted,
   },
   activityAmount: {
     fontFamily: FontFamily.bodyBold,
     fontSize: FontSize.small,
   },
   amountEarned: {
-    color: ZORA_YELLOW,
+    color: Colors.secondary,
   },
   amountPending: {
-    color: 'rgba(255, 255, 255, 0.2)',
+    color: Colors.textMuted,
   },
   viewAllButton: {
-    paddingVertical: 12,
+    paddingVertical: Spacing.md,
     alignItems: 'center',
   },
   viewAllText: {
     fontFamily: FontFamily.bodySemiBold,
     fontSize: FontSize.caption,
-    color: ZORA_RED,
+    color: Colors.primary,
   },
 });

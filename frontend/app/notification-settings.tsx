@@ -1,11 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   ScrollView,
   TouchableOpacity,
-  Switch,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -20,25 +19,37 @@ import {
 } from 'phosphor-react-native';
 import { Colors } from '../constants/colors';
 import { Spacing, BorderRadius } from '../constants/spacing';
-import { FontSize, FontFamily } from '../constants/typography';
+import { FontSize, FontFamily, LetterSpacing } from '../constants/typography';
+import { Toggle } from '../components/ui/Toggle';
 
-// Zora Brand Colors
-const ZORA_RED = '#CC0000';
-const ZORA_YELLOW = '#F4B400';
-const ZORA_CARD = '#342418';
-const BACKGROUND_DARK = '#181010';
-const SURFACE_ELEVATED = '#463225';
-const MUTED_TEXT = 'rgba(255, 255, 255, 0.4)';
-const TOGGLE_BG = '#231515';
+// Available colors from Design System for randomized icons
+const DESIGN_SYSTEM_COLORS = [
+  Colors.primary,
+  Colors.secondary,
+  Colors.success,
+  Colors.info,
+  Colors.badgeEcoFriendly,
+];
+
+// Shuffle array function for random color assignment
+const shuffleArray = <T,>(array: T[]): T[] => {
+  const shuffled = [...array];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+};
 
 interface CategoryItem {
   id: string;
   icon: React.ComponentType<any>;
   label: string;
   defaultEnabled: boolean;
+  color: string;
 }
 
-const CATEGORIES: CategoryItem[] = [
+const CATEGORIES_BASE: Omit<CategoryItem, 'color'>[] = [
   { id: 'orders', icon: Truck, label: 'Order Updates', defaultEnabled: true },
   { id: 'delivery', icon: Package, label: 'Delivery Status', defaultEnabled: true },
   { id: 'promos', icon: Percent, label: 'Promotions', defaultEnabled: false },
@@ -48,8 +59,18 @@ const CATEGORIES: CategoryItem[] = [
 export default function NotificationPreferencesScreen() {
   const router = useRouter();
   const [pushEnabled, setPushEnabled] = useState(true);
+  
+  // Assign random colors to categories
+  const categories = useMemo(() => {
+    const shuffledColors = shuffleArray(DESIGN_SYSTEM_COLORS);
+    return CATEGORIES_BASE.map((cat, index) => ({
+      ...cat,
+      color: shuffledColors[index % shuffledColors.length],
+    }));
+  }, []);
+
   const [categorySettings, setCategorySettings] = useState<Record<string, boolean>>(
-    CATEGORIES.reduce((acc, cat) => ({ ...acc, [cat.id]: cat.defaultEnabled }), {})
+    categories.reduce((acc, cat) => ({ ...acc, [cat.id]: cat.defaultEnabled }), {})
   );
   const [emailSettings, setEmailSettings] = useState({
     newsletter: true,
@@ -74,6 +95,7 @@ export default function NotificationPreferencesScreen() {
         <TouchableOpacity
           style={styles.backButton}
           onPress={() => router.back()}
+          activeOpacity={0.8}
         >
           <ArrowLeft size={24} color={Colors.textPrimary} weight="bold" />
         </TouchableOpacity>
@@ -93,7 +115,7 @@ export default function NotificationPreferencesScreen() {
           
           <View style={styles.masterContent}>
             <View style={styles.masterIconContainer}>
-              <Bell size={26} color={ZORA_YELLOW} weight="fill" />
+              <Bell size={26} color={Colors.secondary} weight="duotone" />
             </View>
             <View style={styles.masterTextContainer}>
               <Text style={styles.masterTitle}>Push Notifications</Text>
@@ -101,12 +123,9 @@ export default function NotificationPreferencesScreen() {
             </View>
           </View>
           
-          <Switch
+          <Toggle
             value={pushEnabled}
             onValueChange={setPushEnabled}
-            trackColor={{ false: TOGGLE_BG, true: ZORA_RED }}
-            thumbColor={Colors.textPrimary}
-            ios_backgroundColor={TOGGLE_BG}
           />
         </View>
 
@@ -118,22 +137,20 @@ export default function NotificationPreferencesScreen() {
           </View>
           
           <View style={styles.categoryList}>
-            {CATEGORIES.map((category) => {
+            {categories.map((category) => {
               const IconComponent = category.icon;
               return (
                 <View key={category.id} style={styles.categoryItem}>
                   <View style={styles.categoryLeft}>
-                    <View style={styles.categoryIconContainer}>
-                      <IconComponent size={20} color={ZORA_YELLOW} weight="fill" />
+                    <View style={[styles.categoryIconContainer, { backgroundColor: `${category.color}20` }]}>
+                      <IconComponent size={20} color={category.color} weight="duotone" />
                     </View>
                     <Text style={styles.categoryLabel}>{category.label}</Text>
                   </View>
-                  <Switch
+                  <Toggle
                     value={categorySettings[category.id]}
                     onValueChange={() => toggleCategory(category.id)}
-                    trackColor={{ false: TOGGLE_BG, true: ZORA_RED }}
-                    thumbColor={Colors.textPrimary}
-                    ios_backgroundColor={TOGGLE_BG}
+                    disabled={!pushEnabled}
                   />
                 </View>
               );
@@ -151,14 +168,11 @@ export default function NotificationPreferencesScreen() {
           <View style={styles.emailCard}>
             <View style={styles.emailItem}>
               <Text style={styles.emailLabel}>Weekly Newsletter</Text>
-              <Switch
+              <Toggle
                 value={emailSettings.newsletter}
                 onValueChange={(value) =>
                   setEmailSettings((prev) => ({ ...prev, newsletter: value }))
                 }
-                trackColor={{ false: TOGGLE_BG, true: ZORA_RED }}
-                thumbColor={Colors.textPrimary}
-                ios_backgroundColor={TOGGLE_BG}
               />
             </View>
             <View style={styles.emailDivider} />
@@ -166,12 +180,10 @@ export default function NotificationPreferencesScreen() {
               <Text style={[styles.emailLabel, styles.emailLabelDisabled]}>
                 Order Receipts
               </Text>
-              <Switch
+              <Toggle
                 value={emailSettings.receipts}
+                onValueChange={() => {}}
                 disabled
-                trackColor={{ false: TOGGLE_BG, true: `${ZORA_RED}80` }}
-                thumbColor="rgba(255, 255, 255, 0.5)"
-                ios_backgroundColor={TOGGLE_BG}
               />
             </View>
           </View>
@@ -187,7 +199,7 @@ export default function NotificationPreferencesScreen() {
           <View style={styles.quietHoursCard}>
             <View style={styles.quietHoursHeader}>
               <View style={styles.quietHoursIconContainer}>
-                <Moon size={24} color={ZORA_YELLOW} weight="fill" />
+                <Moon size={24} color={Colors.secondary} weight="duotone" />
               </View>
               <Text style={styles.quietHoursDescription}>
                 Pause notifications during these times. Critical alerts will still arrive.
@@ -197,7 +209,7 @@ export default function NotificationPreferencesScreen() {
             <View style={styles.timePickerRow}>
               <View style={styles.timePickerItem}>
                 <Text style={styles.timePickerLabel}>FROM</Text>
-                <TouchableOpacity style={styles.timePickerButton}>
+                <TouchableOpacity style={styles.timePickerButton} activeOpacity={0.8}>
                   <Text style={styles.timePickerValue}>
                     10:00 <Text style={styles.timePickerPeriod}>PM</Text>
                   </Text>
@@ -208,7 +220,7 @@ export default function NotificationPreferencesScreen() {
               
               <View style={styles.timePickerItem}>
                 <Text style={styles.timePickerLabel}>TO</Text>
-                <TouchableOpacity style={styles.timePickerButton}>
+                <TouchableOpacity style={styles.timePickerButton} activeOpacity={0.8}>
                   <Text style={styles.timePickerValue}>
                     07:00 <Text style={styles.timePickerPeriod}>AM</Text>
                   </Text>
@@ -228,7 +240,7 @@ export default function NotificationPreferencesScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: BACKGROUND_DARK,
+    backgroundColor: Colors.backgroundDark,
   },
 
   // Header
@@ -236,15 +248,20 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: Spacing.base,
-    paddingVertical: 12,
-    backgroundColor: 'rgba(24, 16, 16, 0.95)',
+    paddingTop: Spacing.sm,
+    paddingBottom: Spacing.md,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.borderDark,
   },
   backButton: {
-    width: 40,
-    height: 40,
+    width: 44,
+    height: 44,
     justifyContent: 'center',
     alignItems: 'center',
-    borderRadius: 20,
+    borderRadius: 22,
+    backgroundColor: Colors.cardDark,
+    borderWidth: 1,
+    borderColor: Colors.borderDark,
   },
   headerTitle: {
     flex: 1,
@@ -252,10 +269,10 @@ const styles = StyleSheet.create({
     fontSize: FontSize.h4,
     color: Colors.textPrimary,
     textAlign: 'center',
-    letterSpacing: -0.3,
+    marginRight: 44,
   },
   headerRight: {
-    width: 40,
+    width: 44,
   },
 
   // Scroll View
@@ -264,7 +281,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     padding: Spacing.base,
-    gap: 32,
+    gap: Spacing['2xl'],
   },
 
   // Master Card
@@ -272,13 +289,13 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: ZORA_CARD,
+    backgroundColor: Colors.cardDark,
     borderRadius: BorderRadius.xl,
-    padding: 20,
+    padding: Spacing.lg,
     overflow: 'hidden',
     position: 'relative',
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.05)',
+    borderColor: Colors.borderDark,
   },
   decorativeGradient: {
     position: 'absolute',
@@ -287,23 +304,23 @@ const styles = StyleSheet.create({
     width: 128,
     height: 128,
     borderRadius: 64,
-    backgroundColor: 'rgba(204, 0, 0, 0.1)',
+    backgroundColor: `${Colors.primary}0D`,
   },
   masterContent: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 16,
+    gap: Spacing.base,
     flex: 1,
   },
   masterIconContainer: {
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: 'rgba(244, 180, 0, 0.1)',
+    backgroundColor: `${Colors.secondary}20`,
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: 'rgba(244, 180, 0, 0.2)',
+    borderColor: `${Colors.secondary}33`,
   },
   masterTextContainer: {
     flex: 1,
@@ -316,58 +333,57 @@ const styles = StyleSheet.create({
   masterSubtitle: {
     fontFamily: FontFamily.body,
     fontSize: FontSize.small,
-    color: 'rgba(255, 255, 255, 0.6)',
+    color: Colors.textMuted,
     marginTop: 2,
   },
 
   // Section
   section: {
-    gap: 16,
+    gap: Spacing.base,
   },
   sectionHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
-    paddingHorizontal: 8,
+    gap: Spacing.sm,
+    paddingHorizontal: Spacing.xs,
   },
   sectionDot: {
     width: 6,
     height: 6,
     borderRadius: 3,
-    backgroundColor: ZORA_YELLOW,
+    backgroundColor: Colors.secondary,
   },
   sectionTitle: {
-    fontFamily: FontFamily.display,
-    fontSize: 12,
-    color: MUTED_TEXT,
+    fontFamily: FontFamily.bodySemiBold,
+    fontSize: FontSize.caption,
+    color: Colors.textMuted,
     textTransform: 'uppercase',
-    letterSpacing: 2,
+    letterSpacing: LetterSpacing.widest,
   },
 
   // Category List
   categoryList: {
-    gap: 12,
+    gap: Spacing.md,
   },
   categoryItem: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: ZORA_CARD,
+    backgroundColor: Colors.cardDark,
     borderRadius: BorderRadius.xl,
-    padding: 16,
+    padding: Spacing.base,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.05)',
+    borderColor: Colors.borderDark,
   },
   categoryLeft: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
+    gap: Spacing.md,
   },
   categoryIconContainer: {
     width: 36,
     height: 36,
     borderRadius: BorderRadius.lg,
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -379,17 +395,17 @@ const styles = StyleSheet.create({
 
   // Email Card
   emailCard: {
-    backgroundColor: ZORA_CARD,
+    backgroundColor: Colors.cardDark,
     borderRadius: BorderRadius.xl,
     overflow: 'hidden',
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.05)',
+    borderColor: Colors.borderDark,
   },
   emailItem: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    padding: 16,
+    padding: Spacing.base,
   },
   emailItemDisabled: {
     opacity: 0.5,
@@ -398,88 +414,88 @@ const styles = StyleSheet.create({
     fontFamily: FontFamily.bodyMedium,
     fontSize: FontSize.body,
     color: Colors.textPrimary,
-    paddingLeft: 4,
+    paddingLeft: Spacing.xs,
   },
   emailLabelDisabled: {
-    color: 'rgba(255, 255, 255, 0.5)',
+    color: Colors.textMuted,
   },
   emailDivider: {
     height: 1,
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    backgroundColor: Colors.borderDark,
   },
 
   // Quiet Hours
   quietHoursCard: {
-    backgroundColor: ZORA_CARD,
+    backgroundColor: Colors.cardDark,
     borderRadius: BorderRadius.xl,
-    padding: 20,
+    padding: Spacing.lg,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.05)',
+    borderColor: Colors.borderDark,
   },
   quietHoursHeader: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    gap: 16,
-    marginBottom: 24,
+    gap: Spacing.base,
+    marginBottom: Spacing.xl,
   },
   quietHoursIconContainer: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: 'rgba(244, 180, 0, 0.1)',
+    backgroundColor: `${Colors.secondary}20`,
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: 'rgba(244, 180, 0, 0.2)',
+    borderColor: `${Colors.secondary}33`,
   },
   quietHoursDescription: {
     flex: 1,
     fontFamily: FontFamily.bodyMedium,
     fontSize: FontSize.small,
-    color: 'rgba(255, 255, 255, 0.8)',
+    color: Colors.textPrimary,
     lineHeight: 20,
   },
   timePickerRow: {
     flexDirection: 'row',
     alignItems: 'flex-end',
-    gap: 16,
+    gap: Spacing.base,
   },
   timePickerItem: {
     flex: 1,
-    gap: 8,
+    gap: Spacing.sm,
   },
   timePickerLabel: {
     fontFamily: FontFamily.bodyBold,
-    fontSize: 10,
-    color: MUTED_TEXT,
+    fontSize: FontSize.tiny,
+    color: Colors.textMuted,
     textTransform: 'uppercase',
-    letterSpacing: 2,
-    paddingLeft: 4,
+    letterSpacing: LetterSpacing.widest,
+    paddingLeft: Spacing.xs,
   },
   timePickerButton: {
     height: 56,
-    backgroundColor: BACKGROUND_DARK,
+    backgroundColor: Colors.backgroundDark,
     borderRadius: BorderRadius.xl,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
+    borderColor: Colors.borderDark,
     justifyContent: 'center',
-    paddingHorizontal: 16,
+    paddingHorizontal: Spacing.base,
   },
   timePickerValue: {
     fontFamily: FontFamily.display,
-    fontSize: 18,
+    fontSize: FontSize.h4,
     color: Colors.textPrimary,
     letterSpacing: -0.5,
   },
   timePickerPeriod: {
     fontFamily: FontFamily.bodyMedium,
     fontSize: FontSize.small,
-    color: MUTED_TEXT,
+    color: Colors.textMuted,
   },
   timePickerDivider: {
-    width: 24,
+    width: Spacing.xl,
     height: 1,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    backgroundColor: Colors.borderDark,
     marginBottom: 28,
   },
 });

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   View,
   Text,
@@ -20,14 +20,27 @@ import {
 } from 'phosphor-react-native';
 import { Colors } from '../../constants/colors';
 import { Spacing, BorderRadius } from '../../constants/spacing';
-import { FontSize, FontFamily } from '../../constants/typography';
+import { FontSize, FontFamily, LetterSpacing } from '../../constants/typography';
+import { useAuthStore } from '../../stores/authStore';
 
-// Zora Brand Colors
-const ZORA_RED = '#CC0000';
-const ZORA_YELLOW = '#FFCC00';
-const ZORA_CARD = '#342418';
-const BACKGROUND_DARK = '#221710';
-const MUTED_TEXT = '#bc9a9a';
+// Available colors from Design System for randomized icons
+const DESIGN_SYSTEM_COLORS = [
+  Colors.primary,
+  Colors.secondary,
+  Colors.success,
+  Colors.info,
+  Colors.badgeEcoFriendly,
+];
+
+// Shuffle array function for random color assignment
+const shuffleArray = <T,>(array: T[]): T[] => {
+  const shuffled = [...array];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+};
 
 interface PaymentMethod {
   id: string;
@@ -35,9 +48,10 @@ interface PaymentMethod {
   last4: string;
   expiry: string;
   isDefault: boolean;
+  color: string;
 }
 
-const PAYMENT_METHODS: PaymentMethod[] = [
+const PAYMENT_METHODS_BASE: Omit<PaymentMethod, 'color'>[] = [
   { id: '1', type: 'visa', last4: '4242', expiry: '12/26', isDefault: true },
   { id: '2', type: 'mastercard', last4: '8888', expiry: '03/25', isDefault: false },
 ];
@@ -53,13 +67,23 @@ const getCardIcon = (type: string) => {
     case 'googlepay':
       return { color: '#4285F4', label: 'G Pay' };
     default:
-      return { color: MUTED_TEXT, label: 'Card' };
+      return { color: Colors.textMuted, label: 'Card' };
   }
 };
 
 export default function PaymentMethodsScreen() {
   const router = useRouter();
-  const [methods, setMethods] = useState(PAYMENT_METHODS);
+  const { user } = useAuthStore();
+  const [methods, setMethods] = useState(PAYMENT_METHODS_BASE);
+
+  // Assign random colors to payment methods
+  const paymentMethods = useMemo(() => {
+    const shuffledColors = shuffleArray(DESIGN_SYSTEM_COLORS);
+    return methods.map((method, index) => ({
+      ...method,
+      color: shuffledColors[index % shuffledColors.length],
+    }));
+  }, [methods]);
 
   const handleSetDefault = (id: string) => {
     setMethods(methods.map(m => ({
@@ -94,6 +118,7 @@ export default function PaymentMethodsScreen() {
         <TouchableOpacity
           style={styles.backButton}
           onPress={() => router.back()}
+          activeOpacity={0.8}
         >
           <ArrowLeft size={24} color={Colors.textPrimary} weight="bold" />
         </TouchableOpacity>
@@ -110,7 +135,7 @@ export default function PaymentMethodsScreen() {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Saved Cards</Text>
           <View style={styles.cardsList}>
-            {methods.map((method) => {
+            {paymentMethods.map((method) => {
               const cardInfo = getCardIcon(method.type);
               return (
                 <View
@@ -132,13 +157,14 @@ export default function PaymentMethodsScreen() {
                   <View style={styles.cardActions}>
                     {method.isDefault ? (
                       <View style={styles.defaultBadge}>
-                        <CheckCircle size={16} color={ZORA_RED} weight="fill" />
+                        <CheckCircle size={16} color={Colors.primary} weight="duotone" />
                         <Text style={styles.defaultText}>Default</Text>
                       </View>
                     ) : (
                       <TouchableOpacity
                         style={styles.setDefaultButton}
                         onPress={() => handleSetDefault(method.id)}
+                        activeOpacity={0.8}
                       >
                         <Text style={styles.setDefaultText}>Set Default</Text>
                       </TouchableOpacity>
@@ -146,8 +172,9 @@ export default function PaymentMethodsScreen() {
                     <TouchableOpacity
                       style={styles.deleteButton}
                       onPress={() => handleDelete(method.id)}
+                      activeOpacity={0.8}
                     >
-                      <Trash size={20} color="#EF4444" weight="regular" />
+                      <Trash size={20} color={Colors.error} weight="duotone" />
                     </TouchableOpacity>
                   </View>
                 </View>
@@ -161,7 +188,7 @@ export default function PaymentMethodsScreen() {
               activeOpacity={0.8}
             >
               <View style={styles.addCardIcon}>
-                <Plus size={24} color={ZORA_RED} weight="bold" />
+                <Plus size={24} color={Colors.primary} weight="bold" />
               </View>
               <Text style={styles.addCardText}>Add New Card</Text>
             </TouchableOpacity>
@@ -172,9 +199,9 @@ export default function PaymentMethodsScreen() {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Other Payment Options</Text>
           <View style={styles.optionsList}>
-            <TouchableOpacity style={styles.optionItem}>
-              <View style={styles.optionIcon}>
-                <Wallet size={24} color={ZORA_YELLOW} weight="fill" />
+            <TouchableOpacity style={styles.optionItem} activeOpacity={0.8}>
+              <View style={[styles.optionIcon, { backgroundColor: `${Colors.secondary}20` }]}>
+                <Wallet size={24} color={Colors.secondary} weight="duotone" />
               </View>
               <View style={styles.optionInfo}>
                 <Text style={styles.optionTitle}>Apple Pay</Text>
@@ -183,9 +210,9 @@ export default function PaymentMethodsScreen() {
               <Text style={styles.optionAction}>Connect</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.optionItem}>
-              <View style={styles.optionIcon}>
-                <Wallet size={24} color="#4285F4" weight="fill" />
+            <TouchableOpacity style={styles.optionItem} activeOpacity={0.8}>
+              <View style={[styles.optionIcon, { backgroundColor: `${Colors.info}20` }]}>
+                <Wallet size={24} color={Colors.info} weight="duotone" />
               </View>
               <View style={styles.optionInfo}>
                 <Text style={styles.optionTitle}>Google Pay</Text>
@@ -194,9 +221,9 @@ export default function PaymentMethodsScreen() {
               <Text style={styles.optionAction}>Connect</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.optionItem}>
-              <View style={styles.optionIcon}>
-                <Bank size={24} color="#22C55E" weight="fill" />
+            <TouchableOpacity style={styles.optionItem} activeOpacity={0.8}>
+              <View style={[styles.optionIcon, { backgroundColor: `${Colors.success}20` }]}>
+                <Bank size={24} color={Colors.success} weight="duotone" />
               </View>
               <View style={styles.optionInfo}>
                 <Text style={styles.optionTitle}>Bank Transfer</Text>
@@ -211,7 +238,7 @@ export default function PaymentMethodsScreen() {
         <View style={styles.creditCard}>
           <View style={styles.creditHeader}>
             <Text style={styles.creditTitle}>Zora Credit</Text>
-            <Text style={styles.creditBalance}>£12.50</Text>
+            <Text style={styles.creditBalance}>£{user?.zora_credits?.toFixed(2) || '12.50'}</Text>
           </View>
           <Text style={styles.creditDescription}>
             Use your Zora credit balance for faster checkout. Earn credit through referrals and rewards.
@@ -219,6 +246,7 @@ export default function PaymentMethodsScreen() {
           <TouchableOpacity
             style={styles.creditButton}
             onPress={() => router.push('/rewards')}
+            activeOpacity={0.8}
           >
             <Text style={styles.creditButtonText}>View Rewards</Text>
           </TouchableOpacity>
@@ -234,7 +262,7 @@ export default function PaymentMethodsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: BACKGROUND_DARK,
+    backgroundColor: Colors.backgroundDark,
   },
 
   // Header
@@ -243,10 +271,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: Spacing.base,
-    paddingVertical: Spacing.sm,
-    backgroundColor: `${BACKGROUND_DARK}F2`,
+    paddingTop: Spacing.sm,
+    paddingBottom: Spacing.md,
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255, 255, 255, 0.05)',
+    borderBottomColor: Colors.borderDark,
   },
   backButton: {
     width: 44,
@@ -254,12 +282,14 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     borderRadius: 22,
+    backgroundColor: Colors.cardDark,
+    borderWidth: 1,
+    borderColor: Colors.borderDark,
   },
   headerTitle: {
     fontFamily: FontFamily.display,
     fontSize: FontSize.h4,
     color: Colors.textPrimary,
-    letterSpacing: -0.3,
   },
   headerRight: {
     width: 44,
@@ -271,54 +301,54 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     padding: Spacing.base,
-    gap: 32,
+    gap: Spacing['2xl'],
   },
 
   // Section
   section: {
-    gap: 16,
+    gap: Spacing.base,
   },
   sectionTitle: {
     fontFamily: FontFamily.display,
-    fontSize: 20,
+    fontSize: FontSize.h4,
     color: Colors.textPrimary,
-    paddingHorizontal: 4,
+    paddingHorizontal: Spacing.xs,
   },
 
   // Cards List
   cardsList: {
-    gap: 12,
+    gap: Spacing.md,
   },
   cardItem: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: ZORA_CARD,
+    backgroundColor: Colors.cardDark,
     borderRadius: BorderRadius.xl,
-    padding: 16,
+    padding: Spacing.base,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.05)',
+    borderColor: Colors.borderDark,
   },
   cardItemDefault: {
-    borderColor: `${ZORA_RED}40`,
+    borderColor: `${Colors.primary}40`,
   },
   cardLeft: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
+    gap: Spacing.md,
   },
   cardIconContainer: {
     width: 48,
     height: 32,
-    borderRadius: 6,
+    borderRadius: BorderRadius.md,
     justifyContent: 'center',
     alignItems: 'center',
   },
   cardIconText: {
     fontFamily: FontFamily.bodyBold,
-    fontSize: 10,
+    fontSize: FontSize.tiny,
     color: Colors.textPrimary,
-    letterSpacing: 0.5,
+    letterSpacing: LetterSpacing.wide,
   },
   cardInfo: {
     gap: 2,
@@ -330,34 +360,34 @@ const styles = StyleSheet.create({
   },
   cardExpiry: {
     fontFamily: FontFamily.body,
-    fontSize: 12,
-    color: MUTED_TEXT,
+    fontSize: FontSize.caption,
+    color: Colors.textMuted,
   },
   cardActions: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
+    gap: Spacing.md,
   },
   defaultBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
+    gap: Spacing.xs,
   },
   defaultText: {
     fontFamily: FontFamily.bodySemiBold,
-    fontSize: 12,
-    color: ZORA_RED,
+    fontSize: FontSize.caption,
+    color: Colors.primary,
   },
   setDefaultButton: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-    borderRadius: BorderRadius.sm,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.sm,
+    backgroundColor: Colors.backgroundDark,
+    borderRadius: BorderRadius.md,
   },
   setDefaultText: {
     fontFamily: FontFamily.bodyMedium,
-    fontSize: 12,
-    color: MUTED_TEXT,
+    fontSize: FontSize.caption,
+    color: Colors.textMuted,
   },
   deleteButton: {
     width: 36,
@@ -370,49 +400,50 @@ const styles = StyleSheet.create({
   addCardButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 16,
-    backgroundColor: 'rgba(204, 0, 0, 0.05)',
+    gap: Spacing.base,
+    backgroundColor: `${Colors.primary}0D`,
     borderRadius: BorderRadius.xl,
-    padding: 16,
+    padding: Spacing.base,
     borderWidth: 1,
     borderStyle: 'dashed',
-    borderColor: `${ZORA_RED}40`,
+    borderColor: `${Colors.primary}40`,
   },
   addCardIcon: {
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: 'rgba(204, 0, 0, 0.1)',
+    backgroundColor: `${Colors.primary}20`,
     justifyContent: 'center',
     alignItems: 'center',
   },
   addCardText: {
     fontFamily: FontFamily.bodySemiBold,
     fontSize: FontSize.body,
-    color: ZORA_RED,
+    color: Colors.primary,
   },
 
   // Options List
   optionsList: {
-    backgroundColor: ZORA_CARD,
+    backgroundColor: Colors.cardDark,
     borderRadius: BorderRadius.xl,
     overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: Colors.borderDark,
   },
   optionItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 16,
+    padding: Spacing.base,
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255, 255, 255, 0.05)',
+    borderBottomColor: Colors.borderDark,
   },
   optionIcon: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 12,
+    marginRight: Spacing.md,
   },
   optionInfo: {
     flex: 1,
@@ -424,55 +455,56 @@ const styles = StyleSheet.create({
   },
   optionSubtitle: {
     fontFamily: FontFamily.body,
-    fontSize: 12,
-    color: MUTED_TEXT,
+    fontSize: FontSize.caption,
+    color: Colors.textMuted,
+    marginTop: 2,
   },
   optionAction: {
     fontFamily: FontFamily.bodySemiBold,
     fontSize: FontSize.small,
-    color: ZORA_RED,
+    color: Colors.primary,
   },
 
   // Credit Card
   creditCard: {
-    backgroundColor: ZORA_CARD,
+    backgroundColor: Colors.cardDark,
     borderRadius: BorderRadius.xl,
-    padding: 20,
+    padding: Spacing.lg,
     borderWidth: 1,
-    borderColor: `${ZORA_YELLOW}20`,
+    borderColor: `${Colors.secondary}33`,
   },
   creditHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: Spacing.md,
   },
   creditTitle: {
     fontFamily: FontFamily.display,
     fontSize: FontSize.body,
-    color: ZORA_YELLOW,
+    color: Colors.secondary,
   },
   creditBalance: {
     fontFamily: FontFamily.display,
-    fontSize: 24,
+    fontSize: FontSize.h2,
     color: Colors.textPrimary,
   },
   creditDescription: {
     fontFamily: FontFamily.body,
     fontSize: FontSize.small,
-    color: MUTED_TEXT,
+    color: Colors.textMuted,
     lineHeight: 20,
-    marginBottom: 16,
+    marginBottom: Spacing.base,
   },
   creditButton: {
-    backgroundColor: 'rgba(255, 204, 0, 0.1)',
+    backgroundColor: `${Colors.secondary}20`,
     borderRadius: BorderRadius.lg,
-    paddingVertical: 12,
+    paddingVertical: Spacing.md,
     alignItems: 'center',
   },
   creditButtonText: {
     fontFamily: FontFamily.bodySemiBold,
     fontSize: FontSize.small,
-    color: ZORA_YELLOW,
+    color: Colors.secondary,
   },
 });

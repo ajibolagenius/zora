@@ -8,6 +8,7 @@ export { Button } from './Button';
 export { Card } from './Card';
 export { Badge } from './Badge';
 export { Input } from './Input';
+export { Toggle } from './Toggle';
 
 // Feature Components
 export { ProductCard } from './ProductCard';

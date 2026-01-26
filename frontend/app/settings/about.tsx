@@ -1,11 +1,10 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   ScrollView,
   TouchableOpacity,
-  Image,
   Linking,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -23,33 +22,115 @@ import {
   ShieldCheck,
   FileText,
   Star,
+  Users,
+  Storefront,
+  ShoppingBag,
+  Award,
+  MapPin,
+  Phone,
 } from 'phosphor-react-native';
 import { Colors } from '../../constants/colors';
 import { Spacing, BorderRadius } from '../../constants/spacing';
-import { FontSize, FontFamily } from '../../constants/typography';
+import { FontSize, FontFamily, LetterSpacing } from '../../constants/typography';
 
-// Zora Brand Colors
-const ZORA_RED = '#CC0000';
-const ZORA_YELLOW = '#FFCC00';
-const ZORA_CARD = '#342418';
-const BACKGROUND_DARK = '#221710';
-const MUTED_TEXT = '#bc9a9a';
+// Available colors from Design System for randomized icons
+const DESIGN_SYSTEM_COLORS = [
+  Colors.primary,
+  Colors.secondary,
+  Colors.success,
+  Colors.info,
+  Colors.badgeEcoFriendly,
+];
 
-const SOCIAL_LINKS = [
+// Shuffle array function for random color assignment
+const shuffleArray = <T,>(array: T[]): T[] => {
+  const shuffled = [...array];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+};
+
+interface SocialLink {
+  id: string;
+  icon: React.ComponentType<any>;
+  label: string;
+  url: string;
+  color: string;
+}
+
+const SOCIAL_LINKS_BASE: Omit<SocialLink, 'color'>[] = [
   { id: 'instagram', icon: InstagramLogo, label: 'Instagram', url: 'https://instagram.com/zoramarket' },
   { id: 'twitter', icon: TwitterLogo, label: 'Twitter', url: 'https://twitter.com/zoramarket' },
   { id: 'facebook', icon: FacebookLogo, label: 'Facebook', url: 'https://facebook.com/zoramarket' },
   { id: 'tiktok', icon: TiktokLogo, label: 'TikTok', url: 'https://tiktok.com/@zoramarket' },
 ];
 
-const LEGAL_LINKS = [
+interface LegalLink {
+  id: string;
+  icon: React.ComponentType<any>;
+  label: string;
+  color: string;
+}
+
+const LEGAL_LINKS_BASE: Omit<LegalLink, 'color'>[] = [
   { id: 'terms', icon: FileText, label: 'Terms of Service' },
   { id: 'privacy', icon: ShieldCheck, label: 'Privacy Policy' },
   { id: 'licenses', icon: FileText, label: 'Licenses' },
 ];
 
+interface StatItem {
+  value: string;
+  label: string;
+  icon: React.ComponentType<any>;
+  color: string;
+}
+
+const STATS_BASE: Omit<StatItem, 'icon' | 'color'>[] = [
+  { value: '500+', label: 'Products' },
+  { value: '50+', label: 'Vendors' },
+  { value: '10K+', label: 'Customers' },
+];
+
+const STAT_ICONS = [ShoppingBag, Storefront, Users];
+
 export default function AboutScreen() {
   const router = useRouter();
+
+  // Assign icons and colors to stats
+  const stats = useMemo(() => {
+    const shuffledColors = shuffleArray(DESIGN_SYSTEM_COLORS);
+    return STATS_BASE.map((stat, index) => {
+      const IconComponent = STAT_ICONS[index];
+      if (!IconComponent) {
+        console.warn(`Icon at index ${index} is undefined`);
+      }
+      return {
+        ...stat,
+        icon: IconComponent || ShoppingBag, // Fallback to ShoppingBag if undefined
+        color: shuffledColors[index % shuffledColors.length],
+      };
+    });
+  }, []);
+
+  // Assign random colors to social links
+  const socialLinks = useMemo(() => {
+    const shuffledColors = shuffleArray(DESIGN_SYSTEM_COLORS);
+    return SOCIAL_LINKS_BASE.map((link, index) => ({
+      ...link,
+      color: shuffledColors[index % shuffledColors.length],
+    }));
+  }, []);
+
+  // Assign random colors to legal links
+  const legalLinks = useMemo(() => {
+    const shuffledColors = shuffleArray(DESIGN_SYSTEM_COLORS);
+    return LEGAL_LINKS_BASE.map((link, index) => ({
+      ...link,
+      color: shuffledColors[index % shuffledColors.length],
+    }));
+  }, []);
 
   const handleOpenLink = (url: string) => {
     Linking.openURL(url);
@@ -67,6 +148,7 @@ export default function AboutScreen() {
         <TouchableOpacity
           style={styles.backButton}
           onPress={() => router.back()}
+          activeOpacity={0.8}
         >
           <ArrowLeft size={24} color={Colors.textPrimary} weight="bold" />
         </TouchableOpacity>
@@ -94,7 +176,9 @@ export default function AboutScreen() {
         {/* Mission Section */}
         <View style={styles.missionCard}>
           <View style={styles.missionHeader}>
-            <Heart size={24} color={ZORA_RED} weight="fill" />
+            <View style={styles.missionIconContainer}>
+              <Heart size={24} color={Colors.primary} weight="duotone" />
+            </View>
             <Text style={styles.missionTitle}>Our Mission</Text>
           </View>
           <Text style={styles.missionText}>
@@ -107,26 +191,32 @@ export default function AboutScreen() {
 
         {/* Stats Section */}
         <View style={styles.statsRow}>
-          <View style={styles.statCard}>
-            <Text style={styles.statValue}>500+</Text>
-            <Text style={styles.statLabel}>Products</Text>
-          </View>
-          <View style={styles.statCard}>
-            <Text style={styles.statValue}>50+</Text>
-            <Text style={styles.statLabel}>Vendors</Text>
-          </View>
-          <View style={styles.statCard}>
-            <Text style={styles.statValue}>10K+</Text>
-            <Text style={styles.statLabel}>Customers</Text>
-          </View>
+          {stats.map((stat, index) => {
+            const IconComponent = stat.icon;
+            if (!IconComponent) {
+              return null; // Skip rendering if icon is undefined
+            }
+            return (
+              <View key={index} style={styles.statCard}>
+                <View style={[styles.statIconContainer, { backgroundColor: `${stat.color}20` }]}>
+                  <IconComponent size={24} color={stat.color} weight="duotone" />
+                </View>
+                <Text style={styles.statValue}>{stat.value}</Text>
+                <Text style={styles.statLabel}>{stat.label}</Text>
+              </View>
+            );
+          })}
         </View>
 
         {/* Social Links */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Follow Us</Text>
           <View style={styles.socialGrid}>
-            {SOCIAL_LINKS.map((social) => {
+            {socialLinks.map((social) => {
               const IconComponent = social.icon;
+              if (!IconComponent) {
+                return null; // Skip rendering if icon is undefined
+              }
               return (
                 <TouchableOpacity
                   key={social.id}
@@ -134,7 +224,9 @@ export default function AboutScreen() {
                   onPress={() => handleOpenLink(social.url)}
                   activeOpacity={0.8}
                 >
-                  <IconComponent size={28} color={Colors.textPrimary} weight="fill" />
+                  <View style={[styles.socialIconContainer, { backgroundColor: `${social.color}20` }]}>
+                    <IconComponent size={28} color={social.color} weight="duotone" />
+                  </View>
                 </TouchableOpacity>
               );
             })}
@@ -145,28 +237,70 @@ export default function AboutScreen() {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Get in Touch</Text>
           <View style={styles.contactCard}>
-            <TouchableOpacity style={styles.contactItem}>
-              <View style={styles.contactIconContainer}>
-                <Globe size={20} color={ZORA_YELLOW} weight="fill" />
+            <TouchableOpacity 
+              style={styles.contactItem}
+              onPress={() => handleOpenLink('https://www.zoramarket.co.uk')}
+              activeOpacity={0.8}
+            >
+              <View style={[styles.contactIconContainer, { backgroundColor: `${Colors.secondary}20` }]}>
+                <Globe size={20} color={Colors.secondary} weight="duotone" />
               </View>
               <View style={styles.contactInfo}>
                 <Text style={styles.contactLabel}>Website</Text>
                 <Text style={styles.contactValue}>www.zoramarket.co.uk</Text>
               </View>
-              <CaretRight size={20} color={MUTED_TEXT} weight="regular" />
+              <CaretRight size={20} color={Colors.textMuted} weight="regular" />
             </TouchableOpacity>
 
             <View style={styles.contactDivider} />
 
-            <TouchableOpacity style={styles.contactItem}>
-              <View style={styles.contactIconContainer}>
-                <Envelope size={20} color={ZORA_YELLOW} weight="fill" />
+            <TouchableOpacity 
+              style={styles.contactItem}
+              onPress={() => handleOpenLink('mailto:hello@zoramarket.co.uk')}
+              activeOpacity={0.8}
+            >
+              <View style={[styles.contactIconContainer, { backgroundColor: `${Colors.secondary}20` }]}>
+                <Envelope size={20} color={Colors.secondary} weight="duotone" />
               </View>
               <View style={styles.contactInfo}>
                 <Text style={styles.contactLabel}>Email</Text>
                 <Text style={styles.contactValue}>hello@zoramarket.co.uk</Text>
               </View>
-              <CaretRight size={20} color={MUTED_TEXT} weight="regular" />
+              <CaretRight size={20} color={Colors.textMuted} weight="regular" />
+            </TouchableOpacity>
+
+            <View style={styles.contactDivider} />
+
+            <TouchableOpacity 
+              style={styles.contactItem}
+              onPress={() => handleOpenLink('tel:+442071234567')}
+              activeOpacity={0.8}
+            >
+              <View style={[styles.contactIconContainer, { backgroundColor: `${Colors.secondary}20` }]}>
+                <Phone size={20} color={Colors.secondary} weight="duotone" />
+              </View>
+              <View style={styles.contactInfo}>
+                <Text style={styles.contactLabel}>Phone</Text>
+                <Text style={styles.contactValue}>+44 20 7123 4567</Text>
+              </View>
+              <CaretRight size={20} color={Colors.textMuted} weight="regular" />
+            </TouchableOpacity>
+
+            <View style={styles.contactDivider} />
+
+            <TouchableOpacity 
+              style={styles.contactItem}
+              onPress={() => handleOpenLink('https://maps.google.com/?q=London,UK')}
+              activeOpacity={0.8}
+            >
+              <View style={[styles.contactIconContainer, { backgroundColor: `${Colors.secondary}20` }]}>
+                <MapPin size={20} color={Colors.secondary} weight="duotone" />
+              </View>
+              <View style={styles.contactInfo}>
+                <Text style={styles.contactLabel}>Location</Text>
+                <Text style={styles.contactValue}>London, United Kingdom</Text>
+              </View>
+              <CaretRight size={20} color={Colors.textMuted} weight="regular" />
             </TouchableOpacity>
           </View>
         </View>
@@ -175,19 +309,27 @@ export default function AboutScreen() {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Legal</Text>
           <View style={styles.legalCard}>
-            {LEGAL_LINKS.map((link, index) => {
+            {legalLinks.map((link, index) => {
               const IconComponent = link.icon;
+              if (!IconComponent) {
+                return null; // Skip rendering if icon is undefined
+              }
               return (
-                <React.Fragment key={link.id}>
-                  <TouchableOpacity style={styles.legalItem}>
+                <View key={link.id}>
+                  <TouchableOpacity 
+                    style={styles.legalItem}
+                    activeOpacity={0.8}
+                  >
                     <View style={styles.legalLeft}>
-                      <IconComponent size={18} color={MUTED_TEXT} weight="regular" />
+                      <View style={[styles.legalIconContainer, { backgroundColor: `${link.color}20` }]}>
+                        <IconComponent size={18} color={link.color} weight="duotone" />
+                      </View>
                       <Text style={styles.legalLabel}>{link.label}</Text>
                     </View>
-                    <CaretRight size={18} color={MUTED_TEXT} weight="regular" />
+                    <CaretRight size={18} color={Colors.textMuted} weight="regular" />
                   </TouchableOpacity>
-                  {index < LEGAL_LINKS.length - 1 && <View style={styles.legalDivider} />}
-                </React.Fragment>
+                  {index < legalLinks.length - 1 && <View style={styles.legalDivider} />}
+                </View>
               );
             })}
           </View>
@@ -199,12 +341,17 @@ export default function AboutScreen() {
           onPress={handleRateApp}
           activeOpacity={0.8}
         >
-          <Star size={24} color={ZORA_YELLOW} weight="fill" />
+          <View style={styles.rateIconContainer}>
+            <Star size={24} color={Colors.secondary} weight="duotone" />
+          </View>
           <Text style={styles.rateText}>Rate Zora on the App Store</Text>
         </TouchableOpacity>
 
         {/* Footer */}
         <View style={styles.footer}>
+          <View style={styles.footerIconContainer}>
+            <Award size={32} color={Colors.secondary} weight="duotone" />
+          </View>
           <Text style={styles.footerText}>Made with ❤️ in London</Text>
           <Text style={styles.copyright}>© 2024 Zora African Market Ltd.</Text>
         </View>
@@ -219,7 +366,7 @@ export default function AboutScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: BACKGROUND_DARK,
+    backgroundColor: Colors.backgroundDark,
   },
 
   // Header
@@ -228,10 +375,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: Spacing.base,
-    paddingVertical: Spacing.sm,
-    backgroundColor: `${BACKGROUND_DARK}F2`,
+    paddingTop: Spacing.sm,
+    paddingBottom: Spacing.md,
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255, 255, 255, 0.05)',
+    borderBottomColor: Colors.borderDark,
   },
   backButton: {
     width: 44,
@@ -239,12 +386,14 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     borderRadius: 22,
+    backgroundColor: Colors.cardDark,
+    borderWidth: 1,
+    borderColor: Colors.borderDark,
   },
   headerTitle: {
     fontFamily: FontFamily.display,
     fontSize: FontSize.h4,
     color: Colors.textPrimary,
-    letterSpacing: -0.3,
   },
   headerRight: {
     width: 44,
@@ -256,29 +405,29 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     padding: Spacing.base,
-    gap: 24,
+    gap: Spacing.xl,
   },
 
   // Logo Section
   logoSection: {
     alignItems: 'center',
-    paddingVertical: 24,
+    paddingVertical: Spacing.xl,
   },
   logoContainer: {
     alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: Spacing.base,
   },
   logoText: {
     fontFamily: FontFamily.display,
     fontSize: 48,
-    color: ZORA_RED,
-    letterSpacing: 8,
+    color: Colors.primary,
+    letterSpacing: LetterSpacing.wider,
   },
   logoSubtext: {
     fontFamily: FontFamily.bodyMedium,
-    fontSize: 12,
-    color: ZORA_YELLOW,
-    letterSpacing: 4,
+    fontSize: FontSize.caption,
+    color: Colors.secondary,
+    letterSpacing: LetterSpacing.widest,
     marginTop: -4,
   },
   tagline: {
@@ -287,25 +436,35 @@ const styles = StyleSheet.create({
     color: Colors.textPrimary,
     textAlign: 'center',
     lineHeight: 24,
-    marginBottom: 8,
+    marginBottom: Spacing.sm,
   },
   version: {
     fontFamily: FontFamily.body,
     fontSize: FontSize.small,
-    color: MUTED_TEXT,
+    color: Colors.textMuted,
   },
 
   // Mission Card
   missionCard: {
-    backgroundColor: ZORA_CARD,
+    backgroundColor: Colors.cardDark,
     borderRadius: BorderRadius.xl,
-    padding: 20,
-    gap: 16,
+    padding: Spacing.lg,
+    gap: Spacing.base,
+    borderWidth: 1,
+    borderColor: Colors.borderDark,
   },
   missionHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
+    gap: Spacing.md,
+  },
+  missionIconContainer: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: `${Colors.primary}20`,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   missionTitle: {
     fontFamily: FontFamily.display,
@@ -315,86 +474,106 @@ const styles = StyleSheet.create({
   missionText: {
     fontFamily: FontFamily.body,
     fontSize: FontSize.small,
-    color: 'rgba(255, 255, 255, 0.8)',
+    color: Colors.textPrimary,
     lineHeight: 22,
   },
 
   // Stats Row
   statsRow: {
     flexDirection: 'row',
-    gap: 12,
+    gap: Spacing.md,
   },
   statCard: {
     flex: 1,
-    backgroundColor: ZORA_CARD,
+    backgroundColor: Colors.cardDark,
     borderRadius: BorderRadius.lg,
-    padding: 16,
+    padding: Spacing.base,
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: Colors.borderDark,
+  },
+  statIconContainer: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: Spacing.sm,
   },
   statValue: {
     fontFamily: FontFamily.display,
-    fontSize: 24,
-    color: ZORA_YELLOW,
-    marginBottom: 4,
+    fontSize: FontSize.h2,
+    color: Colors.textPrimary,
+    marginBottom: Spacing.xs,
   },
   statLabel: {
     fontFamily: FontFamily.body,
     fontSize: FontSize.small,
-    color: MUTED_TEXT,
+    color: Colors.textMuted,
   },
 
   // Section
   section: {
-    gap: 12,
+    gap: Spacing.md,
   },
   sectionTitle: {
     fontFamily: FontFamily.display,
     fontSize: FontSize.body,
     color: Colors.textPrimary,
-    paddingHorizontal: 4,
+    paddingHorizontal: Spacing.xs,
   },
 
   // Social Grid
   socialGrid: {
     flexDirection: 'row',
-    gap: 12,
+    gap: Spacing.md,
   },
   socialButton: {
     flex: 1,
     aspectRatio: 1,
-    backgroundColor: ZORA_CARD,
+    backgroundColor: Colors.cardDark,
     borderRadius: BorderRadius.lg,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: Colors.borderDark,
+  },
+  socialIconContainer: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
     justifyContent: 'center',
     alignItems: 'center',
   },
 
   // Contact Card
   contactCard: {
-    backgroundColor: ZORA_CARD,
+    backgroundColor: Colors.cardDark,
     borderRadius: BorderRadius.xl,
     overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: Colors.borderDark,
   },
   contactItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 16,
+    padding: Spacing.base,
   },
   contactIconContainer: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: 'rgba(255, 204, 0, 0.1)',
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 12,
+    marginRight: Spacing.md,
   },
   contactInfo: {
     flex: 1,
   },
   contactLabel: {
     fontFamily: FontFamily.body,
-    fontSize: 12,
-    color: MUTED_TEXT,
+    fontSize: FontSize.caption,
+    color: Colors.textMuted,
   },
   contactValue: {
     fontFamily: FontFamily.bodySemiBold,
@@ -404,25 +583,34 @@ const styles = StyleSheet.create({
   },
   contactDivider: {
     height: 1,
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    backgroundColor: Colors.borderDark,
   },
 
   // Legal Card
   legalCard: {
-    backgroundColor: ZORA_CARD,
+    backgroundColor: Colors.cardDark,
     borderRadius: BorderRadius.xl,
     overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: Colors.borderDark,
   },
   legalItem: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    padding: 16,
+    padding: Spacing.base,
   },
   legalLeft: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
+    gap: Spacing.md,
+  },
+  legalIconContainer: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   legalLabel: {
     fontFamily: FontFamily.bodyMedium,
@@ -431,7 +619,7 @@ const styles = StyleSheet.create({
   },
   legalDivider: {
     height: 1,
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    backgroundColor: Colors.borderDark,
   },
 
   // Rate Button
@@ -439,33 +627,50 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 12,
-    backgroundColor: 'rgba(255, 204, 0, 0.1)',
+    gap: Spacing.md,
+    backgroundColor: `${Colors.secondary}20`,
     borderRadius: BorderRadius.xl,
-    paddingVertical: 16,
+    paddingVertical: Spacing.base,
     borderWidth: 1,
-    borderColor: 'rgba(255, 204, 0, 0.2)',
+    borderColor: `${Colors.secondary}33`,
+  },
+  rateIconContainer: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: `${Colors.secondary}20`,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   rateText: {
     fontFamily: FontFamily.bodySemiBold,
     fontSize: FontSize.body,
-    color: ZORA_YELLOW,
+    color: Colors.secondary,
   },
 
   // Footer
   footer: {
     alignItems: 'center',
-    paddingVertical: 16,
+    paddingVertical: Spacing.base,
+  },
+  footerIconContainer: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: `${Colors.secondary}20`,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: Spacing.md,
   },
   footerText: {
     fontFamily: FontFamily.body,
     fontSize: FontSize.small,
     color: Colors.textPrimary,
-    marginBottom: 4,
+    marginBottom: Spacing.xs,
   },
   copyright: {
     fontFamily: FontFamily.body,
-    fontSize: 12,
-    color: MUTED_TEXT,
+    fontSize: FontSize.caption,
+    color: Colors.textMuted,
   },
 });
