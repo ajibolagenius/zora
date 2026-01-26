@@ -34,6 +34,7 @@ import { Colors } from '../../constants/colors';
 import { Spacing, BorderRadius, Heights } from '../../constants/spacing';
 import { FontSize, FontFamily } from '../../constants/typography';
 import { PlaceholderImages } from '../../constants';
+import { getProductRoute, getVendorRoute } from '../../lib/navigationHelpers';
 
 // Status colors matching design system (using constants)
 const STATUS_YELLOW = Colors.statusYellow;
@@ -305,13 +306,16 @@ export default function OrdersTab() {
     };
 
     const handleProductPress = (productId: string) => {
-        router.push(`/product/${productId}`);
+        router.push(getProductRoute(productId));
     };
 
     const handleVendorPress = (order: OrderItem) => {
         // If vendorId is available, use it directly
         if (order.vendorId) {
-            router.push(`/vendor/${order.vendorId}`);
+            // Try to get vendor first to get slug
+            const vendors = vendorService.getAll();
+            const vendor = vendors.find(v => v.id === order.vendorId);
+            router.push(getVendorRoute(vendor as any, order.vendorId));
             return;
         }
         
@@ -343,7 +347,7 @@ export default function OrdersTab() {
         }
         
         if (vendor) {
-            router.push(`/vendor/${vendor.id}`);
+            router.push(getVendorRoute(vendor as any, vendor.id));
         } else {
             // Fallback: navigate to vendors list if not found
             console.warn(`Vendor not found: ${order.vendorName}`);

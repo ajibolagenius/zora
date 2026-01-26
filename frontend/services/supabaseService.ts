@@ -11,6 +11,7 @@ import type { User, Vendor, Product, Order, Review, PromoCode } from '../types/s
 import mockDatabase from '../data/mock_database.json';
 import { getFeaturedVendors, getFeaturedProducts } from './rankingService';
 import type { Vendor as MockVendor, Product as MockProduct } from './mockDataService';
+import { encodeProductSlug } from '../lib/slugUtils';
 
 // ============== AUTH SERVICE ==============
 export const authService = {
@@ -224,6 +225,60 @@ export const vendorService = {
     return data;
   },
   
+  getBySlug: async (slug: string): Promise<Vendor | null> => {
+    if (!isSupabaseConfigured()) {
+      // For mock data, try to find by slug or fallback to ID
+      const vendor = mockDatabase.vendors.find(v => {
+        // Generate slug from shop_name for mock data
+        const vendorSlug = (v as any).slug || 
+          v.shop_name?.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+        return vendorSlug === slug || v.id === slug;
+      });
+      if (!vendor) return null;
+      return {
+        ...vendor,
+        latitude: vendor.location.coordinates[1],
+        longitude: vendor.location.coordinates[0],
+        updated_at: vendor.created_at,
+      } as unknown as Vendor;
+    }
+    
+    const { data } = await supabase
+      .from('vendors')
+      .select('*')
+      .eq('slug', slug)
+      .single();
+    
+    return data;
+  },
+  
+  checkSlugUnique: async (slug: string, excludeVendorId?: string): Promise<boolean> => {
+    if (!isSupabaseConfigured()) {
+      // For mock data, just check if any vendor has this slug
+      const existing = mockDatabase.vendors.find(v => {
+        const vendorSlug = (v as any).slug || 
+          v.shop_name?.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+        return vendorSlug === slug && (!excludeVendorId || v.id !== excludeVendorId);
+      });
+      return !existing;
+    }
+    
+    const { data } = await supabase
+      .from('vendors')
+      .select('id')
+      .eq('slug', slug)
+      .limit(1);
+    
+    if (!data || data.length === 0) return true;
+    
+    // If excluding a vendor ID, check if the found vendor is the excluded one
+    if (excludeVendorId && data[0].id === excludeVendorId) {
+      return true;
+    }
+    
+    return false;
+  },
+  
   getNearby: async (lat: number, lng: number, radiusKm: number = 10): Promise<Vendor[]> => {
     if (!isSupabaseConfigured()) {
       // Simple distance filter for mock data
@@ -316,6 +371,22 @@ export const productService = {
       .single();
     
     return data;
+  },
+  
+  getBySlug: async (slug: string): Promise<Product | null> => {
+    // Import slug utilities
+    const { decodeProductSlug } = await import('../lib/slugUtils');
+    
+    try {
+      // Decode the Base62 slug to UUID
+      const uuid = decodeProductSlug(slug);
+      
+      // Use the decoded UUID to fetch the product
+      return await productService.getById(uuid);
+    } catch (error) {
+      console.error('Error decoding product slug:', error);
+      return null;
+    }
   },
   
   getByVendor: async (vendorId: string): Promise<Product[]> => {

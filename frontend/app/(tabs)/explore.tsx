@@ -27,6 +27,7 @@ import { Spacing, BorderRadius, Heights } from '../../constants/spacing';
 import { FontSize, FontFamily } from '../../constants/typography';
 import { AnimationDuration, AnimationEasing } from '../../constants';
 import { vendorService, type Vendor } from '../../services/mockDataService';
+import { getVendorRoute } from '../../lib/navigationHelpers';
 
 type FilterType = 'open' | 'delivery' | 'pickup' | 'topRated';
 
@@ -82,7 +83,10 @@ export default function ExploreScreen() {
   }, []);
 
   const handleVendorPress = (vendorId: string) => {
-    router.push(`/vendor/${vendorId}`);
+    // Try to get vendor to get slug
+    const vendors = vendorService.getAll();
+    const vendor = vendors.find(v => v.id === vendorId);
+    router.push(getVendorRoute(vendor as any, vendorId));
   };
 
   const handleFilterPress = () => {

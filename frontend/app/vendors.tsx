@@ -17,8 +17,8 @@ import { Spacing, BorderRadius, Heights } from '../constants/spacing';
 import { FontSize, FontFamily } from '../constants/typography';
 import { vendorService, regionService, type Vendor, type Region } from '../services/mockDataService';
 import { VendorCard } from '../components/ui';
-
 import { SortOptions, AnimationDuration, AnimationEasing } from '../constants';
+import { getVendorRoute } from '../lib/navigationHelpers';
 
 const SORT_OPTIONS = SortOptions.vendors;
 
@@ -92,7 +92,7 @@ export default function VendorsScreen() {
   const activeFilterCount = (selectedRegion ? 1 : 0) + (sortBy !== 'rating' ? 1 : 0);
 
   const handleVendorPress = (vendor: Vendor) => {
-    router.push(`/vendor/${vendor.id}`);
+    router.push(getVendorRoute(vendor as any, vendor.id));
   };
 
   if (loading) {

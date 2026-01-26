@@ -17,6 +17,7 @@ import { Colors } from '../constants/colors';
 import { Spacing, BorderRadius, Shadows } from '../constants/spacing';
 import { FontSize, FontFamily } from '../constants/typography';
 import { qrCodeScanner, promoQRService } from '../services/qrCodeService';
+import { getProductRoute, getVendorRoute } from '../lib/navigationHelpers';
 
 type ScannerState = 'checking' | 'unavailable' | 'loading' | 'denied' | 'ready';
 
@@ -153,7 +154,7 @@ export default function QRScannerScreen() {
                 { 
                   text: 'View Shop', 
                   onPress: () => {
-                    router.push(`/vendor/${result.data.vendorId}`);
+                    router.push(getVendorRoute(undefined, result.data.vendorId));
                     setScanned(false);
                   }
                 },
@@ -174,7 +175,7 @@ export default function QRScannerScreen() {
                 { 
                   text: 'View Product', 
                   onPress: () => {
-                    router.push(`/product/${result.data.productId}`);
+                    router.push(getProductRoute(result.data.productId));
                     setScanned(false);
                   }
                 },

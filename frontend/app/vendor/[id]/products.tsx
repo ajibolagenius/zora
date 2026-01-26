@@ -27,6 +27,7 @@ import { FontSize, FontFamily } from '../../../constants/typography';
 import { SortOptions, CategoryOptions, AnimationDuration, AnimationEasing } from '../../../constants';
 import { vendorService, productService, type Vendor, type Product } from '../../../services/mockDataService';
 import { useCartStore } from '../../../stores/cartStore';
+import { getProductRoute } from '../../../lib/navigationHelpers';
 
 const SORT_OPTIONS = SortOptions.vendorProducts;
 const CATEGORY_OPTIONS = CategoryOptions;
@@ -202,7 +203,9 @@ export default function VendorProductsScreen() {
             <TouchableOpacity
               key={product.id}
               style={[styles.productCard, { width: productCardWidth }]}
-              onPress={() => router.push(`/product/${product.id}`)}
+              onPress={() => {
+                router.push(getProductRoute(product.id));
+              }}
               activeOpacity={0.95}
             >
               <View style={styles.productImageContainer}>

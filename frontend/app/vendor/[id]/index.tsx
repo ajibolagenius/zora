@@ -36,6 +36,7 @@ import { vendorService, productService, reviewService, type Vendor, type Product
 import { Link } from 'expo-router';
 import { useCartStore } from '../../../stores/cartStore';
 import FloatingTabBar from '../../../components/ui/FloatingTabBar';
+import { getProductRoute } from '../../../lib/navigationHelpers';
 
 type TabType = 'products' | 'reviews' | 'about';
 
@@ -117,7 +118,7 @@ export default function VendorScreen() {
     };
 
     const handleProductPress = (productId: string) => {
-        router.push(`/product/${productId}`);
+        router.push(getProductRoute(productId));
     };
 
     const handleAddToCart = (product: Product) => {

@@ -27,6 +27,7 @@ import {
 } from '../services/mockDataService';
 import { ProductCard } from '../components/ui';
 import { useCartStore } from '../stores/cartStore';
+import { getProductRoute } from '../lib/navigationHelpers';
 
 const SORT_OPTIONS = SortOptions.products;
 
@@ -123,7 +124,7 @@ export default function ProductsScreen() {
     (sortBy !== 'rating' ? 1 : 0);
 
   const handleProductPress = (product: Product) => {
-    router.push(`/product/${product.id}`);
+    router.push(getProductRoute(product.id));
   };
 
   const handleAddToCart = (product: Product) => {

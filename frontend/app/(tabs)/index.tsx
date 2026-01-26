@@ -39,6 +39,7 @@ import {
 } from '../../services/mockDataService';
 import { useCartStore } from '../../stores/cartStore';
 import { useAuthStore } from '../../stores/authStore';
+import { getProductRoute, getVendorRoute } from '../../lib/navigationHelpers';
 
 interface HomeData {
   banners: Banner[];
@@ -124,11 +125,11 @@ export default function HomeScreen() {
   };
 
   const handleProductPress = (product: Product) => {
-    router.push(`/product/${product.id}`);
+    router.push(getProductRoute(product.id));
   };
 
   const handleVendorPress = (vendor: Vendor) => {
-    router.push(`/vendor/${vendor.id}`);
+    router.push(getVendorRoute(vendor as any, vendor.id));
   };
 
   const handleAddToCart = (product: Product) => {

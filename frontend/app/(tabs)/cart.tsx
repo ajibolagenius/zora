@@ -27,6 +27,7 @@ import { FontSize, FontFamily } from '../../constants/typography';
 import { PlaceholderImages, AnimationDuration, AnimationEasing } from '../../constants';
 import { Button } from '../../components/ui';
 import { useCartStore } from '../../stores/cartStore';
+import { getProductRoute, getVendorRoute } from '../../lib/navigationHelpers';
 
 export default function CartTab() {
   const router = useRouter();
@@ -123,7 +124,9 @@ export default function CartTab() {
                 <Text style={styles.vendorName}>{vendor.name}</Text>
                 <Text style={styles.vendorLocation}>Shipping from New York</Text>
               </View>
-              <TouchableOpacity onPress={() => router.push(`/vendor/${vendor.id}`)}>
+              <TouchableOpacity onPress={() => {
+                router.push(getVendorRoute(vendor as any, vendor.id));
+              }}>
                 <Text style={styles.visitStoreText}>Visit Store</Text>
               </TouchableOpacity>
             </View>
@@ -139,7 +142,9 @@ export default function CartTab() {
                 <TouchableOpacity
                   key={item.product_id}
                   style={styles.itemCard}
-                  onPress={() => router.push(`/product/${item.product_id}`)}
+                  onPress={() => {
+                    router.push(getProductRoute(item.product_id));
+                  }}
                   activeOpacity={0.7}
                 >
                   {/* Product Image */}

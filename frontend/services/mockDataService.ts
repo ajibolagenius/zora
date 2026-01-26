@@ -5,6 +5,7 @@
 
 import mockDatabase from '../data/mock_database.json';
 import { getFeaturedVendors, getFeaturedProducts } from './rankingService';
+import { generateVendorSlug, decodeProductSlug } from '../lib/slugUtils';
 
 // Type definitions based on mock database structure
 export interface Vendor {
@@ -156,6 +157,14 @@ export const vendorService = {
         );
     },
 
+    getBySlug: (slug: string): Vendor | undefined => {
+        return db.vendors.find(v => {
+            // Generate slug from shop_name for comparison
+            const vendorSlug = generateVendorSlug(v.shop_name);
+            return vendorSlug === slug;
+        });
+    },
+
     getByRegion: (region: string): Vendor[] =>
         db.vendors.filter(v => v.cultural_specialties.some(s => s.toLowerCase().includes(region.toLowerCase()))),
 };
@@ -173,6 +182,17 @@ export const productService = {
     },
 
     getById: (id: string): Product | undefined => db.products.find(p => p.id === id),
+
+    getBySlug: (slug: string): Product | undefined => {
+        try {
+            // Decode the Base62 slug to UUID
+            const uuid = decodeProductSlug(slug);
+            return db.products.find(p => p.id === uuid);
+        } catch (error) {
+            console.error('Error decoding product slug:', error);
+            return undefined;
+        }
+    },
 
     getByVendor: (vendorId: string): Product[] => db.products.filter(p => p.vendor_id === vendorId && p.is_active),
 

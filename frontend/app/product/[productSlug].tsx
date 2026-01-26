@@ -36,16 +36,19 @@ import { Colors } from '../../constants/colors';
 import { Spacing, BorderRadius, TouchTarget } from '../../constants/spacing';
 import { FontSize, FontWeight, LetterSpacing, FontFamily } from '../../constants/typography';
 import { ImageUrlBuilders } from '../../constants';
-import { productService, vendorService, reviewService, type Product, type Vendor, type Review } from '../../services/mockDataService';
+import { productService, vendorService, reviewService } from '../../services/supabaseService';
+import type { Product, Vendor, Review } from '../../types/supabase';
 import { useCartStore } from '../../stores/cartStore';
 import FloatingTabBar from '../../components/ui/FloatingTabBar';
+import { decodeProductSlug } from '../../lib/slugUtils';
+import { getVendorRoute } from '../../lib/navigationHelpers';
 
 type SectionType = 'description' | 'nutrition' | 'heritage';
 
 export default function ProductScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { id } = useLocalSearchParams<{ id: string }>();
+  const { productSlug } = useLocalSearchParams<{ productSlug: string }>();
   const { height: screenHeight } = useWindowDimensions();
   const addToCart = useCartStore((state) => state.addItem);
 
@@ -61,17 +64,19 @@ export default function ProductScreen() {
   const flatListRef = useRef<FlatList>(null);
 
   const fetchData = useCallback(async () => {
-    if (!id) return;
+    if (!productSlug) return;
     try {
-      const productData = productService.getById(id);
+      setLoading(true);
+      // Decode the Base62 slug to UUID and fetch product
+      const productData = await productService.getBySlug(productSlug);
       if (productData) {
         setProduct(productData);
         if (productData.vendor_id) {
-          const vendorData = vendorService.getById(productData.vendor_id);
+          const vendorData = await vendorService.getById(productData.vendor_id);
           setVendor(vendorData || null);
         }
         // Fetch reviews for this product
-        const productReviews = reviewService.getByProduct(id);
+        const productReviews = await reviewService.getByProduct(productData.id);
         setReviews(productReviews);
       }
     } catch (error) {
@@ -79,7 +84,7 @@ export default function ProductScreen() {
     } finally {
       setLoading(false);
     }
-  }, [id]);
+  }, [productSlug]);
 
   useEffect(() => {
     fetchData();
@@ -297,7 +302,9 @@ export default function ProductScreen() {
           {vendor && (
             <TouchableOpacity
               style={styles.vendorCard}
-              onPress={() => router.push(`/vendor/${vendor.id}`)}
+              onPress={() => {
+                router.push(getVendorRoute(vendor as any, vendor.id));
+              }}
               activeOpacity={0.8}
             >
               <Image
@@ -420,7 +427,7 @@ export default function ProductScreen() {
                 </View>
               </View>
               <Link 
-                href={`/write-review?productId=${id}&productName=${encodeURIComponent(product.name)}`}
+                href={`/write-review?productId=${product.id}&productName=${encodeURIComponent(product.name)}`}
                 asChild
               >
                 <TouchableOpacity style={styles.writeReviewButton}>
@@ -474,7 +481,7 @@ export default function ProductScreen() {
                 {reviews.length > 3 && (
                   <TouchableOpacity 
                     style={styles.viewAllReviews}
-                    onPress={() => router.push(`/product/${id}/reviews`)}
+                    onPress={() => router.push(`/product/${productSlug}/reviews`)}
                     activeOpacity={0.8}
                   >
                     <Text style={styles.viewAllReviewsText}>View All {reviews.length} Reviews</Text>
@@ -486,7 +493,7 @@ export default function ProductScreen() {
               <View style={styles.noReviews}>
                 <Text style={styles.noReviewsText}>No reviews yet. Be the first to review!</Text>
                 <Link 
-                  href={`/write-review?productId=${id}&productName=${encodeURIComponent(product.name)}`}
+                  href={`/write-review?productId=${product.id}&productName=${encodeURIComponent(product.name)}`}
                   asChild
                 >
                   <TouchableOpacity style={styles.firstReviewButton}>

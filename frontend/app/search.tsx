@@ -26,6 +26,7 @@ import {
 } from 'phosphor-react-native';
 import { useProductSearch, useCategories, useRegions, usePriceRange, type ProductFilters } from '../hooks/useQueries';
 import { Colors, TrendingSearches, SortOptions, RatingOptions, Placeholders, PlaceholderImages } from '../constants';
+import { getProductRoute } from '../lib/navigationHelpers';
 
 // Use constants from app.ts
 const TRENDING_SEARCHES = TrendingSearches;
@@ -85,7 +86,7 @@ export default function SearchScreen() {
   
   // Navigate to product
   const handleProductPress = (productId: string) => {
-    router.push(`/product/${productId}`);
+    router.push(getProductRoute(productId));
   };
 
   // Handle selecting a suggestion
