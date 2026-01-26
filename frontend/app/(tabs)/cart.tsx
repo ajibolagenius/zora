@@ -135,7 +135,12 @@ export default function CartTab() {
                 'https://via.placeholder.com/100';
               
               return (
-                <View key={item.product_id} style={styles.itemCard}>
+                <TouchableOpacity
+                  key={item.product_id}
+                  style={styles.itemCard}
+                  onPress={() => router.push(`/product/${item.product_id}`)}
+                  activeOpacity={0.7}
+                >
                   {/* Product Image */}
                   <Image source={{ uri: productImage }} style={styles.itemImage} />
                   
@@ -159,7 +164,7 @@ export default function CartTab() {
                     <View style={styles.itemBottomRow}>
                       {/* Price */}
                       <Text style={styles.itemPrice}>
-                        ${((item.product?.price || 0) * item.quantity).toFixed(2)}
+                        £{((item.product?.price || 0) * item.quantity).toFixed(2)}
                       </Text>
                       
                       {/* Quantity Stepper */}
@@ -180,7 +185,7 @@ export default function CartTab() {
                       </View>
                     </View>
                   </View>
-                </View>
+                </TouchableOpacity>
               );
             })}
           </View>
@@ -195,7 +200,7 @@ export default function CartTab() {
         {/* Subtotal Row */}
         <View style={styles.subtotalRow}>
           <Text style={styles.subtotalLabel}>Subtotal ({itemCount} items)</Text>
-          <Text style={styles.subtotalValue}>${subtotal.toFixed(2)}</Text>
+          <Text style={styles.subtotalValue}>£{subtotal.toFixed(2)}</Text>
         </View>
         
         {/* Checkout Button */}
