@@ -45,9 +45,12 @@ const TRACKING_STEPS = [
 export default function OrderDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
-  const { sessionToken } = useAuthStore();
+  const { session } = useAuthStore();
   const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(true);
+
+  // Extract access token from session
+  const sessionToken = session?.access_token;
 
   useEffect(() => {
     if (id && sessionToken) {
@@ -64,8 +67,13 @@ export default function OrderDetailScreen() {
   }, [id, sessionToken]);
 
   const fetchOrder = async () => {
+    if (!sessionToken) {
+      setLoading(false);
+      return;
+    }
+    
     try {
-      const data = await orderService.getById(id!, sessionToken!);
+      const data = await orderService.getById(id!, sessionToken);
       setOrder(data);
     } catch (error) {
       console.error('Error fetching order:', error);

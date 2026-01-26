@@ -97,7 +97,8 @@ export const useCartStore = create<CartState>()((set, get) => ({
     },
 
     fetchCart: async () => {
-        const { sessionToken } = useAuthStore.getState();
+        const { session } = useAuthStore.getState();
+        const sessionToken = session?.access_token;
         if (!sessionToken) return;
 
         set({ isLoading: true });
