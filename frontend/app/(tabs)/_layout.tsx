@@ -11,6 +11,7 @@ import {
 import { Colors } from '../../constants/colors';
 import { FontSize, FontWeight } from '../../constants/typography';
 import { useCartStore } from '../../stores/cartStore';
+import { ProtectedRoute } from '../../components';
 
 type PhosphorIconProps = {
   size: number;
@@ -44,7 +45,8 @@ export default function TabLayout() {
   const cartItemCount = useCartStore((state) => state.getItemCount());
 
   return (
-    <Tabs
+    <ProtectedRoute>
+      <Tabs
       screenOptions={{
         headerShown: false,
         tabBarActiveTintColor: Colors.primary,
@@ -102,6 +104,7 @@ export default function TabLayout() {
         }}
       />
     </Tabs>
+    </ProtectedRoute>
   );
 }
 

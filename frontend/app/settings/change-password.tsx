@@ -20,24 +20,23 @@ import {
 import { Colors } from '../../constants/colors';
 import { Spacing, BorderRadius } from '../../constants/spacing';
 import { FontSize, FontFamily, LetterSpacing } from '../../constants/typography';
-import { ErrorMessages, SuccessMessages, AlertMessages, Placeholders, ValidationLimits } from '../../constants';
+import { ErrorMessages, SuccessMessages, AlertMessages, Placeholders, ValidationLimits, validatePassword } from '../../constants';
 import { useAuthStore } from '../../stores/authStore';
 
 export default function ChangePasswordScreen() {
   const router = useRouter();
-  const { user } = useAuthStore();
+  const { user, updatePassword, isLoading } = useAuthStore();
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
 
   const handleChangePassword = async () => {
     // Validation
     if (!currentPassword) {
-      Alert.alert(AlertMessages.titles.error, ErrorMessages.validation.required);
+      Alert.alert(AlertMessages.titles.error, 'Please enter your current password');
       return;
     }
 
@@ -46,8 +45,13 @@ export default function ChangePasswordScreen() {
       return;
     }
 
-    if (newPassword.length < ValidationLimits.passwordMinLength) {
-      Alert.alert(AlertMessages.titles.error, ErrorMessages.validation.passwordTooShort);
+    // Validate new password strength
+    const passwordValidation = validatePassword(newPassword);
+    if (!passwordValidation.isValid) {
+      Alert.alert(
+        AlertMessages.titles.error,
+        passwordValidation.errors.join('\n')
+      );
       return;
     }
 
@@ -62,17 +66,7 @@ export default function ChangePasswordScreen() {
     }
 
     try {
-      setIsLoading(true);
-      
-      // In a real app, you would verify the current password first
-      // For now, we'll simulate the password change
-      // TODO: Implement updatePassword in authStore
-      // if (updatePassword) {
-      //   await updatePassword(newPassword);
-      // }
-      
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await updatePassword(currentPassword, newPassword);
       
       Alert.alert(
         AlertMessages.titles.success,
@@ -80,7 +74,13 @@ export default function ChangePasswordScreen() {
         [
           {
             text: AlertMessages.titles.ok,
-            onPress: () => router.back(),
+            onPress: () => {
+              // Clear form
+              setCurrentPassword('');
+              setNewPassword('');
+              setConfirmPassword('');
+              router.back();
+            },
           },
         ]
       );
@@ -90,8 +90,6 @@ export default function ChangePasswordScreen() {
         AlertMessages.titles.error,
         error.message || ErrorMessages.form.updateFailed
       );
-    } finally {
-      setIsLoading(false);
     }
   };
 

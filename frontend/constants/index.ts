@@ -96,6 +96,7 @@ export {
     ValidationLimits as ValidationLimitsRules,
     ValidationPatterns,
     ValidationErrors,
+    validatePassword,
     default as validation,
 } from './validation';
 

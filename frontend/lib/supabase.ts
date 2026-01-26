@@ -113,9 +113,19 @@ const getSupabaseClient = async (): Promise<SupabaseClient<Database>> => {
   return supabaseInstance;
 };
 
-// Initialize client immediately if configured (for synchronous access)
-if (isSupabaseConfigured()) {
-  // Initialize synchronously for web, async for native
+// Track initialization promise to prevent multiple simultaneous initializations
+let initializationPromise: Promise<SupabaseClient<Database>> | null = null;
+
+/**
+ * Initialize the Supabase client synchronously (for web only)
+ * Returns the client if initialized, null otherwise
+ */
+function initializeClientSync(): SupabaseClient<Database> | null {
+  if (!isSupabaseConfigured() || supabaseInstance) {
+    return supabaseInstance;
+  }
+
+  // Only initialize synchronously on web (native requires async for AsyncStorage)
   if (Platform.OS === 'web' && typeof window !== 'undefined') {
     try {
       supabaseInstance = createClient<Database>(supabaseUrl, supabaseAnonKey, {
@@ -125,70 +135,83 @@ if (isSupabaseConfigured()) {
           detectSessionInUrl: true,
         },
       });
+      return supabaseInstance;
     } catch (error) {
-      console.error('Failed to initialize Supabase client:', error);
+      console.error('Failed to initialize Supabase client synchronously:', error);
     }
   }
+
+  return null;
+}
+
+/**
+ * Trigger async initialization (for native platforms)
+ * This is fire-and-forget - doesn't block the getter
+ */
+function triggerAsyncInitialization(): void {
+  if (!isSupabaseConfigured() || supabaseInstance || initializationPromise) {
+    return;
+  }
+
+  // Start async initialization (don't await - let it happen in background)
+  initializationPromise = getSupabaseClient()
+    .then((client) => {
+      return client;
+    })
+    .catch((error) => {
+      console.error('Failed to initialize Supabase client asynchronously:', error);
+      initializationPromise = null;
+      return null;
+    });
+}
+
+// Initialize client immediately if configured (for synchronous access on web)
+if (isSupabaseConfigured()) {
+  initializeClientSync();
 }
 
 // For backwards compatibility, export a getter that returns the singleton instance
 // This avoids creating multiple GoTrueClient instances
 export const supabase = {
   get auth() {
-    if (!supabaseInstance && isSupabaseConfigured()) {
-      // Try to initialize if not already done
-      if (Platform.OS === 'web' && typeof window !== 'undefined') {
-        try {
-          supabaseInstance = createClient<Database>(supabaseUrl, supabaseAnonKey, {
-            auth: {
-              autoRefreshToken: true,
-              persistSession: true,
-              detectSessionInUrl: true,
-            },
-          });
-        } catch (error) {
-          console.error('Failed to initialize Supabase client:', error);
-        }
-      }
+    // Try synchronous initialization first (works on web)
+    if (!supabaseInstance) {
+      initializeClientSync();
     }
+    
+    // If still not initialized (native platform), trigger async initialization
+    // This is fire-and-forget - the getter returns undefined for now,
+    // but initialization will complete in the background
+    if (!supabaseInstance) {
+      triggerAsyncInitialization();
+    }
+    
     return supabaseInstance?.auth;
   },
   get from() {
-    if (!supabaseInstance && isSupabaseConfigured()) {
-      // Try to initialize if not already done
-      if (Platform.OS === 'web' && typeof window !== 'undefined') {
-        try {
-          supabaseInstance = createClient<Database>(supabaseUrl, supabaseAnonKey, {
-            auth: {
-              autoRefreshToken: true,
-              persistSession: true,
-              detectSessionInUrl: true,
-            },
-          });
-        } catch (error) {
-          console.error('Failed to initialize Supabase client:', error);
-        }
-      }
+    // Try synchronous initialization first (works on web)
+    if (!supabaseInstance) {
+      initializeClientSync();
     }
+    
+    // If still not initialized (native platform), trigger async initialization
+    if (!supabaseInstance) {
+      triggerAsyncInitialization();
+    }
+    
     return supabaseInstance?.from?.bind(supabaseInstance);
   },
   get rpc() {
-    if (!supabaseInstance && isSupabaseConfigured()) {
-      // Try to initialize if not already done
-      if (Platform.OS === 'web' && typeof window !== 'undefined') {
-        try {
-          supabaseInstance = createClient<Database>(supabaseUrl, supabaseAnonKey, {
-            auth: {
-              autoRefreshToken: true,
-              persistSession: true,
-              detectSessionInUrl: true,
-            },
-          });
-        } catch (error) {
-          console.error('Failed to initialize Supabase client:', error);
-        }
-      }
+    // Try synchronous initialization first (works on web)
+    if (!supabaseInstance) {
+      initializeClientSync();
     }
+    
+    // If still not initialized (native platform), trigger async initialization
+    if (!supabaseInstance) {
+      triggerAsyncInitialization();
+    }
+    
     return supabaseInstance?.rpc?.bind(supabaseInstance);
   },
 };

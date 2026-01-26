@@ -19,6 +19,8 @@ import {
 } from '@expo-google-fonts/poppins';
 import { Colors } from '../constants/colors';
 import { QueryProvider } from '../providers/QueryProvider';
+import { useAuthStore } from '../stores/authStore';
+import { getSupabaseClient, isSupabaseConfigured } from '../lib/supabase';
 import '../global.css';
 
 // Keep the splash screen visible while we fetch resources
@@ -62,6 +64,76 @@ export default function RootLayout() {
   useEffect(() => {
     onLayoutRootView();
   }, [onLayoutRootView]);
+
+  // Initialize Supabase client early (especially important for native platforms)
+  useEffect(() => {
+    if (!isSupabaseConfigured()) return;
+
+    // Initialize client early to ensure it's ready when services need it
+    getSupabaseClient().catch((error) => {
+      console.error('Failed to initialize Supabase client:', error);
+    });
+  }, []);
+
+  // Auth state listener for session management
+  useEffect(() => {
+    if (!isSupabaseConfigured()) return;
+
+    let mounted = true;
+    let subscription: { unsubscribe: () => void } | null = null;
+
+    const setupAuthListener = async () => {
+      try {
+        const client = await getSupabaseClient();
+        const { data } = client.auth.onAuthStateChange(
+          async (event, session) => {
+            if (!mounted) return;
+
+            const { checkAuth, setSession, setUser, logout } = useAuthStore.getState();
+
+            switch (event) {
+              case 'SIGNED_IN':
+              case 'TOKEN_REFRESHED':
+                // Refresh auth state when session changes
+                await checkAuth();
+                break;
+              case 'SIGNED_OUT':
+                // Clear auth state on logout
+                setUser(null);
+                setSession(null);
+                break;
+              case 'USER_UPDATED':
+                // Refresh user data when profile is updated
+                await checkAuth();
+                break;
+              default:
+                // For other events, just refresh auth state
+                await checkAuth();
+            }
+          }
+        );
+        // onAuthStateChange returns { data: { subscription } }
+        // Only set subscription if component is still mounted
+        if (mounted) {
+          subscription = data.subscription;
+        } else {
+          // Component unmounted before listener was set up, unsubscribe immediately
+          data.subscription.unsubscribe();
+        }
+      } catch (error) {
+        console.error('Failed to setup auth state listener:', error);
+      }
+    };
+
+    setupAuthListener();
+
+    return () => {
+      mounted = false;
+      if (subscription) {
+        subscription.unsubscribe();
+      }
+    };
+  }, []);
 
   // Show loading indicator while fonts are loading
   if (!fontsLoaded && !fontError && !fontTimeout) {

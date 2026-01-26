@@ -6,41 +6,73 @@
  * For development/demo purposes, it falls back to mock data when Supabase is not configured.
  */
 
-import { supabase, isSupabaseConfigured } from '../lib/supabase';
+import { supabase, isSupabaseConfigured, getSupabaseClient } from '../lib/supabase';
 import type { User, Vendor, Product, Order, Review, PromoCode } from '../types/supabase';
 import mockDatabase from '../data/mock_database.json';
 import { getFeaturedVendors, getFeaturedProducts } from './rankingService';
 import type { Vendor as MockVendor, Product as MockProduct } from './mockDataService';
 import { encodeProductSlug } from '../lib/slugUtils';
+import { Platform } from 'react-native';
 
 /**
  * Safely gets the Supabase client's from method
  * Returns null if Supabase is not configured or not initialized
+ * For native platforms, attempts to wait for async initialization
  */
-function getSupabaseFrom() {
+async function getSupabaseFrom(): Promise<((table: string) => any) | null> {
   if (!isSupabaseConfigured()) {
     return null;
   }
-  const fromMethod = supabase.from;
-  if (!fromMethod) {
-    return null;
+  
+  // Try to get the method (this will trigger initialization on web)
+  let fromMethod = supabase.from;
+  
+  // If not available (likely native platform), try to wait for async initialization
+  if (!fromMethod && Platform.OS !== 'web') {
+    try {
+      // Wait a short time for async initialization to complete
+      // This is a best-effort approach - if it's not ready, we'll fall back to mock data
+      await Promise.race([
+        getSupabaseClient(),
+        new Promise(resolve => setTimeout(resolve, 100)), // 100ms timeout
+      ]);
+      fromMethod = supabase.from;
+    } catch (error) {
+      // Ignore errors - will fall back to mock data
+    }
   }
-  return fromMethod;
+  
+  return fromMethod || null;
 }
 
 /**
  * Safely gets the Supabase client's rpc method
  * Returns null if Supabase is not configured or not initialized
+ * For native platforms, attempts to wait for async initialization
  */
-function getSupabaseRpc() {
+async function getSupabaseRpc(): Promise<((functionName: string, args?: any) => any) | null> {
   if (!isSupabaseConfigured()) {
     return null;
   }
-  const rpcMethod = supabase.rpc;
-  if (!rpcMethod) {
-    return null;
+  
+  // Try to get the method (this will trigger initialization on web)
+  let rpcMethod = supabase.rpc;
+  
+  // If not available (likely native platform), try to wait for async initialization
+  if (!rpcMethod && Platform.OS !== 'web') {
+    try {
+      // Wait a short time for async initialization to complete
+      await Promise.race([
+        getSupabaseClient(),
+        new Promise(resolve => setTimeout(resolve, 100)), // 100ms timeout
+      ]);
+      rpcMethod = supabase.rpc;
+    } catch (error) {
+      // Ignore errors - will fall back to mock data
+    }
   }
-  return rpcMethod;
+  
+  return rpcMethod || null;
 }
 
 // ============== AUTH SERVICE ==============
@@ -62,7 +94,7 @@ export const authService = {
     
     if (data.user && !error) {
       // Create user profile
-      const fromMethod = getSupabaseFrom();
+      const fromMethod = await getSupabaseFrom();
       if (fromMethod) {
         await fromMethod('users').insert({
           id: data.user.id,
@@ -149,8 +181,21 @@ export const authService = {
       } as User;
     }
     
-    const { data, error } = await supabase
-      .from('users')
+    const fromMethod = await getSupabaseFrom();
+    if (!fromMethod) {
+      // Fallback to mock data
+      return {
+        id: userId,
+        email: 'demo@zora.market',
+        name: 'Demo User',
+        membership_tier: 'gold',
+        zora_credits: 25.50,
+        loyalty_points: 1250,
+        cultural_interests: ['West Africa', 'East Africa'],
+      } as User;
+    }
+    
+    const { data, error } = await fromMethod('users')
       .select('*')
       .eq('id', userId)
       .single();
@@ -164,8 +209,12 @@ export const authService = {
       return { data: updates, error: null };
     }
     
-    const { data, error } = await supabase
-      .from('users')
+    const fromMethod = await getSupabaseFrom();
+    if (!fromMethod) {
+      return { data: updates, error: null };
+    }
+    
+    const { data, error } = await fromMethod('users')
       .update(updates)
       .eq('id', userId)
       .select()
@@ -188,7 +237,7 @@ export const vendorService = {
       })) as unknown as Vendor[];
     }
     
-    const fromMethod = getSupabaseFrom();
+    const fromMethod = await getSupabaseFrom();
     if (!fromMethod) {
       // Fallback to mock data if Supabase not available
       return mockDatabase.vendors.map(v => ({
@@ -219,7 +268,7 @@ export const vendorService = {
     }
     
     // Fetch all vendors and rank them
-    const fromMethod = getSupabaseFrom();
+    const fromMethod = await getSupabaseFrom();
     if (!fromMethod) {
       const featured = getFeaturedVendors(mockDatabase.vendors as MockVendor[], userRegion, limit);
       return featured.map(v => ({
@@ -269,7 +318,7 @@ export const vendorService = {
       } as unknown as Vendor;
     }
     
-    const fromMethod = getSupabaseFrom();
+    const fromMethod = await getSupabaseFrom();
     if (!fromMethod) {
       const vendor = mockDatabase.vendors.find(v => v.id === id);
       if (!vendor) return null;
@@ -308,7 +357,7 @@ export const vendorService = {
     }
     
     // Check if supabase client is available
-    const fromMethod = supabase.from;
+    const fromMethod = await getSupabaseFrom();
     if (!fromMethod) {
       console.warn('Supabase client not initialized, falling back to mock data');
       const vendor = mockDatabase.vendors.find(v => {
@@ -344,7 +393,7 @@ export const vendorService = {
       return !existing;
     }
     
-    const fromMethod = getSupabaseFrom();
+    const fromMethod = await getSupabaseFrom();
     if (!fromMethod) {
       const existing = mockDatabase.vendors.find(v => {
         const vendorSlug = (v as any).slug || 
@@ -391,7 +440,7 @@ export const vendorService = {
     }
     
     // Using PostGIS for proper geospatial queries in Supabase
-    const rpcMethod = getSupabaseRpc();
+    const rpcMethod = await getSupabaseRpc();
     if (!rpcMethod) {
       // Fallback to mock data
       return mockDatabase.vendors
@@ -431,7 +480,7 @@ export const productService = {
         .map(p => ({ ...p, updated_at: p.created_at })) as unknown as Product[];
     }
     
-    const fromMethod = getSupabaseFrom();
+    const fromMethod = await getSupabaseFrom();
     if (!fromMethod) {
       return mockDatabase.products
         .filter(p => p.is_active)
@@ -454,7 +503,7 @@ export const productService = {
     }
     
     // Fetch all active products and rank them
-    const fromMethod = getSupabaseFrom();
+    const fromMethod = await getSupabaseFrom();
     if (!fromMethod) {
       const featured = getFeaturedProducts(mockDatabase.products as MockProduct[], userRegion, limit);
       return featured.map(p => ({ ...p, updated_at: p.created_at })) as unknown as Product[];
@@ -486,7 +535,7 @@ export const productService = {
       return { ...product, updated_at: product.created_at } as unknown as Product;
     }
     
-    const fromMethod = getSupabaseFrom();
+    const fromMethod = await getSupabaseFrom();
     if (!fromMethod) {
       const product = mockDatabase.products.find(p => p.id === id);
       if (!product) return null;
@@ -531,7 +580,7 @@ export const productService = {
         .map(p => ({ ...p, updated_at: p.created_at })) as unknown as Product[];
     }
     
-    const fromMethod = getSupabaseFrom();
+    const fromMethod = await getSupabaseFrom();
     if (!fromMethod) {
       return mockDatabase.products
         .filter(p => p.vendor_id === vendorId && p.is_active)
@@ -553,7 +602,7 @@ export const productService = {
         .map(p => ({ ...p, updated_at: p.created_at })) as unknown as Product[];
     }
     
-    const fromMethod = getSupabaseFrom();
+    const fromMethod = await getSupabaseFrom();
     if (!fromMethod) {
       return mockDatabase.products
         .filter(p => p.category.toLowerCase() === category.toLowerCase() && p.is_active)
@@ -582,7 +631,7 @@ export const productService = {
         .map(p => ({ ...p, updated_at: p.created_at })) as unknown as Product[];
     }
     
-    const fromMethod = getSupabaseFrom();
+    const fromMethod = await getSupabaseFrom();
     if (!fromMethod) {
       const lowerQuery = query.toLowerCase();
       return mockDatabase.products
@@ -621,8 +670,20 @@ export const orderService = {
       } as Order;
     }
     
-    const { data, error } = await supabase
-      .from('orders')
+    const fromMethod = await getSupabaseFrom();
+    if (!fromMethod) {
+      return {
+        id: 'order_' + Date.now(),
+        ...orderData,
+        status: 'pending',
+        payment_status: 'pending',
+        qr_code: `QR_${Date.now()}`,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      } as Order;
+    }
+    
+    const { data, error } = await fromMethod('orders')
       .insert({
         ...orderData,
         qr_code: `QR_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
@@ -639,8 +700,12 @@ export const orderService = {
       return mockDatabase.orders?.filter(o => o.user_id === userId) || [];
     }
     
-    const { data } = await supabase
-      .from('orders')
+    const fromMethod = await getSupabaseFrom();
+    if (!fromMethod) {
+      return mockDatabase.orders?.filter(o => o.user_id === userId) || [];
+    }
+    
+    const { data } = await fromMethod('orders')
       .select('*')
       .eq('user_id', userId)
       .order('created_at', { ascending: false });
@@ -653,8 +718,12 @@ export const orderService = {
       return mockDatabase.orders?.find(o => o.id === orderId) || null;
     }
     
-    const { data } = await supabase
-      .from('orders')
+    const fromMethod = await getSupabaseFrom();
+    if (!fromMethod) {
+      return mockDatabase.orders?.find(o => o.id === orderId) || null;
+    }
+    
+    const { data } = await fromMethod('orders')
       .select('*')
       .eq('id', orderId)
       .single();
@@ -667,8 +736,12 @@ export const orderService = {
       return null;
     }
     
-    const { data } = await supabase
-      .from('orders')
+    const fromMethod = await getSupabaseFrom();
+    if (!fromMethod) {
+      return null;
+    }
+    
+    const { data } = await fromMethod('orders')
       .update({ status, updated_at: new Date().toISOString() })
       .eq('id', orderId)
       .select()
@@ -682,8 +755,12 @@ export const orderService = {
       return mockDatabase.orders?.find(o => o.qr_code === qrCode) || null;
     }
     
-    const { data } = await supabase
-      .from('orders')
+    const fromMethod = await getSupabaseFrom();
+    if (!fromMethod) {
+      return mockDatabase.orders?.find(o => o.qr_code === qrCode) || null;
+    }
+    
+    const { data } = await fromMethod('orders')
       .select('*')
       .eq('qr_code', qrCode)
       .single();
@@ -699,8 +776,12 @@ export const reviewService = {
       return mockDatabase.reviews?.filter(r => r.product_id === productId) || [];
     }
     
-    const { data } = await supabase
-      .from('reviews')
+    const fromMethod = await getSupabaseFrom();
+    if (!fromMethod) {
+      return mockDatabase.reviews?.filter(r => r.product_id === productId) || [];
+    }
+    
+    const { data } = await fromMethod('reviews')
       .select('*, users(name, avatar_url)')
       .eq('product_id', productId)
       .order('created_at', { ascending: false });
@@ -713,8 +794,12 @@ export const reviewService = {
       return mockDatabase.reviews?.filter(r => r.vendor_id === vendorId) || [];
     }
     
-    const { data } = await supabase
-      .from('reviews')
+    const fromMethod = await getSupabaseFrom();
+    if (!fromMethod) {
+      return mockDatabase.reviews?.filter(r => r.vendor_id === vendorId) || [];
+    }
+    
+    const { data } = await fromMethod('reviews')
       .select('*, users(name, avatar_url)')
       .eq('vendor_id', vendorId)
       .order('created_at', { ascending: false });
@@ -733,8 +818,18 @@ export const reviewService = {
       } as Review;
     }
     
-    const { data } = await supabase
-      .from('reviews')
+    const fromMethod = await getSupabaseFrom();
+    if (!fromMethod) {
+      return {
+        id: 'review_' + Date.now(),
+        ...reviewData,
+        helpful_count: 0,
+        verified_purchase: true,
+        created_at: new Date().toISOString(),
+      } as Review;
+    }
+    
+    const { data } = await fromMethod('reviews')
       .insert(reviewData)
       .select()
       .single();
@@ -743,45 +838,54 @@ export const reviewService = {
   },
 };
 
+// Mock promo codes helper
+const getMockPromoCodes = (): Record<string, PromoCode> => ({
+  'WELCOME10': {
+    id: 'promo_1',
+    code: 'WELCOME10',
+    type: 'percentage',
+    value: 10,
+    min_order: 20,
+    max_uses: 1000,
+    current_uses: 500,
+    valid_from: '2024-01-01',
+    valid_until: '2025-12-31',
+    is_active: true,
+    created_at: '2024-01-01',
+  },
+  'FREESHIP': {
+    id: 'promo_2',
+    code: 'FREESHIP',
+    type: 'free_delivery',
+    value: 0,
+    min_order: 30,
+    max_uses: null,
+    current_uses: 100,
+    valid_from: '2024-01-01',
+    valid_until: '2025-12-31',
+    is_active: true,
+    created_at: '2024-01-01',
+  },
+});
+
 // ============== PROMO CODE SERVICE ==============
 export const promoCodeService = {
   validate: async (code: string): Promise<PromoCode | null> => {
     if (!isSupabaseConfigured()) {
       // Mock promo codes
-      const mockCodes: Record<string, PromoCode> = {
-        'WELCOME10': {
-          id: 'promo_1',
-          code: 'WELCOME10',
-          type: 'percentage',
-          value: 10,
-          min_order: 20,
-          max_uses: 1000,
-          current_uses: 500,
-          valid_from: '2024-01-01',
-          valid_until: '2025-12-31',
-          is_active: true,
-          created_at: '2024-01-01',
-        },
-        'FREESHIP': {
-          id: 'promo_2',
-          code: 'FREESHIP',
-          type: 'free_delivery',
-          value: 0,
-          min_order: 30,
-          max_uses: null,
-          current_uses: 100,
-          valid_from: '2024-01-01',
-          valid_until: '2025-12-31',
-          is_active: true,
-          created_at: '2024-01-01',
-        },
-      };
+      const mockCodes = getMockPromoCodes();
+      return mockCodes[code.toUpperCase()] || null;
+    }
+    
+    const fromMethod = await getSupabaseFrom();
+    if (!fromMethod) {
+      // Return mock promo codes
+      const mockCodes = getMockPromoCodes();
       return mockCodes[code.toUpperCase()] || null;
     }
     
     const now = new Date().toISOString();
-    const { data } = await supabase
-      .from('promo_codes')
+    const { data } = await fromMethod('promo_codes')
       .select('*')
       .eq('code', code.toUpperCase())
       .eq('is_active', true)

@@ -6,10 +6,10 @@
 export const PasswordRules = {
     minLength: 8,
     maxLength: 128,
-    requireUppercase: false,
-    requireLowercase: false,
-    requireNumbers: false,
-    requireSpecialChars: false,
+    requireUppercase: true,
+    requireLowercase: true,
+    requireNumbers: true,
+    requireSpecialChars: true,
 } as const;
 
 /**
@@ -120,9 +120,53 @@ export const ValidationErrors = {
     },
 } as const;
 
+/**
+ * Validates a password against the password rules
+ * @param password - The password to validate
+ * @returns Object with isValid flag and array of error messages
+ */
+export function validatePassword(password: string): { isValid: boolean; errors: string[] } {
+    const errors: string[] = [];
+
+    if (!password) {
+        errors.push(ValidationErrors.required);
+        return { isValid: false, errors };
+    }
+
+    if (password.length < PasswordRules.minLength) {
+        errors.push(ValidationErrors.password.tooShort);
+    }
+
+    if (password.length > PasswordRules.maxLength) {
+        errors.push(ValidationErrors.password.tooLong);
+    }
+
+    if (PasswordRules.requireUppercase && !/[A-Z]/.test(password)) {
+        errors.push(ValidationErrors.password.noUppercase);
+    }
+
+    if (PasswordRules.requireLowercase && !/[a-z]/.test(password)) {
+        errors.push(ValidationErrors.password.noLowercase);
+    }
+
+    if (PasswordRules.requireNumbers && !/\d/.test(password)) {
+        errors.push(ValidationErrors.password.noNumber);
+    }
+
+    if (PasswordRules.requireSpecialChars && !/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) {
+        errors.push(ValidationErrors.password.noSpecialChar);
+    }
+
+    return {
+        isValid: errors.length === 0,
+        errors,
+    };
+}
+
 export default {
     password: PasswordRules,
     limits: ValidationLimits,
     patterns: ValidationPatterns,
     errors: ValidationErrors,
+    validatePassword,
 };

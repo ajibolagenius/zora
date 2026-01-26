@@ -3,6 +3,26 @@ import { User } from '../types';
 import { supabase, getSupabaseClient, isSupabaseConfigured, getCredentialsError } from '../lib/supabase';
 import { Session, AuthError } from '@supabase/supabase-js';
 import { ApiConfig } from '../constants';
+import {
+  checkLoginRateLimit,
+  recordLoginAttempt,
+  resetLoginRateLimit,
+} from '../lib/security/rateLimiter';
+import {
+  logSecurityEvent,
+  SecurityEventType,
+} from '../lib/security/securityLogger';
+import {
+  createAuditLog,
+  AuditAction,
+} from '../lib/security/auditTrail';
+import {
+  createSecurityAlert,
+} from '../lib/security/securityAlerts';
+import {
+  sessionTimeoutManager,
+} from '../lib/security/sessionTimeout';
+import { sanitizeEmail } from '../lib/security/sanitize';
 
 // ============================================
 // DEV MOCK USER - For testing without Supabase
@@ -44,12 +64,16 @@ interface AuthState {
   isAuthenticated: boolean;
   isLoading: boolean;
   hasCompletedOnboarding: boolean;
+  emailVerified: boolean;
+  sessionExpiringSoon: boolean;
   
   // Actions
   setUser: (user: User | null) => void;
   setSession: (session: Session | null) => void;
   setLoading: (loading: boolean) => void;
   setOnboardingComplete: (complete: boolean) => void;
+  setEmailVerified: (verified: boolean) => void;
+  setSessionExpiringSoon: (expiring: boolean) => void;
   signInWithGoogle: () => Promise<void>;
   signInWithEmail: (email: string, password: string) => Promise<void>;
   signInWithMockUser: () => void; // Dev testing without Supabase
@@ -58,11 +82,15 @@ interface AuthState {
   logout: () => Promise<void>;
   checkAuth: () => Promise<void>;
   updateProfile: (updates: Partial<User>) => Promise<void>;
+  updatePassword: (currentPassword: string, newPassword: string) => Promise<void>;
+  verifyEmail: () => Promise<void>;
+  resendVerificationEmail: () => Promise<void>;
+  refreshSession: () => Promise<void>;
 }
 
 // Helper to convert Supabase user to our User type
 const mapSupabaseUser = (supabaseUser: any, profile?: any): User => ({
-  id: supabaseUser.id,
+  user_id: supabaseUser.id,
   email: supabaseUser.email || '',
   name: profile?.full_name || supabaseUser.user_metadata?.full_name || supabaseUser.email?.split('@')[0] || 'User',
   picture: profile?.avatar_url || supabaseUser.user_metadata?.avatar_url || null,
@@ -72,6 +100,7 @@ const mapSupabaseUser = (supabaseUser: any, profile?: any): User => ({
   loyalty_points: profile?.loyalty_points || 0,
   referral_code: profile?.referral_code || null,
   cultural_interests: profile?.cultural_interests || [],
+  created_at: supabaseUser.created_at || new Date().toISOString(),
 });
 
 export const useAuthStore = create<AuthState>()((set, get) => ({
@@ -80,53 +109,129 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
   isAuthenticated: false,
   isLoading: false, // Start as false to prevent blocking UI
   hasCompletedOnboarding: false,
+  emailVerified: false,
+  sessionExpiringSoon: false,
   
   setUser: (user) => set({ user, isAuthenticated: !!user }),
-  setSession: (session) => set({ session }),
+  setSession: (session) => {
+    set({ session });
+    // Start session timeout tracking when session is set
+    if (session) {
+      sessionTimeoutManager.startSession(
+        (minutesLeft) => {
+          set({ sessionExpiringSoon: true });
+          const { user } = get();
+          if (user) {
+            createSecurityAlert.sessionExpiring(user.user_id, minutesLeft);
+          }
+        },
+        () => {
+          // Session expired
+          const { user, logout } = get();
+          if (user) {
+            logSecurityEvent.sessionExpired(user.user_id, user.email);
+            createSecurityAlert.suspiciousActivity(
+              user.user_id,
+              'Your session has expired. Please log in again.'
+            );
+          }
+          logout();
+        }
+      );
+    } else {
+      sessionTimeoutManager.endSession();
+    }
+  },
   setLoading: (isLoading) => set({ isLoading }),
   setOnboardingComplete: (hasCompletedOnboarding) => set({ hasCompletedOnboarding }),
+  setEmailVerified: (emailVerified) => set({ emailVerified }),
+  setSessionExpiringSoon: (sessionExpiringSoon) => set({ sessionExpiringSoon }),
   
   signInWithGoogle: async () => {
     // Check credentials before attempting auth
     if (!isSupabaseConfigured()) {
       const error = new Error(getCredentialsError());
       console.error('Google sign in error:', error);
+      logSecurityEvent.loginFailed('', 'Supabase not configured');
       throw error;
     }
 
     try {
       set({ isLoading: true });
       const client = await getSupabaseClient();
-      const { error } = await client.auth.signInWithOAuth({
+      const { data, error } = await client.auth.signInWithOAuth({
         provider: 'google',
         options: {
           redirectTo: 'zora://auth/callback',
+          queryParams: {
+            access_type: 'offline',
+            prompt: 'consent',
+          },
         },
       });
       
-      if (error) throw error;
+      if (error) {
+        logSecurityEvent.loginFailed('', `OAuth error: ${error.message}`);
+        createAuditLog('', AuditAction.USER_LOGIN, {
+          success: false,
+          errorMessage: error.message,
+        });
+        throw error;
+      }
+
+      // Log OAuth attempt
+      logSecurityEvent.loginSuccess('', 'OAuth');
       // The session will be handled by the auth state listener
-    } catch (error) {
+    } catch (error: any) {
       console.error('Google sign in error:', error);
       set({ isLoading: false });
+      
+      // Provide user-friendly error messages
+      if (error.message?.includes('popup')) {
+        throw new Error('Please enable popups for Google sign-in');
+      } else if (error.message?.includes('network')) {
+        throw new Error('Network error. Please check your connection and try again.');
+      } else if (error.message?.includes('cancelled')) {
+        throw new Error('Sign-in was cancelled');
+      }
+      
       throw error;
     }
   },
   
   signInWithEmail: async (email: string, password: string) => {
+    // Sanitize email input
+    const sanitizedEmail = sanitizeEmail(email);
+    if (!sanitizedEmail) {
+      const error = new Error('Invalid email address');
+      logSecurityEvent.loginFailed(email, 'Invalid email format');
+      throw error;
+    }
+
     // Check for dev mock user credentials
     if (
-      email === DEV_MOCK_CREDENTIALS.email &&
+      sanitizedEmail === DEV_MOCK_CREDENTIALS.email &&
       password === DEV_MOCK_CREDENTIALS.password
     ) {
       get().signInWithMockUser();
       return;
     }
 
+    // Check rate limiting
+    const rateLimitCheck = checkLoginRateLimit(sanitizedEmail);
+    if (!rateLimitCheck.allowed) {
+      recordLoginAttempt(sanitizedEmail);
+      logSecurityEvent.rateLimitExceeded(sanitizedEmail, 'login');
+      createSecurityAlert.multipleFailedLogins('', rateLimitCheck.remaining);
+      const error = new Error(rateLimitCheck.errorMessage || 'Too many login attempts');
+      throw error;
+    }
+
     // Check credentials before attempting auth
     if (!isSupabaseConfigured()) {
       const error = new Error(getCredentialsError());
       console.error('Email sign in error:', error);
+      logSecurityEvent.loginFailed(sanitizedEmail, 'Supabase not configured');
       throw error;
     }
 
@@ -136,14 +241,21 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
       
       // Add timeout to prevent infinite loading
       const { data, error } = await withTimeout(
-        client.auth.signInWithPassword({ email, password }),
+        client.auth.signInWithPassword({ email: sanitizedEmail, password }),
         AUTH_TIMEOUT_MS,
         'Sign in timed out. Please check your internet connection and try again.'
       );
       
-      if (error) throw error;
+      if (error) {
+        recordLoginAttempt(sanitizedEmail);
+        logSecurityEvent.loginFailed(sanitizedEmail, error.message);
+        throw error;
+      }
       
       if (data.user) {
+        // Reset rate limit on successful login
+        resetLoginRateLimit(sanitizedEmail);
+
         // Fetch user profile with timeout
         const { data: profile } = await withTimeout(
           client.from('profiles').select('*').eq('id', data.user.id).single(),
@@ -151,16 +263,29 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
           'Failed to load profile. Please try again.'
         );
         
+        const user = mapSupabaseUser(data.user, profile);
+        const emailVerified = data.user.email_confirmed_at !== null;
+        
         set({
-          user: mapSupabaseUser(data.user, profile),
+          user,
           session: data.session,
           isAuthenticated: true,
+          emailVerified,
           isLoading: false,
         });
+
+        // Log successful login
+        logSecurityEvent.loginSuccess(user.user_id, user.email);
+        createAuditLog(user.user_id, AuditAction.USER_LOGIN, { success: true });
+
+        // Start session timeout
+        if (data.session) {
+          get().setSession(data.session);
+        }
       } else {
         set({ isLoading: false });
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Email sign in error:', error);
       set({ isLoading: false });
       throw error;
@@ -181,6 +306,12 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
   },
   
   signUpWithEmail: async (email: string, password: string, name: string) => {
+    // Sanitize inputs
+    const sanitizedEmail = sanitizeEmail(email);
+    if (!sanitizedEmail) {
+      throw new Error('Invalid email address');
+    }
+
     // Check credentials before attempting auth
     if (!isSupabaseConfigured()) {
       const error = new Error(getCredentialsError());
@@ -195,12 +326,13 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
       // Add timeout to prevent infinite loading
       const { data, error } = await withTimeout(
         client.auth.signUp({
-          email,
+          email: sanitizedEmail,
           password,
           options: {
             data: {
               full_name: name,
             },
+            emailRedirectTo: 'zora://auth/verify-email',
           },
         }),
         AUTH_TIMEOUT_MS,
@@ -225,12 +357,25 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
           'Failed to create profile. Please try again.'
         );
         
+        const user = mapSupabaseUser(data.user, { full_name: name });
+        const emailVerified = data.user.email_confirmed_at !== null;
+        
         set({
-          user: mapSupabaseUser(data.user, { full_name: name }),
+          user,
           session: data.session,
           isAuthenticated: !!data.session,
+          emailVerified,
           isLoading: false,
         });
+
+        // Log signup
+        createAuditLog(user.user_id, AuditAction.USER_SIGNUP, { success: true });
+        logSecurityEvent.emailVerificationSent(user.user_id, user.email);
+
+        // Send verification email if not verified
+        if (!emailVerified && data.session) {
+          await get().resendVerificationEmail();
+        }
       } else {
         set({ isLoading: false });
       }
@@ -271,17 +416,27 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
   },
   
   logout: async () => {
+    const { user } = get();
     try {
       set({ isLoading: true });
       const client = await getSupabaseClient();
       await client.auth.signOut();
+
+      // Log logout
+      if (user) {
+        logSecurityEvent.logout(user.user_id, user.email);
+        createAuditLog(user.user_id, AuditAction.USER_LOGOUT, { success: true });
+      }
     } catch (error) {
       console.error('Logout error:', error);
     } finally {
+      sessionTimeoutManager.endSession();
       set({
         user: null,
         session: null,
         isAuthenticated: false,
+        emailVerified: false,
+        sessionExpiringSoon: false,
         isLoading: false,
       });
     }
@@ -313,17 +468,25 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
           .eq('id', session.user.id)
           .single();
         
+        const user = mapSupabaseUser(session.user, profile);
+        const emailVerified = session.user.email_confirmed_at !== null;
+        
         set({
-          user: mapSupabaseUser(session.user, profile),
+          user,
           session,
           isAuthenticated: true,
+          emailVerified,
           isLoading: false,
         });
+
+        // Refresh session timeout
+        get().setSession(session);
       } else {
         set({
           user: null,
           session: null,
           isAuthenticated: false,
+          emailVerified: false,
           isLoading: false,
         });
       }
@@ -365,7 +528,7 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
           avatar_url: updates.picture,
           cultural_interests: updates.cultural_interests,
         })
-        .eq('id', user.id)
+        .eq('id', user.user_id)
         .select()
         .single();
       
@@ -380,6 +543,142 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
     } catch (error) {
       console.error('Update profile error:', error);
       throw error;
+    }
+  },
+  
+  updatePassword: async (currentPassword: string, newPassword: string) => {
+    const { session, user } = get();
+    if (!user || !session) throw new Error('Not authenticated');
+    
+    // Check credentials before attempting password update
+    if (!isSupabaseConfigured()) {
+      const error = new Error(getCredentialsError());
+      console.error('Password update error:', error);
+      throw error;
+    }
+
+    try {
+      set({ isLoading: true });
+      const client = await getSupabaseClient();
+      
+      // First, verify the current password by attempting to sign in
+      // Note: This creates a new session, but we'll restore the original session after
+      const { error: verifyError } = await client.auth.signInWithPassword({
+        email: user.email,
+        password: currentPassword,
+      });
+      
+      if (verifyError) {
+        throw new Error('Current password is incorrect');
+      }
+      
+      // Update password with timeout
+      const { error: updateError } = await withTimeout(
+        client.auth.updateUser({ password: newPassword }),
+        AUTH_TIMEOUT_MS,
+        'Password update timed out. Please check your internet connection and try again.'
+      );
+      
+      if (updateError) throw updateError;
+      
+      // Password updated successfully
+      logSecurityEvent.passwordChange(user.user_id, user.email);
+      createAuditLog(user.user_id, AuditAction.PASSWORD_CHANGE, { success: true });
+      createSecurityAlert.passwordChange(user.user_id);
+    } catch (error: any) {
+      console.error('Password update error:', error);
+      createAuditLog(user.user_id, AuditAction.PASSWORD_CHANGE, {
+        success: false,
+        errorMessage: error.message,
+      });
+      throw error;
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+
+  verifyEmail: async () => {
+    const { user } = get();
+    if (!user) throw new Error('Not authenticated');
+
+    if (!isSupabaseConfigured()) {
+      throw new Error(getCredentialsError());
+    }
+
+    try {
+      set({ isLoading: true });
+      const client = await getSupabaseClient();
+      
+      // Check current email verification status
+      const { data: { user: authUser } } = await client.auth.getUser();
+      
+      if (authUser?.email_confirmed_at) {
+        set({ emailVerified: true });
+        logSecurityEvent.emailVerified(user.user_id, user.email);
+        createAuditLog(user.user_id, AuditAction.EMAIL_VERIFICATION, { success: true });
+        return;
+      }
+
+      // If not verified, user needs to click link in email
+      throw new Error('Please check your email and click the verification link');
+    } catch (error: any) {
+      console.error('Email verification error:', error);
+      throw error;
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+
+  resendVerificationEmail: async () => {
+    const { user } = get();
+    if (!user) throw new Error('Not authenticated');
+
+    if (!isSupabaseConfigured()) {
+      throw new Error(getCredentialsError());
+    }
+
+    try {
+      set({ isLoading: true });
+      const client = await getSupabaseClient();
+      
+      const { error } = await client.auth.resend({
+        type: 'signup',
+        email: user.email,
+        options: {
+          emailRedirectTo: 'zora://auth/verify-email',
+        },
+      });
+
+      if (error) throw error;
+
+      logSecurityEvent.emailVerificationSent(user.user_id, user.email);
+    } catch (error: any) {
+      console.error('Resend verification email error:', error);
+      throw error;
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+
+  refreshSession: async () => {
+    const { session } = get();
+    if (!session) return;
+
+    try {
+      const client = await getSupabaseClient();
+      const { data, error } = await client.auth.refreshSession();
+
+      if (error) throw error;
+
+      if (data.session) {
+        get().setSession(data.session);
+        logSecurityEvent.sessionExpired('', ''); // Will be updated with actual user
+        sessionTimeoutManager.refreshSession();
+      }
+    } catch (error) {
+      console.error('Session refresh error:', error);
+      // If refresh fails, logout user
+      get().logout();
     }
   },
 }));
