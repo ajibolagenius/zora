@@ -471,9 +471,13 @@ export default function ProductScreen() {
                   </View>
                 ))}
                 {reviews.length > 3 && (
-                  <TouchableOpacity style={styles.viewAllReviews}>
+                  <TouchableOpacity 
+                    style={styles.viewAllReviews}
+                    onPress={() => router.push(`/product/${id}/reviews`)}
+                    activeOpacity={0.8}
+                  >
                     <Text style={styles.viewAllReviewsText}>View All {reviews.length} Reviews</Text>
-                    <CaretRight size={16} color="#C1272D" weight="bold" />
+                    <CaretRight size={16} color={Colors.primary} weight="bold" />
                   </TouchableOpacity>
                 )}
               </View>

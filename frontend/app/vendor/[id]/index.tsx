@@ -25,11 +25,14 @@ import {
   Plus,
   SealCheck,
   MapPin,
+  PencilSimple,
+  CaretRight,
 } from 'phosphor-react-native';
 import { Colors } from '../../../constants/colors';
 import { Spacing, BorderRadius, TouchTarget } from '../../../constants/spacing';
 import { FontSize, FontWeight, FontFamily } from '../../../constants/typography';
-import { vendorService, productService, type Vendor, type Product } from '../../../services/mockDataService';
+import { vendorService, productService, reviewService, type Vendor, type Product, type Review } from '../../../services/mockDataService';
+import { Link } from 'expo-router';
 import { useCartStore } from '../../../stores/cartStore';
 import FloatingTabBar from '../../../components/ui/FloatingTabBar';
 
@@ -48,6 +51,7 @@ export default function VendorScreen() {
 
   const [vendor, setVendor] = useState<Vendor | null>(null);
   const [products, setProducts] = useState<Product[]>([]);
+  const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<TabType>('products');
   const [isFollowing, setIsFollowing] = useState(false);
@@ -65,11 +69,16 @@ export default function VendorScreen() {
         setVendor(vendorData);
         const vendorProducts = productService.getByVendor(vendorData.id);
         setProducts(vendorProducts);
+        // Fetch reviews for this vendor
+        const vendorReviews = reviewService.getByVendor(vendorData.id);
+        setReviews(vendorReviews);
       } else {
         const allVendors = vendorService.getAll();
         if (allVendors.length > 0) {
           setVendor(allVendors[0]);
           setProducts(productService.getByVendor(allVendors[0].id));
+          const vendorReviews = reviewService.getByVendor(allVendors[0].id);
+          setReviews(vendorReviews);
         }
       }
     } catch (error) {
@@ -345,84 +354,93 @@ export default function VendorScreen() {
         {/* Reviews Tab Content */}
         {activeTab === 'reviews' && (
           <Animated.View style={[styles.tabContent, { opacity: fadeAnim }]}>
-            {/* Rating Summary Card */}
-            <View style={styles.reviewSummaryCard}>
-              <View style={styles.reviewScoreSection}>
-                <Text style={styles.reviewScore}>{vendor.rating.toFixed(1)}</Text>
-                <View style={styles.reviewStars}>
-                  {[1, 2, 3, 4, 5].map((star) => (
-                    <Star
-                      key={star}
-                      size={20}
-                      color={star <= Math.floor(vendor.rating) ? Colors.secondary : 'rgba(255,255,255,0.15)'}
-                      weight="fill"
-                    />
-                  ))}
+            {/* Reviews Section Header */}
+            <View style={styles.reviewsHeader}>
+              <View>
+                <Text style={styles.reviewsTitle}>Customer Reviews</Text>
+                <View style={styles.reviewsRating}>
+                  <Star size={16} color={Colors.secondary} weight="fill" />
+                  <Text style={styles.reviewsRatingText}>
+                    {vendor.rating.toFixed(1)} ({vendor.review_count || reviews.length} reviews)
+                  </Text>
                 </View>
-                <Text style={styles.reviewCountText}>
-                  {vendor.review_count.toLocaleString()} reviews
-                </Text>
               </View>
-              
-              {/* Rating Bars */}
-              <View style={styles.ratingBars}>
-                {[5, 4, 3, 2, 1].map((rating) => {
-                  const percentage = rating === 5 ? 75 : rating === 4 ? 18 : rating === 3 ? 5 : rating === 2 ? 1 : 1;
-                  return (
-                    <View key={rating} style={styles.ratingBarRow}>
-                      <Text style={styles.ratingBarLabel}>{rating}</Text>
-                      <Star size={12} color={Colors.secondary} weight="fill" />
-                      <View style={styles.ratingBarTrack}>
-                        <Animated.View style={[styles.ratingBarFill, { width: `${percentage}%` }]} />
-                      </View>
-                      <Text style={styles.ratingBarPercentage}>{percentage}%</Text>
-                    </View>
-                  );
-                })}
-              </View>
+              <Link 
+                href={`/write-review?vendorId=${id}&vendorName=${encodeURIComponent(vendor.name)}`}
+                asChild
+              >
+                <TouchableOpacity style={styles.writeReviewButton}>
+                  <PencilSimple size={18} color={Colors.primary} weight="bold" />
+                  <Text style={styles.writeReviewText}>Write Review</Text>
+                </TouchableOpacity>
+              </Link>
             </View>
 
             {/* Reviews List */}
-            {[
-              { id: 1, name: 'Amara O.', initial: 'A', rating: 5, date: '1 week ago', text: 'Amazing quality spices! The jollof seasoning is absolutely perfect. Fast delivery and great packaging. Will definitely order again!', verified: true },
-              { id: 2, name: 'Kofi M.', initial: 'K', rating: 5, date: '2 weeks ago', text: 'Best suya spice I\'ve ever had! Authentic taste that reminds me of home. Highly recommend!', verified: true },
-              { id: 3, name: 'Ngozi E.', initial: 'N', rating: 4, date: '1 month ago', text: 'Great products overall. The egusi was fresh and well-packaged. Delivery was a bit slow but worth the wait.', verified: false },
-              { id: 4, name: 'David K.', initial: 'D', rating: 5, date: '3 weeks ago', text: 'Excellent service and authentic products. The scotch bonnet peppers are incredibly fresh!', verified: true },
-              { id: 5, name: 'Sarah M.', initial: 'S', rating: 4, date: '2 months ago', text: 'Good quality products. Packaging could be better but overall satisfied with my purchase.', verified: false },
-            ].map((review) => (
-              <View key={review.id} style={styles.reviewCard}>
-                <View style={styles.reviewHeader}>
-                  <View style={styles.reviewerAvatar}>
-                    <Text style={styles.reviewerInitial}>{review.initial}</Text>
-                  </View>
-                  <View style={styles.reviewerInfo}>
-                    <View style={styles.reviewerNameRow}>
-                      <Text style={styles.reviewerName}>{review.name}</Text>
-                      {review.verified && (
-                        <View style={styles.verifiedPurchaseBadge}>
-                          <SealCheck size={10} color={Colors.success} weight="fill" />
-                          <Text style={styles.verifiedPurchaseText}>Verified Purchase</Text>
+            {reviews.length > 0 ? (
+              <View style={styles.reviewsList}>
+                {reviews.slice(0, 3).map((review) => (
+                  <View key={review.id} style={styles.reviewCard}>
+                    <View style={styles.reviewHeader}>
+                      <Image
+                        source={{ uri: review.user_avatar || 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + review.user_name }}
+                        style={styles.reviewAvatar}
+                      />
+                      <View style={styles.reviewMeta}>
+                        <Text style={styles.reviewerName}>{review.user_name}</Text>
+                        <View style={styles.reviewStars}>
+                          {[1, 2, 3, 4, 5].map((star) => (
+                            <Star
+                              key={star}
+                              size={12}
+                              color={star <= review.rating ? Colors.secondary : Colors.borderDark}
+                              weight={star <= review.rating ? 'fill' : 'regular'}
+                            />
+                          ))}
+                          <Text style={styles.reviewDate}>
+                            {new Date(review.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
+                          </Text>
+                        </View>
+                      </View>
+                      {review.verified_purchase && (
+                        <View style={styles.verifiedBadge}>
+                          <SealCheck size={14} color={Colors.success} weight="fill" />
+                          <Text style={styles.verifiedText}>Verified</Text>
                         </View>
                       )}
                     </View>
-                    <View style={styles.reviewMetaRow}>
-                      <View style={styles.reviewStarsSmall}>
-                        {[1, 2, 3, 4, 5].map((star) => (
-                          <Star key={star} size={14} color={star <= review.rating ? Colors.secondary : 'rgba(255,255,255,0.15)'} weight="fill" />
-                        ))}
-                      </View>
-                      <Text style={styles.reviewDate}>{review.date}</Text>
-                    </View>
+                    {review.title && (
+                      <Text style={styles.reviewTitle}>{review.title}</Text>
+                    )}
+                    <Text style={styles.reviewContent} numberOfLines={3}>
+                      {review.content}
+                    </Text>
                   </View>
-                </View>
-                <Text style={styles.reviewText}>{review.text}</Text>
+                ))}
+                {reviews.length > 3 && (
+                  <TouchableOpacity 
+                    style={styles.viewAllReviews}
+                    onPress={() => router.push(`/vendor/${id}/reviews`)}
+                    activeOpacity={0.8}
+                  >
+                    <Text style={styles.viewAllReviewsText}>View All {reviews.length} Reviews</Text>
+                    <CaretRight size={16} color={Colors.primary} weight="bold" />
+                  </TouchableOpacity>
+                )}
               </View>
-            ))}
-
-            {/* Load More Button */}
-            <TouchableOpacity style={styles.loadMoreButton} activeOpacity={0.8}>
-              <Text style={styles.loadMoreText}>Load More Reviews</Text>
-            </TouchableOpacity>
+            ) : (
+              <View style={styles.noReviews}>
+                <Text style={styles.noReviewsText}>No reviews yet. Be the first to review!</Text>
+                <Link 
+                  href={`/write-review?vendorId=${id}&vendorName=${encodeURIComponent(vendor.name)}`}
+                  asChild
+                >
+                  <TouchableOpacity style={styles.firstReviewButton}>
+                    <Text style={styles.firstReviewText}>Write a Review</Text>
+                  </TouchableOpacity>
+                </Link>
+              </View>
+            )}
           </Animated.View>
         )}
 
@@ -863,160 +881,143 @@ const styles = StyleSheet.create({
     paddingTop: Spacing.base,
   },
   
-  // Reviews Tab - Summary Card
-  reviewSummaryCard: {
+  // Reviews Section
+  reviewsHeader: {
     flexDirection: 'row',
-    backgroundColor: Colors.cardDark,
-    borderRadius: BorderRadius.lg,
-    padding: Spacing.base,
-    marginBottom: Spacing.md,
-    gap: Spacing.lg,
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: Spacing.lg,
   },
-  reviewScoreSection: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingRight: Spacing.md,
-    borderRightWidth: 1,
-    borderRightColor: 'rgba(255, 255, 255, 0.05)',
-  },
-  reviewScore: {
-    fontFamily: FontFamily.displaySemiBold,
-    fontSize: 40,
+  reviewsTitle: {
+    fontFamily: FontFamily.display,
+    fontSize: FontSize.h3,
     color: Colors.textPrimary,
-  },
-  reviewStars: {
-    flexDirection: 'row',
-    gap: 2,
-    marginVertical: Spacing.xs,
-  },
-  reviewCountText: {
-    fontFamily: FontFamily.body,
-    fontSize: FontSize.caption,
-    color: Colors.textMuted,
-  },
-  ratingBars: {
-    flex: 1,
-    justifyContent: 'center',
-    gap: Spacing.xs,
-  },
-  ratingBarRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.sm,
     marginBottom: Spacing.xs,
   },
-  ratingBarLabel: {
-    fontFamily: FontFamily.bodySemiBold,
-    fontSize: FontSize.caption,
-    color: Colors.textPrimary,
-    width: 12,
+  reviewsRating: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.xs,
   },
-  ratingBarTrack: {
-    flex: 1,
-    height: 8,
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-    borderRadius: 4,
-    overflow: 'hidden',
-  },
-  ratingBarFill: {
-    height: '100%',
-    backgroundColor: Colors.secondary,
-    borderRadius: 4,
-  },
-  ratingBarPercentage: {
+  reviewsRatingText: {
     fontFamily: FontFamily.body,
-    fontSize: FontSize.caption,
+    fontSize: FontSize.small,
     color: Colors.textMuted,
-    width: 35,
-    textAlign: 'right',
   },
-  
-  // Review Card
+  writeReviewButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.xs,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.sm,
+    borderRadius: BorderRadius.full,
+    borderWidth: 1,
+    borderColor: Colors.primary,
+  },
+  writeReviewText: {
+    fontFamily: FontFamily.bodySemiBold,
+    fontSize: FontSize.small,
+    color: Colors.primary,
+  },
+  reviewsList: {
+    gap: Spacing.md,
+  },
   reviewCard: {
     backgroundColor: Colors.cardDark,
     borderRadius: BorderRadius.lg,
     padding: Spacing.base,
-    marginBottom: Spacing.md,
+    borderWidth: 1,
+    borderColor: Colors.borderDark,
   },
   reviewHeader: {
     flexDirection: 'row',
-    alignItems: 'flex-start',
-    marginBottom: Spacing.md,
-  },
-  reviewerAvatar: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: Colors.primary,
-    justifyContent: 'center',
     alignItems: 'center',
+    marginBottom: Spacing.sm,
   },
-  reviewerInitial: {
-    fontFamily: FontFamily.bodySemiBold,
-    color: Colors.textPrimary,
-    fontSize: FontSize.body,
+  reviewAvatar: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    marginRight: Spacing.sm,
   },
-  reviewerInfo: {
+  reviewMeta: {
     flex: 1,
-    marginLeft: Spacing.md,
-  },
-  reviewerNameRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.sm,
-    marginBottom: Spacing.xs,
   },
   reviewerName: {
     fontFamily: FontFamily.bodySemiBold,
-    fontSize: FontSize.body,
+    fontSize: FontSize.small,
     color: Colors.textPrimary,
+    marginBottom: 2,
   },
-  verifiedPurchaseBadge: {
+  reviewStars: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
-    backgroundColor: 'rgba(34, 197, 94, 0.15)',
-    paddingHorizontal: Spacing.sm,
-    paddingVertical: 3,
-    borderRadius: BorderRadius.full,
-    borderWidth: 1,
-    borderColor: Colors.success,
-  },
-  verifiedPurchaseText: {
-    fontFamily: FontFamily.bodySemiBold,
-    fontSize: FontSize.tiny,
-    color: Colors.success,
-  },
-  reviewMetaRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: Spacing.sm,
-  },
-  reviewStarsSmall: {
-    flexDirection: 'row',
     gap: 2,
   },
   reviewDate: {
     fontFamily: FontFamily.body,
     fontSize: FontSize.caption,
     color: Colors.textMuted,
+    marginLeft: Spacing.sm,
   },
-  reviewText: {
+  verifiedBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 2,
+    backgroundColor: Colors.success + '20',
+    paddingHorizontal: Spacing.sm,
+    paddingVertical: 2,
+    borderRadius: BorderRadius.full,
+  },
+  verifiedText: {
+    fontFamily: FontFamily.body,
+    fontSize: FontSize.caption,
+    color: Colors.success,
+  },
+  reviewTitle: {
+    fontFamily: FontFamily.bodySemiBold,
+    fontSize: FontSize.small,
+    color: Colors.textPrimary,
+    marginBottom: Spacing.xs,
+  },
+  reviewContent: {
     fontFamily: FontFamily.body,
     fontSize: FontSize.small,
     color: Colors.textMuted,
-    lineHeight: 22,
+    lineHeight: 20,
   },
-  loadMoreButton: {
+  viewAllReviews: {
+    flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
     paddingVertical: Spacing.md,
-    marginBottom: Spacing.md,
+    gap: Spacing.xs,
   },
-  loadMoreText: {
+  viewAllReviewsText: {
     fontFamily: FontFamily.bodySemiBold,
     fontSize: FontSize.small,
     color: Colors.primary,
+  },
+  noReviews: {
+    alignItems: 'center',
+    paddingVertical: Spacing.xl,
+    gap: Spacing.md,
+  },
+  noReviewsText: {
+    fontFamily: FontFamily.body,
+    fontSize: FontSize.small,
+    color: Colors.textMuted,
+  },
+  firstReviewButton: {
+    backgroundColor: Colors.primary,
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.sm,
+    borderRadius: BorderRadius.full,
+  },
+  firstReviewText: {
+    fontFamily: FontFamily.bodySemiBold,
+    fontSize: FontSize.small,
+    color: Colors.textPrimary,
   },
   
   // About Tab
