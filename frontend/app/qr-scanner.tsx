@@ -7,33 +7,82 @@ import {
   Alert,
   Vibration,
   Platform,
+  ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { X, FlashlightOn, FlashlightOff, QrCode } from 'phosphor-react-native';
 import { Colors } from '../constants/colors';
-import { Spacing, BorderRadius } from '../constants/spacing';
+import { Spacing, BorderRadius, Shadows } from '../constants/spacing';
 import { FontSize, FontFamily } from '../constants/typography';
 import { qrCodeScanner, promoQRService } from '../services/qrCodeService';
+
+type ScannerState = 'checking' | 'unavailable' | 'loading' | 'denied' | 'ready';
 
 export default function QRScannerScreen() {
   const router = useRouter();
   
-  // Check if CameraView is available (may not be on web)
+  // Platform check
   const isCameraAvailable = Platform.OS !== 'web' && CameraView !== undefined;
   
-  // Always call the hook (hooks must be called unconditionally)
+  // Camera permissions hook (always called)
   const [permission, requestPermission] = useCameraPermissions();
   
+  // UI state
   const [scanned, setScanned] = useState(false);
   const [torch, setTorch] = useState(false);
+  const [scannerState, setScannerState] = useState<ScannerState>('checking');
 
+  // Determine scanner state based on platform and permissions
   useEffect(() => {
-    if (permission && requestPermission && !permission.granted) {
-      requestPermission();
+    if (!isCameraAvailable || !CameraView) {
+      setScannerState('unavailable');
+      return;
     }
-  }, [permission, requestPermission]);
+
+    if (!permission) {
+      setScannerState('loading');
+      return;
+    }
+
+    if (!permission.granted) {
+      setScannerState('denied');
+      return;
+    }
+
+    setScannerState('ready');
+  }, [isCameraAvailable, permission]);
+
+  // Auto-request permission when available
+  useEffect(() => {
+    if (permission && requestPermission && !permission.granted && scannerState === 'denied') {
+      // Don't auto-request, let user click button
+    }
+  }, [permission, requestPermission, scannerState]);
+
+  const handleBack = () => {
+    if (router.canGoBack()) {
+      router.back();
+    } else {
+      router.replace('/(tabs)/profile');
+    }
+  };
+
+  const handleRequestPermission = async () => {
+    if (requestPermission) {
+      try {
+        await requestPermission();
+      } catch (error) {
+        console.error('Permission request error:', error);
+        Alert.alert(
+          'Permission Required',
+          'Camera access is required to scan QR codes. Please enable it in your device settings.',
+          [{ text: 'OK' }]
+        );
+      }
+    }
+  };
 
   const handleBarCodeScanned = async ({ type, data }: { type: string; data: string }) => {
     if (scanned) return;
@@ -41,141 +90,227 @@ export default function QRScannerScreen() {
     setScanned(true);
     Vibration.vibrate(100);
     
-    // Parse the QR code
-    const result = qrCodeScanner.parseQRCode(data);
-    
-    if (result.success) {
-      switch (result.type) {
-        case 'order':
-          Alert.alert(
-            'Order Found',
-            `Order #${result.data.orderId}`,
-            [
-              { text: 'View Order', onPress: () => router.push(`/order-tracking/${result.data.orderId}`) },
-              { text: 'Scan Again', onPress: () => setScanned(false) },
-            ]
-          );
-          break;
-          
-        case 'promo':
-          const promoResult = await promoQRService.applyScannedPromo(data);
-          Alert.alert(
-            promoResult.success ? 'Promo Code Applied!' : 'Invalid Promo',
-            promoResult.message,
-            [
-              { text: 'Continue Shopping', onPress: () => router.push('/(tabs)') },
-              { text: 'Scan Again', onPress: () => setScanned(false) },
-            ]
-          );
-          break;
-          
-        case 'vendor':
-          Alert.alert(
-            'Vendor Found',
-            'View this vendor\'s shop?',
-            [
-              { text: 'View Shop', onPress: () => router.push(`/vendor/${result.data.vendorId}`) },
-              { text: 'Scan Again', onPress: () => setScanned(false) },
-            ]
-          );
-          break;
-          
-        case 'product':
-          Alert.alert(
-            'Product Found',
-            'View this product?',
-            [
-              { text: 'View Product', onPress: () => router.push(`/product/${result.data.productId}`) },
-              { text: 'Scan Again', onPress: () => setScanned(false) },
-            ]
-          );
-          break;
-          
-        default:
-          Alert.alert('Unknown QR Code', 'This QR code is not recognized.', [
-            { text: 'Scan Again', onPress: () => setScanned(false) },
-          ]);
+    try {
+      // Parse the QR code
+      const result = qrCodeScanner.parseQRCode(data);
+      
+      if (result.success) {
+        switch (result.type) {
+          case 'order':
+            Alert.alert(
+              'Order Found',
+              `Order #${result.data.orderId}`,
+              [
+                { 
+                  text: 'View Order', 
+                  onPress: () => {
+                    router.push(`/order-tracking/${result.data.orderId}`);
+                    setScanned(false);
+                  }
+                },
+                { 
+                  text: 'Scan Again', 
+                  style: 'cancel',
+                  onPress: () => setScanned(false) 
+                },
+              ]
+            );
+            break;
+            
+          case 'promo':
+            try {
+              const promoResult = await promoQRService.applyScannedPromo(data);
+              Alert.alert(
+                promoResult.success ? 'Promo Code Applied!' : 'Invalid Promo',
+                promoResult.message,
+                [
+                  { 
+                    text: 'Continue Shopping', 
+                    onPress: () => {
+                      router.push('/(tabs)');
+                      setScanned(false);
+                    }
+                  },
+                  { 
+                    text: 'Scan Again', 
+                    style: 'cancel',
+                    onPress: () => setScanned(false) 
+                  },
+                ]
+              );
+            } catch (error) {
+              Alert.alert('Error', 'Failed to apply promo code. Please try again.', [
+                { text: 'OK', onPress: () => setScanned(false) },
+              ]);
+            }
+            break;
+            
+          case 'vendor':
+            Alert.alert(
+              'Vendor Found',
+              'View this vendor\'s shop?',
+              [
+                { 
+                  text: 'View Shop', 
+                  onPress: () => {
+                    router.push(`/vendor/${result.data.vendorId}`);
+                    setScanned(false);
+                  }
+                },
+                { 
+                  text: 'Scan Again', 
+                  style: 'cancel',
+                  onPress: () => setScanned(false) 
+                },
+              ]
+            );
+            break;
+            
+          case 'product':
+            Alert.alert(
+              'Product Found',
+              'View this product?',
+              [
+                { 
+                  text: 'View Product', 
+                  onPress: () => {
+                    router.push(`/product/${result.data.productId}`);
+                    setScanned(false);
+                  }
+                },
+                { 
+                  text: 'Scan Again', 
+                  style: 'cancel',
+                  onPress: () => setScanned(false) 
+                },
+              ]
+            );
+            break;
+            
+          default:
+            Alert.alert(
+              'Unknown QR Code', 
+              'This QR code is not recognized.',
+              [
+                { text: 'OK', onPress: () => setScanned(false) },
+              ]
+            );
+        }
+      } else {
+        Alert.alert(
+          'Scan Error', 
+          result.error || 'Could not read QR code',
+          [
+            { text: 'Try Again', onPress: () => setScanned(false) },
+          ]
+        );
       }
-    } else {
-      Alert.alert('Scan Error', result.error || 'Could not read QR code', [
-        { text: 'Try Again', onPress: () => setScanned(false) },
-      ]);
+    } catch (error) {
+      console.error('QR scan error:', error);
+      Alert.alert(
+        'Error',
+        'An error occurred while processing the QR code.',
+        [
+          { text: 'OK', onPress: () => setScanned(false) },
+        ]
+      );
     }
   };
 
-  // First check: Camera unavailable on this platform (web/unsupported)
-  if (!isCameraAvailable || !CameraView) {
+  // Render based on scanner state
+  if (scannerState === 'checking' || scannerState === 'loading') {
     return (
       <View style={styles.container}>
-        <SafeAreaView style={styles.permissionContainer}>
-          <View style={styles.permissionIconContainer}>
+        <SafeAreaView style={styles.centerContainer} edges={['top']}>
+          <View style={styles.iconContainer}>
             <QrCode size={64} color={Colors.textMuted} weight="duotone" />
           </View>
-          <Text style={styles.permissionTitle}>QR Scanner</Text>
-          <Text style={styles.permissionText}>
-            QR code scanning is not available on this platform. Please use the mobile app to scan QR codes.
+          <Text style={styles.title}>QR Scanner</Text>
+          <Text style={styles.subtitle}>
+            {scannerState === 'checking' ? 'Checking camera availability...' : 'Requesting camera permission...'}
+          </Text>
+          <ActivityIndicator size="large" color={Colors.primary} style={{ marginTop: Spacing.xl }} />
+        </SafeAreaView>
+      </View>
+    );
+  }
+
+  if (scannerState === 'unavailable') {
+    return (
+      <View style={styles.container}>
+        <SafeAreaView style={styles.centerContainer} edges={['top']}>
+          <View style={styles.header}>
+            <TouchableOpacity
+              style={styles.backButton}
+              onPress={handleBack}
+              activeOpacity={0.8}
+            >
+              <X size={24} color={Colors.textPrimary} weight="bold" />
+            </TouchableOpacity>
+            <View style={{ flex: 1 }} />
+          </View>
+          
+          <View style={styles.iconContainer}>
+            <QrCode size={64} color={Colors.textMuted} weight="duotone" />
+          </View>
+          <Text style={styles.title}>QR Scanner Unavailable</Text>
+          <Text style={styles.subtitle}>
+            QR code scanning is not available on this platform.{'\n'}Please use the mobile app to scan QR codes.
           </Text>
           <TouchableOpacity 
-            style={styles.cancelButton} 
-            onPress={() => router.back()}
+            style={styles.primaryButton} 
+            onPress={handleBack}
             activeOpacity={0.8}
           >
-            <Text style={styles.cancelButtonText}>Go Back</Text>
+            <Text style={styles.primaryButtonText}>Go Back</Text>
           </TouchableOpacity>
         </SafeAreaView>
       </View>
     );
   }
 
-  // Second check: Permission is loading (null state)
-  if (!permission) {
+  if (scannerState === 'denied') {
     return (
       <View style={styles.container}>
-        <SafeAreaView style={styles.permissionContainer}>
-          <View style={styles.permissionIconContainer}>
+        <SafeAreaView style={styles.centerContainer} edges={['top']}>
+          <View style={styles.header}>
+            <TouchableOpacity
+              style={styles.backButton}
+              onPress={handleBack}
+              activeOpacity={0.8}
+            >
+              <X size={24} color={Colors.textPrimary} weight="bold" />
+            </TouchableOpacity>
+            <View style={{ flex: 1 }} />
+          </View>
+          
+          <View style={styles.iconContainer}>
             <QrCode size={64} color={Colors.textMuted} weight="duotone" />
           </View>
-          <Text style={styles.permissionTitle}>QR Scanner</Text>
-          <Text style={styles.permissionText}>
-            Requesting camera permission...
-          </Text>
-        </SafeAreaView>
-      </View>
-    );
-  }
-
-  // Third check: Permission not granted
-  if (!permission.granted) {
-    return (
-      <View style={styles.container}>
-        <SafeAreaView style={styles.permissionContainer}>
-          <View style={styles.permissionIconContainer}>
-            <QrCode size={64} color={Colors.textMuted} weight="duotone" />
-          </View>
-          <Text style={styles.permissionTitle}>Camera Access Required</Text>
-          <Text style={styles.permissionText}>
-            To scan QR codes, please allow camera access
+          <Text style={styles.title}>Camera Access Required</Text>
+          <Text style={styles.subtitle}>
+            To scan QR codes, please allow camera access in your device settings.
           </Text>
           <TouchableOpacity 
-            style={styles.permissionButton} 
-            onPress={requestPermission}
+            style={styles.primaryButton} 
+            onPress={handleRequestPermission}
             activeOpacity={0.8}
           >
-            <Text style={styles.permissionButtonText}>Grant Permission</Text>
+            <Text style={styles.primaryButtonText}>Grant Permission</Text>
           </TouchableOpacity>
           <TouchableOpacity 
-            style={styles.cancelButton} 
-            onPress={() => router.back()}
+            style={styles.secondaryButton} 
+            onPress={handleBack}
             activeOpacity={0.8}
           >
-            <Text style={styles.cancelButtonText}>Cancel</Text>
+            <Text style={styles.secondaryButtonText}>Cancel</Text>
           </TouchableOpacity>
         </SafeAreaView>
       </View>
     );
   }
 
-  // All checks passed - render camera view
+  // Ready state - render camera
   return (
     <View style={styles.container}>
       <CameraView
@@ -190,17 +325,17 @@ export default function QRScannerScreen() {
       {/* Overlay */}
       <View style={styles.overlay}>
         {/* Header */}
-        <SafeAreaView style={styles.header} edges={['top']}>
+        <SafeAreaView style={styles.cameraHeader} edges={['top']}>
           <TouchableOpacity 
-            style={styles.closeButton} 
-            onPress={() => router.back()}
+            style={styles.headerButton} 
+            onPress={handleBack}
             activeOpacity={0.8}
           >
             <X size={24} color={Colors.textPrimary} weight="bold" />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>Scan QR Code</Text>
+          <Text style={styles.cameraHeaderTitle}>Scan QR Code</Text>
           <TouchableOpacity 
-            style={styles.torchButton} 
+            style={styles.headerButton} 
             onPress={() => setTorch(!torch)}
             activeOpacity={0.8}
           >
@@ -244,13 +379,33 @@ const styles = StyleSheet.create({
   camera: {
     flex: 1,
   },
-  permissionContainer: {
+  centerContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     padding: Spacing.xl,
   },
-  permissionIconContainer: {
+  header: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: Spacing.base,
+    paddingTop: Spacing.md,
+  },
+  backButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: Colors.cardDark,
+    borderWidth: 1,
+    borderColor: Colors.borderDark,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  iconContainer: {
     width: 120,
     height: 120,
     borderRadius: 60,
@@ -258,37 +413,42 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: Spacing.xl,
+    ...Shadows.md,
   },
-  permissionTitle: {
+  title: {
     fontFamily: FontFamily.display,
     fontSize: FontSize.h3,
     color: Colors.textPrimary,
-    marginTop: Spacing.base,
     marginBottom: Spacing.sm,
+    textAlign: 'center',
   },
-  permissionText: {
+  subtitle: {
     fontFamily: FontFamily.body,
     fontSize: FontSize.body,
     color: Colors.textMuted,
     textAlign: 'center',
+    lineHeight: 24,
     marginBottom: Spacing.xl,
   },
-  permissionButton: {
+  primaryButton: {
     backgroundColor: Colors.primary,
     paddingHorizontal: Spacing['2xl'],
     paddingVertical: Spacing.md,
     borderRadius: BorderRadius.full,
     marginBottom: Spacing.md,
+    minWidth: 200,
+    alignItems: 'center',
+    ...Shadows.md,
   },
-  permissionButtonText: {
+  primaryButtonText: {
     color: Colors.textPrimary,
     fontFamily: FontFamily.bodyBold,
     fontSize: FontSize.body,
   },
-  cancelButton: {
+  secondaryButton: {
     paddingVertical: Spacing.md,
   },
-  cancelButtonText: {
+  secondaryButtonText: {
     color: Colors.textMuted,
     fontFamily: FontFamily.body,
     fontSize: FontSize.body,
@@ -297,14 +457,14 @@ const styles = StyleSheet.create({
     ...StyleSheet.absoluteFillObject,
     justifyContent: 'space-between',
   },
-  header: {
+  cameraHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: Spacing.base,
     paddingVertical: Spacing.md,
   },
-  closeButton: {
+  headerButton: {
     width: 44,
     height: 44,
     borderRadius: 22,
@@ -314,21 +474,10 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: Colors.borderDark,
   },
-  headerTitle: {
+  cameraHeaderTitle: {
     fontFamily: FontFamily.display,
     fontSize: FontSize.h4,
-    fontWeight: '600',
     color: Colors.textPrimary,
-  },
-  torchButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: Colors.borderDark,
   },
   scannerContainer: {
     flex: 1,
