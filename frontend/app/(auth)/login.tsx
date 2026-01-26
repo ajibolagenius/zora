@@ -399,7 +399,7 @@ const styles = StyleSheet.create({
         height: 20,
         borderRadius: BorderRadius.sm,
         borderWidth: 1.5, // Per Design System
-        borderColor: 'rgba(255, 255, 255, 0.3)', // Per Design System
+        borderColor: Colors.white20 + '4D', // 30% opacity
         backgroundColor: 'transparent',
         justifyContent: 'center',
         alignItems: 'center',
@@ -446,7 +446,7 @@ const styles = StyleSheet.create({
     dividerLine: {
         flex: 1,
         height: 1,
-        backgroundColor: 'rgba(255, 255, 255, 0.1)',
+        backgroundColor: Colors.white10,
     },
     dividerText: {
         fontFamily: FontFamily.body,

@@ -521,7 +521,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: Spacing.base,
         gap: Spacing.sm,
         borderWidth: 1,
-        borderColor: 'rgba(255, 255, 255, 0.05)',
+        borderColor: Colors.borderDark,
     },
     searchInput: {
         flex: 1,
@@ -628,7 +628,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         paddingTop: Spacing.sm,
         borderTopWidth: 1,
-        borderTopColor: 'rgba(255, 255, 255, 0.05)',
+        borderTopColor: Colors.borderDark,
     },
     orderTotal: {
         fontFamily: FontFamily.displaySemiBold,

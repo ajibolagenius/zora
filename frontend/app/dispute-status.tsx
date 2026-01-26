@@ -306,7 +306,7 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.md,
     backgroundColor: Colors.backgroundDark,
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255, 255, 255, 0.05)',
+    borderBottomColor: 'Colors.borderDark',
   },
   backButton: {
     width: 44,
@@ -314,7 +314,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     borderRadius: 22,
-    backgroundColor: 'rgba(0, 0, 0, 0.3)',
+    backgroundColor: Colors.black30,
   },
   headerTitle: {
     fontFamily: FontFamily.displaySemiBold,
@@ -340,7 +340,7 @@ const styles = StyleSheet.create({
     borderRadius: BorderRadius.xl,
     padding: Spacing.lg,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.05)',
+    borderColor: 'Colors.borderDark',
   },
   headerCardTop: {
     flexDirection: 'row',
@@ -365,9 +365,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: Spacing.xs,
-    backgroundColor: 'rgba(255, 204, 0, 0.1)',
+    backgroundColor: Colors.secondary10,
     borderWidth: 1,
-    borderColor: 'rgba(255, 204, 0, 0.25)',
+    borderColor: Colors.secondary + '40', // 25% opacity
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.sm,
     borderRadius: BorderRadius.full,
@@ -376,7 +376,7 @@ const styles = StyleSheet.create({
     width: 10,
     height: 10,
     borderRadius: 5,
-    backgroundColor: 'rgba(255, 204, 0, 0.3)',
+    backgroundColor: Colors.secondary + '4D', // 30% opacity
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -394,7 +394,7 @@ const styles = StyleSheet.create({
   },
   headerDivider: {
     height: 1,
-    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+    backgroundColor: 'Colors.white08',
     marginBottom: Spacing.base,
   },
   headerCardBottom: {
@@ -443,10 +443,10 @@ const styles = StyleSheet.create({
     top: 32,
     bottom: 0,
     width: 2,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    backgroundColor: 'Colors.white10',
   },
   timelineLineCompleted: {
-    backgroundColor: 'rgba(204, 0, 0, 0.3)',
+    backgroundColor: 'Colors.primary30',
   },
   timelineLineActive: {
     backgroundColor: Colors.primary,
@@ -463,7 +463,7 @@ const styles = StyleSheet.create({
     width: 20,
     height: 20,
     borderRadius: 10,
-    backgroundColor: 'rgba(204, 0, 0, 0.2)',
+    backgroundColor: 'Colors.primary20',
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -478,7 +478,7 @@ const styles = StyleSheet.create({
     height: 14,
     borderRadius: 7,
     borderWidth: 2,
-    borderColor: 'rgba(255, 255, 255, 0.2)',
+    borderColor: Colors.white20,
     backgroundColor: Colors.backgroundDark,
   },
   timelineContent: {
@@ -520,7 +520,7 @@ const styles = StyleSheet.create({
     borderRadius: BorderRadius.xl,
     padding: Spacing.lg,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.05)',
+    borderColor: 'Colors.borderDark',
     gap: Spacing.lg,
   },
   detailSection: {
@@ -556,7 +556,7 @@ const styles = StyleSheet.create({
     padding: Spacing.md,
     borderRadius: BorderRadius.md,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.05)',
+    borderColor: 'Colors.borderDark',
   },
   itemName: {
     fontFamily: FontFamily.body,
@@ -575,7 +575,7 @@ const styles = StyleSheet.create({
     padding: Spacing.md,
     borderRadius: BorderRadius.md,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.05)',
+    borderColor: 'Colors.borderDark',
   },
   descriptionText: {
     fontFamily: FontFamily.body,
@@ -595,7 +595,7 @@ const styles = StyleSheet.create({
     borderRadius: BorderRadius.md,
     overflow: 'hidden',
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
+    borderColor: 'Colors.white10',
   },
   evidenceImage: {
     width: '100%',
@@ -608,7 +608,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.backgroundDark,
     borderWidth: 1.5,
     borderStyle: 'dashed',
-    borderColor: 'rgba(255, 255, 255, 0.15)',
+    borderColor: Colors.borderOutline,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -620,7 +620,7 @@ const styles = StyleSheet.create({
     padding: Spacing.xl,
     borderWidth: 1.5,
     borderStyle: 'dashed',
-    borderColor: 'rgba(255, 255, 255, 0.1)',
+    borderColor: 'Colors.white10',
     alignItems: 'center',
     gap: Spacing.md,
   },
@@ -655,7 +655,7 @@ const styles = StyleSheet.create({
     paddingBottom: Spacing.xl,
     backgroundColor: Colors.backgroundDark,
     borderTopWidth: 1,
-    borderTopColor: 'rgba(255, 255, 255, 0.05)',
+    borderTopColor: 'Colors.borderDark',
   },
   contactButton: {
     flexDirection: 'row',

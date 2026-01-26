@@ -208,7 +208,7 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: 'rgba(0, 0, 0, 0.4)',
+    backgroundColor: Colors.black40,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -258,7 +258,7 @@ const styles = StyleSheet.create({
   },
   regionOverlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0, 0, 0, 0.35)',
+    backgroundColor: Colors.black35,
   },
   regionContent: {
     flex: 1,
@@ -274,7 +274,7 @@ const styles = StyleSheet.create({
   },
   regionCountries: {
     fontFamily: FontFamily.body,
-    color: 'rgba(255, 255, 255, 0.7)',
+    color: Colors.textMuted,
     fontSize: FontSize.small,
     marginTop: 2,
   },
@@ -283,7 +283,7 @@ const styles = StyleSheet.create({
     height: 26,
     borderRadius: 13,
     borderWidth: 1.5,
-    borderColor: 'rgba(255, 255, 255, 0.4)',
+    borderColor: Colors.white20 + '66', // 40% opacity
     backgroundColor: 'transparent',
     justifyContent: 'center',
     alignItems: 'center',

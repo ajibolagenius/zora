@@ -311,7 +311,7 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.md,
     backgroundColor: Colors.backgroundDark,
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255, 255, 255, 0.05)',
+    borderBottomColor: Colors.borderDark,
   },
   backButton: {
     width: 44,
@@ -319,7 +319,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     borderRadius: 22,
-    backgroundColor: 'rgba(0, 0, 0, 0.3)',
+    backgroundColor: Colors.black30,
   },
   headerTitle: {
     fontFamily: FontFamily.displaySemiBold,
@@ -346,7 +346,7 @@ const styles = StyleSheet.create({
     borderRadius: BorderRadius.lg,
     overflow: 'hidden',
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.05)',
+    borderColor: Colors.borderDark,
   },
   accordionHeader: {
     flexDirection: 'row',
@@ -373,7 +373,7 @@ const styles = StyleSheet.create({
   },
   accordionDivider: {
     height: 1,
-    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+    backgroundColor: Colors.white08,
     marginBottom: Spacing.md,
   },
   accordionItem: {
@@ -435,7 +435,7 @@ const styles = StyleSheet.create({
     fontSize: FontSize.body,
     color: Colors.textPrimary,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.05)',
+    borderColor: Colors.borderDark,
   },
   charCount: {
     position: 'absolute',
@@ -458,11 +458,11 @@ const styles = StyleSheet.create({
     borderRadius: BorderRadius.lg,
     borderWidth: 1.5,
     borderStyle: 'dashed',
-    borderColor: 'rgba(255, 255, 255, 0.15)',
+    borderColor: Colors.borderOutline,
     justifyContent: 'center',
     alignItems: 'center',
     gap: Spacing.xs,
-    backgroundColor: 'rgba(255, 255, 255, 0.02)',
+    backgroundColor: Colors.white03,
   },
   addPhotoText: {
     fontFamily: FontFamily.bodySemiBold,
@@ -486,7 +486,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: 'rgba(0, 0, 0, 0.15)',
+    backgroundColor: Colors.black30 + '50', // ~15% opacity
   },
   removeImageButton: {
     position: 'absolute',
@@ -512,11 +512,11 @@ const styles = StyleSheet.create({
     borderRadius: BorderRadius.lg,
     padding: Spacing.base,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.05)',
+    borderColor: Colors.borderDark,
   },
   optionCardSelected: {
     borderColor: Colors.primary,
-    backgroundColor: 'rgba(204, 0, 0, 0.1)',
+    backgroundColor: Colors.primary10,
   },
   optionContent: {
     flex: 1,
@@ -541,7 +541,7 @@ const styles = StyleSheet.create({
     height: 22,
     borderRadius: 11,
     borderWidth: 2,
-    borderColor: 'rgba(255, 255, 255, 0.2)',
+    borderColor: Colors.white20,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -566,7 +566,7 @@ const styles = StyleSheet.create({
     paddingBottom: Spacing.xl,
     backgroundColor: Colors.backgroundDark,
     borderTopWidth: 1,
-    borderTopColor: 'rgba(255, 255, 255, 0.05)',
+    borderTopColor: Colors.borderDark,
   },
   submitButton: {
     backgroundColor: Colors.primary,

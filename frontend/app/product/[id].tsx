@@ -162,7 +162,7 @@ export default function ProductScreen() {
                       resizeMode="cover"
                     >
                       <LinearGradient
-                        colors={['rgba(0,0,0,0.4)', 'transparent', 'rgba(0,0,0,0.6)']}
+                        colors={[Colors.black40, 'transparent', Colors.black50 + '99']} // 0.6 opacity = 99 hex
                         style={styles.heroGradient}
                       />
                     </ImageBackground>
@@ -213,7 +213,7 @@ export default function ProductScreen() {
                 resizeMode="cover"
               >
                 <LinearGradient
-                  colors={['rgba(0,0,0,0.4)', 'transparent', 'rgba(0,0,0,0.6)']}
+                  colors={[Colors.black40, 'transparent', Colors.black50 + '99']} // 0.6 opacity = 99 hex
                   style={styles.heroGradient}
                 />
               </ImageBackground>
@@ -584,9 +584,9 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    backgroundColor: Colors.white10,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.05)',
+    borderColor: Colors.borderDark,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -624,7 +624,7 @@ const styles = StyleSheet.create({
   dragHandle: {
     width: 48,
     height: 4,
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    backgroundColor: Colors.white20,
     borderRadius: 2,
     alignSelf: 'center',
     position: 'absolute',
@@ -675,16 +675,16 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   badgeOrganic: {
-    backgroundColor: 'rgba(74, 222, 128, 0.1)',
-    borderColor: 'rgba(74, 222, 128, 0.2)',
+    backgroundColor: Colors.success10,
+    borderColor: Colors.success20,
   },
   badgeTopRated: {
-    backgroundColor: 'rgba(250, 204, 21, 0.1)',
-    borderColor: 'rgba(250, 204, 21, 0.2)',
+    backgroundColor: Colors.secondary10,
+    borderColor: Colors.secondary20,
   },
   badgeEco: {
-    backgroundColor: 'rgba(45, 212, 191, 0.1)',
-    borderColor: 'rgba(45, 212, 191, 0.2)',
+    backgroundColor: Colors.info10,
+    borderColor: Colors.info20,
   },
   badgeText: {
     fontFamily: FontFamily.bodySemiBold,
@@ -708,9 +708,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: Spacing.base,
     borderRadius: BorderRadius.lg,
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    backgroundColor: Colors.white05,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.05)',
+    borderColor: Colors.borderDark,
     marginBottom: Spacing.lg,
     gap: Spacing.base,
   },
@@ -720,7 +720,7 @@ const styles = StyleSheet.create({
     borderRadius: 24,
     backgroundColor: Colors.backgroundDark,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
+    borderColor: Colors.white10,
   },
   vendorInfo: {
     flex: 1,
@@ -747,7 +747,7 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    backgroundColor: Colors.white10,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -756,7 +756,7 @@ const styles = StyleSheet.create({
   tabsContainer: {
     flexDirection: 'row',
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255, 255, 255, 0.05)',
+    borderBottomColor: Colors.borderDark,
     marginTop: Spacing.lg,
     marginBottom: Spacing.base,
   },
@@ -823,9 +823,9 @@ const styles = StyleSheet.create({
   },
   infoCard: {
     flex: 1,
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    backgroundColor: Colors.white05,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.05)',
+    borderColor: Colors.borderDark,
     borderRadius: BorderRadius.lg,
     padding: Spacing.base,
     gap: Spacing.md,
@@ -850,9 +850,9 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    backgroundColor: 'rgba(34, 23, 16, 0.9)',
+    backgroundColor: Colors.backgroundDark90,
     borderTopWidth: 1,
-    borderTopColor: 'rgba(255, 255, 255, 0.05)',
+    borderTopColor: Colors.borderDark,
     paddingHorizontal: Spacing.lg,
     paddingTop: Spacing.lg,
   },
@@ -864,10 +864,10 @@ const styles = StyleSheet.create({
   quantitySelector: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    backgroundColor: Colors.borderDark,
     borderRadius: BorderRadius.full,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
+    borderColor: Colors.white10,
     height: 48,
     paddingHorizontal: Spacing.xs,
   },
@@ -905,7 +905,7 @@ const styles = StyleSheet.create({
     marginTop: Spacing.xl,
     paddingTop: Spacing.lg,
     borderTopWidth: 1,
-    borderTopColor: 'rgba(255, 255, 255, 0.05)',
+    borderTopColor: Colors.borderDark,
   },
   reviewsHeader: {
     flexDirection: 'row',
@@ -948,11 +948,11 @@ const styles = StyleSheet.create({
     gap: Spacing.md,
   },
   reviewCard: {
-    backgroundColor: 'rgba(255, 255, 255, 0.03)',
+    backgroundColor: Colors.white03,
     borderRadius: BorderRadius.lg,
     padding: Spacing.base,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.05)',
+    borderColor: Colors.borderDark,
   },
   reviewHeader: {
     flexDirection: 'row',
@@ -989,7 +989,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 2,
-    backgroundColor: 'rgba(16, 185, 129, 0.1)',
+    backgroundColor: Colors.success10,
     paddingHorizontal: Spacing.sm,
     paddingVertical: 2,
     borderRadius: BorderRadius.full,

@@ -340,9 +340,9 @@ const styles = StyleSheet.create({
     width: 72,
     height: 72,
     borderRadius: 36,
-    backgroundColor: 'rgba(204, 0, 0, 0.12)',
+    backgroundColor: Colors.primary15, // Close to 0.12
     borderWidth: 1,
-    borderColor: 'rgba(204, 0, 0, 0.25)',
+    borderColor: Colors.primary + '40', // 25% opacity
     justifyContent: 'center',
     alignItems: 'center',
   },

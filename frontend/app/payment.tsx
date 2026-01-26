@@ -271,7 +271,7 @@ export default function PaymentScreen() {
           <Switch
             value={useZoraCredit}
             onValueChange={setUseZoraCredit}
-            trackColor={{ false: 'rgba(255,255,255,0.1)', true: Colors.primary }}
+            trackColor={{ false: Colors.white10, true: Colors.primary }}
             thumbColor="#FFFFFF"
           />
         </View>
@@ -408,7 +408,7 @@ const styles = StyleSheet.create({
   // Processing Overlay
   processingOverlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+    backgroundColor: Colors.black80,
     justifyContent: 'center',
     alignItems: 'center',
     zIndex: 100,
@@ -441,7 +441,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.base,
     paddingVertical: Spacing.md,
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255, 255, 255, 0.05)',
+    borderBottomColor: 'Colors.borderDark',
   },
   backButton: {
     width: 44,
@@ -488,7 +488,7 @@ const styles = StyleSheet.create({
     padding: Spacing.base,
     marginBottom: Spacing.lg,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.05)',
+    borderColor: 'Colors.borderDark',
   },
   zoraCreditLeft: {
     flexDirection: 'row',
@@ -523,7 +523,7 @@ const styles = StyleSheet.create({
     height: 22,
     borderRadius: 11,
     borderWidth: 2,
-    borderColor: 'rgba(255, 255, 255, 0.2)',
+    borderColor: Colors.white20,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -550,7 +550,7 @@ const styles = StyleSheet.create({
     borderRadius: BorderRadius.lg,
     padding: Spacing.base,
     borderWidth: 1.5,
-    borderColor: 'rgba(255, 255, 255, 0.05)',
+    borderColor: 'Colors.borderDark',
   },
   methodCardSelected: {
     borderColor: Colors.primary,
@@ -590,7 +590,7 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   methodSubtitleDisabled: {
-    color: 'rgba(255, 255, 255, 0.3)',
+    color: Colors.textMuted,
   },
   klarnaText: {
     fontFamily: FontFamily.bodySemiBold,
@@ -609,7 +609,7 @@ const styles = StyleSheet.create({
     borderRadius: BorderRadius.lg,
     padding: Spacing.base,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.05)',
+    borderColor: 'Colors.borderDark',
   },
   orderSummaryTitle: {
     fontFamily: FontFamily.displaySemiBold,
@@ -628,7 +628,7 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.sm,
     paddingBottom: Spacing.sm,
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255, 255, 255, 0.05)',
+    borderBottomColor: 'Colors.borderDark',
     borderStyle: 'dashed',
   },
   summaryLabel: {
@@ -682,7 +682,7 @@ const styles = StyleSheet.create({
     paddingTop: Spacing.base,
     backgroundColor: Colors.backgroundDark,
     borderTopWidth: 1,
-    borderTopColor: 'rgba(255, 255, 255, 0.05)',
+    borderTopColor: 'Colors.borderDark',
   },
   footerTotalRow: {
     flexDirection: 'row',

@@ -109,7 +109,7 @@ export default function OrderConfirmationScreen() {
           { opacity: fadeAnim, transform: [{ scale: scaleAnim }] }
         ]}>
           <View style={styles.successIcon}>
-            <Check size={40} color="#FFFFFF" weight="bold" />
+            <Check size={40} color={Colors.textPrimary} weight="bold" />
           </View>
         </Animated.View>
 
@@ -342,7 +342,7 @@ const styles = StyleSheet.create({
     paddingLeft: Spacing.base + 4,
     marginBottom: Spacing.lg,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.05)',
+    borderColor: Colors.borderDark,
     overflow: 'hidden',
     position: 'relative',
   },
@@ -394,7 +394,7 @@ const styles = StyleSheet.create({
   },
   progressBar: {
     height: 4,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    backgroundColor: Colors.white10,
     borderRadius: 2,
     marginBottom: Spacing.md,
     overflow: 'hidden',
@@ -418,12 +418,12 @@ const styles = StyleSheet.create({
   },
   mapBackground: {
     flex: 1,
-    backgroundColor: '#E8DED4',
+    backgroundColor: Colors.backgroundLight,
     position: 'relative',
   },
   mapRoad: {
     position: 'absolute',
-    backgroundColor: '#D4C8BC',
+    backgroundColor: Colors.textMuted + '80', // Using textMuted with 50% opacity for map road
   },
   mapRoadH1: {
     left: 0,
@@ -458,7 +458,7 @@ const styles = StyleSheet.create({
     borderRadius: 6,
     backgroundColor: Colors.secondary,
     borderWidth: 2,
-    borderColor: '#FFFFFF',
+    borderColor: Colors.textPrimary,
   },
   
   // Referral Card
@@ -470,7 +470,7 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.xl,
     borderWidth: 1.5,
     borderStyle: 'dashed',
-    borderColor: 'rgba(255, 204, 0, 0.4)',
+    borderColor: Colors.secondary + '66', // 40% opacity
   },
   referralHeader: {
     flexDirection: 'row',
@@ -481,7 +481,7 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: BorderRadius.md,
-    backgroundColor: 'rgba(255, 204, 0, 0.15)',
+    backgroundColor: Colors.secondary15,
     justifyContent: 'center',
     alignItems: 'center',
   },

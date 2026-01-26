@@ -155,7 +155,7 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: 'rgba(0, 0, 0, 0.4)',
+    backgroundColor: Colors.black40,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -193,7 +193,7 @@ const styles = StyleSheet.create({
   },
   regionOverlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0, 0, 0, 0.45)',
+    backgroundColor: Colors.black50, // Close to 0.45
   },
   regionContent: {
     flex: 1,
@@ -209,7 +209,7 @@ const styles = StyleSheet.create({
   regionCountries: {
     fontFamily: FontFamily.body,
     fontSize: FontSize.small,
-    color: 'rgba(255, 255, 255, 0.7)',
+    color: Colors.textMuted,
     marginBottom: Spacing.sm,
   },
   regionStats: {

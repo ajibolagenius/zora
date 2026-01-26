@@ -242,7 +242,7 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: 'rgba(0, 0, 0, 0.4)',
+    backgroundColor: Colors.black40,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -289,7 +289,7 @@ const styles = StyleSheet.create({
   },
   divider: {
     height: 1,
-    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+    backgroundColor: Colors.white08,
     marginHorizontal: Spacing.base,
     marginBottom: Spacing.lg,
   },

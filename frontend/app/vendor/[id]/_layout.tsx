@@ -2,16 +2,18 @@ import { Stack } from 'expo-router';
 import { Colors } from '../../../constants/colors';
 
 export default function VendorLayout() {
-  return (
-    <Stack
-      screenOptions={{
-        headerShown: false,
-        contentStyle: { backgroundColor: Colors.backgroundDark },
-        animation: 'slide_from_right',
-      }}
-    >
-      <Stack.Screen name="index" />
-      <Stack.Screen name="products" />
-    </Stack>
-  );
+    return (
+        <Stack
+            screenOptions={{
+                headerShown: false,
+                contentStyle: { backgroundColor: Colors.backgroundDark },
+                animation: 'slide_from_right',
+            }}
+        >
+            <Stack.Screen name="index" />
+            <Stack.Screen name="products" />
+            <Stack.Screen name="reviews" />
+            <Stack.Screen name="chat" />
+        </Stack>
+    );
 }

@@ -324,7 +324,7 @@ const styles = StyleSheet.create({
     width: 4,
     height: 4,
     borderRadius: 2,
-    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+    backgroundColor: Colors.white08,
   },
   routeLineContainer: {
     position: 'absolute',
@@ -397,7 +397,7 @@ const styles = StyleSheet.create({
     width: 50,
     height: 50,
     borderRadius: 25,
-    backgroundColor: 'rgba(204, 0, 0, 0.2)',
+    backgroundColor: Colors.primary20,
   },
   driverPin: {
     padding: Spacing.sm,
@@ -466,12 +466,12 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: 'rgba(0, 0, 0, 0.4)',
+    backgroundColor: Colors.black40,
     justifyContent: 'center',
     alignItems: 'center',
   },
   titleContainer: {
-    backgroundColor: 'rgba(0, 0, 0, 0.4)',
+    backgroundColor: Colors.black40,
     paddingHorizontal: Spacing.base,
     paddingVertical: Spacing.sm,
     borderRadius: BorderRadius.full,
@@ -501,7 +501,7 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: 'rgba(0, 0, 0, 0.4)',
+    backgroundColor: Colors.black40,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -532,7 +532,7 @@ const styles = StyleSheet.create({
   dragHandle: {
     width: 40,
     height: 4,
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    backgroundColor: Colors.white20,
     borderRadius: 2,
     alignSelf: 'center',
     marginTop: Spacing.md,
@@ -563,12 +563,12 @@ const styles = StyleSheet.create({
     color: Colors.textPrimary,
   },
   onTimeBadge: {
-    backgroundColor: 'rgba(34, 197, 94, 0.15)',
+    backgroundColor: Colors.success15,
     paddingHorizontal: Spacing.sm,
     paddingVertical: Spacing.xs,
     borderRadius: BorderRadius.sm,
     borderWidth: 1,
-    borderColor: 'rgba(34, 197, 94, 0.3)',
+    borderColor: Colors.success + '4D', // 30% opacity
   },
   onTimeText: {
     fontFamily: FontFamily.bodySemiBold,
@@ -577,7 +577,7 @@ const styles = StyleSheet.create({
   },
   progressBarBg: {
     height: 6,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    backgroundColor: Colors.white10,
     borderRadius: 3,
     overflow: 'hidden',
   },
@@ -596,7 +596,7 @@ const styles = StyleSheet.create({
     padding: Spacing.base,
     borderRadius: BorderRadius.lg,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.05)',
+    borderColor: Colors.borderDark,
   },
   driverPhoto: {
     position: 'relative',
@@ -637,7 +637,7 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   licensePlate: {
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    backgroundColor: Colors.white10,
     paddingHorizontal: Spacing.sm,
     paddingVertical: 2,
     borderRadius: BorderRadius.sm,
@@ -714,18 +714,18 @@ const styles = StyleSheet.create({
     width: 12,
     height: 12,
     borderRadius: 6,
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    backgroundColor: Colors.white20,
     zIndex: 10,
     marginTop: 6,
   },
   timelineLine: {
     width: 2,
     height: 28,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    backgroundColor: Colors.white10,
     marginVertical: Spacing.xs,
   },
   timelineLineCompleted: {
-    backgroundColor: 'rgba(204, 0, 0, 0.3)',
+    backgroundColor: Colors.primary30,
   },
   timelineLineActive: {
     backgroundColor: Colors.primary,

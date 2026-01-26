@@ -301,7 +301,7 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: BorderRadius.md,
-    backgroundColor: 'rgba(255, 204, 0, 0.15)',
+    backgroundColor: Colors.secondary15,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -331,7 +331,7 @@ const styles = StyleSheet.create({
     gap: Spacing.md,
     paddingVertical: Spacing.md,
     borderTopWidth: 1,
-    borderTopColor: 'rgba(255, 255, 255, 0.05)',
+    borderTopColor: Colors.borderDark,
   },
   itemImage: {
     width: 100,
@@ -420,7 +420,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.base,
     paddingTop: Spacing.base,
     borderTopWidth: 1,
-    borderTopColor: 'rgba(255, 255, 255, 0.05)',
+    borderTopColor: Colors.borderDark,
   },
   subtotalRow: {
     flexDirection: 'row',

@@ -432,7 +432,7 @@ const styles = StyleSheet.create({
     right: 0,
     padding: Spacing.xl,
     paddingBottom: Spacing['2xl'],
-    backgroundColor: 'rgba(34, 23, 16, 0.85)',
+    backgroundColor: Colors.backgroundDark85,
   },
   heroTitle: {
     fontFamily: FontFamily.display,
@@ -440,7 +440,7 @@ const styles = StyleSheet.create({
     color: Colors.textPrimary,
     textAlign: 'center',
     marginBottom: Spacing.sm,
-    textShadowColor: 'rgba(0, 0, 0, 0.5)',
+    textShadowColor: Colors.black50,
     textShadowOffset: { width: 0, height: 2 },
     textShadowRadius: 4,
   },

@@ -253,7 +253,7 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.md,
     backgroundColor: Colors.backgroundDark,
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255, 255, 255, 0.05)',
+    borderBottomColor: Colors.borderDark,
   },
   backButton: {
     width: 44,
@@ -261,7 +261,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     borderRadius: 22,
-    backgroundColor: 'rgba(0, 0, 0, 0.3)',
+    backgroundColor: Colors.black30,
   },
   headerTitle: {
     fontFamily: FontFamily.displaySemiBold,
@@ -304,18 +304,18 @@ const styles = StyleSheet.create({
     borderRadius: BorderRadius.lg,
     padding: Spacing.base,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.05)',
+    borderColor: Colors.borderDark,
   },
   issueTypeItemSelected: {
     borderColor: Colors.primary,
-    backgroundColor: 'rgba(204, 0, 0, 0.1)',
+    backgroundColor: Colors.primary10,
   },
   radioOuter: {
     width: 22,
     height: 22,
     borderRadius: 11,
     borderWidth: 2,
-    borderColor: 'rgba(255, 255, 255, 0.2)',
+    borderColor: Colors.white20,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -341,7 +341,7 @@ const styles = StyleSheet.create({
   // Items List
   itemsList: {
     borderTopWidth: 1,
-    borderTopColor: 'rgba(255, 255, 255, 0.05)',
+    borderTopColor: Colors.borderDark,
   },
   itemRow: {
     flexDirection: 'row',
@@ -349,7 +349,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingVertical: Spacing.base,
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255, 255, 255, 0.05)',
+    borderBottomColor: Colors.borderDark,
   },
   itemLeft: {
     flexDirection: 'row',
@@ -382,7 +382,7 @@ const styles = StyleSheet.create({
     height: 24,
     borderRadius: BorderRadius.sm,
     borderWidth: 2,
-    borderColor: 'rgba(255, 255, 255, 0.2)',
+    borderColor: Colors.white20,
     justifyContent: 'center',
     alignItems: 'center',
     marginLeft: Spacing.sm,
@@ -402,7 +402,7 @@ const styles = StyleSheet.create({
     paddingBottom: Spacing.xl,
     backgroundColor: Colors.backgroundDark,
     borderTopWidth: 1,
-    borderTopColor: 'rgba(255, 255, 255, 0.05)',
+    borderTopColor: Colors.borderDark,
   },
   continueButton: {
     backgroundColor: Colors.primary,
@@ -423,7 +423,7 @@ const styles = StyleSheet.create({
     }),
   },
   continueButtonDisabled: {
-    backgroundColor: 'rgba(204, 0, 0, 0.4)',
+    backgroundColor: Colors.primary + '66', // 40% opacity
     ...Platform.select({
       ios: {
         shadowOpacity: 0,

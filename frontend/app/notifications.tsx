@@ -19,16 +19,8 @@ import { Colors } from '../constants/colors';
 import { Spacing, BorderRadius } from '../constants/spacing';
 import { FontSize, FontFamily } from '../constants/typography';
 
-// Zora Brand Colors
-const ZORA_RED = '#CC0000';
-const ZORA_YELLOW = '#FFCC00';
-const ZORA_GREEN = '#22C55E';
-const ZORA_BLUE = '#3B82F6';
-const ZORA_PURPLE = '#9333EA';
-const ZORA_CARD = '#342418';
-const BACKGROUND_DARK = '#221710';
-const MUTED_TEXT = '#bc9a9a';
-const BORDER_COLOR = '#3a2727';
+// Zora Brand Colors - Use design system tokens where possible
+const ZORA_PURPLE = '#9333EA'; // Purple for rewards (not in design system)
 
 type TabType = 'all' | 'orders' | 'promos' | 'updates';
 
@@ -111,36 +103,36 @@ export default function NotificationsScreen() {
   const [activeTab, setActiveTab] = useState<TabType>('all');
 
   const getIconConfig = (type: string, isRead: boolean) => {
-    const opacity = isRead ? 0.5 : 1;
+    const opacityHex = isRead ? '80' : 'FF'; // 50% opacity = 80, 100% = FF
     switch (type) {
       case 'order':
         return {
           icon: Package,
-          bgColor: `rgba(59, 130, 246, ${opacity})`,
+          bgColor: `${Colors.info}${opacityHex}`,
           iconColor: Colors.textPrimary,
         };
       case 'promo':
         return {
           icon: Confetti,
-          bgColor: ZORA_YELLOW,
-          iconColor: BACKGROUND_DARK,
+          bgColor: Colors.secondary,
+          iconColor: Colors.backgroundDark,
         };
       case 'review':
         return {
           icon: Star,
-          bgColor: ZORA_GREEN,
+          bgColor: Colors.success,
           iconColor: Colors.textPrimary,
         };
       case 'reward':
         return {
           icon: PiggyBank,
-          bgColor: `rgba(147, 51, 234, ${opacity})`,
+          bgColor: `${ZORA_PURPLE}${opacityHex}`,
           iconColor: Colors.textPrimary,
         };
       default:
         return {
           icon: Package,
-          bgColor: ZORA_BLUE,
+          bgColor: Colors.info,
           iconColor: Colors.textPrimary,
         };
     }
@@ -282,14 +274,14 @@ export default function NotificationsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: BACKGROUND_DARK,
+    backgroundColor: Colors.backgroundDark,
   },
 
   // Header
   header: {
-    backgroundColor: 'rgba(34, 23, 16, 0.95)',
+    backgroundColor: Colors.tabBarBackground,
     borderBottomWidth: 1,
-    borderBottomColor: BORDER_COLOR,
+    borderBottomColor: Colors.borderDark,
   },
   headerTop: {
     flexDirection: 'row',
@@ -307,7 +299,7 @@ const styles = StyleSheet.create({
   markAllRead: {
     fontFamily: FontFamily.bodyBold,
     fontSize: FontSize.small,
-    color: ZORA_RED,
+    color: Colors.primary,
     letterSpacing: 0.3,
   },
 
@@ -317,7 +309,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     gap: 32,
     borderBottomWidth: 1,
-    borderBottomColor: BORDER_COLOR,
+    borderBottomColor: Colors.borderDark,
   },
   tab: {
     paddingBottom: 12,
@@ -325,12 +317,12 @@ const styles = StyleSheet.create({
     borderBottomColor: 'transparent',
   },
   tabActive: {
-    borderBottomColor: ZORA_RED,
+    borderBottomColor: Colors.primary,
   },
   tabText: {
     fontFamily: FontFamily.bodyBold,
     fontSize: FontSize.small,
-    color: MUTED_TEXT,
+    color: Colors.textMuted,
   },
   tabTextActive: {
     color: Colors.textPrimary,
@@ -368,7 +360,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'flex-start',
     gap: 16,
-    backgroundColor: ZORA_CARD,
+    backgroundColor: Colors.cardDark,
     borderRadius: BorderRadius.xl,
     padding: 16,
     position: 'relative',
@@ -403,12 +395,12 @@ const styles = StyleSheet.create({
   notificationTime: {
     fontFamily: FontFamily.bodyMedium,
     fontSize: 12,
-    color: MUTED_TEXT,
+    color: Colors.textMuted,
   },
   notificationDescription: {
     fontFamily: FontFamily.body,
     fontSize: FontSize.small,
-    color: MUTED_TEXT,
+    color: Colors.textMuted,
     lineHeight: 20,
   },
   unreadDot: {
@@ -418,6 +410,6 @@ const styles = StyleSheet.create({
     width: 10,
     height: 10,
     borderRadius: 5,
-    backgroundColor: ZORA_RED,
+    backgroundColor: Colors.primary,
   },
 });

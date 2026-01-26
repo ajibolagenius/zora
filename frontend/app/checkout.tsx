@@ -362,7 +362,7 @@ const styles = StyleSheet.create({
     padding: Spacing.base,
     marginBottom: Spacing.md,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.05)',
+    borderColor: Colors.borderDark,
   },
   addressCardSelected: {
     borderColor: Colors.secondary,
@@ -395,7 +395,7 @@ const styles = StyleSheet.create({
     color: Colors.textPrimary,
   },
   defaultBadge: {
-    backgroundColor: 'rgba(255, 204, 0, 0.2)',
+    backgroundColor: Colors.secondary20,
     paddingHorizontal: Spacing.sm,
     paddingVertical: 2,
     borderRadius: BorderRadius.sm,
@@ -418,7 +418,7 @@ const styles = StyleSheet.create({
     height: 22,
     borderRadius: 11,
     borderWidth: 2,
-    borderColor: 'rgba(255, 255, 255, 0.2)',
+    borderColor: Colors.white20,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -443,7 +443,7 @@ const styles = StyleSheet.create({
     borderRadius: BorderRadius.lg,
     borderWidth: 1.5,
     borderStyle: 'dashed',
-    borderColor: 'rgba(255, 255, 255, 0.15)',
+    borderColor: Colors.borderOutline,
   },
   addAddressText: {
     fontFamily: FontFamily.bodySemiBold,
@@ -534,7 +534,7 @@ const styles = StyleSheet.create({
     paddingTop: Spacing.base,
     backgroundColor: Colors.backgroundDark,
     borderTopWidth: 1,
-    borderTopColor: 'rgba(255, 255, 255, 0.05)',
+    borderTopColor: Colors.borderDark,
   },
   footerTotalRow: {
     flexDirection: 'row',

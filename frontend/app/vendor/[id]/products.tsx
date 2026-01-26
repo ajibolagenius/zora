@@ -472,7 +472,7 @@ const styles = StyleSheet.create({
     width: 30,
     height: 30,
     borderRadius: 15,
-    backgroundColor: 'rgba(0, 0, 0, 0.3)',
+    backgroundColor: Colors.black30,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -529,7 +529,7 @@ const styles = StyleSheet.create({
   // Filter Panel
   filterOverlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backgroundColor: Colors.black50,
     justifyContent: 'flex-end',
   },
   filterPanel: {
@@ -568,7 +568,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: Spacing.md,
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255, 255, 255, 0.05)',
+    borderBottomColor: Colors.borderDark,
   },
   filterOptionText: {
     fontFamily: FontFamily.body,
@@ -584,7 +584,7 @@ const styles = StyleSheet.create({
     height: 20,
     borderRadius: 10,
     borderWidth: 2,
-    borderColor: 'rgba(255, 255, 255, 0.2)',
+    borderColor: Colors.white20,
     justifyContent: 'center',
     alignItems: 'center',
   },
