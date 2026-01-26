@@ -25,6 +25,7 @@ import {
 import { Colors } from '../../constants/colors';
 import { Spacing, BorderRadius, Heights } from '../../constants/spacing';
 import { FontSize, FontFamily } from '../../constants/typography';
+import { Placeholders, AnimationDuration, AnimationEasing } from '../../constants';
 import { useAuthStore } from '../../stores/authStore';
 
 const NEARBY_VENDORS = [
@@ -58,14 +59,14 @@ export default function LocationScreen() {
     Animated.parallel([
       Animated.timing(fadeAnim, {
         toValue: 1,
-        duration: 400,
-        easing: Easing.out(Easing.cubic),
+        duration: AnimationDuration.default,
+        easing: AnimationEasing.standard,
         useNativeDriver: true,
       }),
       Animated.timing(slideAnim, {
         toValue: 0,
-        duration: 400,
-        easing: Easing.out(Easing.cubic),
+        duration: AnimationDuration.default,
+        easing: AnimationEasing.standard,
         useNativeDriver: true,
       }),
     ]).start();
@@ -123,7 +124,7 @@ export default function LocationScreen() {
               <MagnifyingGlass size={20} color={Colors.textMuted} weight="regular" />
               <TextInput
                 style={styles.searchInput}
-                placeholder="Enter postcode (e.g., SW9 8HQ)"
+                placeholder={Placeholders.form.postcode}
                 placeholderTextColor={Colors.textMuted}
                 value={searchQuery}
                 onChangeText={setSearchQuery}

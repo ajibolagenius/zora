@@ -25,27 +25,12 @@ import {
   TrendUp,
 } from 'phosphor-react-native';
 import { useProductSearch, useCategories, useRegions, usePriceRange, type ProductFilters } from '../hooks/useQueries';
-import { Colors } from '../constants/colors';
+import { Colors, TrendingSearches, SortOptions, RatingOptions, Placeholders, PlaceholderImages } from '../constants';
 
-// Popular/trending searches
-const TRENDING_SEARCHES = [
-  'Jollof rice',
-  'Plantain',
-  'Egusi',
-  'Palm oil',
-  'Suya spice',
-  'Fufu',
-];
-
-const SORT_OPTIONS = [
-  { id: 'rating', label: 'Top Rated' },
-  { id: 'price_asc', label: 'Price: Low to High' },
-  { id: 'price_desc', label: 'Price: High to Low' },
-  { id: 'name', label: 'Name A-Z' },
-  { id: 'newest', label: 'Newest First' },
-] as const;
-
-const RATING_OPTIONS = [4, 3, 2, 1] as const;
+// Use constants from app.ts
+const TRENDING_SEARCHES = TrendingSearches;
+const SORT_OPTIONS = SortOptions.products;
+const RATING_OPTIONS = RatingOptions;
 
 export default function SearchScreen() {
   const router = useRouter();
@@ -148,7 +133,7 @@ export default function SearchScreen() {
             <MagnifyingGlass size={20} color={Colors.textMuted} weight="regular" />
             <TextInput
               className="flex-1 ml-3 text-text-primary font-body text-base"
-              placeholder="Search products..."
+              placeholder={Placeholders.search.products}
               placeholderTextColor={Colors.textMuted}
               value={searchQuery}
               onChangeText={(text) => {
@@ -357,7 +342,7 @@ export default function SearchScreen() {
                 >
                   <View className="bg-card-dark rounded-xl overflow-hidden">
                     <Image
-                      source={{ uri: product.image_urls?.[0] || 'https://via.placeholder.com/200' }}
+                      source={{ uri: product.image_urls?.[0] || PlaceholderImages.image200 }}
                       className="w-full h-32"
                       resizeMode="cover"
                     />

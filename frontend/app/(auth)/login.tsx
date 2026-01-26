@@ -27,6 +27,7 @@ import {
 import { Colors } from '../../constants/colors';
 import { Spacing, BorderRadius, Heights } from '../../constants/spacing';
 import { FontSize, FontFamily } from '../../constants/typography';
+import { ErrorMessages } from '../../constants';
 import { useAuthStore } from '../../stores/authStore';
 
 type AuthMode = 'signin' | 'signup';
@@ -82,12 +83,12 @@ export default function LoginScreen() {
 
     const handleEmailAuth = async () => {
         if (!email || !password) {
-            Alert.alert('Missing Fields', 'Please enter your email and password');
+            Alert.alert(ErrorMessages.auth.missingFields, ErrorMessages.auth.missingFields);
             return;
         }
 
         if (mode === 'signup' && !name) {
-            Alert.alert('Missing Fields', 'Please enter your name');
+            Alert.alert(ErrorMessages.auth.missingName, ErrorMessages.auth.missingName);
             return;
         }
 
@@ -106,8 +107,8 @@ export default function LoginScreen() {
         } catch (error: any) {
             console.error('Auth error:', error);
             Alert.alert(
-                mode === 'signin' ? 'Sign In Failed' : 'Sign Up Failed',
-                error.message || 'An error occurred during authentication'
+                mode === 'signin' ? ErrorMessages.auth.signInFailed : ErrorMessages.auth.signUpFailed,
+                error.message || ErrorMessages.auth.generic
             );
         } finally {
             setLocalLoading(false);

@@ -36,14 +36,14 @@ export default function RegionsScreen() {
     Animated.parallel([
       Animated.timing(fadeAnim, {
         toValue: 1,
-        duration: 400,
-        easing: Easing.out(Easing.cubic),
+        duration: AnimationDuration.default,
+        easing: AnimationEasing.standard,
         useNativeDriver: true,
       }),
       Animated.timing(slideAnim, {
         toValue: 0,
-        duration: 400,
-        easing: Easing.out(Easing.cubic),
+        duration: AnimationDuration.default,
+        easing: AnimationEasing.standard,
         useNativeDriver: true,
       }),
     ]).start();

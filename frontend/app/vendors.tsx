@@ -18,11 +18,9 @@ import { FontSize, FontFamily } from '../constants/typography';
 import { vendorService, regionService, type Vendor, type Region } from '../services/mockDataService';
 import { VendorCard } from '../components/ui';
 
-const SORT_OPTIONS = [
-  { id: 'rating', label: 'Top Rated' },
-  { id: 'name', label: 'Name A-Z' },
-  { id: 'delivery', label: 'Fastest Delivery' },
-] as const;
+import { SortOptions, AnimationDuration, AnimationEasing } from '../constants';
+
+const SORT_OPTIONS = SortOptions.vendors;
 
 export default function VendorsScreen() {
   const router = useRouter();
@@ -49,14 +47,14 @@ export default function VendorsScreen() {
     Animated.parallel([
       Animated.timing(fadeAnim, {
         toValue: 1,
-        duration: 400,
-        easing: Easing.out(Easing.cubic),
+        duration: AnimationDuration.default,
+        easing: AnimationEasing.standard,
         useNativeDriver: true,
       }),
       Animated.timing(slideAnim, {
         toValue: 0,
-        duration: 400,
-        easing: Easing.out(Easing.cubic),
+        duration: AnimationDuration.default,
+        easing: AnimationEasing.standard,
         useNativeDriver: true,
       }),
     ]).start();

@@ -24,11 +24,12 @@ import {
 import { Colors } from '../../constants/colors';
 import { Spacing, BorderRadius } from '../../constants/spacing';
 import { FontSize, FontFamily, LetterSpacing } from '../../constants/typography';
+import { ErrorMessages, SuccessMessages, AlertMessages, CommonImages } from '../../constants';
 import { useAuthStore } from '../../stores/authStore';
 
 // Mock user data
 const USER_DATA = {
-  avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200',
+  avatar: CommonImages.defaultUser,
   firstName: 'Adaeze',
   lastName: 'Okonkwo',
   email: 'adaeze.okonkwo@email.com',
@@ -66,15 +67,15 @@ export default function PersonalInformationScreen() {
       }
       
       setIsEditing(false);
-      Alert.alert('Success', 'Your profile has been updated.');
+      Alert.alert(AlertMessages.titles.success, SuccessMessages.profile.updated);
     } catch (error: any) {
       console.error('Save error:', error);
-      Alert.alert('Error', error.message || 'Failed to update profile. Please try again.');
+      Alert.alert(AlertMessages.titles.error, error.message || ErrorMessages.form.updateFailed);
     }
   };
 
   const handleChangePhoto = () => {
-    Alert.alert('Change Photo', 'Photo upload feature coming soon!');
+    Alert.alert('Change Photo', AlertMessages.info.photoUploadComingSoon);
   };
 
   return (

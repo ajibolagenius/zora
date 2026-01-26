@@ -25,13 +25,7 @@ import { Colors } from '../../../constants/colors';
 import { Spacing, BorderRadius, Shadows } from '../../../constants/spacing';
 import { FontSize, FontFamily } from '../../../constants/typography';
 import { vendorService, messageService, type Vendor, type Message } from '../../../services/mockDataService';
-
-const QUICK_REPLIES = [
-    "What are your delivery hours?",
-    "Do you have this in stock?",
-    "Can I customize my order?",
-    "What's your return policy?",
-];
+import { QuickReplies, Placeholders, AnimationDuration, AnimationEasing } from '../../../constants';
 
 export default function VendorChatScreen() {
     const router = useRouter();
@@ -87,14 +81,14 @@ export default function VendorChatScreen() {
             Animated.parallel([
                 Animated.timing(fadeAnim, {
                     toValue: 1,
-                    duration: 300,
+                    duration: AnimationDuration.normal,
                     easing: Easing.out(Easing.cubic),
                     useNativeDriver: true,
                 }),
                 Animated.timing(slideAnim, {
                     toValue: 0,
-                    duration: 300,
-                    easing: Easing.out(Easing.cubic),
+                    duration: AnimationDuration.normal,
+                    easing: AnimationEasing.standard,
                     useNativeDriver: true,
                 }),
             ]).start();
@@ -407,7 +401,7 @@ export default function VendorChatScreen() {
                                 showsHorizontalScrollIndicator={false}
                                 contentContainerStyle={styles.quickRepliesContainer}
                             >
-                                {QUICK_REPLIES.map((reply, index) => (
+                                {QuickReplies.vendorChat.map((reply, index) => (
                                     <TouchableOpacity
                                         key={index}
                                         style={styles.quickReplyChip}
@@ -432,7 +426,7 @@ export default function VendorChatScreen() {
                             </TouchableOpacity>
                             <TextInput
                                 style={styles.textInput}
-                                placeholder="Type a message..."
+                                placeholder={Placeholders.form.message}
                                 placeholderTextColor={Colors.textMuted}
                                 value={inputText}
                                 onChangeText={setInputText}

@@ -26,6 +26,7 @@ import {
 import { Colors } from '../constants/colors';
 import { Spacing, BorderRadius } from '../constants/spacing';
 import { FontSize, FontFamily, LetterSpacing } from '../constants/typography';
+import { Placeholders } from '../constants';
 
 // Available colors from Design System for randomized icons
 const DESIGN_SYSTEM_COLORS = [
@@ -149,7 +150,7 @@ export default function HelpCenterScreen() {
             <MagnifyingGlass size={20} color={Colors.textMuted} weight="duotone" />
             <TextInput
               style={styles.searchInput}
-              placeholder="How can we help?"
+              placeholder={Placeholders.form.helpMessage}
               placeholderTextColor={Colors.textMuted}
               value={searchQuery}
               onChangeText={setSearchQuery}

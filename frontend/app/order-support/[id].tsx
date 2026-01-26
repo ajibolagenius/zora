@@ -22,6 +22,7 @@ import {
 import { Colors } from '../../constants/colors';
 import { Spacing, BorderRadius, Shadows } from '../../constants/spacing';
 import { FontSize, FontFamily } from '../../constants/typography';
+import { QuickReplies, Placeholders, AnimationDuration, AnimationEasing } from '../../constants';
 
 interface Message {
     id: string;
@@ -54,13 +55,6 @@ const INITIAL_MESSAGES: Message[] = [
     },
 ];
 
-const QUICK_REPLIES = [
-    "Where's my order?",
-    "Wrong item",
-    "Request refund",
-    "Speak to human",
-];
-
 export default function OrderSupportScreen() {
     const router = useRouter();
     const insets = useSafeAreaInsets();
@@ -80,13 +74,13 @@ export default function OrderSupportScreen() {
         Animated.parallel([
             Animated.timing(fadeAnim, {
                 toValue: 1,
-                duration: 300,
+                    duration: AnimationDuration.normal,
                 easing: Easing.out(Easing.cubic),
                 useNativeDriver: true,
             }),
             Animated.timing(slideAnim, {
                 toValue: 0,
-                duration: 300,
+                    duration: AnimationDuration.normal,
                 easing: Easing.out(Easing.cubic),
                 useNativeDriver: true,
             }),
@@ -288,13 +282,13 @@ export default function OrderSupportScreen() {
                 {/* Bottom Section */}
                 <View style={[styles.bottomSection, { paddingBottom: Math.max(insets.bottom, Spacing.base) }]}>
                     {/* Quick Replies */}
-                    {QUICK_REPLIES.length > 0 && (
+                    {QuickReplies.orderSupport.length > 0 && (
                         <ScrollView
                             horizontal
                             showsHorizontalScrollIndicator={false}
                             contentContainerStyle={styles.quickRepliesContainer}
                         >
-                            {QUICK_REPLIES.map((reply, index) => (
+                            {QuickReplies.orderSupport.map((reply, index) => (
                                 <TouchableOpacity
                                     key={index}
                                     style={styles.quickReplyChip}
@@ -317,7 +311,7 @@ export default function OrderSupportScreen() {
                         </TouchableOpacity>
                         <TextInput
                             style={styles.textInput}
-                            placeholder="Type a message..."
+                            placeholder={Placeholders.form.message}
                             placeholderTextColor={Colors.textMuted}
                             value={inputText}
                             onChangeText={setInputText}

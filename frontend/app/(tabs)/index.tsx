@@ -25,6 +25,7 @@ import {
 import { Colors } from '../../constants/colors';
 import { Spacing, BorderRadius, Heights } from '../../constants/spacing';
 import { FontSize, FontFamily } from '../../constants/typography';
+import { AnimationDuration, AnimationEasing } from '../../constants';
 import { FeaturedSlider, RegionCard, VendorCard, ProductCard } from '../../components/ui';
 import { 
   vendorService, 
@@ -46,7 +47,9 @@ interface HomeData {
   popular_products: Product[];
 }
 
-const PRODUCT_GAP = 8;
+import { UiConfig } from '../../constants';
+
+const PRODUCT_GAP = UiConfig.productGap;
 
 export default function HomeScreen() {
   const router = useRouter();
@@ -101,14 +104,14 @@ export default function HomeScreen() {
       Animated.parallel([
         Animated.timing(fadeAnim, {
           toValue: 1,
-          duration: 400,
-          easing: Easing.out(Easing.cubic),
+          duration: AnimationDuration.default,
+          easing: AnimationEasing.standard,
           useNativeDriver: true,
         }),
         Animated.timing(slideAnim, {
           toValue: 0,
-          duration: 400,
-          easing: Easing.out(Easing.cubic),
+          duration: AnimationDuration.default,
+          easing: AnimationEasing.standard,
           useNativeDriver: true,
         }),
       ]).start();

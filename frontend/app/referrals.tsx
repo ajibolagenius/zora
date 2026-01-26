@@ -27,6 +27,7 @@ import * as Clipboard from 'expo-clipboard';
 import { Colors } from '../constants/colors';
 import { Spacing, BorderRadius } from '../constants/spacing';
 import { FontSize, FontFamily, LetterSpacing } from '../constants/typography';
+import { SuccessMessages, ReferralConstants } from '../constants';
 import { useAuthStore } from '../stores/authStore';
 
 // Available colors from Design System for randomized icons
@@ -119,19 +120,21 @@ export default function ReferralsScreen() {
     }));
   }, []);
 
-  const referralCode = user?.referral_code || 'ZORA-REF-2024';
+  const referralCode = user?.referral_code || ReferralConstants.defaultReferralCode;
 
   const handleCopyCode = async () => {
     await Clipboard.setStringAsync(referralCode);
     setCopied(true);
-    Alert.alert('Copied!', 'Referral code copied to clipboard');
+    Alert.alert(SuccessMessages.copied, SuccessMessages.referral.codeCopied);
     setTimeout(() => setCopied(false), 2000);
   };
 
   const handleShare = async () => {
     try {
       await Share.share({
-        message: `Join Zora African Market with my code ${referralCode} and get £10 off your first order! 🛒🌍`,
+        message: ReferralConstants.shareMessageTemplate
+          .replace('{code}', referralCode)
+          .replace('{amount}', ReferralConstants.referralBonus.toString()),
         title: 'Share Zora African Market',
       });
     } catch (error) {

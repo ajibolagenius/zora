@@ -16,6 +16,7 @@ import { ArrowLeft, Funnel, X } from 'phosphor-react-native';
 import { Colors } from '../constants/colors';
 import { Spacing, BorderRadius, Heights } from '../constants/spacing';
 import { FontSize, FontFamily } from '../constants/typography';
+import { UiConfig, SortOptions, AnimationDuration, AnimationEasing } from '../constants';
 import { 
   productService, 
   regionService, 
@@ -27,14 +28,14 @@ import {
 import { ProductCard } from '../components/ui';
 import { useCartStore } from '../stores/cartStore';
 
-const SORT_OPTIONS = [
+const SORT_OPTIONS = SortOptions.products;
   { id: 'rating', label: 'Top Rated' },
   { id: 'price_asc', label: 'Price: Low to High' },
   { id: 'price_desc', label: 'Price: High to Low' },
   { id: 'name', label: 'Name A-Z' },
 ] as const;
 
-const PRODUCT_GAP = 8;
+const PRODUCT_GAP = UiConfig.productGap;
 
 export default function ProductsScreen() {
   const router = useRouter();
@@ -69,14 +70,14 @@ export default function ProductsScreen() {
     Animated.parallel([
       Animated.timing(fadeAnim, {
         toValue: 1,
-        duration: 400,
-        easing: Easing.out(Easing.cubic),
+        duration: AnimationDuration.default,
+        easing: AnimationEasing.standard,
         useNativeDriver: true,
       }),
       Animated.timing(slideAnim, {
         toValue: 0,
-        duration: 400,
-        easing: Easing.out(Easing.cubic),
+        duration: AnimationDuration.default,
+        easing: AnimationEasing.standard,
         useNativeDriver: true,
       }),
     ]).start();

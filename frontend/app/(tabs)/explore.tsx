@@ -24,7 +24,8 @@ import {
 } from 'phosphor-react-native';
 import { Colors } from '../../constants/colors';
 import { Spacing, BorderRadius, Heights } from '../../constants/spacing';
-import { FontSize, FontFamily } from '../../constants/typography'
+import { FontSize, FontFamily } from '../../constants/typography';
+import { AnimationDuration, AnimationEasing } from '../../constants';
 import { vendorService, type Vendor } from '../../services/mockDataService';
 
 type FilterType = 'open' | 'delivery' | 'pickup' | 'topRated';
@@ -67,14 +68,14 @@ export default function ExploreScreen() {
     Animated.parallel([
       Animated.timing(fadeAnim, {
         toValue: 1,
-        duration: 400,
-        easing: Easing.out(Easing.cubic),
+        duration: AnimationDuration.default,
+        easing: AnimationEasing.standard,
         useNativeDriver: true,
       }),
       Animated.timing(slideAnim, {
         toValue: 0,
-        duration: 400,
-        easing: Easing.out(Easing.cubic),
+        duration: AnimationDuration.default,
+        easing: AnimationEasing.standard,
         useNativeDriver: true,
       }),
     ]).start();

@@ -17,6 +17,7 @@ import { ArrowLeft, ArrowRight, Check } from 'phosphor-react-native';
 import { Colors } from '../../constants/colors';
 import { Spacing, BorderRadius, Heights } from '../../constants/spacing';
 import { FontSize, FontFamily } from '../../constants/typography';
+import { AnimationDuration, AnimationEasing, CommonImages } from '../../constants';
 
 const { width } = Dimensions.get('window');
 
@@ -25,31 +26,31 @@ const REGIONS = [
     id: 'west-africa',
     name: 'West Africa',
     countries: 'Nigeria, Ghana, Senegal, Mali...',
-    image: 'https://images.unsplash.com/photo-1590001155093-a3c66ab0c3ff?w=600',
+    image: CommonImages.westAfrica,
   },
   {
     id: 'east-africa',
     name: 'East Africa',
     countries: 'Kenya, Ethiopia, Tanzania, Uganda...',
-    image: 'https://images.unsplash.com/photo-1489392191049-fc10c97e64b6?w=600',
+    image: CommonImages.eastAfrica,
   },
   {
     id: 'southern-africa',
     name: 'Southern Africa',
     countries: 'South Africa, Zimbabwe, Botswana...',
-    image: 'https://images.unsplash.com/photo-1484318571209-661cf29a69c3?w=600',
+    image: CommonImages.southernAfrica,
   },
   {
     id: 'central-africa',
     name: 'Central Africa',
     countries: 'Congo, Cameroon, Gabon...',
-    image: 'https://images.unsplash.com/photo-1523805009345-7448845a9e53?w=600',
+    image: CommonImages.centralAfrica,
   },
   {
     id: 'north-africa',
     name: 'North Africa',
     countries: 'Morocco, Egypt, Tunisia, Algeria...',
-    image: 'https://images.unsplash.com/photo-1539635278303-d4002c07eae3?w=600',
+    image: CommonImages.northAfrica,
   },
 ];
 
@@ -77,14 +78,14 @@ export default function HeritageScreen() {
     Animated.parallel([
       Animated.timing(fadeAnim, {
         toValue: 1,
-        duration: 400,
-        easing: Easing.out(Easing.cubic),
+        duration: AnimationDuration.default,
+        easing: AnimationEasing.standard,
         useNativeDriver: true,
       }),
       Animated.timing(slideAnim, {
         toValue: 0,
-        duration: 400,
-        easing: Easing.out(Easing.cubic),
+        duration: AnimationDuration.default,
+        easing: AnimationEasing.standard,
         useNativeDriver: true,
       }),
     ]).start();

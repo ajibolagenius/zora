@@ -19,6 +19,7 @@ import { useProduct, useCreateReview } from '../hooks/useQueries';
 import { Colors } from '../constants/colors';
 import { Spacing, BorderRadius, Heights } from '../constants/spacing';
 import { FontSize, FontFamily, LetterSpacing } from '../constants/typography';
+import { Placeholders, ValidationLimits } from '../constants';
 
 export default function WriteReviewScreen() {
     const router = useRouter();
@@ -163,11 +164,11 @@ export default function WriteReviewScreen() {
                             </Text>
                             <TextInput
                                 style={styles.input}
-                                placeholder="Enter your name"
+                                placeholder={Placeholders.form.reviewName}
                                 placeholderTextColor={Colors.textMuted}
                                 value={userName}
                                 onChangeText={setUserName}
-                                maxLength={50}
+                                maxLength={ValidationLimits.maxNameLength}
                             />
                         </View>
 
@@ -178,7 +179,7 @@ export default function WriteReviewScreen() {
                             </Text>
                             <TextInput
                                 style={styles.input}
-                                placeholder="Summarize your experience"
+                                placeholder={Placeholders.form.reviewTitle}
                                 placeholderTextColor={Colors.textMuted}
                                 value={title}
                                 onChangeText={setTitle}
@@ -201,7 +202,7 @@ export default function WriteReviewScreen() {
                             </View>
                             <TextInput
                                 style={[styles.input, styles.textArea]}
-                                placeholder="Share details of your experience..."
+                                placeholder={Placeholders.form.reviewBody}
                                 placeholderTextColor={Colors.textMuted}
                                 value={comment}
                                 onChangeText={setComment}

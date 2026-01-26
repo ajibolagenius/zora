@@ -24,6 +24,7 @@ import {
 import { Colors } from '../../constants/colors';
 import { Spacing, BorderRadius, Heights } from '../../constants/spacing';
 import { FontSize, FontFamily } from '../../constants/typography';
+import { PlaceholderImages, AnimationDuration, AnimationEasing } from '../../constants';
 import { Button } from '../../components/ui';
 import { useCartStore } from '../../stores/cartStore';
 
@@ -45,14 +46,14 @@ export default function CartTab() {
     Animated.parallel([
       Animated.timing(fadeAnim, {
         toValue: 1,
-        duration: 400,
-        easing: Easing.out(Easing.cubic),
+        duration: AnimationDuration.default,
+        easing: AnimationEasing.standard,
         useNativeDriver: true,
       }),
       Animated.timing(slideAnim, {
         toValue: 0,
-        duration: 400,
-        easing: Easing.out(Easing.cubic),
+        duration: AnimationDuration.default,
+        easing: AnimationEasing.standard,
         useNativeDriver: true,
       }),
     ]).start();
@@ -132,7 +133,7 @@ export default function CartTab() {
               // Handle both image_url and image_urls array
               const productImage = item.product?.image_url || 
                 (item.product as any)?.image_urls?.[0] || 
-                'https://via.placeholder.com/100';
+                PlaceholderImages.image100;
               
               return (
                 <TouchableOpacity

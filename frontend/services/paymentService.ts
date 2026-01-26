@@ -4,6 +4,7 @@
  */
 
 import { Platform } from 'react-native';
+import { PaymentLimits } from '../constants';
 
 // Configuration
 const STRIPE_PUBLISHABLE_KEY = process.env.EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY || 'pk_test_your_stripe_publishable_key_here';
@@ -247,38 +248,41 @@ export const klarnaService = {
     const options = [];
     
     // Pay Later (Pay in 30 days)
+    const payLaterLimits = PaymentLimits.payLater;
     options.push({
       id: 'pay_later',
       name: 'Pay Later',
       description: 'Pay in 30 days. No interest.',
-      minAmount: 10,
-      maxAmount: 1000,
-      available: amount >= 10 && amount <= 1000,
+      minAmount: payLaterLimits.minAmount,
+      maxAmount: payLaterLimits.maxAmount,
+      available: amount >= payLaterLimits.minAmount && amount <= payLaterLimits.maxAmount,
     });
     
     // Pay in 3
-    if (amount >= 35) {
+    const payIn3Limits = PaymentLimits.payIn3;
+    if (amount >= payIn3Limits.minAmount) {
       const installment = (amount / 3).toFixed(2);
       options.push({
         id: 'pay_in_3',
         name: 'Pay in 3',
         description: `3 interest-free payments of £${installment}`,
-        minAmount: 35,
-        maxAmount: 1000,
-        available: amount >= 35 && amount <= 1000,
+        minAmount: payIn3Limits.minAmount,
+        maxAmount: payIn3Limits.maxAmount,
+        available: amount >= payIn3Limits.minAmount && amount <= payIn3Limits.maxAmount,
         installmentAmount: parseFloat(installment),
       });
     }
     
     // Financing (for larger amounts)
-    if (amount >= 99) {
+    const financingLimits = PaymentLimits.financing;
+    if (amount >= financingLimits.minAmount) {
       options.push({
         id: 'financing',
         name: 'Financing',
         description: 'Spread the cost over 6-36 months',
-        minAmount: 99,
-        maxAmount: 10000,
-        available: amount >= 99 && amount <= 10000,
+        minAmount: financingLimits.minAmount,
+        maxAmount: financingLimits.maxAmount,
+        available: amount >= financingLimits.minAmount && amount <= financingLimits.maxAmount,
       });
     }
     
@@ -341,14 +345,15 @@ export const clearpayService = {
     }
     
     const installment = (amount / 4).toFixed(2);
+    const payLaterLimits = PaymentLimits.payLater;
     return {
       available: true,
       installmentCount: 4,
       installmentAmount: parseFloat(installment),
       frequency: 'fortnightly',
       description: `4 interest-free payments of £${installment}`,
-      minAmount: 10,
-      maxAmount: 1000,
+      minAmount: payLaterLimits.minAmount,
+      maxAmount: payLaterLimits.maxAmount,
     };
   },
 };

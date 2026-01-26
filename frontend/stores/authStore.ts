@@ -36,8 +36,6 @@ const withTimeout = <T>(promise: Promise<T>, ms: number, errorMessage: string): 
   return Promise.race([promise, timeout]);
 };
 
-import { ApiConfig } from '../constants';
-
 const AUTH_TIMEOUT_MS = ApiConfig.authTimeout;
 
 interface AuthState {

@@ -24,24 +24,12 @@ import {
 import { Colors } from '../../../constants/colors';
 import { Spacing, BorderRadius, Heights } from '../../../constants/spacing';
 import { FontSize, FontFamily } from '../../../constants/typography';
+import { SortOptions, CategoryOptions, AnimationDuration, AnimationEasing } from '../../../constants';
 import { vendorService, productService, type Vendor, type Product } from '../../../services/mockDataService';
 import { useCartStore } from '../../../stores/cartStore';
 
-const SORT_OPTIONS = [
-  { id: 'popular', label: 'Most Popular' },
-  { id: 'newest', label: 'Newest First' },
-  { id: 'price_low', label: 'Price: Low to High' },
-  { id: 'price_high', label: 'Price: High to Low' },
-  { id: 'rating', label: 'Highest Rated' },
-];
-
-const CATEGORY_OPTIONS = [
-  { id: 'all', label: 'All Products' },
-  { id: 'spices', label: 'Spices' },
-  { id: 'grains', label: 'Grains' },
-  { id: 'oils', label: 'Oils' },
-  { id: 'snacks', label: 'Snacks' },
-];
+const SORT_OPTIONS = SortOptions.vendorProducts;
+const CATEGORY_OPTIONS = CategoryOptions;
 
 export default function VendorProductsScreen() {
   const router = useRouter();
@@ -90,14 +78,14 @@ export default function VendorProductsScreen() {
       Animated.parallel([
         Animated.timing(fadeAnim, {
           toValue: 1,
-          duration: 400,
-          easing: Easing.out(Easing.cubic),
+          duration: AnimationDuration.default,
+          easing: AnimationEasing.standard,
           useNativeDriver: true,
         }),
         Animated.timing(slideAnim, {
           toValue: 0,
-          duration: 400,
-          easing: Easing.out(Easing.cubic),
+          duration: AnimationDuration.default,
+          easing: AnimationEasing.standard,
           useNativeDriver: true,
         }),
       ]).start();
@@ -141,7 +129,7 @@ export default function VendorProductsScreen() {
     if (showFilters) {
       Animated.timing(filterSlideAnim, {
         toValue: 300,
-        duration: 250,
+        duration: AnimationDuration.fast,
         easing: Easing.in(Easing.cubic),
         useNativeDriver: true,
       }).start(() => setShowFilters(false));
@@ -149,7 +137,7 @@ export default function VendorProductsScreen() {
       setShowFilters(true);
       Animated.timing(filterSlideAnim, {
         toValue: 0,
-        duration: 300,
+        duration: AnimationDuration.normal,
         easing: Easing.out(Easing.cubic),
         useNativeDriver: true,
       }).start();

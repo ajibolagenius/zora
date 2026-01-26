@@ -35,6 +35,7 @@ import {
 import { Colors } from '../../constants/colors';
 import { Spacing, BorderRadius, TouchTarget } from '../../constants/spacing';
 import { FontSize, FontWeight, LetterSpacing, FontFamily } from '../../constants/typography';
+import { ImageUrlBuilders } from '../../constants';
 import { productService, vendorService, reviewService, type Product, type Vendor, type Review } from '../../services/mockDataService';
 import { useCartStore } from '../../stores/cartStore';
 import FloatingTabBar from '../../components/ui/FloatingTabBar';
@@ -436,7 +437,7 @@ export default function ProductScreen() {
                   <View key={review.id} style={styles.reviewCard}>
                     <View style={styles.reviewHeader}>
                       <Image
-                        source={{ uri: review.user_avatar || 'https://api.dicebear.com/7.x/avataaars/svg?seed=User' }}
+                        source={{ uri: review.user_avatar || ImageUrlBuilders.dicebearAvatar('User') }}
                         style={styles.reviewAvatar}
                       />
                       <View style={styles.reviewMeta}>

@@ -22,6 +22,7 @@ import {
 import { Colors } from '../../../constants/colors';
 import { Spacing, BorderRadius, Shadows } from '../../../constants/spacing';
 import { FontSize, FontFamily } from '../../../constants/typography';
+import { ImageUrlBuilders } from '../../../constants';
 import { productService, reviewService, type Product, type Review } from '../../../services/mockDataService';
 
 type SortOption = 'recent' | 'highest' | 'lowest' | 'helpful';
@@ -317,7 +318,7 @@ export default function ProductReviewsScreen() {
               <View key={review.id} style={styles.reviewCard}>
                 <View style={styles.reviewHeader}>
                   <Image
-                    source={{ uri: review.user_avatar || 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + review.user_name }}
+                    source={{ uri: review.user_avatar || ImageUrlBuilders.dicebearAvatar(review.user_name) }}
                     style={styles.reviewAvatar}
                   />
                   <View style={styles.reviewMeta}>

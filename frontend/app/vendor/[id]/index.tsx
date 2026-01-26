@@ -31,6 +31,7 @@ import {
 import { Colors } from '../../../constants/colors';
 import { Spacing, BorderRadius, TouchTarget } from '../../../constants/spacing';
 import { FontSize, FontWeight, FontFamily } from '../../../constants/typography';
+import { AnimationDuration, AnimationEasing, ImageUrlBuilders, ValidationLimits } from '../../../constants';
 import { vendorService, productService, reviewService, type Vendor, type Product, type Review } from '../../../services/mockDataService';
 import { Link } from 'expo-router';
 import { useCartStore } from '../../../stores/cartStore';
@@ -38,7 +39,7 @@ import FloatingTabBar from '../../../components/ui/FloatingTabBar';
 
 type TabType = 'products' | 'reviews' | 'about';
 
-const MAX_BIO_LENGTH = 100;
+const MAX_BIO_LENGTH = ValidationLimits.maxBioLength;
 
 export default function VendorScreen() {
     const router = useRouter();
@@ -97,14 +98,14 @@ export default function VendorScreen() {
             Animated.parallel([
                 Animated.timing(fadeAnim, {
                     toValue: 1,
-                    duration: 400,
-                    easing: Easing.out(Easing.cubic),
+                    duration: AnimationDuration.default,
+                    easing: AnimationEasing.standard,
                     useNativeDriver: true,
                 }),
                 Animated.timing(slideAnim, {
                     toValue: 0,
-                    duration: 400,
-                    easing: Easing.out(Easing.cubic),
+                    duration: AnimationDuration.default,
+                    easing: AnimationEasing.standard,
                     useNativeDriver: true,
                 }),
             ]).start();
@@ -387,7 +388,7 @@ export default function VendorScreen() {
                                     <View key={review.id} style={styles.reviewCard}>
                                         <View style={styles.reviewHeader}>
                                             <Image
-                                                source={{ uri: review.user_avatar || 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + review.user_name }}
+                                                source={{ uri: review.user_avatar || ImageUrlBuilders.dicebearAvatar(review.user_name) }}
                                                 style={styles.reviewAvatar}
                                             />
                                             <View style={styles.reviewMeta}>

@@ -1,0 +1,132 @@
+// Zora African Market Design Tokens - Asset Constants
+
+import { ApiEndpoints } from './api';
+
+/**
+ * Placeholder Image URLs
+ * Default images used when actual images are not available
+ */
+export const PlaceholderImages = {
+    // Product images
+    product: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=400',
+    productThumbnail: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=200',
+    productLarge: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800',
+
+    // Vendor images
+    vendorLogo: 'https://via.placeholder.com/40',
+    vendorCover: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800',
+    vendorAvatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Vendor',
+
+    // User images
+    userAvatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=User',
+    userAvatarDefault: 'https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=200',
+
+    // Generic placeholders
+    image: 'https://via.placeholder.com/200',
+    image100: 'https://via.placeholder.com/100',
+    image200: 'https://via.placeholder.com/200',
+    image400: 'https://via.placeholder.com/400',
+} as const;
+
+/**
+ * Image Size Presets
+ * Standard image sizes used throughout the app
+ */
+export const ImageSizes = {
+    // Thumbnail sizes
+    thumbnail: {
+        small: 100,
+        medium: 200,
+        large: 400,
+        xlarge: 600,
+        xxlarge: 800,
+    },
+    // Avatar sizes
+    avatar: {
+        tiny: 24,
+        small: 40,
+        medium: 48,
+        large: 80,
+        xlarge: 100,
+        xxlarge: 200,
+    },
+    // Cover image sizes
+    cover: {
+        small: 400,
+        medium: 600,
+        large: 800,
+    },
+    // Product image sizes
+    product: {
+        thumbnail: 100,
+        small: 200,
+        medium: 400,
+        large: 600,
+        xlarge: 800,
+    },
+} as const;
+
+/**
+ * Image Service URL Builders
+ * Helper functions to generate image URLs from services
+ */
+export const ImageUrlBuilders = {
+    /**
+     * Generate Dicebear avatar URL
+     * @param seed - Seed for avatar generation (user name, ID, etc.)
+     * @param size - Optional size parameter
+     */
+    dicebearAvatar: (seed: string, size?: number): string => {
+        const sizeParam = size ? `&size=${size}` : '';
+        return `${ApiEndpoints.dicebear}?seed=${encodeURIComponent(seed)}${sizeParam}`;
+    },
+
+    /**
+     * Generate QR code URL
+     * @param data - Data to encode in QR code
+     * @param size - Size of QR code (default: 160x160)
+     */
+    qrCode: (data: string, size: number = 160): string => {
+        return `${ApiEndpoints.qrCode}?size=${size}x${size}&data=${encodeURIComponent(data)}&bgcolor=FFFFFF&color=000000`;
+    },
+
+    /**
+     * Generate Unsplash image URL with size
+     * @param photoId - Unsplash photo ID or seed
+     * @param width - Image width
+     */
+    unsplash: (photoId: string, width: number = 400): string => {
+        return `https://images.unsplash.com/photo-${photoId}?w=${width}`;
+    },
+} as const;
+
+/**
+ * Common Image URLs
+ * Frequently used image URLs that can be reused
+ */
+export const CommonImages = {
+    // African regions
+    westAfrica: 'https://images.unsplash.com/photo-1590001155093-a3c66ab0c3ff?w=600',
+    eastAfrica: 'https://images.unsplash.com/photo-1489392191049-fc10c97e64b6?w=600',
+    northAfrica: 'https://images.unsplash.com/photo-1539635278303-d4002c07eae3?w=600',
+    southernAfrica: 'https://images.unsplash.com/photo-1484318571209-661cf29a69c3?w=600',
+    centralAfrica: 'https://images.unsplash.com/photo-1523805009345-7448845a9e53?w=600',
+
+    // Common product images
+    jollofRice: 'https://images.unsplash.com/photo-1596040033229-a9821ebd058d?w=200',
+    palmOil: 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=200',
+    garri: 'https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=200',
+    sheaButter: 'https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?w=200',
+    suyaSpice: 'https://images.unsplash.com/photo-1532336414038-cf19250c5757?w=200',
+
+    // User avatars
+    defaultUser: 'https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=200',
+    driverAvatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200',
+} as const;
+
+export default {
+    placeholders: PlaceholderImages,
+    sizes: ImageSizes,
+    builders: ImageUrlBuilders,
+    common: CommonImages,
+};

@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, Animated, Dimensions, Easing } from 'react-nati
 import { useRouter } from 'expo-router';
 import { Colors } from '../constants/colors';
 import { FontFamily, FontSize, LetterSpacing } from '../constants/typography';
+import { AnimationDuration, AppConfig } from '../constants';
 import { useAuthStore } from '../stores/authStore';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -144,11 +145,11 @@ export default function SplashScreen() {
       startGlowAnimation();
     });
 
-    // Navigate after 5 seconds with fade-out
+    // Navigate after configured duration with fade-out
     const timer = setTimeout(() => {
       Animated.timing(screenOpacity, {
         toValue: 0,
-        duration: 400,
+        duration: AnimationDuration.default,
         useNativeDriver: true,
       }).start(() => {
         if (isAuthenticated) {
@@ -161,7 +162,7 @@ export default function SplashScreen() {
           router.replace('/(auth)/login');
         }
       });
-    }, 5000);
+    }, AppConfig.splashScreenDuration);
 
     return () => clearTimeout(timer);
   }, [isAuthenticated, hasCompletedOnboarding]);

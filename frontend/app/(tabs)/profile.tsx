@@ -28,6 +28,7 @@ import {
   Package,
 } from 'phosphor-react-native';
 import { Colors } from '../../constants/colors';
+import { ImageUrlBuilders, OrderConfig, CommonImages } from '../../constants';
 import { Spacing, BorderRadius } from '../../constants/spacing';
 import { FontSize, FontFamily, LetterSpacing } from '../../constants/typography';
 import { useAuthStore } from '../../stores/authStore';
@@ -169,7 +170,7 @@ export default function ProfileTab() {
           <View style={styles.avatarContainer}>
             <Image
               source={{ 
-                uri: user?.picture || 'https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=200' 
+                uri: user?.picture || CommonImages.defaultUser 
               }}
               style={styles.avatar}
             />
@@ -239,7 +240,7 @@ export default function ProfileTab() {
           <View style={styles.qrCodeContainer}>
             <Image
               source={{ 
-                uri: `https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=ZORA-${(user as any)?.id?.substring(0, 8) || (user?.user_id?.substring(0, 8)) || 'USER'}-${membershipTier.toUpperCase()}&bgcolor=FFFFFF&color=000000` 
+                uri: ImageUrlBuilders.qrCode(`${OrderConfig.orderNumberPrefix}${(user as any)?.id?.substring(0, 8) || (user?.user_id?.substring(0, 8)) || 'USER'}-${membershipTier.toUpperCase()}`) 
               }}
               style={styles.qrCode}
               resizeMode="contain"

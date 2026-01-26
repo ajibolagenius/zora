@@ -23,6 +23,7 @@ import {
 import { Colors } from '../../constants/colors';
 import { Spacing, BorderRadius } from '../../constants/spacing';
 import { FontSize, FontFamily, LetterSpacing } from '../../constants/typography';
+import { AlertMessages } from '../../constants';
 
 // Available colors from Design System for randomized icons
 const DESIGN_SYSTEM_COLORS = [
@@ -118,17 +119,17 @@ export default function SavedAddressesScreen() {
   };
 
   const handleEdit = (id: string) => {
-    Alert.alert('Edit Address', 'Address editing feature coming soon!');
+    Alert.alert('Edit Address', AlertMessages.info.addressEditComingSoon);
   };
 
   const handleDelete = (id: string) => {
     Alert.alert(
-      'Delete Address',
-      'Are you sure you want to delete this address?',
+      AlertMessages.titles.delete,
+      AlertMessages.confirm.deleteAddress,
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: AlertMessages.titles.cancel, style: 'cancel' },
         {
-          text: 'Delete',
+          text: AlertMessages.titles.delete,
           style: 'destructive',
           onPress: () => setAddresses(addresses.filter(a => a.id !== id)),
         },
@@ -137,7 +138,7 @@ export default function SavedAddressesScreen() {
   };
 
   const handleAddAddress = () => {
-    Alert.alert('Add Address', 'Address addition feature coming soon!');
+    Alert.alert('Add Address', AlertMessages.info.addressAddComingSoon);
   };
 
   return (

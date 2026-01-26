@@ -20,6 +20,7 @@ import {
 import { Colors } from '../../constants/colors';
 import { Spacing, BorderRadius } from '../../constants/spacing';
 import { FontSize, FontFamily, LetterSpacing } from '../../constants/typography';
+import { ErrorMessages, SuccessMessages, AlertMessages, Placeholders, ValidationLimits } from '../../constants';
 import { useAuthStore } from '../../stores/authStore';
 
 export default function ChangePasswordScreen() {
@@ -36,27 +37,27 @@ export default function ChangePasswordScreen() {
   const handleChangePassword = async () => {
     // Validation
     if (!currentPassword) {
-      Alert.alert('Error', 'Please enter your current password');
+      Alert.alert(AlertMessages.titles.error, ErrorMessages.validation.required);
       return;
     }
 
     if (!newPassword) {
-      Alert.alert('Error', 'Please enter a new password');
+      Alert.alert(AlertMessages.titles.error, Placeholders.auth.newPassword);
       return;
     }
 
-    if (newPassword.length < 8) {
-      Alert.alert('Error', 'New password must be at least 8 characters long');
+    if (newPassword.length < ValidationLimits.passwordMinLength) {
+      Alert.alert(AlertMessages.titles.error, ErrorMessages.validation.passwordTooShort);
       return;
     }
 
     if (newPassword !== confirmPassword) {
-      Alert.alert('Error', 'New passwords do not match');
+      Alert.alert(AlertMessages.titles.error, ErrorMessages.validation.passwordMismatch);
       return;
     }
 
     if (currentPassword === newPassword) {
-      Alert.alert('Error', 'New password must be different from current password');
+      Alert.alert(AlertMessages.titles.error, ErrorMessages.validation.passwordSame);
       return;
     }
 
@@ -74,11 +75,11 @@ export default function ChangePasswordScreen() {
       await new Promise(resolve => setTimeout(resolve, 1000));
       
       Alert.alert(
-        'Success',
-        'Your password has been changed successfully.',
+        AlertMessages.titles.success,
+        SuccessMessages.password.changed,
         [
           {
-            text: 'OK',
+            text: AlertMessages.titles.ok,
             onPress: () => router.back(),
           },
         ]
@@ -86,8 +87,8 @@ export default function ChangePasswordScreen() {
     } catch (error: any) {
       console.error('Change password error:', error);
       Alert.alert(
-        'Error',
-        error.message || 'Failed to change password. Please try again.'
+        AlertMessages.titles.error,
+        error.message || ErrorMessages.form.updateFailed
       );
     } finally {
       setIsLoading(false);
@@ -137,7 +138,7 @@ export default function ChangePasswordScreen() {
                 value={currentPassword}
                 onChangeText={setCurrentPassword}
                 secureTextEntry={!showCurrentPassword}
-                placeholder="Enter current password"
+                placeholder={Placeholders.auth.currentPassword}
                 placeholderTextColor={Colors.textMuted}
                 autoCapitalize="none"
               />
@@ -165,7 +166,7 @@ export default function ChangePasswordScreen() {
                 value={newPassword}
                 onChangeText={setNewPassword}
                 secureTextEntry={!showNewPassword}
-                placeholder="Enter new password"
+                placeholder={Placeholders.auth.newPassword}
                 placeholderTextColor={Colors.textMuted}
                 autoCapitalize="none"
               />
@@ -193,7 +194,7 @@ export default function ChangePasswordScreen() {
                 value={confirmPassword}
                 onChangeText={setConfirmPassword}
                 secureTextEntry={!showConfirmPassword}
-                placeholder="Confirm new password"
+                placeholder={Placeholders.auth.confirmPassword}
                 placeholderTextColor={Colors.textMuted}
                 autoCapitalize="none"
               />

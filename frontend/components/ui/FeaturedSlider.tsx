@@ -14,8 +14,7 @@ import { ArrowRight } from 'phosphor-react-native';
 import { Colors } from '../../constants/colors';
 import { BorderRadius, Spacing } from '../../constants/spacing';
 import { FontSize, FontFamily } from '../../constants/typography';
-
-import { UiConfig } from '../../constants';
+import { UiConfig, AppConfig } from '../../constants';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const CARD_WIDTH = SCREEN_WIDTH - UiConfig.screenPadding * 2;
@@ -44,7 +43,7 @@ export const FeaturedSlider: React.FC<FeaturedSliderProps> = ({
   banners,
   onBannerPress,
   autoPlay = true,
-  autoPlayInterval = 5000,
+  autoPlayInterval = AppConfig.autoPlayInterval,
 }) => {
   const flatListRef = useRef<FlatList>(null);
   const [activeIndex, setActiveIndex] = useState(0);

@@ -24,6 +24,7 @@ import {
 import { Colors } from '../../constants/colors';
 import { Spacing, BorderRadius, Heights } from '../../constants/spacing';
 import { FontSize, FontFamily } from '../../constants/typography';
+import { Placeholders, AnimationDuration, AnimationEasing } from '../../constants';
 import { useAuthStore } from '../../stores/authStore';
 
 type ScreenState = 'input' | 'sent';
@@ -47,14 +48,14 @@ export default function ForgotPasswordScreen() {
         Animated.parallel([
             Animated.timing(fadeAnim, {
                 toValue: 1,
-                duration: 400,
-                easing: Easing.out(Easing.cubic),
+                duration: AnimationDuration.default,
+                easing: AnimationEasing.standard,
                 useNativeDriver: true,
             }),
             Animated.timing(slideAnim, {
                 toValue: 0,
-                duration: 400,
-                easing: Easing.out(Easing.cubic),
+                duration: AnimationDuration.default,
+                easing: AnimationEasing.standard,
                 useNativeDriver: true,
             }),
         ]).start();
@@ -164,7 +165,7 @@ export default function ForgotPasswordScreen() {
                                         <Envelope size={20} color={Colors.textMuted} weight="duotone" />
                                         <TextInput
                                             style={styles.input}
-                                            placeholder="Email Address"
+                                            placeholder={Placeholders.auth.email}
                                             placeholderTextColor={Colors.textMuted}
                                             value={email}
                                             onChangeText={setEmail}
