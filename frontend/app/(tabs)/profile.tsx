@@ -445,7 +445,7 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: `${Colors.secondary}20`,
+    backgroundColor: `${Colors.secondary}26`,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -483,7 +483,7 @@ const styles = StyleSheet.create({
     width: 120,
     height: 120,
     borderRadius: 60,
-    backgroundColor: `${Colors.primary}10`,
+    backgroundColor: `${Colors.primary}0D`,
   },
   qrDecorBottom: {
     position: 'absolute',
@@ -492,7 +492,7 @@ const styles = StyleSheet.create({
     width: 120,
     height: 120,
     borderRadius: 60,
-    backgroundColor: `${Colors.secondary}10`,
+    backgroundColor: `${Colors.secondary}0D`,
   },
   qrHeader: {
     alignItems: 'center',
