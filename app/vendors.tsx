@@ -16,6 +16,29 @@ import { Colors } from '../constants/colors';
 import { Spacing, BorderRadius, Heights } from '../constants/spacing';
 import { FontSize, FontFamily } from '../constants/typography';
 import { vendorService, regionService, type Vendor, type Region } from '../services/mockDataService';
+import { vendorService as supabaseVendorService } from '../services/supabaseService';
+import { onboardingService, type Region as OnboardingRegion } from '../services/onboardingService';
+import { realtimeService } from '../services/realtimeService';
+import { isSupabaseConfigured } from '../lib/supabase';
+
+// Map onboardingService Region to mockDataService Region format
+const mapOnboardingRegionToRegion = (region: OnboardingRegion): Region => {
+  const countries = region.description 
+    ? region.description.split(',').map(c => c.trim()).filter(Boolean)
+    : [];
+  
+  return {
+    id: region.id,
+    name: region.name,
+    slug: region.slug,
+    image_url: region.image_url || '',
+    countries: countries,
+    description: region.description || '',
+    is_selected: false,
+    vendor_count: 0,
+    product_count: 0,
+  };
+};
 import { VendorCard, Button } from '../components/ui';
 import { SortOptions, AnimationDuration, AnimationEasing } from '../constants';
 import { getVendorRoute } from '../lib/navigationHelpers';
@@ -37,27 +60,79 @@ export default function VendorsScreen() {
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(20)).current;
 
-  useEffect(() => {
-    const vendorData = vendorService.getAll();
-    const regionData = regionService.getAll();
-    setVendors(vendorData);
-    setRegions(regionData);
-    setLoading(false);
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      
+      // Fetch vendors from database or mock
+      let vendorData: Vendor[];
+      if (isSupabaseConfigured()) {
+        vendorData = await supabaseVendorService.getAll();
+      } else {
+        vendorData = vendorService.getAll();
+      }
+      setVendors(vendorData);
 
-    Animated.parallel([
-      Animated.timing(fadeAnim, {
-        toValue: 1,
-        duration: AnimationDuration.default,
-        easing: AnimationEasing.standard,
-        useNativeDriver: true,
-      }),
-      Animated.timing(slideAnim, {
-        toValue: 0,
-        duration: AnimationDuration.default,
-        easing: AnimationEasing.standard,
-        useNativeDriver: true,
-      }),
-    ]).start();
+      // Fetch regions from database or mock
+      let regionData: Region[];
+      if (isSupabaseConfigured()) {
+        const onboardingRegions = await onboardingService.getRegions();
+        regionData = onboardingRegions.map(mapOnboardingRegionToRegion);
+      } else {
+        regionData = regionService.getAll();
+      }
+      setRegions(regionData);
+
+      Animated.parallel([
+        Animated.timing(fadeAnim, {
+          toValue: 1,
+          duration: AnimationDuration.default,
+          easing: AnimationEasing.standard,
+          useNativeDriver: true,
+        }),
+        Animated.timing(slideAnim, {
+          toValue: 0,
+          duration: AnimationDuration.default,
+          easing: AnimationEasing.standard,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    } catch (error) {
+      console.error('Error fetching vendors data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+
+    // Subscribe to real-time updates
+    const unsubscribers: (() => void)[] = [];
+
+    if (isSupabaseConfigured()) {
+      // Subscribe to vendors updates
+      realtimeService.subscribeToTable('vendors', '*', async () => {
+        const updatedVendors = await supabaseVendorService.getAll();
+        setVendors(updatedVendors);
+      }).then((unsub) => {
+        if (unsub) unsubscribers.push(unsub);
+      });
+
+      // Subscribe to regions updates
+      onboardingService.subscribeToRegions((updatedRegions) => {
+        const mappedRegions = updatedRegions.map(mapOnboardingRegionToRegion);
+        setRegions(mappedRegions);
+      });
+    }
+
+    return () => {
+      unsubscribers.forEach((unsub) => {
+        if (typeof unsub === 'function') {
+          unsub();
+        }
+      });
+    };
   }, []);
 
   // Filtered and sorted vendors

@@ -18,6 +18,28 @@ import { Spacing, BorderRadius, Heights } from '../constants/spacing';
 import { FontSize, FontFamily } from '../constants/typography';
 import { AnimationDuration, AnimationEasing } from '../constants';
 import { regionService, type Region } from '../services/mockDataService';
+import { onboardingService, type Region as OnboardingRegion } from '../services/onboardingService';
+import { isSupabaseConfigured } from '../lib/supabase';
+
+// Map onboardingService Region to mockDataService Region format
+const mapOnboardingRegionToRegion = (region: OnboardingRegion): Region => {
+  // Parse countries from description if available
+  const countries = region.description 
+    ? region.description.split(',').map(c => c.trim()).filter(Boolean)
+    : [];
+  
+  return {
+    id: region.id,
+    name: region.name,
+    slug: region.slug,
+    image_url: region.image_url || '',
+    countries: countries,
+    description: region.description || '',
+    is_selected: false,
+    vendor_count: 0, // These would need to be fetched separately if needed
+    product_count: 0, // These would need to be fetched separately if needed
+  };
+};
 
 export default function RegionsScreen() {
   const router = useRouter();
@@ -29,25 +51,51 @@ export default function RegionsScreen() {
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(20)).current;
 
-  useEffect(() => {
-    const data = regionService.getAll();
-    setRegions(data);
-    setLoading(false);
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      
+      // Fetch regions from database or mock
+      let data: Region[];
+      if (isSupabaseConfigured()) {
+        const onboardingRegions = await onboardingService.getRegions();
+        data = onboardingRegions.map(mapOnboardingRegionToRegion);
+      } else {
+        data = regionService.getAll();
+      }
+      setRegions(data);
 
-    Animated.parallel([
-      Animated.timing(fadeAnim, {
-        toValue: 1,
-        duration: AnimationDuration.default,
-        easing: AnimationEasing.standard,
-        useNativeDriver: true,
-      }),
-      Animated.timing(slideAnim, {
-        toValue: 0,
-        duration: AnimationDuration.default,
-        easing: AnimationEasing.standard,
-        useNativeDriver: true,
-      }),
-    ]).start();
+      Animated.parallel([
+        Animated.timing(fadeAnim, {
+          toValue: 1,
+          duration: AnimationDuration.default,
+          easing: AnimationEasing.standard,
+          useNativeDriver: true,
+        }),
+        Animated.timing(slideAnim, {
+          toValue: 0,
+          duration: AnimationDuration.default,
+          easing: AnimationEasing.standard,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    } catch (error) {
+      console.error('Error fetching regions data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+
+    // Subscribe to real-time updates for regions
+    if (isSupabaseConfigured()) {
+      onboardingService.subscribeToRegions((updatedRegions) => {
+        const mappedRegions = updatedRegions.map(mapOnboardingRegionToRegion);
+        setRegions(mappedRegions);
+      });
+    }
   }, []);
 
   const handleRegionPress = (region: Region) => {

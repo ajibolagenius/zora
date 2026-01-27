@@ -31,6 +31,7 @@ import { Spacing, BorderRadius, TouchTarget } from '../../constants/spacing';
 import { FontSize, FontFamily } from '../../constants/typography';
 import { AnimationDuration, AnimationEasing, ImageUrlBuilders, ValidationLimits } from '../../constants';
 import { vendorService, productService, reviewService } from '../../services/supabaseService';
+import { realtimeService } from '../../services/realtimeService';
 import type { Vendor, Product, Review } from '../../types/supabase';
 import { Link } from 'expo-router';
 import { useCartStore } from '../../stores/cartStore';
@@ -94,7 +95,67 @@ export default function StoreScreen() {
 
     useEffect(() => {
         fetchData();
-    }, [fetchData]);
+
+        // Subscribe to real-time updates
+        const unsubscribers: (() => void)[] = [];
+
+        if (vendor?.id) {
+            // Subscribe to vendor updates
+            realtimeService.subscribeToTable(
+                'vendors',
+                'UPDATE',
+                async (payload) => {
+                    if (payload.new?.id === vendor.id) {
+                        const updatedVendor = await vendorService.getBySlug(vendorSlug || '');
+                        if (updatedVendor) {
+                            setVendor(updatedVendor);
+                        }
+                    }
+                },
+                `id=eq.${vendor.id}`
+            ).then((unsub) => {
+                if (unsub) unsubscribers.push(unsub);
+            });
+
+            // Subscribe to products updates for this vendor
+            realtimeService.subscribeToTable(
+                'products',
+                '*',
+                async () => {
+                    if (vendor.id) {
+                        const updatedProducts = await productService.getByVendor(vendor.id);
+                        setProducts(updatedProducts);
+                    }
+                },
+                `vendor_id=eq.${vendor.id}`
+            ).then((unsub) => {
+                if (unsub) unsubscribers.push(unsub);
+            });
+
+            // Subscribe to reviews updates for this vendor
+            realtimeService.subscribeToTable(
+                'reviews',
+                '*',
+                async () => {
+                    if (vendor.id) {
+                        const updatedReviews = await reviewService.getByVendor(vendor.id);
+                        setReviews(updatedReviews);
+                    }
+                },
+                `vendor_id=eq.${vendor.id}`
+            ).then((unsub) => {
+                if (unsub) unsubscribers.push(unsub);
+            });
+        }
+
+        return () => {
+            unsubscribers.forEach((unsub) => {
+                if (typeof unsub === 'function') {
+                    unsub();
+                }
+            });
+        };
+    }, [fetchData, vendor?.id, vendorSlug]);
 
     useEffect(() => {
         if (!loading) {

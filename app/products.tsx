@@ -25,6 +25,42 @@ import {
   type Region,
   type Category,
 } from '../services/mockDataService';
+import { productService as supabaseProductService, vendorService as supabaseVendorService } from '../services/supabaseService';
+import { onboardingService, type Region as OnboardingRegion, type Category as OnboardingCategory } from '../services/onboardingService';
+import { realtimeService } from '../services/realtimeService';
+import { isSupabaseConfigured } from '../lib/supabase';
+
+// Map onboardingService Region to mockDataService Region format
+const mapOnboardingRegionToRegion = (region: OnboardingRegion): Region => {
+  const countries = region.description 
+    ? region.description.split(',').map(c => c.trim()).filter(Boolean)
+    : [];
+  
+  return {
+    id: region.id,
+    name: region.name,
+    slug: region.slug,
+    image_url: region.image_url || '',
+    countries: countries,
+    description: region.description || '',
+    is_selected: false,
+    vendor_count: 0,
+    product_count: 0,
+  };
+};
+
+// Map onboardingService Category to mockDataService Category format
+const mapOnboardingCategoryToCategory = (category: OnboardingCategory): Category => {
+  return {
+    id: category.id,
+    name: category.name,
+    slug: category.slug,
+    icon: category.icon || '',
+    image_url: category.image_url || '',
+    product_count: 0, // Would need to be fetched separately if needed
+    description: category.description || '',
+  };
+};
 import { ProductCard, Button } from '../components/ui';
 import { useCartStore } from '../stores/cartStore';
 import { getProductRoute } from '../lib/navigationHelpers';
@@ -54,29 +90,95 @@ export default function ProductsScreen() {
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(20)).current;
 
-  useEffect(() => {
-    const productData = productService.getAll();
-    const regionData = regionService.getAll();
-    const categoryData = categoryService.getAll();
-    setProducts(productData);
-    setRegions(regionData);
-    setCategories(categoryData);
-    setLoading(false);
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      
+      // Fetch products from database or mock
+      let productData: Product[];
+      if (isSupabaseConfigured()) {
+        productData = await supabaseProductService.getAll();
+      } else {
+        productData = productService.getAll();
+      }
+      setProducts(productData);
 
-    Animated.parallel([
-      Animated.timing(fadeAnim, {
-        toValue: 1,
-        duration: AnimationDuration.default,
-        easing: AnimationEasing.standard,
-        useNativeDriver: true,
-      }),
-      Animated.timing(slideAnim, {
-        toValue: 0,
-        duration: AnimationDuration.default,
-        easing: AnimationEasing.standard,
-        useNativeDriver: true,
-      }),
-    ]).start();
+      // Fetch regions from database or mock
+      let regionData: Region[];
+      if (isSupabaseConfigured()) {
+        const onboardingRegions = await onboardingService.getRegions();
+        regionData = onboardingRegions.map(mapOnboardingRegionToRegion);
+      } else {
+        regionData = regionService.getAll();
+      }
+      setRegions(regionData);
+
+      // Fetch categories from database or mock
+      let categoryData: Category[];
+      if (isSupabaseConfigured()) {
+        const onboardingCategories = await onboardingService.getCategories();
+        categoryData = onboardingCategories.map(mapOnboardingCategoryToCategory);
+      } else {
+        categoryData = categoryService.getAll();
+      }
+      setCategories(categoryData);
+
+      Animated.parallel([
+        Animated.timing(fadeAnim, {
+          toValue: 1,
+          duration: AnimationDuration.default,
+          easing: AnimationEasing.standard,
+          useNativeDriver: true,
+        }),
+        Animated.timing(slideAnim, {
+          toValue: 0,
+          duration: AnimationDuration.default,
+          easing: AnimationEasing.standard,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    } catch (error) {
+      console.error('Error fetching products data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+
+    // Subscribe to real-time updates
+    const unsubscribers: (() => void)[] = [];
+
+    if (isSupabaseConfigured()) {
+      // Subscribe to products updates
+      realtimeService.subscribeToTable('products', '*', async () => {
+        const updatedProducts = await supabaseProductService.getAll();
+        setProducts(updatedProducts);
+      }).then((unsub) => {
+        if (unsub) unsubscribers.push(unsub);
+      });
+
+      // Subscribe to regions updates
+      onboardingService.subscribeToRegions((updatedRegions) => {
+        const mappedRegions = updatedRegions.map(mapOnboardingRegionToRegion);
+        setRegions(mappedRegions);
+      });
+
+      // Subscribe to categories updates
+      onboardingService.subscribeToCategories((updatedCategories) => {
+        const mappedCategories = updatedCategories.map(mapOnboardingCategoryToCategory);
+        setCategories(mappedCategories);
+      });
+    }
+
+    return () => {
+      unsubscribers.forEach((unsub) => {
+        if (typeof unsub === 'function') {
+          unsub();
+        }
+      });
+    };
   }, []);
 
   // Filtered and sorted products

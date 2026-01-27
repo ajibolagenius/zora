@@ -36,6 +36,7 @@ import { Spacing, BorderRadius, TouchTarget } from '../../constants/spacing';
 import { FontSize, FontWeight, LetterSpacing, FontFamily } from '../../constants/typography';
 import { ImageUrlBuilders } from '../../constants';
 import { productService, vendorService, reviewService } from '../../services/supabaseService';
+import { realtimeService } from '../../services/realtimeService';
 import type { Product, Vendor, Review } from '../../types/supabase';
 import { useCartStore } from '../../stores/cartStore';
 import FloatingTabBar from '../../components/ui/FloatingTabBar';
@@ -95,7 +96,69 @@ export default function ProductScreen() {
 
   useEffect(() => {
     fetchData();
-  }, [fetchData]);
+
+    // Subscribe to real-time updates
+    const unsubscribers: (() => void)[] = [];
+
+    if (product?.id) {
+      // Subscribe to product updates
+      realtimeService.subscribeToTable(
+        'products',
+        'UPDATE',
+        async (payload) => {
+          if (payload.new?.id === product.id) {
+            const updatedProduct = await productService.getById(product.id);
+            if (updatedProduct) {
+              setProduct(updatedProduct);
+            }
+          }
+        },
+        `id=eq.${product.id}`
+      ).then((unsub) => {
+        if (unsub) unsubscribers.push(unsub);
+      });
+
+      // Subscribe to reviews updates for this product
+      realtimeService.subscribeToTable(
+        'reviews',
+        '*',
+        async () => {
+          const updatedReviews = await reviewService.getByProduct(product.id);
+          setReviews(updatedReviews);
+        },
+        `product_id=eq.${product.id}`
+      ).then((unsub) => {
+        if (unsub) unsubscribers.push(unsub);
+      });
+    }
+
+    if (product?.vendor_id) {
+      // Subscribe to vendor updates
+      realtimeService.subscribeToTable(
+        'vendors',
+        'UPDATE',
+        async (payload) => {
+          if (payload.new?.id === product.vendor_id) {
+            const updatedVendor = await vendorService.getById(product.vendor_id);
+            if (updatedVendor) {
+              setVendor(updatedVendor);
+            }
+          }
+        },
+        `id=eq.${product.vendor_id}`
+      ).then((unsub) => {
+        if (unsub) unsubscribers.push(unsub);
+      });
+    }
+
+    return () => {
+      unsubscribers.forEach((unsub) => {
+        if (typeof unsub === 'function') {
+          unsub();
+        }
+      });
+    };
+  }, [fetchData, product?.id, product?.vendor_id]);
 
   const productImages = product?.image_urls || [];
   const { width: screenWidth } = useWindowDimensions();
