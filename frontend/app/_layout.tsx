@@ -19,6 +19,7 @@ import {
 } from '@expo-google-fonts/poppins';
 import { Colors } from '../constants/colors';
 import { QueryProvider } from '../providers/QueryProvider';
+import { ToastProvider } from '../components/ui';
 import { useAuthStore } from '../stores/authStore';
 import { getSupabaseClient, isSupabaseConfigured } from '../lib/supabase';
 import '../global.css';
@@ -197,13 +198,15 @@ export default function RootLayout() {
 
   return (
     <QueryProvider>
-      <StatusBar style="light" />
-      <Stack
-        screenOptions={{
-          headerShown: false,
-          contentStyle: { backgroundColor: Colors.backgroundDark },
-        }}
-      />
+      <ToastProvider>
+        <StatusBar style="light" />
+        <Stack
+          screenOptions={{
+            headerShown: false,
+            contentStyle: { backgroundColor: Colors.backgroundDark },
+          }}
+        />
+      </ToastProvider>
     </QueryProvider>
   );
 }

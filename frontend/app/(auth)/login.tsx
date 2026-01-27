@@ -9,7 +9,6 @@ import {
     Platform,
     ScrollView,
     ActivityIndicator,
-    Alert,
     Animated,
     Easing,
 } from 'react-native';
@@ -29,12 +28,15 @@ import { Spacing, BorderRadius, Heights } from '../../constants/spacing';
 import { FontSize, FontFamily } from '../../constants/typography';
 import { ErrorMessages, Placeholders } from '../../constants';
 import { useAuthStore } from '../../stores/authStore';
+import { useToast } from '../../components/ui';
+import { getSupabaseClient, isSupabaseConfigured } from '../../lib/supabase';
 
 type AuthMode = 'signin' | 'signup';
 
 export default function LoginScreen() {
     const router = useRouter();
     const { signInWithGoogle, signInWithEmail, signUpWithEmail, isLoading } = useAuthStore();
+    const { showToast } = useToast();
     const [mode, setMode] = useState<AuthMode>('signin');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -74,7 +76,10 @@ export default function LoginScreen() {
             // Navigation will be handled by auth state change listener
         } catch (error: any) {
             console.error('Google login error:', error);
-            Alert.alert('Login Failed', error.message || 'Unable to sign in with Google');
+            showToast(
+                error.message || 'Unable to sign in with Google',
+                'error'
+            );
         } finally {
             setLocalLoading(false);
         }
@@ -83,12 +88,12 @@ export default function LoginScreen() {
 
     const handleEmailAuth = async () => {
         if (!email || !password) {
-            Alert.alert(ErrorMessages.auth.missingFields, ErrorMessages.auth.missingFields);
+            showToast(ErrorMessages.auth.missingFields, 'error');
             return;
         }
 
         if (mode === 'signup' && !name) {
-            Alert.alert(ErrorMessages.auth.missingName, ErrorMessages.auth.missingName);
+            showToast(ErrorMessages.auth.missingName, 'error');
             return;
         }
 
@@ -106,10 +111,51 @@ export default function LoginScreen() {
             }
         } catch (error: any) {
             console.error('Auth error:', error);
-            Alert.alert(
-                mode === 'signin' ? ErrorMessages.auth.signInFailed : ErrorMessages.auth.signUpFailed,
-                error.message || ErrorMessages.auth.generic
-            );
+            
+            // Handle specific error cases with user-friendly messages
+            let errorMessage = error.message || ErrorMessages.auth.generic;
+            let errorType: 'error' | 'warning' | 'info' = 'error';
+            let action: { label: string; onPress: () => void } | undefined;
+
+            // Check for email not confirmed error
+            if (error.message?.includes('Email not confirmed') || error.message?.includes('email_not_confirmed')) {
+                errorMessage = 'Please verify your email address before signing in. Check your inbox for the confirmation link.';
+                errorType = 'warning';
+                action = {
+                    label: 'Resend Email',
+                    onPress: async () => {
+                        try {
+                            if (!isSupabaseConfigured()) {
+                                showToast('Unable to resend verification email. Please try again later.', 'error');
+                                return;
+                            }
+                            const client = await getSupabaseClient();
+                            const { error: resendError } = await client.auth.resend({
+                                type: 'signup',
+                                email: email,
+                                options: {
+                                    emailRedirectTo: Platform.OS === 'web' 
+                                        ? (typeof window !== 'undefined' ? `${window.location.origin}/auth/callback` : 'http://localhost:3000/auth/callback')
+                                        : 'zoramarket://auth/callback',
+                                },
+                            });
+                            if (resendError) throw resendError;
+                            showToast('Verification email sent! Please check your inbox.', 'success');
+                        } catch (resendError: any) {
+                            showToast(resendError.message || 'Failed to resend verification email', 'error');
+                        }
+                    },
+                };
+            } else if (error.message?.includes('Invalid login credentials') || error.message?.includes('invalid_credentials')) {
+                errorMessage = 'Invalid email or password. Please check your credentials and try again.';
+            } else if (error.message?.includes('Too many login attempts') || error.message?.includes('rate_limit')) {
+                errorMessage = 'Too many login attempts. Please wait a few minutes before trying again.';
+                errorType = 'warning';
+            } else if (error.message?.includes('network') || error.message?.includes('Network')) {
+                errorMessage = 'Network error. Please check your internet connection and try again.';
+            }
+
+            showToast(errorMessage, errorType, undefined, action);
         } finally {
             setLocalLoading(false);
         }

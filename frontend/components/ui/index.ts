@@ -9,6 +9,8 @@ export { Card } from './Card';
 export { Badge } from './Badge';
 export { Input } from './Input';
 export { Toggle } from './Toggle';
+export { Toast } from './Toast';
+export { ToastProvider, useToast } from './ToastProvider';
 
 // Feature Components
 export { ProductCard } from './ProductCard';
