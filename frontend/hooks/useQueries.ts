@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { 
-  productService, 
-  vendorService, 
+import {
+  productService,
+  vendorService,
   reviewService,
   orderService,
   promoCodeService,
@@ -63,9 +63,9 @@ export interface VendorFilters {
 // ============== Helper Functions ==============
 const applyProductFilters = (products: Product[], filters?: ProductFilters): Product[] => {
   if (!filters) return products;
-  
+
   let result = [...products];
-  
+
   if (filters.category) {
     result = result.filter(p => p.category?.toLowerCase() === filters.category?.toLowerCase());
   }
@@ -84,7 +84,7 @@ const applyProductFilters = (products: Product[], filters?: ProductFilters): Pro
   if (filters.inStock) {
     result = result.filter(p => p.stock_quantity > 0);
   }
-  
+
   // Apply sorting
   if (filters.sortBy) {
     switch (filters.sortBy) {
@@ -105,7 +105,7 @@ const applyProductFilters = (products: Product[], filters?: ProductFilters): Pro
         break;
     }
   }
-  
+
   return result;
 };
 
@@ -172,16 +172,16 @@ export function useVendors(filters?: VendorFilters) {
     queryKey: queryKeys.vendors.list(filters),
     queryFn: async () => {
       let vendors = await vendorService.getAll();
-      
+
       // Apply filters
       if (filters) {
         if (filters.category) {
-          vendors = vendors.filter(v => 
+          vendors = vendors.filter(v =>
             v.categories?.some((c: string) => c.toLowerCase().includes(filters.category?.toLowerCase() || ''))
           );
         }
         if (filters.region) {
-          vendors = vendors.filter(v => 
+          vendors = vendors.filter(v =>
             v.cultural_specialties?.some((s: string) => s.toLowerCase().includes(filters.region?.toLowerCase() || ''))
           );
         }
@@ -189,7 +189,7 @@ export function useVendors(filters?: VendorFilters) {
           vendors = vendors.filter(v => (v.rating || 0) >= (filters.minRating || 0));
         }
       }
-      
+
       return vendors;
     },
     staleTime: 5 * 60 * 1000,
@@ -278,7 +278,7 @@ export interface CreateReviewInput {
 
 export function useCreateReview() {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: async (input: CreateReviewInput) => {
       const newReview = await reviewService.create({
@@ -286,10 +286,10 @@ export function useCreateReview() {
         vendor_id: input.vendorId,
         rating: input.rating,
         title: input.title,
-        body: input.comment,
+        content: input.comment,
         user_id: 'current_user', // Would come from auth context
       });
-      
+
       return newReview;
     },
     onSuccess: (data, variables) => {
@@ -299,10 +299,10 @@ export function useCreateReview() {
         queryClient.invalidateQueries({ queryKey: queryKeys.products.detail(variables.productId) });
       }
       if (variables.vendorId) {
-        queryClient.invalidateQueries({ queryKey: queryKeys.reviews.byVendor(variables.vendorId) });
         queryClient.invalidateQueries({ queryKey: queryKeys.vendors.detail(variables.vendorId) });
       }
     },
+    networkMode: 'offlineFirst',
   });
 }
 
@@ -322,7 +322,7 @@ export interface CreateOrderInput {
 
 export function useCreateOrder() {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: async (input: CreateOrderInput) => {
       const order = await orderService.create({
@@ -335,12 +335,13 @@ export function useCreateOrder() {
         status: 'pending',
         payment_status: 'pending',
       });
-      
+
       return order;
     },
     onSuccess: (data, variables) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.orders.byUser(variables.userId) });
     },
+    networkMode: 'offlineFirst',
   });
 }
 

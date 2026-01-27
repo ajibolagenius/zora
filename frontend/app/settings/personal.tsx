@@ -8,6 +8,7 @@ import {
   TextInput,
   Image,
   Alert,
+  Keyboard,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -141,6 +142,7 @@ export default function PersonalInformationScreen() {
                 onChangeText={(text) => setFormData({ ...formData, firstName: text })}
                 editable={isEditing}
                 placeholderTextColor={Colors.textMuted}
+                onBlur={() => Keyboard.dismiss()}
               />
             </View>
           </View>
@@ -156,6 +158,7 @@ export default function PersonalInformationScreen() {
                 onChangeText={(text) => setFormData({ ...formData, lastName: text })}
                 editable={isEditing}
                 placeholderTextColor={Colors.textMuted}
+                onBlur={() => Keyboard.dismiss()}
               />
             </View>
           </View>
@@ -172,6 +175,7 @@ export default function PersonalInformationScreen() {
                 editable={isEditing}
                 keyboardType="email-address"
                 placeholderTextColor={Colors.textMuted}
+                onBlur={() => Keyboard.dismiss()}
               />
             </View>
           </View>
@@ -188,6 +192,7 @@ export default function PersonalInformationScreen() {
                 editable={isEditing}
                 keyboardType="phone-pad"
                 placeholderTextColor={Colors.textMuted}
+                onBlur={() => Keyboard.dismiss()}
               />
             </View>
           </View>
@@ -203,6 +208,7 @@ export default function PersonalInformationScreen() {
                 onChangeText={(text) => setFormData({ ...formData, dateOfBirth: text })}
                 editable={isEditing}
                 placeholderTextColor={Colors.textMuted}
+                onBlur={() => Keyboard.dismiss()}
               />
             </View>
           </View>

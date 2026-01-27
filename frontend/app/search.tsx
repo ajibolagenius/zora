@@ -142,7 +142,10 @@ export default function SearchScreen() {
                 setShowDropdown(true);
               }}
               onFocus={() => setIsInputFocused(true)}
-              onBlur={() => setTimeout(() => setIsInputFocused(false), 200)}
+              onBlur={() => {
+                Keyboard.dismiss();
+                setTimeout(() => setIsInputFocused(false), 200);
+              }}
               autoFocus
               returnKeyType="search"
               onSubmitEditing={() => {
@@ -496,6 +499,7 @@ export default function SearchScreen() {
                         const num = parseFloat(text);
                         setTempFilters(f => ({ ...f, minPrice: isNaN(num) ? undefined : num }));
                       }}
+                      onBlur={() => Keyboard.dismiss()}
                     />
                   </View>
                   <View className="flex-1">
@@ -510,6 +514,7 @@ export default function SearchScreen() {
                         const num = parseFloat(text);
                         setTempFilters(f => ({ ...f, maxPrice: isNaN(num) ? undefined : num }));
                       }}
+                      onBlur={() => Keyboard.dismiss()}
                     />
                   </View>
                 </View>

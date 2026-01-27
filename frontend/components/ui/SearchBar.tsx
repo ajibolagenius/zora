@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, Keyboard } from 'react-native';
 import { Colors } from '../../constants/colors';
 import { BorderRadius, Spacing } from '../../constants/spacing';
 import { FontSize, FontFamily } from '../../constants/typography';
@@ -32,6 +32,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
         placeholder={placeholder}
         placeholderTextColor={Colors.textMuted}
         onFocus={onFocus}
+        onBlur={() => Keyboard.dismiss()}
         onSubmitEditing={onSubmit}
         returnKeyType="search"
       />

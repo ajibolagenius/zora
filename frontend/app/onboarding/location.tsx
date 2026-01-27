@@ -11,6 +11,7 @@ import {
   Image,
   Animated,
   Easing,
+  Keyboard,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -128,6 +129,7 @@ export default function LocationScreen() {
                 placeholderTextColor={Colors.textMuted}
                 value={searchQuery}
                 onChangeText={setSearchQuery}
+                onBlur={() => Keyboard.dismiss()}
               />
             </View>
           </View>

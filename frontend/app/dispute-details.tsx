@@ -11,6 +11,7 @@ import {
     Animated,
     Easing,
     Platform,
+    Keyboard,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
@@ -167,6 +168,7 @@ export default function DisputeDetailsScreen() {
                             value={description}
                             onChangeText={(text) => setDescription(text.slice(0, ValidationLimits.maxDescriptionLength))}
                             textAlignVertical="top"
+                            onBlur={() => Keyboard.dismiss()}
                         />
                         <Text style={styles.charCount}>{description.length}/{ValidationLimits.maxDescriptionLength}</Text>
                     </View>

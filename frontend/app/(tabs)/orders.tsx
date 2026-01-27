@@ -10,6 +10,7 @@ import {
     Easing,
     Platform,
     TextInput,
+    Keyboard,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -633,6 +634,7 @@ export default function OrdersTab() {
                         onChangeText={setSearchQuery}
                         autoCapitalize="none"
                         autoCorrect={false}
+                        onBlur={() => Keyboard.dismiss()}
                     />
                     {searchQuery.length > 0 && (
                         <TouchableOpacity onPress={clearSearch} activeOpacity={0.7}>

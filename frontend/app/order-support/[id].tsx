@@ -10,6 +10,7 @@ import {
     Platform,
     Animated,
     Easing,
+    Keyboard,
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
@@ -317,6 +318,7 @@ export default function OrderSupportScreen() {
                             onChangeText={setInputText}
                             multiline
                             maxLength={500}
+                            onBlur={() => Keyboard.dismiss()}
                         />
                         <TouchableOpacity
                             style={[

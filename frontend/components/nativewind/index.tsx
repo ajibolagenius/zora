@@ -181,6 +181,11 @@ export function ZoraInput({
       <TextInput
         className={`bg-card-dark rounded-xl px-4 py-3 text-white text-body border ${error ? 'border-error' : 'border-white/10'} ${className}`}
         placeholderTextColor="rgba(255,255,255,0.3)"
+        onBlur={(e) => {
+          const { Keyboard } = require('react-native');
+          Keyboard.dismiss();
+          props.onBlur?.(e);
+        }}
         {...props}
       />
       {error && (

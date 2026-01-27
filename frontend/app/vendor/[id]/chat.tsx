@@ -12,6 +12,7 @@ import {
     Easing,
     Image,
     ActivityIndicator,
+    Keyboard,
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
@@ -434,6 +435,7 @@ export default function VendorChatScreen() {
                                 multiline
                                 maxLength={500}
                                 onSubmitEditing={handleSend}
+                                onBlur={() => Keyboard.dismiss()}
                             />
                             <TouchableOpacity
                                 style={[

@@ -11,6 +11,7 @@ import {
     Alert,
     StyleSheet,
     ActivityIndicator,
+    Keyboard,
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
@@ -169,6 +170,7 @@ export default function WriteReviewScreen() {
                                 value={userName}
                                 onChangeText={setUserName}
                                 maxLength={ValidationLimits.maxNameLength}
+                                onBlur={() => Keyboard.dismiss()}
                             />
                         </View>
 
@@ -184,6 +186,7 @@ export default function WriteReviewScreen() {
                                 value={title}
                                 onChangeText={setTitle}
                                 maxLength={100}
+                                onBlur={() => Keyboard.dismiss()}
                             />
                         </View>
 
@@ -210,6 +213,7 @@ export default function WriteReviewScreen() {
                                 numberOfLines={5}
                                 maxLength={maxCommentLength}
                                 textAlignVertical="top"
+                                onBlur={() => Keyboard.dismiss()}
                             />
                         </View>
 

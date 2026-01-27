@@ -12,6 +12,7 @@ import {
     Alert,
     Animated,
     Easing,
+    Keyboard,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -173,6 +174,7 @@ export default function ForgotPasswordScreen() {
                                             autoCapitalize="none"
                                             autoComplete="email"
                                             autoFocus
+                                            onBlur={() => Keyboard.dismiss()}
                                         />
                                     </View>
                                 </View>

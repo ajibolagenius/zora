@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   TextInput,
   Alert,
+  Keyboard,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -139,6 +140,7 @@ export default function ChangePasswordScreen() {
                 placeholder={Placeholders.auth.currentPassword}
                 placeholderTextColor={Colors.textMuted}
                 autoCapitalize="none"
+                onBlur={() => Keyboard.dismiss()}
               />
               <TouchableOpacity
                 style={styles.eyeButton}
@@ -167,6 +169,7 @@ export default function ChangePasswordScreen() {
                 placeholder={Placeholders.auth.newPassword}
                 placeholderTextColor={Colors.textMuted}
                 autoCapitalize="none"
+                onBlur={() => Keyboard.dismiss()}
               />
               <TouchableOpacity
                 style={styles.eyeButton}
