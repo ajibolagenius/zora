@@ -1,0 +1,580 @@
+[
+    {
+        "user_id": "user-0",
+        "shop_name": "East Africa Market",
+        "description": "Your trusted source for authentic East Africa products. We bring the flavors and traditions of East Africa to your doorstep.",
+        "logo_url": null,
+        "cover_image_url": null,
+        "address": "121 Avenue, Hackney, London",
+        "latitude": 51.57879,
+        "longitude": -0.013828,
+        "coverage_radius_km": 12.56,
+        "is_verified": true,
+        "rating": 4,
+        "review_count": 500,
+        "cultural_specialties": [
+            "Kenya"
+        ],
+        "categories": [
+            "Spices",
+            "Grains",
+            "Vegetables"
+        ],
+        "delivery_time_min": 30,
+        "delivery_time_max": 74,
+        "delivery_fee": 5.65,
+        "minimum_order": 20.41,
+        "is_featured": false,
+        "badge": "Verified"
+    },
+    {
+        "user_id": "user-1",
+        "shop_name": "Kenya Delights",
+        "description": "Your trusted source for authentic East Africa products. We bring the flavors and traditions of East Africa to your doorstep.",
+        "logo_url": null,
+        "cover_image_url": null,
+        "address": "181 High Street, Brixton, London",
+        "latitude": 51.453485,
+        "longitude": -0.069545,
+        "coverage_radius_km": 12.61,
+        "is_verified": true,
+        "rating": 4.3,
+        "review_count": 109,
+        "cultural_specialties": [
+            "Kenya"
+        ],
+        "categories": [
+            "Spices",
+            "Grains",
+            "Vegetables"
+        ],
+        "delivery_time_min": 33,
+        "delivery_time_max": 53,
+        "delivery_fee": 5.44,
+        "minimum_order": 15.34,
+        "is_featured": false,
+        "badge": null
+    },
+    {
+        "user_id": "user-2",
+        "shop_name": "Authentic South Africa",
+        "description": "Your trusted source for authentic South Africa products. We bring the flavors and traditions of South Africa to your doorstep.",
+        "logo_url": null,
+        "cover_image_url": null,
+        "address": "108 Avenue, Peckham, London",
+        "latitude": 51.482327999999995,
+        "longitude": -0.03972199999999999,
+        "coverage_radius_km": 6.26,
+        "is_verified": true,
+        "rating": 4.5,
+        "review_count": 402,
+        "cultural_specialties": [
+            "South Africa",
+            "Zimbabwe",
+            "Botswana"
+        ],
+        "categories": [
+            "Spices",
+            "Grains"
+        ],
+        "delivery_time_min": 36,
+        "delivery_time_max": 85,
+        "delivery_fee": 5.67,
+        "minimum_order": 29.9,
+        "is_featured": false,
+        "badge": null
+    },
+    {
+        "user_id": "user-3",
+        "shop_name": "South Africa Groceries",
+        "description": "Your trusted source for authentic South Africa products. We bring the flavors and traditions of South Africa to your doorstep.",
+        "logo_url": null,
+        "cover_image_url": null,
+        "address": "3 High Street, Hackney, London",
+        "latitude": 51.503896,
+        "longitude": -0.014261999999999997,
+        "coverage_radius_km": 10.57,
+        "is_verified": false,
+        "rating": 4.6,
+        "review_count": 330,
+        "cultural_specialties": [
+            "South Africa"
+        ],
+        "categories": [
+            "Spices",
+            "Grains"
+        ],
+        "delivery_time_min": 35,
+        "delivery_time_max": 85,
+        "delivery_fee": 5.7,
+        "minimum_order": 17.55,
+        "is_featured": false,
+        "badge": "Verified"
+    },
+    {
+        "user_id": "user-4",
+        "shop_name": "Taste of South Africa",
+        "description": "Your trusted source for authentic South Africa products. We bring the flavors and traditions of South Africa to your doorstep.",
+        "logo_url": null,
+        "cover_image_url": null,
+        "address": "66 High Street, Brixton, London",
+        "latitude": 51.413854,
+        "longitude": -0.161354,
+        "coverage_radius_km": 9.78,
+        "is_verified": false,
+        "rating": 4.3,
+        "review_count": 489,
+        "cultural_specialties": [
+            "South Africa",
+            "Zimbabwe"
+        ],
+        "categories": [
+            "Spices",
+            "Grains",
+            "Vegetables",
+            "Meats"
+        ],
+        "delivery_time_min": 27,
+        "delivery_time_max": 81,
+        "delivery_fee": 4.77,
+        "minimum_order": 22.76,
+        "is_featured": false,
+        "badge": "Fast Delivery"
+    },
+    {
+        "user_id": "user-5",
+        "shop_name": "South Africa Market",
+        "description": "Your trusted source for authentic South Africa products. We bring the flavors and traditions of South Africa to your doorstep.",
+        "logo_url": null,
+        "cover_image_url": null,
+        "address": "10 Road, Brixton, London",
+        "latitude": 51.495945,
+        "longitude": -0.100163,
+        "coverage_radius_km": 13.13,
+        "is_verified": true,
+        "rating": 4.4,
+        "review_count": 135,
+        "cultural_specialties": [
+            "South Africa",
+            "Zimbabwe",
+            "Botswana"
+        ],
+        "categories": [
+            "Spices",
+            "Grains",
+            "Vegetables"
+        ],
+        "delivery_time_min": 38,
+        "delivery_time_max": 47,
+        "delivery_fee": 4.69,
+        "minimum_order": 29.49,
+        "is_featured": false,
+        "badge": null
+    },
+    {
+        "user_id": "user-6",
+        "shop_name": "South Africa Delights",
+        "description": "Your trusted source for authentic South Africa products. We bring the flavors and traditions of South Africa to your doorstep.",
+        "logo_url": null,
+        "cover_image_url": null,
+        "address": "45 Road, Brixton, London",
+        "latitude": 51.443338999999995,
+        "longitude": -0.14841000000000001,
+        "coverage_radius_km": 9.17,
+        "is_verified": false,
+        "rating": 4.6,
+        "review_count": 309,
+        "cultural_specialties": [
+            "South Africa"
+        ],
+        "categories": [
+            "Spices",
+            "Grains",
+            "Vegetables",
+            "Meats"
+        ],
+        "delivery_time_min": 40,
+        "delivery_time_max": 65,
+        "delivery_fee": 4.43,
+        "minimum_order": 16.08,
+        "is_featured": true,
+        "badge": "Fast Delivery"
+    },
+    {
+        "user_id": "user-7",
+        "shop_name": "Authentic North Africa",
+        "description": "Your trusted source for authentic North Africa products. We bring the flavors and traditions of North Africa to your doorstep.",
+        "logo_url": null,
+        "cover_image_url": null,
+        "address": "108 Lane, Camden, London",
+        "latitude": 51.535928,
+        "longitude": -0.09869899999999998,
+        "coverage_radius_km": 9.7,
+        "is_verified": true,
+        "rating": 4.9,
+        "review_count": 99,
+        "cultural_specialties": [
+            "Morocco",
+            "Egypt",
+            "Tunisia"
+        ],
+        "categories": [
+            "Spices",
+            "Grains"
+        ],
+        "delivery_time_min": 40,
+        "delivery_time_max": 61,
+        "delivery_fee": 5.41,
+        "minimum_order": 25.26,
+        "is_featured": false,
+        "badge": null
+    },
+    {
+        "user_id": "user-8",
+        "shop_name": "South Africa Groceries",
+        "description": "Your trusted source for authentic South Africa products. We bring the flavors and traditions of South Africa to your doorstep.",
+        "logo_url": null,
+        "cover_image_url": null,
+        "address": "153 Lane, Brixton, London",
+        "latitude": 51.436139999999995,
+        "longitude": -0.114732,
+        "coverage_radius_km": 8.19,
+        "is_verified": true,
+        "rating": 4.4,
+        "review_count": 167,
+        "cultural_specialties": [
+            "South Africa"
+        ],
+        "categories": [
+            "Spices",
+            "Grains",
+            "Vegetables"
+        ],
+        "delivery_time_min": 30,
+        "delivery_time_max": 62,
+        "delivery_fee": 4.64,
+        "minimum_order": 28.61,
+        "is_featured": true,
+        "badge": null
+    },
+    {
+        "user_id": "user-9",
+        "shop_name": "Taste of North Africa",
+        "description": "Your trusted source for authentic North Africa products. We bring the flavors and traditions of North Africa to your doorstep.",
+        "logo_url": null,
+        "cover_image_url": null,
+        "address": "84 Lane, Tottenham, London",
+        "latitude": 51.635217000000004,
+        "longitude": -0.073864,
+        "coverage_radius_km": 10.43,
+        "is_verified": true,
+        "rating": 4.2,
+        "review_count": 454,
+        "cultural_specialties": [
+            "Morocco",
+            "Egypt",
+            "Tunisia"
+        ],
+        "categories": [
+            "Spices",
+            "Grains",
+            "Vegetables"
+        ],
+        "delivery_time_min": 20,
+        "delivery_time_max": 47,
+        "delivery_fee": 3.07,
+        "minimum_order": 24.13,
+        "is_featured": false,
+        "badge": null
+    },
+    {
+        "user_id": "user-10",
+        "shop_name": "East Africa Market",
+        "description": "Your trusted source for authentic East Africa products. We bring the flavors and traditions of East Africa to your doorstep.",
+        "logo_url": null,
+        "cover_image_url": null,
+        "address": "80 Road, Camden, London",
+        "latitude": 51.578578,
+        "longitude": -0.18359299999999998,
+        "coverage_radius_km": 5.57,
+        "is_verified": true,
+        "rating": 4.6,
+        "review_count": 239,
+        "cultural_specialties": [
+            "Kenya"
+        ],
+        "categories": [
+            "Spices",
+            "Grains",
+            "Vegetables"
+        ],
+        "delivery_time_min": 25,
+        "delivery_time_max": 45,
+        "delivery_fee": 3.65,
+        "minimum_order": 25.69,
+        "is_featured": false,
+        "badge": null
+    },
+    {
+        "user_id": "user-11",
+        "shop_name": "Nigeria Delights",
+        "description": "Your trusted source for authentic West Africa products. We bring the flavors and traditions of West Africa to your doorstep.",
+        "logo_url": null,
+        "cover_image_url": null,
+        "address": "18 Road, Hackney, London",
+        "latitude": 51.577112,
+        "longitude": -0.066535,
+        "coverage_radius_km": 14.01,
+        "is_verified": true,
+        "rating": 4.1,
+        "review_count": 216,
+        "cultural_specialties": [
+            "Nigeria",
+            "Ghana"
+        ],
+        "categories": [
+            "Spices",
+            "Grains",
+            "Vegetables"
+        ],
+        "delivery_time_min": 29,
+        "delivery_time_max": 83,
+        "delivery_fee": 5.64,
+        "minimum_order": 25.72,
+        "is_featured": false,
+        "badge": null
+    },
+    {
+        "user_id": "user-12",
+        "shop_name": "Authentic East Africa",
+        "description": "Your trusted source for authentic East Africa products. We bring the flavors and traditions of East Africa to your doorstep.",
+        "logo_url": null,
+        "cover_image_url": null,
+        "address": "3 Avenue, Brixton, London",
+        "latitude": 51.494012,
+        "longitude": -0.144425,
+        "coverage_radius_km": 7.14,
+        "is_verified": false,
+        "rating": 4.5,
+        "review_count": 488,
+        "cultural_specialties": [
+            "Kenya",
+            "Tanzania"
+        ],
+        "categories": [
+            "Spices",
+            "Grains",
+            "Vegetables",
+            "Meats"
+        ],
+        "delivery_time_min": 36,
+        "delivery_time_max": 85,
+        "delivery_fee": 4.82,
+        "minimum_order": 16.86,
+        "is_featured": false,
+        "badge": null
+    },
+    {
+        "user_id": "user-13",
+        "shop_name": "West Africa Groceries",
+        "description": "Your trusted source for authentic West Africa products. We bring the flavors and traditions of West Africa to your doorstep.",
+        "logo_url": null,
+        "cover_image_url": null,
+        "address": "71 High Street, Camden, London",
+        "latitude": 51.553467,
+        "longitude": -0.09431499999999998,
+        "coverage_radius_km": 14.39,
+        "is_verified": false,
+        "rating": 4.3,
+        "review_count": 448,
+        "cultural_specialties": [
+            "Nigeria"
+        ],
+        "categories": [
+            "Spices",
+            "Grains"
+        ],
+        "delivery_time_min": 37,
+        "delivery_time_max": 51,
+        "delivery_fee": 3.29,
+        "minimum_order": 15.72,
+        "is_featured": true,
+        "badge": null
+    },
+    {
+        "user_id": "user-14",
+        "shop_name": "Taste of North Africa",
+        "description": "Your trusted source for authentic North Africa products. We bring the flavors and traditions of North Africa to your doorstep.",
+        "logo_url": null,
+        "cover_image_url": null,
+        "address": "191 Lane, Peckham, London",
+        "latitude": 51.440877,
+        "longitude": -0.055865,
+        "coverage_radius_km": 14.2,
+        "is_verified": true,
+        "rating": 4.8,
+        "review_count": 142,
+        "cultural_specialties": [
+            "Morocco",
+            "Egypt",
+            "Tunisia"
+        ],
+        "categories": [
+            "Spices",
+            "Grains",
+            "Vegetables"
+        ],
+        "delivery_time_min": 26,
+        "delivery_time_max": 46,
+        "delivery_fee": 3.47,
+        "minimum_order": 17.46,
+        "is_featured": false,
+        "badge": null
+    },
+    {
+        "user_id": "user-15",
+        "shop_name": "North Africa Market",
+        "description": "Your trusted source for authentic North Africa products. We bring the flavors and traditions of North Africa to your doorstep.",
+        "logo_url": null,
+        "cover_image_url": null,
+        "address": "13 Road, Tottenham, London",
+        "latitude": 51.628075,
+        "longitude": -0.07558,
+        "coverage_radius_km": 12.71,
+        "is_verified": false,
+        "rating": 4.6,
+        "review_count": 210,
+        "cultural_specialties": [
+            "Morocco",
+            "Egypt",
+            "Tunisia"
+        ],
+        "categories": [
+            "Spices",
+            "Grains",
+            "Vegetables",
+            "Meats"
+        ],
+        "delivery_time_min": 37,
+        "delivery_time_max": 76,
+        "delivery_fee": 4.94,
+        "minimum_order": 21.93,
+        "is_featured": false,
+        "badge": null
+    },
+    {
+        "user_id": "user-16",
+        "shop_name": "South Africa Delights",
+        "description": "Your trusted source for authentic South Africa products. We bring the flavors and traditions of South Africa to your doorstep.",
+        "logo_url": null,
+        "cover_image_url": null,
+        "address": "95 High Street, Camden, London",
+        "latitude": 51.540046,
+        "longitude": -0.153026,
+        "coverage_radius_km": 8.88,
+        "is_verified": true,
+        "rating": 4.8,
+        "review_count": 99,
+        "cultural_specialties": [
+            "South Africa"
+        ],
+        "categories": [
+            "Spices",
+            "Grains"
+        ],
+        "delivery_time_min": 35,
+        "delivery_time_max": 86,
+        "delivery_fee": 3.66,
+        "minimum_order": 21.11,
+        "is_featured": true,
+        "badge": null
+    },
+    {
+        "user_id": "user-17",
+        "shop_name": "Authentic West Africa",
+        "description": "Your trusted source for authentic West Africa products. We bring the flavors and traditions of West Africa to your doorstep.",
+        "logo_url": null,
+        "cover_image_url": null,
+        "address": "107 Avenue, Camden, London",
+        "latitude": 51.548862,
+        "longitude": -0.13846299999999997,
+        "coverage_radius_km": 8.11,
+        "is_verified": true,
+        "rating": 4.3,
+        "review_count": 392,
+        "cultural_specialties": [
+            "Nigeria",
+            "Ghana"
+        ],
+        "categories": [
+            "Spices",
+            "Grains",
+            "Vegetables",
+            "Meats"
+        ],
+        "delivery_time_min": 26,
+        "delivery_time_max": 67,
+        "delivery_fee": 4.65,
+        "minimum_order": 15,
+        "is_featured": false,
+        "badge": null
+    },
+    {
+        "user_id": "user-18",
+        "shop_name": "East Africa Groceries",
+        "description": "Your trusted source for authentic East Africa products. We bring the flavors and traditions of East Africa to your doorstep.",
+        "logo_url": null,
+        "cover_image_url": null,
+        "address": "151 High Street, Tottenham, London",
+        "latitude": 51.558571,
+        "longitude": -0.058827,
+        "coverage_radius_km": 13.68,
+        "is_verified": true,
+        "rating": 4.8,
+        "review_count": 29,
+        "cultural_specialties": [
+            "Kenya",
+            "Tanzania",
+            "Ethiopia"
+        ],
+        "categories": [
+            "Spices",
+            "Grains",
+            "Vegetables",
+            "Meats"
+        ],
+        "delivery_time_min": 24,
+        "delivery_time_max": 58,
+        "delivery_fee": 3.19,
+        "minimum_order": 26.43,
+        "is_featured": false,
+        "badge": null
+    },
+    {
+        "user_id": "user-19",
+        "shop_name": "Taste of East Africa",
+        "description": "Your trusted source for authentic East Africa products. We bring the flavors and traditions of East Africa to your doorstep.",
+        "logo_url": null,
+        "cover_image_url": null,
+        "address": "28 Avenue, Brixton, London",
+        "latitude": 51.465726,
+        "longitude": -0.073126,
+        "coverage_radius_km": 7.22,
+        "is_verified": true,
+        "rating": 4.8,
+        "review_count": 70,
+        "cultural_specialties": [
+            "Kenya"
+        ],
+        "categories": [
+            "Spices",
+            "Grains"
+        ],
+        "delivery_time_min": 38,
+        "delivery_time_max": 85,
+        "delivery_fee": 5.32,
+        "minimum_order": 20.54,
+        "is_featured": false,
+        "badge": null
+    }
+]
