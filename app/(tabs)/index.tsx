@@ -27,26 +27,12 @@ import { Spacing, BorderRadius, Heights } from '../../constants/spacing';
 import { FontSize, FontFamily } from '../../constants/typography';
 import { AnimationDuration, AnimationEasing } from '../../constants';
 import { FeaturedSlider, RegionCard, VendorCard, ProductCard } from '../../components/ui';
-import { 
-  vendorService, 
-  productService, 
-  regionService, 
-  bannerService,
-  type Vendor,
-  type Product,
-  type Region,
-  type Banner,
-} from '../../services/mockDataService';
+import { homeService, type HomeData } from '../../services/homeService';
+import type { Vendor, Product } from '../../types/supabase';
 import { useCartStore } from '../../stores/cartStore';
 import { useAuthStore } from '../../stores/authStore';
 import { getProductRoute, getVendorRoute } from '../../lib/navigationHelpers';
-
-interface HomeData {
-  banners: Banner[];
-  regions: Region[];
-  featured_vendors: Vendor[];
-  popular_products: Product[];
-}
+import { CommonImages } from '../../constants';
 
 import { UiConfig } from '../../constants';
 
@@ -62,6 +48,7 @@ export default function HomeScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedRegion, setSelectedRegion] = useState<string | null>(null);
+  const [userLocation, setUserLocation] = useState<{ city: string; postcode: string } | null>(null);
   const addToCart = useCartStore((state) => state.addItem);
   const { user } = useAuthStore();
   
@@ -74,19 +61,15 @@ export default function HomeScreen() {
 
   const fetchHomeData = async () => {
     try {
-      // Use mock data service instead of API
-      const banners = bannerService.getActive();
-      const regions = regionService.getAll();
-      // Use ranking system with user's cultural region for personalized results
-      const featured_vendors = vendorService.getFeatured(userRegion, 10);
-      const popular_products = productService.getFeatured(userRegion, 20);
-      
-      setHomeData({
-        banners,
-        regions,
-        featured_vendors,
-        popular_products,
-      });
+      // Fetch all home data from database
+      const data = await homeService.getHomeData(userRegion);
+      setHomeData(data);
+
+      // Fetch user location for display
+      if (user?.user_id) {
+        const location = await homeService.getUserLocation(user.user_id);
+        setUserLocation(location);
+      }
     } catch (error) {
       console.error('Error fetching home data:', error);
     } finally {
@@ -97,7 +80,31 @@ export default function HomeScreen() {
 
   useEffect(() => {
     fetchHomeData();
-  }, [userRegion]); // Refetch when user region changes
+
+    // Subscribe to real-time updates
+    let unsubscribe: (() => void) | null = null;
+
+    homeService.subscribeToHomeUpdates(
+      (updatedData) => {
+        setHomeData((prev) => {
+          if (!prev) return prev;
+          return {
+            ...prev,
+            ...updatedData,
+          };
+        });
+      },
+      userRegion
+    ).then((unsub) => {
+      unsubscribe = unsub;
+    });
+
+    return () => {
+      if (unsubscribe) {
+        unsubscribe();
+      }
+    };
+  }, [userRegion, user?.user_id]); // Refetch when user region or user changes
 
   // Animate content when data loads
   useEffect(() => {
@@ -133,20 +140,27 @@ export default function HomeScreen() {
   };
 
   const handleAddToCart = (product: Product) => {
-    // Map mockDataService Product to types Product for cart compatibility
+    // Map Supabase Product to cart Product format
+    const imageUrls = Array.isArray(product.image_urls) 
+      ? product.image_urls 
+      : product.image_urls 
+        ? [product.image_urls] 
+        : [];
+    
     const cartProduct = {
       ...product,
       currency: 'GBP',
-      image_url: product.image_urls?.[0] || '',
-      images: product.image_urls || [],
+      image_url: imageUrls[0] || '',
+      images: imageUrls,
       region: product.cultural_region || '',
-      in_stock: product.stock_quantity > 0,
+      in_stock: (product.stock_quantity || 0) > 0,
       attributes: {},
+      unit_price_label: product.unit_price_label || '',
     };
     addToCart(cartProduct as any, 1);
   };
 
-  const handleRegionPress = (region: Region) => {
+  const handleRegionPress = (region: { name: string }) => {
     setSelectedRegion(selectedRegion === region.name ? null : region.name);
   };
 
@@ -202,7 +216,12 @@ export default function HomeScreen() {
             activeOpacity={0.8}
           >
             <MapPin size={20} color={Colors.primary} weight="fill" />
-            <Text style={styles.locationText}>Brixton, London</Text>
+            <Text style={styles.locationText}>
+              {userLocation 
+                ? `${userLocation.city}${userLocation.postcode ? `, ${userLocation.postcode}` : ''}`
+                : 'Brixton, London'
+              }
+            </Text>
             <CaretDown size={16} color={Colors.textMuted} weight="bold" />
           </TouchableOpacity>
           <TouchableOpacity 
@@ -270,14 +289,39 @@ export default function HomeScreen() {
               showsHorizontalScrollIndicator={false}
               contentContainerStyle={styles.regionsContainer}
             >
-              {homeData?.regions.map((region) => (
-                <RegionCard
-                  key={region.id}
-                  region={region}
-                  selected={selectedRegion === region.name}
-                  onPress={() => handleRegionPress(region)}
-                />
-              ))}
+              {homeData?.regions.map((region) => {
+                // Get fallback image from CommonImages based on slug
+                const getRegionImage = (slug: string): string => {
+                  if (region.image_url) return region.image_url;
+                  const imageMap: Record<string, string> = {
+                    'west-africa': CommonImages.westAfrica,
+                    'east-africa': CommonImages.eastAfrica,
+                    'southern-africa': CommonImages.southernAfrica,
+                    'central-africa': CommonImages.centralAfrica,
+                    'north-africa': CommonImages.northAfrica,
+                  };
+                  return imageMap[slug] || CommonImages.westAfrica;
+                };
+
+                return (
+                  <RegionCard
+                    key={region.id}
+                    region={{
+                      id: region.id,
+                      name: region.name,
+                      slug: region.slug,
+                      image_url: getRegionImage(region.slug),
+                      countries: region.description ? [region.description] : [],
+                      description: region.description || '',
+                      is_selected: selectedRegion === region.name,
+                      vendor_count: 0,
+                      product_count: 0,
+                    }}
+                    selected={selectedRegion === region.name}
+                    onPress={() => handleRegionPress({ name: region.name })}
+                  />
+                );
+              })}
             </ScrollView>
           </View>
 

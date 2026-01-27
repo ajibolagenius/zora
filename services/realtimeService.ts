@@ -9,23 +9,24 @@ class RealtimeService {
 
     /**
      * Subscribe to specific table changes
+     * Returns an unsubscribe function
      */
     async subscribeToTable(
         table: string,
         event: 'INSERT' | 'UPDATE' | 'DELETE' | '*',
         callback: RealtimeCallback,
         filter?: string
-    ) {
+    ): Promise<(() => void) | undefined> {
         if (!isSupabaseConfigured()) {
             console.log(`[Mock Realtime] Subscribing to ${table} (${event})`);
-            return;
+            return () => { }; // Return no-op unsubscribe
         }
 
         const channelId = `${table}:${event}:${filter || 'all'}`;
 
         if (this.channels.has(channelId)) {
-            // Already subscribed
-            return;
+            // Already subscribed, return no-op unsubscribe
+            return () => { };
         }
 
         try {
@@ -53,8 +54,20 @@ class RealtimeService {
                 });
 
             this.channels.set(channelId, channel);
+
+            // Return unsubscribe function
+            return async () => {
+                try {
+                    await client.removeChannel(channel);
+                    this.channels.delete(channelId);
+                    console.log(`[Realtime] Unsubscribed from ${channelId}`);
+                } catch (error) {
+                    console.error(`Failed to unsubscribe from ${channelId}:`, error);
+                }
+            };
         } catch (error) {
             console.error('Failed to subscribe to realtime channel:', error);
+            return () => { }; // Return no-op unsubscribe on error
         }
     }
 

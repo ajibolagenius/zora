@@ -532,6 +532,7 @@ export const useAuthStore = create<AuthState>()(
                 session: null,
                 isAuthenticated: false,
                 emailVerified: false,
+                hasCompletedOnboarding: false, // Explicitly reset onboarding flag
                 isLoading: false,
               });
             } else {
@@ -615,6 +616,7 @@ export const useAuthStore = create<AuthState>()(
             session: null,
             isAuthenticated: false,
             emailVerified: false,
+            hasCompletedOnboarding: false, // Explicitly reset onboarding flag
             sessionExpiringSoon: false,
             isLoading: false,
           });
@@ -629,6 +631,7 @@ export const useAuthStore = create<AuthState>()(
             user: null,
             session: null,
             isAuthenticated: false,
+            hasCompletedOnboarding: false, // Explicitly reset onboarding flag
             isLoading: false,
           });
           return;
@@ -705,6 +708,7 @@ export const useAuthStore = create<AuthState>()(
                 session: null,
                 isAuthenticated: false,
                 emailVerified: false,
+                hasCompletedOnboarding: false, // Explicitly reset onboarding flag
                 isLoading: false,
               });
               // Don't throw error here - just clear session and return
@@ -737,6 +741,7 @@ export const useAuthStore = create<AuthState>()(
               session: null,
               isAuthenticated: false,
               emailVerified: false,
+              hasCompletedOnboarding: false, // Explicitly reset onboarding flag
               isLoading: false,
             });
           }
@@ -746,6 +751,7 @@ export const useAuthStore = create<AuthState>()(
             user: null,
             session: null,
             isAuthenticated: false,
+            hasCompletedOnboarding: false, // Explicitly reset onboarding flag
             isLoading: false,
           });
         }
