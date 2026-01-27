@@ -45,7 +45,7 @@ export default function HeritageScreen() {
   const footerHeight = Heights.button + (Spacing.lg * 2) + insets.bottom; // button + padding + safe area bottom
   const scrollPadding = Spacing.base * 2; // top and bottom padding in scroll content
   const availableHeight = screenHeight - headerHeight - titleHeight - footerHeight - scrollPadding;
-  const gapHeight = Spacing.md * (regions.length || 5 - 1); // Total gap between cards
+  const gapHeight = Spacing.md * ((regions.length || 5) - 1); // Total gap between cards
   const cardHeight = Math.max((availableHeight - gapHeight) / (regions.length || 5), 80); // Minimum 80px
 
   // Fetch regions from database

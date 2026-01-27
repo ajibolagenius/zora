@@ -363,7 +363,7 @@ export default function LocationScreen() {
           <TouchableOpacity
             style={[
               styles.completeButton,
-              (!isLocationEnabled && !searchQuery.trim()) || isSaving && styles.completeButtonDisabled,
+              ((!isLocationEnabled && !searchQuery.trim()) || isSaving) && styles.completeButtonDisabled,
             ]}
             onPress={handleComplete}
             disabled={(!isLocationEnabled && !searchQuery.trim()) || isSaving}

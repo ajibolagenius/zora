@@ -364,7 +364,7 @@ export const onboardingService = {
    */
   subscribeToRegions: (callback: (regions: Region[]) => void) => {
     if (!isSupabaseConfigured()) {
-      return () => {}; // Return no-op unsubscribe
+      return () => { }; // Return no-op unsubscribe
     }
 
     realtimeService.subscribeToTable('regions', '*', (payload) => {
@@ -383,7 +383,7 @@ export const onboardingService = {
    */
   subscribeToCategories: (callback: (categories: Category[]) => void) => {
     if (!isSupabaseConfigured()) {
-      return () => {}; // Return no-op unsubscribe
+      return () => { }; // Return no-op unsubscribe
     }
 
     realtimeService.subscribeToTable('categories', '*', (payload) => {
@@ -402,7 +402,7 @@ export const onboardingService = {
    */
   subscribeToAddresses: (userId: string, callback: (addresses: Address[]) => void) => {
     if (!isSupabaseConfigured()) {
-      return () => {}; // Return no-op unsubscribe
+      return () => { }; // Return no-op unsubscribe
     }
 
     realtimeService.subscribeToTable(
