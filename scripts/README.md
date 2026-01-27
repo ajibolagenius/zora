@@ -41,17 +41,69 @@ The scripts populate the following tables:
 - `vendors` - Vendor shops (20 records)
 - `products` - Products from vendors (70 records)
 
+## Option 1: Complete Database Population (RECOMMENDED)
+
+### Quick Start
+```bash
+# Install dotenv if not already installed
+npm install dotenv
+
+# Set up environment variables in .env file:
+# SUPABASE_URL=your_supabase_url
+# SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
+
+# Run the complete population process
+node scripts/populate-option1.js
+```
+
+### Step-by-Step Process
+
+#### Step 1: Create Users via Supabase Auth
+```bash
+node scripts/create-users-auth.js
+```
+- Creates users in `auth.users` via Supabase Admin API
+- Automatically creates profiles via `handle_new_user()` trigger
+- Saves results to `data/user_creation_results.json`
+
+#### Step 2: Update Profiles with Zora-Specific Data
+```bash
+node scripts/update-profiles.js
+```
+- Updates profiles with phone, membership_tier, zora_credits, loyalty_points, cultural_interests
+- Requires Step 1 to be completed first
+
+#### Step 3: Generate Vendors and Products SQL
+```bash
+node scripts/create-vendors-products.js
+```
+- Generates SQL for vendors and products (skips profiles)
+- Outputs to `supabase/migrations/006_populate_vendors_products.sql`
+
+#### Step 4: Execute SQL
+Execute the generated SQL using Supabase MCP `execute_sql` tool or Supabase dashboard.
+
+### All-in-One Script
+```bash
+node scripts/populate-option1.js
+```
+
+This runs all steps sequentially. Use flags to skip steps:
+- `--skip-users` - Skip user creation
+- `--skip-profiles` - Skip profile updates
+- `--skip-vendors` - Skip vendors/products generation
+
 ## Important Notes
 
 ### Foreign Key Constraints
-The `profiles` table has a foreign key constraint to `auth.users`. To insert profiles:
-1. Create auth users first via Supabase Auth API, OR
-2. Temporarily disable the foreign key constraint for data population
+The `profiles` table has a foreign key constraint to `auth.users`. 
+
+**✅ Option 1 (Recommended)**: Create users via Supabase Auth API first. The `handle_new_user()` trigger automatically creates profiles.
+
+**⚠️ Option 2 (Not Recommended)**: Temporarily disable the foreign key constraint for data population (risky, not production-ready).
 
 ### Vendor ID Mapping
-⚠️ **Known Issue**: The generated SQL has vendor ID mismatches. Products reference vendor IDs that don't match the inserted vendors. This needs to be fixed in the script.
-
-**Fix Required**: Update `insert-to-supabase.js` to use consistent vendor IDs between vendors and products.
+✅ **Fixed**: The scripts now properly map vendor IDs between vendors and products using the `user_id` references in the JSON files.
 
 ## Execution Steps
 

@@ -11,12 +11,12 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import { ArrowLeft, Funnel, X, Star } from 'phosphor-react-native';
+import { ArrowLeft, Funnel, X, Star, Storefront } from 'phosphor-react-native';
 import { Colors } from '../constants/colors';
 import { Spacing, BorderRadius, Heights } from '../constants/spacing';
 import { FontSize, FontFamily } from '../constants/typography';
 import { vendorService, regionService, type Vendor, type Region } from '../services/mockDataService';
-import { VendorCard } from '../components/ui';
+import { VendorCard, Button } from '../components/ui';
 import { SortOptions, AnimationDuration, AnimationEasing } from '../constants';
 import { getVendorRoute } from '../lib/navigationHelpers';
 
@@ -25,14 +25,14 @@ const SORT_OPTIONS = SortOptions.vendors;
 export default function VendorsScreen() {
   const router = useRouter();
   const params = useLocalSearchParams<{ region?: string }>();
-  
+
   const [vendors, setVendors] = useState<Vendor[]>([]);
   const [regions, setRegions] = useState<Region[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedRegion, setSelectedRegion] = useState<string | null>(params.region || null);
   const [sortBy, setSortBy] = useState<string>('rating');
   const [showFilters, setShowFilters] = useState(false);
-  
+
   // Animation values
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(20)).current;
@@ -43,7 +43,7 @@ export default function VendorsScreen() {
     setVendors(vendorData);
     setRegions(regionData);
     setLoading(false);
-    
+
     Animated.parallel([
       Animated.timing(fadeAnim, {
         toValue: 1,
@@ -63,16 +63,16 @@ export default function VendorsScreen() {
   // Filtered and sorted vendors
   const filteredVendors = useMemo(() => {
     let result = [...vendors];
-    
+
     // Filter by region
     if (selectedRegion) {
-      result = result.filter(v => 
-        v.cultural_specialties?.some(s => 
+      result = result.filter(v =>
+        v.cultural_specialties?.some(s =>
           s.toLowerCase().includes(selectedRegion.toLowerCase())
         )
       );
     }
-    
+
     // Sort
     switch (sortBy) {
       case 'rating':
@@ -85,14 +85,14 @@ export default function VendorsScreen() {
         result.sort((a, b) => a.delivery_time_min - b.delivery_time_min);
         break;
     }
-    
+
     return result;
   }, [vendors, selectedRegion, sortBy]);
 
   const activeFilterCount = (selectedRegion ? 1 : 0) + (sortBy !== 'rating' ? 1 : 0);
 
   const handleVendorPress = (vendor: Vendor) => {
-    router.push(getVendorRoute(vendor as any, vendor.id));
+    router.push(getVendorRoute(vendor as any, vendor.id) as any);
   };
 
   if (loading) {
@@ -109,15 +109,15 @@ export default function VendorsScreen() {
     <SafeAreaView style={styles.container} edges={['top']}>
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity 
-          style={styles.backButton} 
+        <TouchableOpacity
+          style={styles.backButton}
           onPress={() => router.back()}
           activeOpacity={0.8}
         >
           <ArrowLeft size={22} color={Colors.textPrimary} weight="bold" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>All Vendors</Text>
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.filterButton}
           onPress={() => setShowFilters(!showFilters)}
           activeOpacity={0.8}
@@ -196,13 +196,31 @@ export default function VendorsScreen() {
         showsVerticalScrollIndicator={false}
       >
         <Animated.View style={{ opacity: fadeAnim, transform: [{ translateY: slideAnim }] }}>
-          {filteredVendors.map((vendor) => (
-            <VendorCard
-              key={vendor.id}
-              vendor={vendor}
-              onPress={() => handleVendorPress(vendor)}
-            />
-          ))}
+          {filteredVendors.length === 0 ? (
+            <View style={styles.emptyContainer}>
+              <View style={styles.emptyIconContainer}>
+                <Storefront size={48} color={Colors.textMuted} weight="duotone" />
+              </View>
+              <Text style={styles.emptyTitle}>No vendors found</Text>
+              <Text style={styles.emptySubtitle}>Try adjusting your filters to find what you're looking for</Text>
+              {activeFilterCount > 0 && (
+                <Button
+                  title="Clear Filters"
+                  onPress={() => { setSelectedRegion(null); setSortBy('rating'); }}
+                  variant="secondary"
+                  style={{ marginTop: Spacing.lg }}
+                />
+              )}
+            </View>
+          ) : (
+            filteredVendors.map((vendor) => (
+              <VendorCard
+                key={vendor.id}
+                vendor={vendor}
+                onPress={() => handleVendorPress(vendor)}
+              />
+            ))
+          )}
         </Animated.View>
 
         <View style={{ height: 100 }} />
@@ -232,7 +250,7 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: Colors.black40,
+    backgroundColor: 'transparent',
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -245,7 +263,7 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: Colors.black40,
+    backgroundColor: 'transparent',
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -328,5 +346,36 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingHorizontal: Spacing.base,
+  },
+  // Empty State - Consistent
+  emptyContainer: {
+    paddingVertical: 80,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: Spacing.xl,
+  },
+  emptyIconContainer: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    backgroundColor: Colors.cardDark,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: Spacing.md,
+  },
+  emptyTitle: {
+    fontFamily: FontFamily.display,
+    fontSize: FontSize.h4,
+    color: Colors.textPrimary,
+    marginTop: Spacing.md,
+    textAlign: 'center',
+  },
+  emptySubtitle: {
+    fontFamily: FontFamily.body,
+    fontSize: FontSize.body,
+    color: Colors.textMuted,
+    marginTop: Spacing.sm,
+    textAlign: 'center',
+    marginBottom: Spacing.sm,
   },
 });

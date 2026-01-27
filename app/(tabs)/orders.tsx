@@ -35,6 +35,7 @@ import { Colors } from '../../constants/colors';
 import { Spacing, BorderRadius, Heights } from '../../constants/spacing';
 import { FontSize, FontFamily } from '../../constants/typography';
 import { PlaceholderImages } from '../../constants';
+import { Button } from '../../components/ui';
 import { getProductRoute, getVendorRoute } from '../../lib/navigationHelpers';
 import { useOrderStore } from '../../stores/orderStore';
 import { useAuthStore } from '../../stores/authStore';
@@ -366,7 +367,7 @@ export default function OrdersTab() {
     };
 
     const handleProductPress = (productId: string) => {
-        router.push(getProductRoute(productId));
+        router.push(getProductRoute(productId) as any);
     };
 
     const handleVendorPress = (order: OrderItem) => {
@@ -375,7 +376,7 @@ export default function OrdersTab() {
             // Try to get vendor first to get slug
             const vendors = vendorService.getAll();
             const vendor = vendors.find(v => v.id === order.vendorId);
-            router.push(getVendorRoute(vendor as any, order.vendorId));
+            router.push(getVendorRoute(vendor as any, order.vendorId) as any);
             return;
         }
 
@@ -407,11 +408,11 @@ export default function OrdersTab() {
         }
 
         if (vendor) {
-            router.push(getVendorRoute(vendor as any, vendor.id));
+            router.push(getVendorRoute(vendor as any, vendor.id) as any);
         } else {
             // Fallback: navigate to vendors list if not found
             console.warn(`Vendor not found: ${order.vendorName}`);
-            router.push('/vendors');
+            router.push('/vendors' as any);
         }
     };
 
@@ -437,21 +438,18 @@ export default function OrdersTab() {
                     }
                 </Text>
                 {isSearching ? (
-                    <TouchableOpacity
-                        style={styles.startShoppingButton}
+                    <Button
+                        title="Clear Search"
                         onPress={clearSearch}
-                        activeOpacity={0.8}
-                    >
-                        <Text style={styles.startShoppingText}>Clear Search</Text>
-                    </TouchableOpacity>
+                        variant="secondary"
+                        style={{ marginTop: Spacing.xl }}
+                    />
                 ) : (
-                    <TouchableOpacity
-                        style={styles.startShoppingButton}
+                    <Button
+                        title="Start Shopping"
                         onPress={() => router.push('/(tabs)')}
-                        activeOpacity={0.8}
-                    >
-                        <Text style={styles.startShoppingText}>Start Shopping</Text>
-                    </TouchableOpacity>
+                        style={{ marginTop: Spacing.xl }}
+                    />
                 )}
             </View>
         );
@@ -654,7 +652,7 @@ export default function OrdersTab() {
                 >
                     <ArrowLeft size={22} color={Colors.textPrimary} weight="bold" />
                 </TouchableOpacity>
-                <Text style={styles.title}>My Orders</Text>
+                <Text style={styles.headerTitle}>My Orders</Text>
                 <TouchableOpacity
                     style={styles.headerButton}
                     onPress={handleHelpPress}
@@ -746,7 +744,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
     },
-    title: {
+    headerTitle: {
         fontFamily: FontFamily.displaySemiBold,
         fontSize: FontSize.h4,
         color: Colors.textPrimary,
@@ -1016,16 +1014,5 @@ const styles = StyleSheet.create({
         marginTop: Spacing.sm,
         textAlign: 'center',
     },
-    startShoppingButton: {
-        marginTop: Spacing.xl,
-        backgroundColor: Colors.primary,
-        paddingHorizontal: Spacing.xl,
-        paddingVertical: Spacing.md,
-        borderRadius: BorderRadius.full,
-    },
-    startShoppingText: {
-        fontFamily: FontFamily.bodySemiBold,
-        fontSize: FontSize.body,
-        color: Colors.textPrimary,
-    },
+
 });

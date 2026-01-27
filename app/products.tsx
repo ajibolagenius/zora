@@ -12,20 +12,20 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import { ArrowLeft, Funnel, X } from 'phosphor-react-native';
+import { ArrowLeft, Funnel, X, Package } from 'phosphor-react-native';
 import { Colors } from '../constants/colors';
 import { Spacing, BorderRadius, Heights } from '../constants/spacing';
 import { FontSize, FontFamily } from '../constants/typography';
 import { UiConfig, SortOptions, AnimationDuration, AnimationEasing } from '../constants';
-import { 
-  productService, 
-  regionService, 
+import {
+  productService,
+  regionService,
   categoryService,
-  type Product, 
+  type Product,
   type Region,
   type Category,
 } from '../services/mockDataService';
-import { ProductCard } from '../components/ui';
+import { ProductCard, Button } from '../components/ui';
 import { useCartStore } from '../stores/cartStore';
 import { getProductRoute } from '../lib/navigationHelpers';
 
@@ -38,7 +38,7 @@ export default function ProductsScreen() {
   const params = useLocalSearchParams<{ region?: string; category?: string }>();
   const { width: screenWidth } = useWindowDimensions();
   const productCardWidth = (screenWidth - 32 - PRODUCT_GAP) / 2;
-  
+
   const [products, setProducts] = useState<Product[]>([]);
   const [regions, setRegions] = useState<Region[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -47,9 +47,9 @@ export default function ProductsScreen() {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(params.category || null);
   const [sortBy, setSortBy] = useState<string>('rating');
   const [showFilters, setShowFilters] = useState(false);
-  
+
   const addToCart = useCartStore((state) => state.addItem);
-  
+
   // Animation values
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(20)).current;
@@ -62,7 +62,7 @@ export default function ProductsScreen() {
     setRegions(regionData);
     setCategories(categoryData);
     setLoading(false);
-    
+
     Animated.parallel([
       Animated.timing(fadeAnim, {
         toValue: 1,
@@ -82,23 +82,23 @@ export default function ProductsScreen() {
   // Filtered and sorted products
   const filteredProducts = useMemo(() => {
     let result = [...products];
-    
+
     // Filter by region - convert slug format (west-africa) to match cultural_region (West Africa)
     if (selectedRegion) {
       // Normalize slug to comparable format: "west-africa" -> "west africa"
       const normalizedFilter = selectedRegion.toLowerCase().replace(/-/g, ' ');
-      result = result.filter(p => 
+      result = result.filter(p =>
         p.cultural_region?.toLowerCase().includes(normalizedFilter)
       );
     }
-    
+
     // Filter by category
     if (selectedCategory) {
-      result = result.filter(p => 
+      result = result.filter(p =>
         p.category?.toLowerCase() === selectedCategory.toLowerCase()
       );
     }
-    
+
     // Sort
     switch (sortBy) {
       case 'rating':
@@ -114,21 +114,21 @@ export default function ProductsScreen() {
         result.sort((a, b) => a.name.localeCompare(b.name));
         break;
     }
-    
+
     return result;
   }, [products, selectedRegion, selectedCategory, sortBy]);
 
-  const activeFilterCount = 
-    (selectedRegion ? 1 : 0) + 
-    (selectedCategory ? 1 : 0) + 
+  const activeFilterCount =
+    (selectedRegion ? 1 : 0) +
+    (selectedCategory ? 1 : 0) +
     (sortBy !== 'rating' ? 1 : 0);
 
   const handleProductPress = (product: Product) => {
-    router.push(getProductRoute(product.id));
+    router.push(getProductRoute(product.id) as any);
   };
 
   const handleAddToCart = (product: Product) => {
-    addToCart(product, 1);
+    addToCart(product as any, 1);
   };
 
   const clearAllFilters = () => {
@@ -166,15 +166,15 @@ export default function ProductsScreen() {
     <SafeAreaView style={styles.container} edges={['top']}>
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity 
-          style={styles.backButton} 
+        <TouchableOpacity
+          style={styles.backButton}
           onPress={() => router.back()}
           activeOpacity={0.8}
         >
           <ArrowLeft size={22} color={Colors.textPrimary} weight="bold" />
         </TouchableOpacity>
         <Text style={styles.headerTitle} numberOfLines={1}>{getPageTitle()}</Text>
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.filterButton}
           onPress={() => setShowFilters(!showFilters)}
           activeOpacity={0.8}
@@ -279,24 +279,42 @@ export default function ProductsScreen() {
         showsVerticalScrollIndicator={false}
       >
         <Animated.View style={{ opacity: fadeAnim, transform: [{ translateY: slideAnim }] }}>
-          <View style={styles.productsGrid}>
-            {filteredProducts.map((product, index) => (
-              <View 
-                key={product.id} 
-                style={{
-                  width: productCardWidth,
-                  marginRight: index % 2 === 0 ? PRODUCT_GAP : 0,
-                  marginBottom: PRODUCT_GAP,
-                }}
-              >
-                <ProductCard
-                  product={product}
-                  onPress={() => handleProductPress(product)}
-                  onAddToCart={() => handleAddToCart(product)}
-                />
+          {filteredProducts.length === 0 ? (
+            <View style={styles.emptyContainer}>
+              <View style={styles.emptyIconContainer}>
+                <Package size={48} color={Colors.textMuted} weight="duotone" />
               </View>
-            ))}
-          </View>
+              <Text style={styles.emptyTitle}>No products found</Text>
+              <Text style={styles.emptySubtitle}>Try adjusting your filters to find what you're looking for</Text>
+              {activeFilterCount > 0 && (
+                <Button
+                  title="Clear Filters"
+                  onPress={clearAllFilters}
+                  variant="secondary"
+                  style={{ marginTop: Spacing.lg }}
+                />
+              )}
+            </View>
+          ) : (
+            <View style={styles.productsGrid}>
+              {filteredProducts.map((product, index) => (
+                <View
+                  key={product.id}
+                  style={{
+                    width: productCardWidth,
+                    marginRight: index % 2 === 0 ? PRODUCT_GAP : 0,
+                    marginBottom: PRODUCT_GAP,
+                  }}
+                >
+                  <ProductCard
+                    product={product}
+                    onPress={() => handleProductPress(product)}
+                    onAddToCart={() => handleAddToCart(product)}
+                  />
+                </View>
+              ))}
+            </View>
+          )}
         </Animated.View>
 
         <View style={{ height: 100 }} />
@@ -326,7 +344,7 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: Colors.black40,
+    backgroundColor: 'transparent',
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -382,7 +400,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     paddingHorizontal: Spacing.base,
     gap: Spacing.sm,
-    flexWrap: 'wrap',
   },
   chip: {
     paddingHorizontal: Spacing.md,
@@ -430,5 +447,36 @@ const styles = StyleSheet.create({
   productsGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
+  },
+  // Empty State - Consistent
+  emptyContainer: {
+    paddingVertical: 80,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: Spacing.xl,
+  },
+  emptyIconContainer: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    backgroundColor: Colors.cardDark,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: Spacing.md,
+  },
+  emptyTitle: {
+    fontFamily: FontFamily.display,
+    fontSize: FontSize.h4,
+    color: Colors.textPrimary,
+    marginTop: Spacing.md,
+    textAlign: 'center',
+  },
+  emptySubtitle: {
+    fontFamily: FontFamily.body,
+    fontSize: FontSize.body,
+    color: Colors.textMuted,
+    marginTop: Spacing.sm,
+    textAlign: 'center',
+    marginBottom: Spacing.sm,
   },
 });

@@ -16,7 +16,9 @@ import {
   Star,
   PiggyBank,
   Truck,
+  Bell,
 } from 'phosphor-react-native';
+import { Button } from '../components/ui';
 import { Colors } from '../constants/colors';
 import { Spacing, BorderRadius } from '../constants/spacing';
 import { FontSize, FontFamily } from '../constants/typography';
@@ -212,69 +214,84 @@ export default function NotificationsScreen() {
           <RefreshControl refreshing={isLoading} onRefresh={onRefresh} tintColor={Colors.primary} />
         }
       >
-        {filteredGroups.map((group) => (
-          <View key={group.label} style={styles.section}>
-            <Text style={styles.sectionTitle}>{group.label}</Text>
-            <View style={styles.notificationsList}>
-              {group.notifications.map((notification) => {
-                const iconConfig = getIconConfig(notification.type, notification.is_read);
-                const IconComponent = iconConfig.icon;
+        {filteredGroups.length === 0 ? (
+          <View style={styles.emptyContainer}>
+            <View style={styles.emptyIconContainer}>
+              <Bell size={48} color={Colors.textMuted} weight="duotone" />
+            </View>
+            <Text style={styles.emptyTitle}>No notifications yet</Text>
+            <Text style={styles.emptySubtitle}>We'll let you know when important updates arrive</Text>
+            <Button
+              title="Refresh"
+              onPress={onRefresh}
+              variant="secondary"
+              style={{ marginTop: Spacing.lg }}
+            />
+          </View>
+        ) : (
+          filteredGroups.map((group) => (
+            <View key={group.label} style={styles.section}>
+              <Text style={styles.sectionTitle}>{group.label}</Text>
+              <View style={styles.notificationsList}>
+                {group.notifications.map((notification) => {
+                  const iconConfig = getIconConfig(notification.type, notification.is_read);
+                  const IconComponent = iconConfig.icon;
 
-                return (
-                  <TouchableOpacity
-                    key={notification.id}
-                    style={[
-                      styles.notificationCard,
-                      notification.is_read && styles.notificationCardRead,
-                    ]}
-                    activeOpacity={0.8}
-                    onPress={() => markAsRead(notification.id)}
-                  >
-                    {/* Icon */}
-                    <View
+                  return (
+                    <TouchableOpacity
+                      key={notification.id}
                       style={[
-                        styles.notificationIcon,
-                        { backgroundColor: iconConfig.bgColor },
+                        styles.notificationCard,
+                        notification.is_read && styles.notificationCardRead,
                       ]}
+                      activeOpacity={0.8}
+                      onPress={() => markAsRead(notification.id)}
                     >
-                      <IconComponent
-                        size={24}
-                        color={iconConfig.iconColor}
-                        weight="fill"
-                      />
-                    </View>
+                      {/* Icon */}
+                      <View
+                        style={[
+                          styles.notificationIcon,
+                          { backgroundColor: iconConfig.bgColor },
+                        ]}
+                      >
+                        <IconComponent
+                          size={24}
+                          color={iconConfig.iconColor}
+                          weight="fill"
+                        />
+                      </View>
 
-                    {/* Content */}
-                    <View style={styles.notificationContent}>
-                      <View style={styles.notificationHeader}>
+                      {/* Content */}
+                      <View style={styles.notificationContent}>
+                        <View style={styles.notificationHeader}>
+                          <Text
+                            style={styles.notificationTitle}
+                            numberOfLines={1}
+                          >
+                            {notification.title}
+                          </Text>
+                          <Text style={styles.notificationTime}>
+                            {formatTimeAgo(notification.created_at)}
+                          </Text>
+                        </View>
                         <Text
-                          style={styles.notificationTitle}
-                          numberOfLines={1}
+                          style={styles.notificationDescription}
+                          numberOfLines={2}
                         >
-                          {notification.title}
-                        </Text>
-                        <Text style={styles.notificationTime}>
-                          {formatTimeAgo(notification.created_at)}
+                          {notification.description}
                         </Text>
                       </View>
-                      <Text
-                        style={styles.notificationDescription}
-                        numberOfLines={2}
-                      >
-                        {notification.description}
-                      </Text>
-                    </View>
 
-                    {/* Unread Dot */}
-                    {!notification.is_read && (
-                      <View style={styles.unreadDot} />
-                    )}
-                  </TouchableOpacity>
-                );
-              })}
+                      {/* Unread Dot */}
+                      {!notification.is_read && (
+                        <View style={styles.unreadDot} />
+                      )}
+                    </TouchableOpacity>
+                  );
+                })}
+              </View>
             </View>
-          </View>
-        ))}
+          )))}
 
         {/* Bottom padding */}
         <View style={{ height: 100 }} />
@@ -422,5 +439,37 @@ const styles = StyleSheet.create({
     height: 10,
     borderRadius: 5,
     backgroundColor: Colors.primary,
+  },
+
+  // Empty State - Consistent with Cart/Orders
+  emptyContainer: {
+    paddingVertical: 80,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: Spacing.xl,
+  },
+  emptyIconContainer: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    backgroundColor: Colors.cardDark,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: Spacing.md,
+  },
+  emptyTitle: {
+    fontFamily: FontFamily.display,
+    fontSize: FontSize.h4,
+    color: Colors.textPrimary,
+    marginTop: Spacing.md,
+    textAlign: 'center',
+  },
+  emptySubtitle: {
+    fontFamily: FontFamily.body,
+    fontSize: FontSize.body,
+    color: Colors.textMuted,
+    marginTop: Spacing.sm,
+    textAlign: 'center',
+    marginBottom: Spacing.sm,
   },
 });

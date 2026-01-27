@@ -142,16 +142,39 @@ ON CONFLICT (slug) DO UPDATE SET
   generateProductInsertSQL(products, vendorIds = []) {
     if (!products || products.length === 0) return null;
 
+    // Create a mapping from vendor string IDs (e.g., "vendor-0") to actual UUIDs
+    const vendorIdMap = new Map();
+    vendorIds.forEach((uuid, index) => {
+      vendorIdMap.set(`vendor-${index}`, uuid);
+    });
+
     const values = products.map((product, index) => {
       const id = `'${this.generateUUID()}'`;
-      // Use vendor IDs from the vendors we just created
-      const vendorIndex = index % vendorIds.length;
-      const vendorId = vendorIds[vendorIndex] ? `'${vendorIds[vendorIndex]}'` : `'${this.generateUUID()}'`;
+      // Use vendor_id from product object if available, otherwise fall back to index-based lookup
+      let vendorId;
+      if (product.vendor_id && vendorIdMap.has(product.vendor_id)) {
+        vendorId = `'${vendorIdMap.get(product.vendor_id)}'`;
+      } else if (product.vendor_id) {
+        // Try to extract index from vendor_id string (e.g., "vendor-6" -> 6)
+        const match = product.vendor_id.match(/vendor-(\d+)/);
+        if (match) {
+          const vendorIndex = parseInt(match[1], 10);
+          vendorId = vendorIds[vendorIndex] ? `'${vendorIds[vendorIndex]}'` : `'${this.generateUUID()}'`;
+        } else {
+          // Fallback to modulo cycling if vendor_id format is unexpected
+          const vendorIndex = index % vendorIds.length;
+          vendorId = vendorIds[vendorIndex] ? `'${vendorIds[vendorIndex]}'` : `'${this.generateUUID()}'`;
+        }
+      } else {
+        // Fallback to modulo cycling if no vendor_id provided
+        const vendorIndex = index % vendorIds.length;
+        vendorId = vendorIds[vendorIndex] ? `'${vendorIds[vendorIndex]}'` : `'${this.generateUUID()}'`;
+      }
       const name = this.escapeSQL(product.name);
       const description = product.description ? this.escapeSQL(product.description.substring(0, 1000)) : 'NULL';
-      const price = product.price || 0;
+      const price = product.price ?? 0;
       const unitPriceLabel = product.unit_price_label ? this.escapeSQL(product.unit_price_label) : 'NULL';
-      const stockQuantity = product.stock_quantity || 0;
+      const stockQuantity = product.stock_quantity ?? 0;
       const category = this.escapeSQL(product.category);
       const culturalRegion = product.cultural_region ? this.escapeSQL(product.cultural_region) : 'NULL';
       const imageUrls = product.image_urls && product.image_urls.length > 0
@@ -166,8 +189,8 @@ ON CONFLICT (slug) DO UPDATE SET
       const isActive = product.is_active !== false ? 'TRUE' : 'FALSE';
       const isFeatured = product.is_featured ? 'TRUE' : 'FALSE';
       const badge = product.badge ? this.escapeSQL(product.badge) : 'NULL';
-      const rating = product.rating || 0;
-      const reviewCount = product.review_count || 0;
+      const rating = product.rating ?? 0;
+      const reviewCount = product.review_count ?? 0;
 
       return `(${id}, ${vendorId}, ${name}, ${description}, ${price}, ${unitPriceLabel}, ${stockQuantity}, ${category}, ${culturalRegion}, ${imageUrls}, ${weight}, ${certifications}, ${nutrition}::JSONB, ${heritageStory}, ${isActive}, ${isFeatured}, ${badge}, ${rating}, ${reviewCount}, NOW(), NOW())`;
     }).join(',\n    ');

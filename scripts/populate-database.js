@@ -285,11 +285,16 @@ class DataTransformer {
     const category = this.mapCategory(productData.category);
     const region = randomChoice(CONFIG.regions);
     
+    // Parse price, but preserve 0 values
+    const parsedPrice = productData.price !== undefined && productData.price !== null 
+      ? parseFloat(productData.price) 
+      : null;
+    
     return {
       vendor_id: vendorId,
       name: productData.title || productData.name,
       description: productData.description || `Quality ${productData.title || 'product'} from ${region.name}`,
-      price: parseFloat(productData.price) || randomFloat(5.99, 99.99),
+      price: parsedPrice !== null && !isNaN(parsedPrice) ? parsedPrice : randomFloat(5.99, 99.99),
       unit_price_label: 'per item',
       stock_quantity: randomInt(10, 200),
       category: category,
@@ -301,8 +306,8 @@ class DataTransformer {
       is_active: true,
       is_featured: Math.random() > 0.7,
       badge: Math.random() > 0.8 ? 'Best Seller' : null,
-      rating: productData.rating?.rate || randomFloat(3.5, 5.0, 1),
-      review_count: productData.rating?.count || randomInt(0, 200),
+      rating: productData.rating?.rate ?? randomFloat(3.5, 5.0, 1),
+      review_count: productData.rating?.count ?? randomInt(0, 200),
     };
   }
 

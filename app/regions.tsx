@@ -16,6 +16,7 @@ import { ArrowLeft, MapPin, Storefront, Package } from 'phosphor-react-native';
 import { Colors } from '../constants/colors';
 import { Spacing, BorderRadius, Heights } from '../constants/spacing';
 import { FontSize, FontFamily } from '../constants/typography';
+import { AnimationDuration, AnimationEasing } from '../constants';
 import { regionService, type Region } from '../services/mockDataService';
 
 export default function RegionsScreen() {
@@ -23,7 +24,7 @@ export default function RegionsScreen() {
   const [regions, setRegions] = useState<Region[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedRegion, setSelectedRegion] = useState<string | null>(null);
-  
+
   // Animation values
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(20)).current;
@@ -32,7 +33,7 @@ export default function RegionsScreen() {
     const data = regionService.getAll();
     setRegions(data);
     setLoading(false);
-    
+
     Animated.parallel([
       Animated.timing(fadeAnim, {
         toValue: 1,
@@ -69,8 +70,8 @@ export default function RegionsScreen() {
     <SafeAreaView style={styles.container} edges={['top']}>
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity 
-          style={styles.backButton} 
+        <TouchableOpacity
+          style={styles.backButton}
           onPress={() => router.back()}
           activeOpacity={0.8}
         >

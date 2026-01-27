@@ -12,10 +12,10 @@ import {
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import { 
-  ShoppingCart, 
-  Trash, 
-  Minus, 
+import {
+  ShoppingCart,
+  Trash,
+  Minus,
   Plus,
   ArrowLeft,
   ArrowRight,
@@ -43,7 +43,7 @@ export default function CartTab() {
     if (items.length > 0) {
       calculateTotals();
     }
-    
+
     Animated.parallel([
       Animated.timing(fadeAnim, {
         toValue: 1,
@@ -67,7 +67,7 @@ export default function CartTab() {
       <SafeAreaView style={styles.container} edges={['top']}>
         {/* Header */}
         <View style={styles.header}>
-          <TouchableOpacity 
+          <TouchableOpacity
             style={styles.backButton}
             onPress={() => router.back()}
           >
@@ -76,7 +76,7 @@ export default function CartTab() {
           <Text style={styles.headerTitle}>My Cart</Text>
           <View style={styles.headerRight} />
         </View>
-        
+
         <View style={styles.emptyContainer}>
           <View style={styles.emptyIconContainer}>
             <ShoppingCart size={48} color={Colors.textMuted} weight="duotone" />
@@ -97,7 +97,7 @@ export default function CartTab() {
     <SafeAreaView style={styles.container} edges={['top']}>
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.backButton}
           onPress={() => router.back()}
         >
@@ -107,7 +107,7 @@ export default function CartTab() {
         <View style={styles.headerRight} />
       </View>
 
-      <Animated.ScrollView 
+      <Animated.ScrollView
         style={[styles.scrollView, { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }]}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
@@ -125,7 +125,7 @@ export default function CartTab() {
                 <Text style={styles.vendorLocation}>Shipping from New York</Text>
               </View>
               <TouchableOpacity onPress={() => {
-                router.push(getVendorRoute(vendor as any, vendor.id));
+                router.push(getVendorRoute(vendor as any, vendor.id) as any);
               }}>
                 <Text style={styles.visitStoreText}>Visit Store</Text>
               </TouchableOpacity>
@@ -134,22 +134,22 @@ export default function CartTab() {
             {/* Items */}
             {vendor.items.map((item) => {
               // Handle both image_url and image_urls array
-              const productImage = item.product?.image_url || 
-                (item.product as any)?.image_urls?.[0] || 
+              const productImage = item.product?.image_url ||
+                (item.product as any)?.image_urls?.[0] ||
                 PlaceholderImages.image100;
-              
+
               return (
                 <TouchableOpacity
                   key={item.product_id}
                   style={styles.itemCard}
                   onPress={() => {
-                    router.push(getProductRoute(item.product_id));
+                    router.push(getProductRoute(item.product_id) as any);
                   }}
                   activeOpacity={0.7}
                 >
                   {/* Product Image */}
                   <Image source={{ uri: productImage }} style={styles.itemImage} />
-                  
+
                   {/* Product Content */}
                   <View style={styles.itemContent}>
                     {/* Top Row: Name + Delete */}
@@ -162,17 +162,17 @@ export default function CartTab() {
                         <Trash size={18} color={Colors.textMuted} weight="regular" />
                       </TouchableOpacity>
                     </View>
-                    
+
                     {/* Variant */}
                     <Text style={styles.itemVariant}>{item.product?.weight || '1 Bottle (1L)'}</Text>
-                    
+
                     {/* Bottom Row: Price + Quantity */}
                     <View style={styles.itemBottomRow}>
                       {/* Price */}
                       <Text style={styles.itemPrice}>
                         £{((item.product?.price || 0) * item.quantity).toFixed(2)}
                       </Text>
-                      
+
                       {/* Quantity Stepper */}
                       <View style={styles.quantityStepper}>
                         <TouchableOpacity
@@ -208,9 +208,9 @@ export default function CartTab() {
           <Text style={styles.subtotalLabel}>Subtotal ({itemCount} items)</Text>
           <Text style={styles.subtotalValue}>£{subtotal.toFixed(2)}</Text>
         </View>
-        
+
         {/* Checkout Button */}
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.checkoutButton}
           onPress={() => router.push('/checkout')}
           activeOpacity={0.9}
@@ -228,7 +228,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Colors.backgroundDark,
   },
-  
+
   // Header
   header: {
     flexDirection: 'row',
@@ -241,7 +241,7 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     justifyContent: 'center',
-    alignItems: 'flex-start',
+    alignItems: 'center',
   },
   headerTitle: {
     fontFamily: FontFamily.displaySemiBold,
@@ -251,7 +251,7 @@ const styles = StyleSheet.create({
   headerRight: {
     width: 44,
   },
-  
+
   // Empty State
   emptyContainer: {
     flex: 1,
@@ -280,7 +280,7 @@ const styles = StyleSheet.create({
     color: Colors.textMuted,
     marginTop: Spacing.sm,
   },
-  
+
   // Scroll View
   scrollView: {
     flex: 1,
@@ -289,7 +289,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.base,
     paddingTop: Spacing.sm,
   },
-  
+
   // Vendor Section
   vendorSection: {
     backgroundColor: Colors.cardDark,
@@ -330,7 +330,7 @@ const styles = StyleSheet.create({
     fontSize: FontSize.small,
     color: Colors.secondary,
   },
-  
+
   // Item Card
   itemCard: {
     flexDirection: 'row',
@@ -376,14 +376,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginTop: Spacing.md,
   },
-  
+
   // Item Price
   itemPrice: {
     fontFamily: FontFamily.displaySemiBold,
     fontSize: FontSize.h4,
     color: Colors.secondary,
   },
-  
+
   // Quantity Stepper
   quantityStepper: {
     flexDirection: 'row',
@@ -415,7 +415,7 @@ const styles = StyleSheet.create({
     width: 32,
     textAlign: 'center',
   },
-  
+
   // Footer
   footerContainer: {
     position: 'absolute',
