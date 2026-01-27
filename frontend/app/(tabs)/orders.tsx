@@ -36,6 +36,9 @@ import { Spacing, BorderRadius, Heights } from '../../constants/spacing';
 import { FontSize, FontFamily } from '../../constants/typography';
 import { PlaceholderImages } from '../../constants';
 import { getProductRoute, getVendorRoute } from '../../lib/navigationHelpers';
+import { useOrderStore } from '../../stores/orderStore';
+import { useAuthStore } from '../../stores/authStore';
+import { Order } from '../../types';
 
 // Status colors matching design system (using constants)
 const STATUS_YELLOW = Colors.statusYellow;
@@ -189,7 +192,7 @@ const StatusIcon = ({ icon, color, size = 14 }: { icon: StatusConfig['icon']; co
 
 const getFilteredOrders = (orders: OrderItem[], tab: TabType, searchQuery: string) => {
     let filtered: OrderItem[];
-    
+
     switch (tab) {
         case 'active':
             filtered = orders.filter(o => o.status === 'preparing' || o.status === 'out_for_delivery');
@@ -203,17 +206,17 @@ const getFilteredOrders = (orders: OrderItem[], tab: TabType, searchQuery: strin
         default:
             filtered = orders;
     }
-    
+
     // Apply search filter
     if (searchQuery.trim()) {
         const query = searchQuery.toLowerCase().trim();
-        filtered = filtered.filter(order => 
+        filtered = filtered.filter(order =>
             order.orderNumber.toLowerCase().includes(query) ||
             order.vendorName.toLowerCase().includes(query) ||
             order.date.toLowerCase().includes(query)
         );
     }
-    
+
     return filtered;
 };
 
@@ -224,11 +227,23 @@ export default function OrdersTab() {
     const [expandedOrders, setExpandedOrders] = useState<Set<string>>(new Set());
     const expandAnimations = useRef<{ [key: string]: Animated.Value }>({});
 
+    // Store hooks
+    const {
+        orders,
+        fetchOrders,
+        isLoading,
+        subscribeToRealtime,
+        unsubscribeFromRealtime
+    } = useOrderStore();
+    const { user } = useAuthStore();
+    const [vendorsMap, setVendorsMap] = useState<Record<string, string>>({}); // id -> name
+
     // Animation values
     const fadeAnim = useRef(new Animated.Value(0)).current;
     const slideAnim = useRef(new Animated.Value(20)).current;
 
     useEffect(() => {
+        fetchOrders();
         Animated.parallel([
             Animated.timing(fadeAnim, {
                 toValue: 1,
@@ -245,7 +260,51 @@ export default function OrdersTab() {
         ]).start();
     }, []);
 
-    const filteredOrders = getFilteredOrders(MOCK_ORDERS, activeTab, searchQuery);
+    useEffect(() => {
+        if (user) {
+            subscribeToRealtime(user.user_id);
+            // Pre-fetch vendor names if possible (mock implementation)
+            // simplified: we'll dynamically get vendor names or use defaults
+        }
+        return () => {
+            unsubscribeFromRealtime();
+        };
+    }, [user]);
+
+    // Transform orders to UI format
+    const uiOrders: OrderItem[] = orders.map((order: Order) => {
+        // Items are stored as JSONB in 'items' or we use the mapped type
+        // In types/index.ts Order.items is OrderItem[] (product items)
+        const products = order.items.map((item: any) => ({
+            id: item.product_id || 'unknown',
+            name: item.name || 'Unknown Item',
+            image_url: item.image_url || PlaceholderImages.image100,
+            quantity: item.quantity || 1,
+            price: item.price || 0,
+        }));
+
+        // Derive vendor name - effectively assuming single vendor per order based on schema
+        // If we had a vendor store, we'd look it up. For now, use a placeholder or ID.
+        // In a real app we would join this data or having it in the store.
+        const vendorName = "Zora Vendor"; // Placeholder as we don't have vendor name in Order type yet
+
+        return {
+            id: order.id,
+            orderNumber: `#${order.order_number || order.id.substring(0, 8)}`,
+            date: new Date(order.created_at || Date.now()).toLocaleDateString('en-GB', {
+                month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit'
+            }),
+            vendorName: vendorName,
+            vendorId: order.items[0]?.vendor_id,
+            itemCount: products.reduce((sum: number, p: any) => sum + p.quantity, 0),
+            total: order.total,
+            status: order.status as OrderStatus,
+            thumbnails: products.map((p: any) => p.image_url),
+            products: products,
+        };
+    });
+
+    const filteredOrders = getFilteredOrders(uiOrders, activeTab, searchQuery);
 
     const clearSearch = () => {
         setSearchQuery('');
@@ -273,14 +332,14 @@ export default function OrdersTab() {
 
     const toggleOrderExpansion = (orderId: string) => {
         const isExpanded = expandedOrders.has(orderId);
-        
+
         // Initialize animation value if not exists
         if (!expandAnimations.current[orderId]) {
             expandAnimations.current[orderId] = new Animated.Value(isExpanded ? 1 : 0);
         }
-        
+
         const animValue = expandAnimations.current[orderId];
-        
+
         if (isExpanded) {
             // Collapse
             setExpandedOrders(prev => {
@@ -319,25 +378,25 @@ export default function OrdersTab() {
             router.push(getVendorRoute(vendor as any, order.vendorId));
             return;
         }
-        
+
         // Otherwise, try to find vendor by name with improved matching
         const vendors = vendorService.getAll();
         const orderNameLower = order.vendorName.toLowerCase();
-        
+
         // Try exact match first
-        let vendor = vendors.find(v => 
+        let vendor = vendors.find(v =>
             v.shop_name.toLowerCase() === orderNameLower
         );
-        
+
         // Try partial match (vendor name contains order name or vice versa)
         if (!vendor) {
             vendor = vendors.find(v => {
                 const shopNameLower = v.shop_name.toLowerCase();
-                return shopNameLower.includes(orderNameLower) || 
-                       orderNameLower.includes(shopNameLower);
+                return shopNameLower.includes(orderNameLower) ||
+                    orderNameLower.includes(shopNameLower);
             });
         }
-        
+
         // Try fuzzy matching for common words (e.g., "Lagos", "Spices", "Beauty")
         if (!vendor) {
             const orderWords = orderNameLower.split(/\s+/).filter(w => w.length > 3);
@@ -346,7 +405,7 @@ export default function OrdersTab() {
                 return orderWords.some(word => shopNameLower.includes(word));
             });
         }
-        
+
         if (vendor) {
             router.push(getVendorRoute(vendor as any, vendor.id));
         } else {
@@ -358,7 +417,7 @@ export default function OrdersTab() {
 
     const renderEmptyState = () => {
         const isSearching = searchQuery.trim().length > 0;
-        
+
         return (
             <View style={styles.emptyContainer}>
                 <View style={styles.emptyIconContainer}>
@@ -372,7 +431,7 @@ export default function OrdersTab() {
                     {isSearching ? 'No results found' : 'No orders yet'}
                 </Text>
                 <Text style={styles.emptySubtitle}>
-                    {isSearching 
+                    {isSearching
                         ? `No orders matching "${searchQuery}"`
                         : 'When you place orders, they\'ll appear here'
                     }
@@ -402,12 +461,12 @@ export default function OrdersTab() {
         const statusConfig = getStatusConfig(order.status);
         const isCompleted = order.status === 'delivered' || order.status === 'cancelled';
         const isExpanded = expandedOrders.has(order.id);
-        
+
         // Initialize animation value if not exists
         if (!expandAnimations.current[order.id]) {
             expandAnimations.current[order.id] = new Animated.Value(isExpanded ? 1 : 0);
         }
-        
+
         const expandAnim = expandAnimations.current[order.id];
         // Calculate height: padding (sm + xs) + (item height + gap) * count
         const itemHeight = 50 + (Spacing.sm * 2); // image height + padding
@@ -456,10 +515,12 @@ export default function OrdersTab() {
                             </View>
                             <Animated.View
                                 style={{
-                                    transform: [{ rotate: expandAnim.interpolate({
-                                        inputRange: [0, 1],
-                                        outputRange: ['0deg', '180deg'],
-                                    }) }],
+                                    transform: [{
+                                        rotate: expandAnim.interpolate({
+                                            inputRange: [0, 1],
+                                            outputRange: ['0deg', '180deg'],
+                                        })
+                                    }],
                                 }}
                             >
                                 <CaretDown size={20} color={Colors.textMuted} weight="bold" />
@@ -586,7 +647,7 @@ export default function OrdersTab() {
         <SafeAreaView style={styles.container} edges={['top']}>
             {/* Header */}
             <View style={styles.header}>
-                <TouchableOpacity 
+                <TouchableOpacity
                     style={styles.headerButton}
                     onPress={() => router.back()}
                     activeOpacity={0.8}
@@ -594,7 +655,7 @@ export default function OrdersTab() {
                     <ArrowLeft size={22} color={Colors.textPrimary} weight="bold" />
                 </TouchableOpacity>
                 <Text style={styles.title}>My Orders</Text>
-                <TouchableOpacity 
+                <TouchableOpacity
                     style={styles.headerButton}
                     onPress={handleHelpPress}
                     activeOpacity={0.8}
