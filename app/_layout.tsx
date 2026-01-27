@@ -29,7 +29,7 @@ SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
   const [fontTimeout, setFontTimeout] = useState(false);
-  
+
   const [fontsLoaded, fontError] = useFonts({
     // Montserrat - Headlines & Display
     'Montserrat-Regular': Montserrat_400Regular,
@@ -46,12 +46,18 @@ export default function RootLayout() {
 
   // Fallback timeout for font loading (especially for web)
   useEffect(() => {
+    console.log('Font loading state:', { fontsLoaded, fontError: !!fontError, fontTimeout });
+
+    if (fontsLoaded || fontError) {
+      console.log('Fonts loaded or error occurred, hiding splash screen');
+    }
+
     const timeout = setTimeout(() => {
       if (!fontsLoaded && !fontError) {
         console.warn('Font loading timeout - proceeding with system fonts');
         setFontTimeout(true);
       }
-    }, 8000); // 8 second timeout
+    }, 5000); // Reduced to 5 seconds for debugging
 
     return () => clearTimeout(timeout);
   }, [fontsLoaded, fontError]);
@@ -91,11 +97,11 @@ export default function RootLayout() {
         // Check if this is an OAuth callback
         if (url.includes('auth/callback') || url.includes('auth#') || url.includes('auth?')) {
           const client = await getSupabaseClient();
-          
+
           // Supabase will automatically extract tokens from the URL
           // Just check if we have a session now
           const { data: { session }, error } = await client.auth.getSession();
-          
+
           if (session && !error) {
             // Session exists, refresh auth state
             const { checkAuth } = useAuthStore.getState();
@@ -187,7 +193,9 @@ export default function RootLayout() {
   }, []);
 
   // Show loading indicator while fonts are loading
-  if (!fontsLoaded && !fontError && !fontTimeout) {
+  // On web, we skip the loading state to properly handle hydration and prevent blocking
+  // The fonts will load in the background (FOUT)
+  if (Platform.OS !== 'web' && !fontsLoaded && !fontError && !fontTimeout) {
     return (
       <View style={styles.loadingContainer}>
         <StatusBar style="light" />
