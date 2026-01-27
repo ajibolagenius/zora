@@ -7,20 +7,35 @@
  * using Supabase MCP execute_sql tool.
  * 
  * Usage: node scripts/execute-final-sql.js
+ * 
+ * Note: If the SQL file doesn't exist, it will be automatically generated.
  */
 
 const fs = require('fs');
 const path = require('path');
+const { VendorsProductsCreator } = require('./create-vendors-products');
 
 // Note: This script is meant to be called via MCP tools
 // For now, it reads the SQL and outputs instructions
 
 const sqlPath = path.join(__dirname, '..', 'supabase', 'migrations', '006_populate_vendors_products.sql');
 
+// Auto-generate SQL file if it doesn't exist
 if (!fs.existsSync(sqlPath)) {
-  console.error(`❌ SQL file not found: ${sqlPath}`);
-  console.error('Please run create-vendors-products.js first.');
-  process.exit(1);
+  console.log(`📝 SQL file not found. Generating it now...\n`);
+  try {
+    const creator = new VendorsProductsCreator();
+    const sql = creator.generateSQL();
+    creator.saveSQL(sql);
+    console.log(`✅ SQL file generated successfully!\n`);
+  } catch (error) {
+    console.error(`❌ Failed to generate SQL file: ${error.message}`);
+    console.error('\n💡 Make sure you have run:');
+    console.error('   1. node scripts/create-users-auth.js');
+    console.error('   2. node scripts/update-profiles.js');
+    console.error('\n   Then try again.');
+    process.exit(1);
+  }
 }
 
 const sql = fs.readFileSync(sqlPath, 'utf8');
