@@ -38,19 +38,22 @@ export default function AuthCallbackScreen() {
           // Session exists, refresh auth state
           await checkAuth();
           
-          // Get the current auth state after checkAuth completes
-          // Use getState() to get the latest value, not the closure value
-          const { isAuthenticated: currentAuthState } = useAuthStore.getState();
-          
           // Wait a moment for any async state updates to complete
           await new Promise(resolve => setTimeout(resolve, 500));
           
-          // Check auth state again after the delay
-          const { isAuthenticated: finalAuthState } = useAuthStore.getState();
+          // Check auth state and onboarding status after the delay
+          const { isAuthenticated, hasCompletedOnboarding, emailVerified } = useAuthStore.getState();
           
-          if (finalAuthState) {
-            router.replace('/(tabs)');
+          if (isAuthenticated && emailVerified) {
+            // User is authenticated and verified, check onboarding
+            if (hasCompletedOnboarding) {
+              router.replace('/(tabs)');
+            } else {
+              // First time login after verification, redirect to onboarding
+              router.replace('/onboarding/heritage');
+            }
           } else {
+            // Not authenticated or not verified, redirect to login
             router.replace('/(auth)/login');
           }
         } else {

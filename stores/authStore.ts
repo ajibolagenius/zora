@@ -522,13 +522,27 @@ export const useAuthStore = create<AuthState>()(
             const user = mapSupabaseUser(data.user, profile);
             const emailVerified = data.user.email_confirmed_at !== null;
 
-            set({
-              user,
-              session: data.session,
-              isAuthenticated: !!data.session,
-              emailVerified,
-              isLoading: false,
-            });
+            // Don't authenticate if email is not verified
+            // User must verify email before they can log in
+            if (!emailVerified) {
+              // Sign out to clear any session
+              await client.auth.signOut();
+              set({
+                user: null,
+                session: null,
+                isAuthenticated: false,
+                emailVerified: false,
+                isLoading: false,
+              });
+            } else {
+              set({
+                user,
+                session: data.session,
+                isAuthenticated: !!data.session,
+                emailVerified,
+                isLoading: false,
+              });
+            }
 
             // Log signup
             createAuditLog(user.user_id, AuditAction.USER_SIGNUP, { success: true });

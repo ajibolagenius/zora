@@ -24,6 +24,8 @@ import {
     EyeSlash,
     Check,
     GoogleLogo,
+    Warning,
+    X,
 } from 'phosphor-react-native';
 import { Colors } from '../../constants/colors';
 import { Spacing, BorderRadius, Heights } from '../../constants/spacing';
@@ -37,7 +39,7 @@ type AuthMode = 'signin' | 'signup';
 
 export default function LoginScreen() {
     const router = useRouter();
-    const { signInWithGoogle, signInWithEmail, signUpWithEmail, isLoading } = useAuthStore();
+    const { signInWithGoogle, signInWithEmail, signUpWithEmail, isLoading, isAuthenticated, emailVerified } = useAuthStore();
     const { showToast } = useToast();
     const [mode, setMode] = useState<AuthMode>('signin');
     const [email, setEmail] = useState('');
@@ -46,6 +48,8 @@ export default function LoginScreen() {
     const [showPassword, setShowPassword] = useState(false);
     const [rememberMe, setRememberMe] = useState(false);
     const [localLoading, setLocalLoading] = useState(false);
+    const [showVerificationBanner, setShowVerificationBanner] = useState(false);
+    const [registeredEmail, setRegisteredEmail] = useState<string | null>(null);
 
     // Animation values
     const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -70,6 +74,14 @@ export default function LoginScreen() {
             }),
         ]).start();
     }, []);
+
+    // Clear verification banner when user successfully logs in
+    useEffect(() => {
+        if (isAuthenticated && emailVerified && showVerificationBanner) {
+            setShowVerificationBanner(false);
+            setRegisteredEmail(null);
+        }
+    }, [isAuthenticated, emailVerified, showVerificationBanner]);
 
     const handleGoogleLogin = async () => {
         try {
@@ -122,13 +134,16 @@ export default function LoginScreen() {
             } else {
                 await signUpWithEmail(email, password, name);
                 
-                // Ensure loading state is cleared before navigation
+                // Ensure loading state is cleared
                 setLocalLoading(false);
                 useAuthStore.getState().setLoading(false);
                 
+                // Store email and show verification banner (don't redirect)
+                setRegisteredEmail(email);
+                setShowVerificationBanner(true);
+                setMode('signin'); // Switch to sign in mode
+                
                 showToast('Please check your email for the confirmation link.', 'info');
-                // Register → onboarding
-                router.replace('/onboarding/heritage');
             }
         } catch (error: any) {
             console.error('Auth error:', error);
@@ -236,6 +251,56 @@ export default function LoginScreen() {
                                     </Text>
                                 </TouchableOpacity>
                             </View>
+
+                            {/* Email Verification Banner */}
+                            {showVerificationBanner && registeredEmail && (
+                                <View style={styles.verificationBanner}>
+                                    <View style={styles.verificationBannerContent}>
+                                        <Warning size={20} color={Colors.warning} weight="fill" />
+                                        <View style={styles.verificationBannerText}>
+                                            <Text style={styles.verificationBannerTitle}>
+                                                Verify Your Email
+                                            </Text>
+                                            <Text style={styles.verificationBannerMessage}>
+                                                We've sent a verification link to {registeredEmail}. Please check your inbox and click the link to verify your email before signing in.
+                                            </Text>
+                                        </View>
+                                        <TouchableOpacity
+                                            onPress={() => setShowVerificationBanner(false)}
+                                            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                                        >
+                                            <X size={20} color={Colors.textMuted} weight="bold" />
+                                        </TouchableOpacity>
+                                    </View>
+                                    <TouchableOpacity
+                                        style={styles.resendButton}
+                                        onPress={async () => {
+                                            try {
+                                                if (!isSupabaseConfigured()) {
+                                                    showToast('Unable to resend verification email. Please try again later.', 'error');
+                                                    return;
+                                                }
+                                                const client = await getSupabaseClient();
+                                                const { error: resendError } = await client.auth.resend({
+                                                    type: 'signup',
+                                                    email: registeredEmail,
+                                                    options: {
+                                                        emailRedirectTo: Platform.OS === 'web'
+                                                            ? (typeof window !== 'undefined' ? `${window.location.origin}/auth/callback` : 'http://localhost:3000/auth/callback')
+                                                            : 'zoramarket://auth/callback',
+                                                    },
+                                                });
+                                                if (resendError) throw resendError;
+                                                showToast('Verification email sent! Please check your inbox.', 'success');
+                                            } catch (resendError: any) {
+                                                showToast(resendError.message || 'Failed to resend verification email', 'error');
+                                            }
+                                        }}
+                                    >
+                                        <Text style={styles.resendButtonText}>Resend Verification Email</Text>
+                                    </TouchableOpacity>
+                                </View>
+                            )}
 
                             {/* Welcome Text */}
                             <View style={styles.welcomeContainer}>
@@ -565,5 +630,48 @@ const styles = StyleSheet.create({
     termsLink: {
         color: Colors.primary,
         fontFamily: FontFamily.bodyMedium,
+    },
+    // Verification Banner
+    verificationBanner: {
+        backgroundColor: Colors.secondary20, // 20% opacity warning color
+        borderRadius: BorderRadius.lg,
+        borderWidth: 1,
+        borderColor: Colors.secondary33, // ~33% opacity for border
+        padding: Spacing.base,
+        marginBottom: Spacing.lg,
+    },
+    verificationBannerContent: {
+        flexDirection: 'row',
+        alignItems: 'flex-start',
+        gap: Spacing.md,
+        marginBottom: Spacing.sm,
+    },
+    verificationBannerText: {
+        flex: 1,
+    },
+    verificationBannerTitle: {
+        fontFamily: FontFamily.bodyBold,
+        color: Colors.warning,
+        fontSize: FontSize.small,
+        marginBottom: Spacing.xs,
+    },
+    verificationBannerMessage: {
+        fontFamily: FontFamily.body,
+        color: Colors.textMuted,
+        fontSize: FontSize.small,
+        lineHeight: 18,
+    },
+    resendButton: {
+        marginTop: Spacing.sm,
+        paddingVertical: Spacing.sm,
+        paddingHorizontal: Spacing.base,
+        backgroundColor: Colors.secondary15,
+        borderRadius: BorderRadius.md,
+        alignSelf: 'flex-start',
+    },
+    resendButtonText: {
+        fontFamily: FontFamily.bodySemiBold,
+        color: Colors.warning,
+        fontSize: FontSize.small,
     },
 });
