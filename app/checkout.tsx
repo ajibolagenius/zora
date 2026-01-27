@@ -23,6 +23,10 @@ import { Spacing, BorderRadius, Heights } from '../constants/spacing';
 import { FontSize, FontFamily } from '../constants/typography';
 import { AnimationDuration, AnimationEasing } from '../constants';
 import { useCartStore } from '../stores/cartStore';
+import { onboardingService, type Address as OnboardingAddress } from '../services/onboardingService';
+import { realtimeService } from '../services/realtimeService';
+import { isSupabaseConfigured } from '../lib/supabase';
+import { useAuthStore } from '../stores/authStore';
 
 type DeliveryTab = 'delivery' | 'pickup';
 
@@ -46,10 +50,26 @@ interface AddressOption {
   icon: 'home' | 'work';
 }
 
-const ADDRESSES: AddressOption[] = [
-  { id: '1', label: 'Home', address: '123 Nairobi St, Apt 4B, Westlands', isDefault: true, icon: 'home' },
-  { id: '2', label: 'Work', address: '45 Corporate Blvd, Suite 200', icon: 'work' },
-];
+// Map onboarding address to checkout address format
+const mapOnboardingAddressToAddressOption = (addr: OnboardingAddress): AddressOption => {
+  const fullAddress = [
+    addr.address_line1,
+    addr.address_line2,
+    addr.city,
+    addr.postcode,
+  ].filter(Boolean).join(', ');
+  
+  // Determine icon based on label
+  const icon: 'home' | 'work' = addr.label.toLowerCase().includes('work') || addr.label.toLowerCase().includes('office') ? 'work' : 'home';
+  
+  return {
+    id: addr.id,
+    label: addr.label,
+    address: fullAddress,
+    isDefault: addr.is_default,
+    icon,
+  };
+};
 
 const TIME_SLOTS: TimeSlotOption[] = [
   { id: '1', label: '10:00 AM - 11:00 AM' },
@@ -82,11 +102,14 @@ export default function CheckoutScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { total } = useCartStore();
+  const { user } = useAuthStore();
   
   const [activeTab, setActiveTab] = useState<DeliveryTab>('delivery');
-  const [selectedAddress, setSelectedAddress] = useState('1');
+  const [addresses, setAddresses] = useState<AddressOption[]>([]);
+  const [selectedAddress, setSelectedAddress] = useState<string>('');
   const [selectedDate, setSelectedDate] = useState(0);
   const [selectedTimeSlot, setSelectedTimeSlot] = useState('3');
+  const [loading, setLoading] = useState(true);
   
   const dates = generateDates();
 
@@ -94,22 +117,87 @@ export default function CheckoutScreen() {
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(20)).current;
 
+  const fetchAddresses = async () => {
+    try {
+      setLoading(true);
+      let addressData: AddressOption[] = [];
+
+      if (isSupabaseConfigured() && user?.user_id) {
+        const dbAddresses = await onboardingService.getUserAddresses(user.user_id);
+        addressData = dbAddresses.map(mapOnboardingAddressToAddressOption);
+      } else {
+        // Fallback to mock addresses
+        addressData = [
+          { id: '1', label: 'Home', address: '123 Nairobi St, Apt 4B, Westlands', isDefault: true, icon: 'home' },
+          { id: '2', label: 'Work', address: '45 Corporate Blvd, Suite 200', icon: 'work' },
+        ];
+      }
+
+      setAddresses(addressData);
+      
+      // Set default selected address
+      if (addressData.length > 0) {
+        const defaultAddr = addressData.find(addr => addr.isDefault) || addressData[0];
+        setSelectedAddress(defaultAddr.id);
+      }
+    } catch (error) {
+      console.error('Error fetching addresses:', error);
+      // Fallback to mock addresses
+      const mockAddresses: AddressOption[] = [
+        { id: '1', label: 'Home', address: '123 Nairobi St, Apt 4B, Westlands', isDefault: true, icon: 'home' },
+        { id: '2', label: 'Work', address: '45 Corporate Blvd, Suite 200', icon: 'work' },
+      ];
+      setAddresses(mockAddresses);
+      setSelectedAddress(mockAddresses[0].id);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    Animated.parallel([
-      Animated.timing(fadeAnim, {
-        toValue: 1,
-        duration: AnimationDuration.default,
-        easing: AnimationEasing.standard,
-        useNativeDriver: true,
-      }),
-      Animated.timing(slideAnim, {
-        toValue: 0,
-        duration: AnimationDuration.default,
-        easing: AnimationEasing.standard,
-        useNativeDriver: true,
-      }),
-    ]).start();
-  }, []);
+    fetchAddresses();
+
+    // Subscribe to real-time address updates
+    if (isSupabaseConfigured() && user?.user_id) {
+      const unsubscribe = onboardingService.subscribeToAddresses(user.user_id, async (updatedAddresses) => {
+        const mappedAddresses = updatedAddresses.map(mapOnboardingAddressToAddressOption);
+        setAddresses(mappedAddresses);
+        
+        // Update selected address if current one was deleted
+        if (selectedAddress && !mappedAddresses.find(addr => addr.id === selectedAddress)) {
+          const defaultAddr = mappedAddresses.find(addr => addr.isDefault) || mappedAddresses[0];
+          if (defaultAddr) {
+            setSelectedAddress(defaultAddr.id);
+          }
+        }
+      });
+
+      return () => {
+        if (typeof unsubscribe === 'function') {
+          unsubscribe();
+        }
+      };
+    }
+  }, [user?.user_id]);
+
+  useEffect(() => {
+    if (!loading) {
+      Animated.parallel([
+        Animated.timing(fadeAnim, {
+          toValue: 1,
+          duration: AnimationDuration.default,
+          easing: AnimationEasing.standard,
+          useNativeDriver: true,
+        }),
+        Animated.timing(slideAnim, {
+          toValue: 0,
+          duration: AnimationDuration.default,
+          easing: AnimationEasing.standard,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    }
+  }, [loading]);
 
   const handleContinue = () => {
     router.push('/payment');
@@ -160,7 +248,7 @@ export default function CheckoutScreen() {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Delivering to</Text>
           
-          {ADDRESSES.map((address) => {
+          {addresses.map((address) => {
             const isSelected = selectedAddress === address.id;
             return (
               <TouchableOpacity

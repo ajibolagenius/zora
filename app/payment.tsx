@@ -27,6 +27,9 @@ import { Spacing, BorderRadius, Heights } from '../constants/spacing';
 import { FontSize, FontFamily } from '../constants/typography';
 import { AnimationDuration, AnimationEasing } from '../constants';
 import { useCartStore } from '../stores/cartStore';
+import { useAuthStore } from '../stores/authStore';
+import { orderService } from '../services/supabaseService';
+import { isSupabaseConfigured } from '../lib/supabase';
 import { 
   paymentService, 
   klarnaService, 
@@ -40,7 +43,8 @@ type PaymentMethodType = 'card' | 'klarna' | 'clearpay';
 export default function PaymentScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { items, subtotal, total, clearCart } = useCartStore();
+  const { items, subtotal, total, deliveryFee, serviceFee, discount, clearCart } = useCartStore();
+  const { user } = useAuthStore();
   
   const [selectedMethod, setSelectedMethod] = useState<PaymentMethodType>('card');
   const [useZoraCredit, setUseZoraCredit] = useState(true);
@@ -94,9 +98,9 @@ export default function PaymentScreen() {
         customerEmail: 'customer@example.com',
         customerName: 'Jane Doe',
         items: items.map(item => ({
-          name: item.name,
+          name: item.product?.name || 'Unknown Product',
           quantity: item.quantity,
-          price: item.price,
+          price: item.product?.price || 0,
         })),
         shippingAddress: {
           line1: '123 Zora Lane, Apartment 4B',
@@ -152,6 +156,44 @@ export default function PaymentScreen() {
       );
       
       if (result.success) {
+        setProcessingStep('Creating order...');
+        
+        // Create order in database
+        let createdOrderId = paymentData.orderId;
+        if (isSupabaseConfigured() && user?.user_id) {
+          try {
+            const orderData = {
+              user_id: user.user_id,
+              status: 'pending' as const,
+              payment_status: 'paid' as const,
+              items: items.map(item => ({
+                product_id: item.product_id,
+                vendor_id: item.vendor_id,
+                name: item.product?.name || item.name || 'Unknown Product',
+                image_url: item.product?.image_url || '',
+                quantity: item.quantity,
+                price: item.product?.price || item.price || 0,
+              })),
+              subtotal: subtotal || 0,
+              delivery_fee: deliveryFee || 0,
+              service_fee: serviceFee || 0.50,
+              discount: discount || (useZoraCredit ? zoraCredit : 0),
+              total: finalTotal,
+              currency: 'GBP',
+              delivery_option: 'delivery' as const,
+              payment_method: selectedMethod === 'card' ? 'card' : selectedMethod,
+            };
+
+            const createdOrder = await orderService.create(orderData);
+            if (createdOrder) {
+              createdOrderId = createdOrder.id;
+            }
+          } catch (error) {
+            console.error('Error creating order:', error);
+            // Continue with payment orderId if order creation fails
+          }
+        }
+        
         setProcessingStep('Payment successful!');
         
         // If requires action (e.g., Klarna/Clearpay redirect)
@@ -168,7 +210,7 @@ export default function PaymentScreen() {
                   clearCart();
                   router.push({
                     pathname: '/order-confirmation',
-                    params: { orderId: paymentData.orderId },
+                    params: { orderId: createdOrderId },
                   });
                 },
               },
@@ -180,7 +222,7 @@ export default function PaymentScreen() {
             clearCart();
             router.push({
               pathname: '/order-confirmation',
-              params: { orderId: paymentData.orderId },
+              params: { orderId: createdOrderId },
             });
           }, 1000);
         }

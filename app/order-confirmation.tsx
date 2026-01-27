@@ -23,56 +23,118 @@ import { Colors } from '../constants/colors';
 import { Spacing, BorderRadius, Heights } from '../constants/spacing';
 import { FontSize, FontFamily } from '../constants/typography';
 import { AnimationDuration, AnimationEasing } from '../constants';
+import { orderService } from '../services/supabaseService';
+import { realtimeService } from '../services/realtimeService';
+import { isSupabaseConfigured } from '../lib/supabase';
+import { Order } from '../types';
+import { useAuthStore } from '../stores/authStore';
 
 export default function OrderConfirmationScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { orderId } = useLocalSearchParams<{ orderId?: string }>();
+  const { user } = useAuthStore();
+  const [order, setOrder] = useState<Order | null>(null);
+  const [loading, setLoading] = useState(true);
   
-  const orderNumber = orderId || 'ZORA-8839';
-
   // Animation values
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const scaleAnim = useRef(new Animated.Value(0.8)).current;
   const slideAnim = useRef(new Animated.Value(30)).current;
 
+  const fetchOrder = async () => {
+    if (!orderId) {
+      setLoading(false);
+      return;
+    }
+
+    try {
+      setLoading(true);
+      if (isSupabaseConfigured()) {
+        const orderData = await orderService.getById(orderId);
+        setOrder(orderData);
+      }
+    } catch (error) {
+      console.error('Error fetching order:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    // Animate success icon
-    Animated.sequence([
-      Animated.parallel([
-        Animated.timing(fadeAnim, {
-          toValue: 1,
-          duration: AnimationDuration.default,
-          easing: AnimationEasing.standard,
+    fetchOrder();
+
+    // Subscribe to real-time order updates
+    if (isSupabaseConfigured() && orderId) {
+      const unsubscribe = realtimeService.subscribeToTable(
+        'orders',
+        'UPDATE',
+        async (payload) => {
+          if (payload.new?.id === orderId) {
+            // Order was updated, refresh the order data
+            await fetchOrder();
+          }
+        },
+        `id=eq.${orderId}`
+      );
+
+      return () => {
+        if (unsubscribe) {
+          unsubscribe.then((unsub) => {
+            if (typeof unsub === 'function') {
+              unsub();
+            }
+          });
+        }
+      };
+    }
+  }, [orderId]);
+
+  useEffect(() => {
+    if (!loading) {
+      // Animate success icon
+      Animated.sequence([
+        Animated.parallel([
+          Animated.timing(fadeAnim, {
+            toValue: 1,
+            duration: AnimationDuration.default,
+            easing: AnimationEasing.standard,
+            useNativeDriver: true,
+          }),
+          Animated.spring(scaleAnim, {
+            toValue: 1,
+            friction: 4,
+            tension: 100,
+            useNativeDriver: true,
+          }),
+        ]),
+        Animated.timing(slideAnim, {
+          toValue: 0,
+          duration: AnimationDuration.normal,
+          easing: Easing.out(Easing.cubic),
           useNativeDriver: true,
         }),
-        Animated.spring(scaleAnim, {
-          toValue: 1,
-          friction: 4,
-          tension: 100,
-          useNativeDriver: true,
-        }),
-      ]),
-      Animated.timing(slideAnim, {
-        toValue: 0,
-        duration: AnimationDuration.normal,
-        easing: Easing.out(Easing.cubic),
-        useNativeDriver: true,
-      }),
-    ]).start();
-  }, []);
+      ]).start();
+    }
+  }, [loading]);
 
   // Get estimated delivery date range
-  const startDate = new Date();
-  startDate.setDate(startDate.getDate() + 2);
-  const endDate = new Date();
-  endDate.setDate(endDate.getDate() + 4);
-  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-  const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-  const formattedDateRange = `${days[startDate.getDay()]}, ${months[startDate.getMonth()]} ${startDate.getDate()} - ${days[endDate.getDay()]}, ${months[endDate.getMonth()]} ${endDate.getDate()}`;
+  const getEstimatedDeliveryDate = () => {
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() + 2);
+    const endDate = new Date();
+    endDate.setDate(endDate.getDate() + 4);
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    return `${days[startDate.getDay()]}, ${months[startDate.getMonth()]} ${startDate.getDate()} - ${days[endDate.getDay()]}, ${months[endDate.getMonth()]} ${endDate.getDate()}`;
+  };
+
+  const formattedDateRange = getEstimatedDeliveryDate();
+  const orderNumber = order?.order_number || order?.id?.substring(0, 8) || orderId || 'ZORA-8839';
 
   const handleTrackOrder = () => {
-    router.push(`/order-tracking/${orderNumber}`);
+    const trackingId = order?.id || orderId || orderNumber;
+    router.push(`/order-tracking/${trackingId}`);
   };
 
   const handleContinueShopping = () => {

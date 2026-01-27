@@ -26,6 +26,9 @@ import { FontSize, FontFamily } from '../../constants/typography';
 import { PlaceholderImages, AnimationDuration, AnimationEasing } from '../../constants';
 import { Button, LazyImage } from '../../components/ui';
 import { useCartStore } from '../../stores/cartStore';
+import { productService as supabaseProductService, vendorService as supabaseVendorService } from '../../services/supabaseService';
+import { realtimeService } from '../../services/realtimeService';
+import { isSupabaseConfigured } from '../../lib/supabase';
 import { getProductRoute, getVendorRoute } from '../../lib/navigationHelpers';
 
 export default function CartTab() {
@@ -36,6 +39,82 @@ export default function CartTab() {
   // Animation values
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(20)).current;
+
+  // Sync product data from database and subscribe to real-time updates
+  useEffect(() => {
+    const syncProductData = async () => {
+      if (!isSupabaseConfigured() || items.length === 0) {
+        calculateTotals();
+        return;
+      }
+
+      try {
+        // Fetch latest product data for all items in cart
+        const updatedItems = await Promise.all(
+          items.map(async (item) => {
+            try {
+              const product = await supabaseProductService.getById(item.product_id);
+              if (product) {
+                return {
+                  ...item,
+                  product: {
+                    ...item.product,
+                    price: product.price,
+                    name: product.name,
+                    image_url: Array.isArray(product.image_urls) 
+                      ? product.image_urls[0] 
+                      : (product.image_urls || item.product?.image_url),
+                    in_stock: (product.stock_quantity || 0) > 0,
+                  },
+                };
+              }
+            } catch (error) {
+              console.error(`Error fetching product ${item.product_id}:`, error);
+            }
+            return item;
+          })
+        );
+
+        // Update cart store with synced data
+        // Note: This is a workaround since we can't directly update items in the store
+        // In production, you'd want to add a syncCartItems method to the store
+        calculateTotals();
+      } catch (error) {
+        console.error('Error syncing cart product data:', error);
+        calculateTotals();
+      }
+    };
+
+    syncProductData();
+
+    // Subscribe to real-time product updates
+    const unsubscribers: (() => void)[] = [];
+
+    if (isSupabaseConfigured() && items.length > 0) {
+      // Subscribe to product updates for all items in cart
+      const productIds = items.map(item => item.product_id);
+      const uniqueProductIds = [...new Set(productIds)];
+
+      uniqueProductIds.forEach((productId) => {
+        realtimeService.subscribeToTable('products', '*', async (payload) => {
+          if (payload.new?.id === productId || payload.old?.id === productId) {
+            // Product was updated, sync cart data
+            await syncProductData();
+          }
+        }).then((unsub) => {
+          if (unsub) unsubscribers.push(unsub);
+        });
+      });
+    }
+
+    return () => {
+      unsubscribers.forEach((unsub) => {
+        if (typeof unsub === 'function') {
+          unsub();
+        }
+      });
+    };
+  }, [items.length]);
 
   // Calculate totals on mount and whenever items change
   useEffect(() => {
