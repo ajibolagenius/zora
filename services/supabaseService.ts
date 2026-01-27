@@ -13,6 +13,7 @@ import { getFeaturedVendors, getFeaturedProducts } from './rankingService';
 import type { Vendor as MockVendor, Product as MockProduct } from './mockDataService';
 import { encodeProductSlug } from '../lib/slugUtils';
 import { Platform } from 'react-native';
+import { getVendorImagesWithFallback } from '../lib/vendorImageUtils';
 
 /**
  * Safely gets the Supabase client's from method
@@ -239,59 +240,96 @@ export const authService = {
   },
 };
 
+/**
+ * Enrich vendor data with generated images when missing
+ * Uses free APIs (Unsplash, DiceBear) to populate cover images and logos
+ */
+function enrichVendorImages(vendor: Vendor): Vendor {
+  if (!vendor.cover_image_url || !vendor.logo_url) {
+    const { coverImageUrl, logoUrl } = getVendorImagesWithFallback(
+      vendor.id,
+      vendor.shop_name,
+      vendor.cover_image_url,
+      vendor.logo_url
+    );
+    
+    return {
+      ...vendor,
+      cover_image_url: vendor.cover_image_url || coverImageUrl,
+      logo_url: vendor.logo_url || logoUrl,
+    };
+  }
+  
+  return vendor;
+}
+
 // ============== VENDOR SERVICE ==============
 export const vendorService = {
   getAll: async (): Promise<Vendor[]> => {
     if (!isSupabaseConfigured()) {
       // Return mock vendors with adapted structure
-      return mockDatabase.vendors.map(v => ({
-        ...v,
-        latitude: v.location.coordinates[1],
-        longitude: v.location.coordinates[0],
-        updated_at: v.created_at,
-      })) as unknown as Vendor[];
+      return mockDatabase.vendors.map(v => {
+        const vendor = {
+          ...v,
+          latitude: v.location.coordinates[1],
+          longitude: v.location.coordinates[0],
+          updated_at: v.created_at,
+        } as unknown as Vendor;
+        return enrichVendorImages(vendor);
+      });
     }
     
     const fromMethod = await getSupabaseFrom();
     if (!fromMethod) {
       // Fallback to mock data if Supabase not available
-      return mockDatabase.vendors.map(v => ({
-        ...v,
-        latitude: v.location.coordinates[1],
-        longitude: v.location.coordinates[0],
-        updated_at: v.created_at,
-      })) as unknown as Vendor[];
+      return mockDatabase.vendors.map(v => {
+        const vendor = {
+          ...v,
+          latitude: v.location.coordinates[1],
+          longitude: v.location.coordinates[0],
+          updated_at: v.created_at,
+        } as unknown as Vendor;
+        return enrichVendorImages(vendor);
+      });
     }
     
     const { data, error } = await fromMethod('vendors')
       .select('*')
       .order('is_featured', { ascending: false });
     
-    return data || [];
+    const vendors = data || [];
+    // Enrich vendors with generated images when missing
+    return vendors.map(enrichVendorImages);
   },
   
   getFeatured: async (userRegion?: string, limit: number = 10): Promise<Vendor[]> => {
     if (!isSupabaseConfigured()) {
       // Use ranking system for mock data
       const featured = getFeaturedVendors(mockDatabase.vendors as MockVendor[], userRegion, limit);
-      return featured.map(v => ({
-        ...v,
-        latitude: v.location.coordinates[1],
-        longitude: v.location.coordinates[0],
-        updated_at: v.created_at,
-      })) as unknown as Vendor[];
+      return featured.map(v => {
+        const vendor = {
+          ...v,
+          latitude: v.location.coordinates[1],
+          longitude: v.location.coordinates[0],
+          updated_at: v.created_at,
+        } as unknown as Vendor;
+        return enrichVendorImages(vendor);
+      });
     }
     
     // Fetch all vendors and rank them
     const fromMethod = await getSupabaseFrom();
     if (!fromMethod) {
       const featured = getFeaturedVendors(mockDatabase.vendors as MockVendor[], userRegion, limit);
-      return featured.map(v => ({
-        ...v,
-        latitude: v.location.coordinates[1],
-        longitude: v.location.coordinates[0],
-        updated_at: v.created_at,
-      })) as unknown as Vendor[];
+      return featured.map(v => {
+        const vendor = {
+          ...v,
+          latitude: v.location.coordinates[1],
+          longitude: v.location.coordinates[0],
+          updated_at: v.created_at,
+        } as unknown as Vendor;
+        return enrichVendorImages(vendor);
+      });
     }
     
     const { data } = await fromMethod('vendors')
@@ -312,45 +350,52 @@ export const vendorService = {
     
     const ranked = getFeaturedVendors(vendorsForRanking, userRegion, limit);
     
-    // Convert back to Supabase format
-    return ranked.map(v => ({
-      ...v,
-      latitude: v.location.coordinates[1],
-      longitude: v.location.coordinates[0],
-      updated_at: v.created_at || new Date().toISOString(),
-    })) as unknown as Vendor[];
+    // Convert back to Supabase format and enrich with images
+    return ranked.map(v => {
+      const vendor = {
+        ...v,
+        latitude: v.location.coordinates[1],
+        longitude: v.location.coordinates[0],
+        updated_at: v.created_at || new Date().toISOString(),
+      } as unknown as Vendor;
+      return enrichVendorImages(vendor);
+    });
   },
   
   getById: async (id: string): Promise<Vendor | null> => {
     if (!isSupabaseConfigured()) {
       const vendor = mockDatabase.vendors.find(v => v.id === id);
       if (!vendor) return null;
-      return {
+      const enrichedVendor = {
         ...vendor,
         latitude: vendor.location.coordinates[1],
         longitude: vendor.location.coordinates[0],
         updated_at: vendor.created_at,
       } as unknown as Vendor;
+      return enrichVendorImages(enrichedVendor);
     }
     
     const fromMethod = await getSupabaseFrom();
     if (!fromMethod) {
       const vendor = mockDatabase.vendors.find(v => v.id === id);
       if (!vendor) return null;
-      return {
+      const enrichedVendor = {
         ...vendor,
         latitude: vendor.location.coordinates[1],
         longitude: vendor.location.coordinates[0],
         updated_at: vendor.created_at,
       } as unknown as Vendor;
+      return enrichVendorImages(enrichedVendor);
     }
     
-    const { data } = await fromMethod('vendors')
+    const { data, error } = await fromMethod('vendors')
       .select('*')
       .eq('id', id)
       .single();
     
-    return data;
+    if (error || !data) return null;
+    
+    return enrichVendorImages(data);
   },
   
   getBySlug: async (slug: string): Promise<Vendor | null> => {

@@ -4,28 +4,11 @@
  * Generates vendor storefront headers (cover images) and profile pictures (logos)
  * using free API services. Provides consistent, deterministic image generation
  * based on vendor ID/name for caching and consistency.
- */
-
-/**
- * Free API Services for Vendor Images:
  * 
- * 1. Unsplash Source API (Free, no key required for basic usage)
- *    - High-quality photos
- *    - Food, market, storefront themes
- *    - Direct image URLs
- * 
- * 2. DiceBear Avatars (Free, no key required)
- *    - SVG avatars/logos
- *    - Deterministic based on seed
- *    - Multiple styles available
- * 
- * 3. Picsum (Lorem Picsum) - Free, no key required
- *    - Random placeholder images
- *    - Simple API
- * 
- * 4. Placeholder.com - Free, no key required
- *    - Simple placeholder images
- *    - Customizable size and text
+ * Free API Services Used:
+ * 1. Unsplash Source API - High-quality photos (free, no key required for basic usage)
+ * 2. DiceBear Avatars - SVG avatars/logos (free, no key required)
+ * 3. Picsum - Random placeholder images (free, no key required)
  */
 
 // Unsplash photo IDs for different vendor themes
@@ -63,19 +46,24 @@ const UNSPLASH_PHOTOS = {
 };
 
 /**
+ * Generate a deterministic hash from a string seed
+ */
+function hashString(str: string): number {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    hash = str.charCodeAt(i) + ((hash << 5) - hash);
+    hash = hash & hash;
+  }
+  return Math.abs(hash);
+}
+
+/**
  * Generate a deterministic Unsplash photo ID based on vendor seed
  * Ensures the same vendor always gets the same cover image
  */
 function getUnsplashPhotoId(seed: string, theme: 'foodMarket' | 'storefront' | 'africanMarket' = 'foodMarket'): string {
-  // Generate hash from seed
-  let hash = 0;
-  for (let i = 0; i < seed.length; i++) {
-    hash = seed.charCodeAt(i) + ((hash << 5) - hash);
-    hash = hash & hash;
-  }
-  
   const photos = UNSPLASH_PHOTOS[theme];
-  const index = Math.abs(hash) % photos.length;
+  const index = hashString(seed) % photos.length;
   return photos[index];
 }
 

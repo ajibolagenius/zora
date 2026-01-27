@@ -112,7 +112,7 @@ export const ImageUrlBuilders = {
         width: number = 800,
         theme: 'foodMarket' | 'storefront' | 'africanMarket' = 'foodMarket'
     ): string => {
-        // Import dynamically to avoid circular dependencies
+        // Lazy import to avoid circular dependencies
         const { generateVendorCoverImage } = require('../lib/vendorImageUtils');
         return generateVendorCoverImage(vendorId, vendorName, width, theme);
     },
@@ -130,6 +130,7 @@ export const ImageUrlBuilders = {
         style: 'identicon' | 'avataaars' | 'bottts' | 'initials' = 'identicon',
         size: number = 200
     ): string => {
+        // Lazy import to avoid circular dependencies
         const { generateVendorLogo } = require('../lib/vendorImageUtils');
         return generateVendorLogo(vendorId, vendorName, style, size);
     },
