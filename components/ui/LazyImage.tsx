@@ -16,6 +16,11 @@ interface LazyImageProps extends Omit<ImageProps, 'source'> {
  * LazyImage Component
  * Optimized image component with lazy loading, placeholder, and error handling
  * Uses expo-image for better performance and caching
+ * 
+ * Caching Strategy:
+ * - memory-disk: Caches images in both memory and disk for optimal performance
+ * - Automatic cache management by expo-image
+ * - Images persist across app restarts (disk cache)
  */
 export const LazyImage: React.FC<LazyImageProps> = ({
   source,
@@ -70,6 +75,11 @@ export const LazyImage: React.FC<LazyImageProps> = ({
   const finalPlaceholder = blurhash || placeholderUri;
   const finalFallback = fallbackUri;
 
+  // Enhanced caching: memory-disk provides best performance
+  // - Memory cache: Fast access for recently viewed images
+  // - Disk cache: Persists across app restarts, larger capacity
+  const cachePolicy = props.cachePolicy || 'memory-disk';
+
   return (
     <View style={[styles.container, style]}>
       <Image
@@ -78,7 +88,8 @@ export const LazyImage: React.FC<LazyImageProps> = ({
         contentFit={props.contentFit || 'cover'}
         placeholder={finalPlaceholder}
         transition={200}
-        cachePolicy="memory-disk"
+        cachePolicy={cachePolicy}
+        priority={props.priority || 'normal'}
         onLoadEnd={handleLoadEnd}
         onError={handleError}
         {...props}
@@ -97,7 +108,7 @@ export const LazyImage: React.FC<LazyImageProps> = ({
           source={finalFallback}
           style={StyleSheet.absoluteFill}
           contentFit={props.contentFit || 'cover'}
-          cachePolicy="memory-disk"
+          cachePolicy={cachePolicy}
         />
       )}
     </View>

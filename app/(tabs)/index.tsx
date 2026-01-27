@@ -112,18 +112,19 @@ export default function HomeScreen() {
         setHasMoreProducts(false);
       } else {
         // Deduplicate products by ID to prevent duplicate keys
-        // Calculate synchronously BEFORE state update to get accurate count
+        // Calculate new products count BEFORE state updates to avoid side effects in updater
+        // Use functional update to access current state synchronously
+        let newProductsCount = 0;
         setAllProducts((prev) => {
           const existingIds = new Set(prev.map(p => p.id));
           const newProducts = moreProducts.filter(p => !existingIds.has(p.id));
-          const newProductsCount = newProducts.length;
-          
-          // Update offset based on actually added products
-          // This runs synchronously within the updater, so newProductsCount is correct
-          setProductOffset((currentOffset) => currentOffset + newProductsCount);
-          
+          newProductsCount = newProducts.length; // Capture count for use outside updater
           return [...prev, ...newProducts];
         });
+        
+        // Update offset AFTER setAllProducts (outside updater function to avoid side effects)
+        // Use the captured count from the updater calculation
+        setProductOffset((prev) => prev + newProductsCount);
         setHasMoreProducts(moreProducts.length >= 20); // More available if we got full batch
       }
     } catch (error) {
