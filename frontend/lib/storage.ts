@@ -1,10 +1,41 @@
-import { MMKV } from 'react-native-mmkv';
+import { Platform } from 'react-native';
 import { StateStorage } from 'zustand/middleware';
 
-// Initialize MMKV
-export const storage = new MMKV({
-    id: 'zora-storage',
-});
+// Platform-specific storage initialization
+let storage: {
+    set: (key: string, value: string) => void;
+    getString: (key: string) => string | undefined;
+    delete: (key: string) => void;
+};
+
+if (Platform.OS === 'web') {
+    // Web: Use localStorage
+    storage = {
+        set: (key: string, value: string) => {
+            if (typeof window !== 'undefined') {
+                window.localStorage.setItem(key, value);
+            }
+        },
+        getString: (key: string) => {
+            if (typeof window !== 'undefined') {
+                return window.localStorage.getItem(key) ?? undefined;
+            }
+            return undefined;
+        },
+        delete: (key: string) => {
+            if (typeof window !== 'undefined') {
+                window.localStorage.removeItem(key);
+            }
+        },
+    };
+} else {
+    // Native: Use MMKV
+    const { MMKV } = require('react-native-mmkv');
+    const mmkvInstance = new MMKV({
+        id: 'zora-storage',
+    });
+    storage = mmkvInstance;
+}
 
 /**
  * MMKV Storage Wrapper for Zustand Persist Middleware
@@ -12,14 +43,14 @@ export const storage = new MMKV({
  */
 export const zustandStorage: StateStorage = {
     setItem: (name: string, value: string) => {
-        return storage.set(name, value);
+        storage.set(name, value);
     },
     getItem: (name: string) => {
         const value = storage.getString(name);
         return value ?? null;
     },
     removeItem: (name: string) => {
-        return storage.delete(name);
+        storage.delete(name);
     },
 };
 
@@ -45,7 +76,7 @@ export const removeItem = (key: string): void => {
 
 /**
  * Async Storage Adapter for TanStack Query
- * Wraps MMKV to conform to the AsyncStorage interface (Promise-based)
+ * Wraps storage to conform to the AsyncStorage interface (Promise-based)
  */
 export const clientStorage = {
     getItem: async (key: string): Promise<string | null> => {

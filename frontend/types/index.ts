@@ -138,7 +138,7 @@ export interface OrderItem {
   variant?: string;
 }
 
-export type OrderStatus = 
+export type OrderStatus =
   | 'pending'
   | 'confirmed'
   | 'preparing'
@@ -228,4 +228,16 @@ export interface AuthState {
   isAuthenticated: boolean;
   isLoading: boolean;
   sessionToken: string | null;
+}
+
+// Notification Types
+export interface Notification {
+  id: string;
+  user_id: string;
+  type: 'order' | 'promo' | 'review' | 'reward' | 'system';
+  title: string;
+  description: string;
+  is_read: boolean;
+  action_url?: string;
+  created_at: string;
 }

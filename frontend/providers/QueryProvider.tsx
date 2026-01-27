@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { QueryClient, onlineManager } from '@tanstack/react-query';
 import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client';
 import { createAsyncStoragePersister } from '@tanstack/query-async-storage-persister';
@@ -11,8 +11,6 @@ onlineManager.setEventListener((setOnline) => {
     setOnline(!!state.isConnected);
   });
 });
-
-// Create a persister using our MMKV adapter
 
 // Create a persister using our MMKV adapter
 const persister = createAsyncStoragePersister({

@@ -1,10 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   ScrollView,
   TouchableOpacity,
+  RefreshControl,
+  ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -18,78 +20,19 @@ import {
 import { Colors } from '../constants/colors';
 import { Spacing, BorderRadius } from '../constants/spacing';
 import { FontSize, FontFamily } from '../constants/typography';
+import { useNotificationStore } from '../stores/notificationStore';
+import { useAuthStore } from '../stores/authStore';
+import { Notification } from '../types';
 
 // Zora Brand Colors - Use design system tokens where possible
 const ZORA_PURPLE = '#9333EA'; // Purple for rewards (not in design system)
 
 type TabType = 'all' | 'orders' | 'promos' | 'updates';
 
-interface Notification {
-  id: string;
-  type: 'order' | 'promo' | 'review' | 'reward';
-  title: string;
-  description: string;
-  time: string;
-  isRead: boolean;
-}
-
 interface NotificationGroup {
   label: string;
   notifications: Notification[];
 }
-
-const NOTIFICATIONS: NotificationGroup[] = [
-  {
-    label: 'Today',
-    notifications: [
-      {
-        id: '1',
-        type: 'order',
-        title: 'Order #2938 Shipped',
-        description: 'Your jollof rice spices are on the way! Track your package to see arrival time.',
-        time: '2h ago',
-        isRead: false,
-      },
-      {
-        id: '2',
-        type: 'promo',
-        title: 'Flash Sale!',
-        description: "20% off all plantain chips for the next hour. Don't miss out on the crunch!",
-        time: '5h ago',
-        isRead: false,
-      },
-    ],
-  },
-  {
-    label: 'Yesterday',
-    notifications: [
-      {
-        id: '3',
-        type: 'review',
-        title: 'Rate your purchase',
-        description: 'How was the Fufu flour you bought? Share your thoughts with the community.',
-        time: '1d ago',
-        isRead: false,
-      },
-      {
-        id: '4',
-        type: 'reward',
-        title: 'You earned 50 pts',
-        description: 'Thanks for referring a friend to Zora! Use your points on your next checkout.',
-        time: '1d ago',
-        isRead: false,
-      },
-      {
-        id: '5',
-        type: 'order',
-        title: 'Order #2910 Delivered',
-        description: 'Your package was left at the front door.',
-        time: '1d ago',
-        isRead: true,
-      },
-    ],
-  },
-];
 
 const TABS: { id: TabType; label: string }[] = [
   { id: 'all', label: 'All' },
@@ -98,9 +41,48 @@ const TABS: { id: TabType; label: string }[] = [
   { id: 'updates', label: 'Updates' },
 ];
 
+const formatTimeAgo = (dateString: string) => {
+  const date = new Date(dateString);
+  const now = new Date();
+  const seconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+
+  if (seconds < 60) return 'Just now';
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return `${minutes}m ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.floor(hours / 24);
+  if (days < 7) return `${days}d ago`;
+  return date.toLocaleDateString();
+};
+
 export default function NotificationsScreen() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<TabType>('all');
+  const {
+    notifications,
+    fetchNotifications,
+    markAsRead,
+    markAllAsRead,
+    isLoading,
+    subscribeToRealtime,
+    unsubscribeFromRealtime
+  } = useNotificationStore();
+  const { user } = useAuthStore();
+
+  useEffect(() => {
+    fetchNotifications();
+    if (user) {
+      subscribeToRealtime(user.user_id);
+    }
+    return () => {
+      unsubscribeFromRealtime();
+    };
+  }, [user]);
+
+  const onRefresh = React.useCallback(() => {
+    fetchNotifications();
+  }, []);
 
   const getIconConfig = (type: string, isRead: boolean) => {
     const opacityHex = isRead ? '80' : 'FF'; // 50% opacity = 80, 100% = FF
@@ -139,24 +121,50 @@ export default function NotificationsScreen() {
   };
 
   const handleMarkAllRead = () => {
-    console.log('Mark all read');
+    markAllAsRead();
   };
 
-  const filterNotifications = (groups: NotificationGroup[]): NotificationGroup[] => {
-    if (activeTab === 'all') return groups;
-    
-    return groups.map(group => ({
-      ...group,
-      notifications: group.notifications.filter(n => {
+  const categorizeNotifications = (filtered: Notification[]): NotificationGroup[] => {
+    const groups: { [key: string]: Notification[] } = {
+      Today: [],
+      Yesterday: [],
+      Earlier: [],
+    };
+
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+    const yesterday = today - 86400000;
+
+    filtered.forEach((n) => {
+      const nDate = new Date(n.created_at).getTime();
+      if (nDate >= today) {
+        groups.Today.push(n);
+      } else if (nDate >= yesterday) {
+        groups.Yesterday.push(n);
+      } else {
+        groups.Earlier.push(n);
+      }
+    });
+
+    return Object.entries(groups)
+      .filter(([_, items]) => items.length > 0)
+      .map(([label, items]) => ({ label, notifications: items }));
+  };
+
+  const filterNotifications = (): NotificationGroup[] => {
+    let filtered = notifications;
+    if (activeTab !== 'all') {
+      filtered = notifications.filter(n => {
         if (activeTab === 'orders') return n.type === 'order';
         if (activeTab === 'promos') return n.type === 'promo';
-        if (activeTab === 'updates') return n.type === 'review' || n.type === 'reward';
+        if (activeTab === 'updates') return n.type === 'review' || n.type === 'reward' || n.type === 'system';
         return true;
-      }),
-    })).filter(group => group.notifications.length > 0);
+      });
+    }
+    return categorizeNotifications(filtered);
   };
 
-  const filteredGroups = filterNotifications(NOTIFICATIONS);
+  const filteredGroups = filterNotifications();
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
@@ -200,13 +208,16 @@ export default function NotificationsScreen() {
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl refreshing={isLoading} onRefresh={onRefresh} tintColor={Colors.primary} />
+        }
       >
         {filteredGroups.map((group) => (
           <View key={group.label} style={styles.section}>
             <Text style={styles.sectionTitle}>{group.label}</Text>
             <View style={styles.notificationsList}>
               {group.notifications.map((notification) => {
-                const iconConfig = getIconConfig(notification.type, notification.isRead);
+                const iconConfig = getIconConfig(notification.type, notification.is_read);
                 const IconComponent = iconConfig.icon;
 
                 return (
@@ -214,9 +225,10 @@ export default function NotificationsScreen() {
                     key={notification.id}
                     style={[
                       styles.notificationCard,
-                      notification.isRead && styles.notificationCardRead,
+                      notification.is_read && styles.notificationCardRead,
                     ]}
                     activeOpacity={0.8}
+                    onPress={() => markAsRead(notification.id)}
                   >
                     {/* Icon */}
                     <View
@@ -242,7 +254,7 @@ export default function NotificationsScreen() {
                           {notification.title}
                         </Text>
                         <Text style={styles.notificationTime}>
-                          {notification.time}
+                          {formatTimeAgo(notification.created_at)}
                         </Text>
                       </View>
                       <Text
@@ -254,7 +266,7 @@ export default function NotificationsScreen() {
                     </View>
 
                     {/* Unread Dot */}
-                    {!notification.isRead && (
+                    {!notification.is_read && (
                       <View style={styles.unreadDot} />
                     )}
                   </TouchableOpacity>
