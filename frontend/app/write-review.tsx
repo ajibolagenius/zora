@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     View,
     Text,
@@ -17,6 +17,7 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { ArrowLeft, Star, Info } from 'phosphor-react-native';
 import { useProduct, useCreateReview } from '../hooks/useQueries';
+import { useDraftStore } from '../stores/draftStore';
 import { Colors } from '../constants/colors';
 import { Spacing, BorderRadius, Heights } from '../constants/spacing';
 import { FontSize, FontFamily, LetterSpacing } from '../constants/typography';
@@ -31,17 +32,33 @@ export default function WriteReviewScreen() {
         productName?: string;
     }>();
 
-    // Form state
-    const [rating, setRating] = useState(0);
-    const [title, setTitle] = useState('');
-    const [comment, setComment] = useState('');
-    const [userName, setUserName] = useState('');
+    // Draft store
+    const { getDraft, saveDraft, removeDraft } = useDraftStore();
+    const existingDraft = productId ? getDraft(productId) : null;
+
+    // Form state - Initialize from draft if available
+    const [rating, setRating] = useState(existingDraft?.rating || 0);
+    const [title, setTitle] = useState(existingDraft?.title || '');
+    const [comment, setComment] = useState(existingDraft?.comment || '');
+    const [userName, setUserName] = useState(existingDraft?.userName || '');
 
     // Get product details if available
     const { data: product } = useProduct(productId || '');
 
     // Review mutation
     const createReview = useCreateReview();
+
+    // Auto-save draft
+    useEffect(() => {
+        if (productId && (rating > 0 || title || comment || userName)) {
+            saveDraft(productId, {
+                rating,
+                title,
+                comment,
+                userName,
+            });
+        }
+    }, [productId, rating, title, comment, userName, saveDraft]);
 
     // Character count
     const maxCommentLength = 500;
@@ -66,6 +83,11 @@ export default function WriteReviewScreen() {
                 comment: comment.trim(),
                 userName: userName.trim(),
             });
+
+            // Clear draft on success
+            if (productId) {
+                removeDraft(productId);
+            }
 
             Alert.alert(
                 'Review Submitted!',
@@ -102,11 +124,18 @@ export default function WriteReviewScreen() {
                         <View style={styles.headerRight} />
                     </View>
 
-                    <ScrollView 
+                    <ScrollView
                         style={styles.scrollView}
                         contentContainerStyle={styles.scrollContent}
                         showsVerticalScrollIndicator={false}
                     >
+                        {/* Draft Indicator */}
+                        {existingDraft && (
+                            <View style={styles.draftBadge}>
+                                <Text style={styles.draftText}>Draft Restored</Text>
+                            </View>
+                        )}
+
                         {/* Product Info (if available) */}
                         {(product || productName) && (
                             <View style={styles.productCard}>
@@ -274,7 +303,7 @@ const styles = StyleSheet.create({
     keyboardView: {
         flex: 1,
     },
-    
+
     // Header
     header: {
         flexDirection: 'row',
@@ -314,6 +343,23 @@ const styles = StyleSheet.create({
     scrollContent: {
         paddingHorizontal: Spacing.base,
         paddingTop: Spacing.lg,
+    },
+
+    // Draft Badge
+    draftBadge: {
+        alignSelf: 'center',
+        backgroundColor: Colors.cardDark,
+        paddingVertical: 4,
+        paddingHorizontal: 12,
+        borderRadius: BorderRadius.full,
+        marginBottom: Spacing.md,
+        borderWidth: 1,
+        borderColor: Colors.secondary,
+    },
+    draftText: {
+        fontFamily: FontFamily.bodyMedium,
+        fontSize: FontSize.small,
+        color: Colors.secondary,
     },
 
     // Product Card

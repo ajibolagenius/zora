@@ -299,6 +299,7 @@ export function useCreateReview() {
         queryClient.invalidateQueries({ queryKey: queryKeys.products.detail(variables.productId) });
       }
       if (variables.vendorId) {
+        queryClient.invalidateQueries({ queryKey: queryKeys.reviews.byVendor(variables.vendorId) });
         queryClient.invalidateQueries({ queryKey: queryKeys.vendors.detail(variables.vendorId) });
       }
     },
