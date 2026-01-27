@@ -1,9 +1,11 @@
 import React from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Heart, Plus, Star, ShieldCheck } from 'phosphor-react-native';
 import { Colors } from '../../constants/colors';
 import { BorderRadius, Spacing, Shadows } from '../../constants/spacing';
 import { FontSize, FontWeight, FontFamily } from '../../constants/typography';
+import { useWishlistStore } from '../../stores/wishlistStore';
+import { LazyImage } from './LazyImage';
 
 // Updated Product interface for mock database
 interface Product {
@@ -50,9 +52,17 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   onAddToCart,
   compact = false,
 }) => {
+  const { isInWishlist, toggleWishlist } = useWishlistStore();
+  const isFavorite = isInWishlist(product.id);
+
   // Normalize image_url for both old and new schemas
   const imageUrl = product.image_urls?.[0] || product.image_url || '';
   const region = product.cultural_region || product.region;
+
+  const handleFavoritePress = (e: any) => {
+    e.stopPropagation(); // Prevent triggering onPress
+    toggleWishlist(product as any);
+  };
 
   const getBadgeColor = (badge: string) => {
     switch (badge?.toUpperCase()) {
@@ -85,10 +95,11 @@ export const ProductCard: React.FC<ProductCardProps> = ({
       activeOpacity={0.8}
     >
       <View style={styles.imageContainer}>
-        <Image
-          source={{ uri: imageUrl }}
+        <LazyImage
+          source={imageUrl}
           style={[styles.image, compact && styles.imageCompact]}
-          resizeMode="cover"
+          contentFit="cover"
+          showLoader={false}
         />
         
         {/* Badges */}
@@ -106,8 +117,16 @@ export const ProductCard: React.FC<ProductCardProps> = ({
         </View>
         
         {/* Favorite Button */}
-        <TouchableOpacity style={styles.favoriteButton}>
-          <Heart size={18} color={Colors.textPrimary} weight="duotone" />
+        <TouchableOpacity 
+          style={styles.favoriteButton}
+          onPress={handleFavoritePress}
+          activeOpacity={0.7}
+        >
+          <Heart 
+            size={18} 
+            color={isFavorite ? Colors.primary : Colors.textPrimary} 
+            weight={isFavorite ? 'fill' : 'duotone'} 
+          />
         </TouchableOpacity>
 
         {/* Trust Badge */}
@@ -165,10 +184,12 @@ const styles = StyleSheet.create({
     borderRadius: BorderRadius.lg,
     overflow: 'hidden',
     width: '100%',
+    height: 280, // Fixed height for uniform appearance
     ...Shadows.md,
   },
   containerCompact: {
     maxWidth: 140,
+    height: 240, // Slightly smaller for compact variant
   },
   imageContainer: {
     position: 'relative',
@@ -210,6 +231,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.4)',
     alignItems: 'center',
     justifyContent: 'center',
+    zIndex: 10,
   },
   trustBadge: {
     position: 'absolute',
@@ -224,6 +246,8 @@ const styles = StyleSheet.create({
   },
   content: {
     padding: Spacing.sm,
+    flex: 1,
+    justifyContent: 'space-between',
   },
   regionTag: {
     fontFamily: FontFamily.bodySemiBold,
@@ -238,6 +262,8 @@ const styles = StyleSheet.create({
     color: Colors.textPrimary,
     fontSize: FontSize.small,
     marginBottom: 2,
+    minHeight: 36, // Fixed height for 2 lines (18px * 2)
+    maxHeight: 36,
   },
   weight: {
     fontFamily: FontFamily.body,

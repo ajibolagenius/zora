@@ -176,10 +176,11 @@ export default function StoreScreen() {
             >
                 {/* Header Image (Shop Front) */}
                 <View style={styles.headerImageContainer}>
-                    <Image
-                        source={{ uri: (vendor as any).cover_image_url || (vendor as any).cover_image || '' }}
+                    <LazyImage
+                        source={(vendor as any).cover_image_url || (vendor as any).cover_image || ''}
                         style={styles.headerImage}
-                        resizeMode="cover"
+                        contentFit="cover"
+                        showLoader={false}
                     />
                     <View style={styles.headerOverlay} />
 
@@ -214,10 +215,10 @@ export default function StoreScreen() {
                     {/* Avatar overlapping header */}
                     <View style={styles.avatarContainer}>
                         <View style={styles.avatarWrapper}>
-                            <Image
-                                source={{ uri: (vendor as any).logo_url || '' }}
+                            <LazyAvatar
+                                source={(vendor as any).logo_url || ''}
+                                size={80}
                                 style={styles.avatar}
-                                resizeMode="cover"
                             />
                         </View>
                     </View>
@@ -339,10 +340,11 @@ export default function StoreScreen() {
                                     >
                                         {/* Product Image */}
                                         <View style={styles.productImageContainer}>
-                                            <Image
-                                                source={{ uri: productImages[0] }}
+                                            <LazyImage
+                                                source={productImages[0]}
                                                 style={styles.productImage}
-                                                resizeMode="cover"
+                                                contentFit="cover"
+                                                showLoader={false}
                                             />
 
                                             {/* Badge */}

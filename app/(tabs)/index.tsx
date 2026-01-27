@@ -49,6 +49,21 @@ export default function HomeScreen() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedRegion, setSelectedRegion] = useState<string | null>(null);
   const [userLocation, setUserLocation] = useState<{ city: string; postcode: string } | null>(null);
+  const [allProducts, setAllProducts] = useState<Product[]>([]);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [hasMoreProducts, setHasMoreProducts] = useState(true);
+  const [productOffset, setProductOffset] = useState(0);
+  const [loadingColor] = useState(() => {
+    // Generate random vibrant color similar to onboarding categories
+    const vibrantColors = [
+      Colors.primary,        // #CC0000 - Zora Red
+      Colors.secondary,      // #FFCC00 - Zora Yellow
+      Colors.success,        // #22C55E - Green
+      Colors.info,           // #3B82F6 - Blue
+      Colors.badgeEcoFriendly, // #14B8A6 - Teal
+    ];
+    return vibrantColors[Math.floor(Math.random() * vibrantColors.length)];
+  });
   const addToCart = useCartStore((state) => state.addItem);
   const { user } = useAuthStore();
   
@@ -64,6 +79,14 @@ export default function HomeScreen() {
       // Fetch all home data from database
       const data = await homeService.getHomeData(userRegion);
       setHomeData(data);
+      
+      // Initialize products list with initial batch (deduplicated)
+      const uniqueProducts = Array.from(
+        new Map(data.popular_products.map(p => [p.id, p])).values()
+      );
+      setAllProducts(uniqueProducts);
+      setProductOffset(uniqueProducts.length);
+      setHasMoreProducts(uniqueProducts.length >= 20); // Assume more if we got full batch
 
       // Fetch user location for display
       if (user?.user_id) {
@@ -75,6 +98,33 @@ export default function HomeScreen() {
     } finally {
       setLoading(false);
       setRefreshing(false);
+    }
+  };
+
+  const loadMoreProducts = async () => {
+    if (loadingMore || !hasMoreProducts) return;
+
+    try {
+      setLoadingMore(true);
+      const moreProducts = await homeService.getMoreProducts(userRegion, productOffset, 20);
+      
+      if (moreProducts.length === 0) {
+        setHasMoreProducts(false);
+      } else {
+        // Deduplicate products by ID to prevent duplicate keys
+        setAllProducts((prev) => {
+          const existingIds = new Set(prev.map(p => p.id));
+          const newProducts = moreProducts.filter(p => !existingIds.has(p.id));
+          return [...prev, ...newProducts];
+        });
+        setProductOffset((prev) => prev + moreProducts.length);
+        setHasMoreProducts(moreProducts.length >= 20); // More available if we got full batch
+      }
+    } catch (error) {
+      console.error('Error loading more products:', error);
+      setHasMoreProducts(false);
+    } finally {
+      setLoadingMore(false);
     }
   };
 
@@ -93,6 +143,15 @@ export default function HomeScreen() {
             ...updatedData,
           };
         });
+        
+        // If popular_products were updated, merge them with allProducts (deduplicated)
+        if (updatedData.popular_products) {
+          setAllProducts((prev) => {
+            const existingIds = new Set(prev.map(p => p.id));
+            const newProducts = updatedData.popular_products!.filter(p => !existingIds.has(p.id));
+            return [...prev, ...newProducts];
+          });
+        }
       },
       userRegion
     ).then((unsub) => {
@@ -128,6 +187,9 @@ export default function HomeScreen() {
 
   const onRefresh = () => {
     setRefreshing(true);
+    setProductOffset(0);
+    setHasMoreProducts(true);
+    setAllProducts([]);
     fetchHomeData();
   };
 
@@ -201,8 +263,8 @@ export default function HomeScreen() {
   }
 
   const filteredProducts = selectedRegion
-    ? homeData?.popular_products.filter((p) => p.cultural_region?.toLowerCase().includes(selectedRegion.toLowerCase()))
-    : homeData?.popular_products;
+    ? allProducts.filter((p) => p.cultural_region?.toLowerCase().includes(selectedRegion.toLowerCase()))
+    : allProducts;
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
@@ -264,6 +326,14 @@ export default function HomeScreen() {
             tintColor={Colors.primary}
           />
         }
+        onScroll={(event) => {
+          const { layoutMeasurement, contentOffset, contentSize } = event.nativeEvent;
+          const paddingToBottom = 100;
+          if (layoutMeasurement.height + contentOffset.y >= contentSize.height - paddingToBottom) {
+            loadMoreProducts();
+          }
+        }}
+        scrollEventThrottle={400}
       >
         <Animated.View style={{ opacity: fadeAnim, transform: [{ translateY: slideAnim }] }}>
           {/* Featured Collection Slider */}
@@ -368,7 +438,7 @@ export default function HomeScreen() {
             <View style={styles.productsGrid}>
               {filteredProducts?.map((product, index) => (
                 <View 
-                  key={product.id} 
+                  key={`product-${product.id}-${index}`} 
                   style={{
                     width: productCardWidth,
                     marginRight: index % 2 === 0 ? PRODUCT_GAP : 0,
@@ -383,6 +453,18 @@ export default function HomeScreen() {
                 </View>
               ))}
             </View>
+            
+            {/* Loading More Footer */}
+            {loadingMore && hasMoreProducts && (
+              <View style={styles.loadingFooterContainer}>
+                <View style={[styles.loadingFooter, { backgroundColor: loadingColor + '20' }]}>
+                  <ActivityIndicator size="small" color={loadingColor} />
+                  <Text style={[styles.loadingFooterText, { color: loadingColor }]}>
+                    Loading more products...
+                  </Text>
+                </View>
+              </View>
+            )}
           </View>
 
           {/* Bottom padding for tab bar */}
@@ -510,5 +592,24 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     paddingHorizontal: Spacing.base,
+  },
+  loadingFooterContainer: {
+    width: '100%',
+    alignItems: 'center',
+    paddingVertical: Spacing.md,
+  },
+  loadingFooter: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: Spacing.sm,
+    paddingHorizontal: Spacing.md,
+    borderRadius: BorderRadius.lg,
+    gap: Spacing.sm,
+    alignSelf: 'center',
+  },
+  loadingFooterText: {
+    fontFamily: FontFamily.bodySemiBold,
+    fontSize: FontSize.caption,
   },
 });

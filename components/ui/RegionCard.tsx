@@ -1,9 +1,10 @@
 import React from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Colors } from '../../constants/colors';
 import { BorderRadius, Spacing } from '../../constants/spacing';
 import { FontSize, FontFamily } from '../../constants/typography';
 import { Region } from '../../types';
+import { LazyImage } from './LazyImage';
 
 interface RegionCardProps {
   region: Region;
@@ -19,10 +20,11 @@ export const RegionCard: React.FC<RegionCardProps> = ({
   return (
     <TouchableOpacity style={styles.container} onPress={onPress} activeOpacity={0.7}>
       <View style={[styles.imageWrapper, selected && styles.imageWrapperSelected]}>
-        <Image
-          source={{ uri: region.image_url }}
+        <LazyImage
+          source={region.image_url}
           style={styles.image}
-          resizeMode="cover"
+          contentFit="cover"
+          showLoader={false}
         />
       </View>
       <Text style={[styles.name, selected && styles.nameSelected]} numberOfLines={1}>

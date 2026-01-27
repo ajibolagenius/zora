@@ -5,7 +5,6 @@ import {
     StyleSheet,
     ScrollView,
     TouchableOpacity,
-    Image,
     Animated,
     Easing,
     Platform,
@@ -35,7 +34,7 @@ import { Colors } from '../../constants/colors';
 import { Spacing, BorderRadius, Heights } from '../../constants/spacing';
 import { FontSize, FontFamily } from '../../constants/typography';
 import { PlaceholderImages } from '../../constants';
-import { Button } from '../../components/ui';
+import { Button, LazyImage } from '../../components/ui';
 import { getProductRoute, getVendorRoute } from '../../lib/navigationHelpers';
 import { useOrderStore } from '../../stores/orderStore';
 import { useAuthStore } from '../../stores/authStore';
@@ -531,13 +530,15 @@ export default function OrdersTab() {
                 <View style={styles.vendorSection}>
                     <View style={styles.thumbnailsContainer}>
                         {order.thumbnails.slice(0, 3).map((thumb, idx) => (
-                            <Image
+                            <LazyImage
                                 key={idx}
-                                source={{ uri: thumb }}
+                                source={thumb}
                                 style={[
                                     styles.thumbnail,
                                     { marginLeft: idx > 0 ? -12 : 0, zIndex: 3 - idx },
                                 ]}
+                                contentFit="cover"
+                                showLoader={false}
                             />
                         ))}
                     </View>
@@ -568,10 +569,11 @@ export default function OrdersTab() {
                                 onPress={() => handleProductPress(product.id)}
                                 activeOpacity={0.8}
                             >
-                                <Image
-                                    source={{ uri: product.image_url }}
+                                <LazyImage
+                                    source={product.image_url}
                                     style={styles.orderItemImage}
-                                    resizeMode="cover"
+                                    contentFit="cover"
+                                    showLoader={false}
                                 />
                                 <View style={styles.orderItemInfo}>
                                     <Text style={styles.orderItemName} numberOfLines={1}>

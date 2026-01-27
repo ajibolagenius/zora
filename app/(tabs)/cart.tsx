@@ -5,7 +5,6 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
-  Image,
   Animated,
   Easing,
   Platform,
@@ -25,7 +24,7 @@ import { Colors } from '../../constants/colors';
 import { Spacing, BorderRadius, Heights } from '../../constants/spacing';
 import { FontSize, FontFamily } from '../../constants/typography';
 import { PlaceholderImages, AnimationDuration, AnimationEasing } from '../../constants';
-import { Button } from '../../components/ui';
+import { Button, LazyImage } from '../../components/ui';
 import { useCartStore } from '../../stores/cartStore';
 import { getProductRoute, getVendorRoute } from '../../lib/navigationHelpers';
 
@@ -148,7 +147,7 @@ export default function CartTab() {
                   activeOpacity={0.7}
                 >
                   {/* Product Image */}
-                  <Image source={{ uri: productImage }} style={styles.itemImage} />
+                  <LazyImage source={productImage} style={styles.itemImage} contentFit="cover" showLoader={false} />
 
                   {/* Product Content */}
                   <View style={styles.itemContent}>

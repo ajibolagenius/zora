@@ -3,12 +3,12 @@ import {
   View,
   Text,
   StyleSheet,
-  Image,
   TouchableOpacity,
   Dimensions,
   FlatList,
   Animated,
 } from 'react-native';
+import { LazyImage } from './LazyImage';
 import { LinearGradient } from 'expo-linear-gradient';
 import { ArrowRight } from 'phosphor-react-native';
 import { Colors } from '../../constants/colors';
@@ -84,10 +84,11 @@ export const FeaturedSlider: React.FC<FeaturedSliderProps> = ({
         onPress={() => onBannerPress?.(item)}
         activeOpacity={0.95}
       >
-        <Image
-          source={{ uri: item.image_url }}
+        <LazyImage
+          source={item.image_url}
           style={styles.bannerImage}
-          resizeMode="cover"
+          contentFit="cover"
+          showLoader={false}
         />
         <LinearGradient
           colors={['transparent', 'rgba(34, 23, 16, 0.4)', 'rgba(34, 23, 16, 0.95)']}

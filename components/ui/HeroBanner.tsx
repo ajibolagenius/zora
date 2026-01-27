@@ -1,11 +1,12 @@
 import React from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { ArrowRight } from 'phosphor-react-native';
 import { Colors } from '../../constants/colors';
 import { BorderRadius, Spacing, Heights } from '../../constants/spacing';
 import { FontSize, FontFamily } from '../../constants/typography';
 import { Banner } from '../../types';
+import { LazyImage } from './LazyImage';
 
 const { width } = Dimensions.get('window');
 
@@ -17,10 +18,11 @@ interface HeroBannerProps {
 export const HeroBanner: React.FC<HeroBannerProps> = ({ banner, onPress }) => {
   return (
     <TouchableOpacity style={styles.container} onPress={onPress} activeOpacity={0.95}>
-      <Image
-        source={{ uri: banner.image_url }}
+      <LazyImage
+        source={banner.image_url}
         style={styles.image}
-        resizeMode="cover"
+        contentFit="cover"
+        showLoader={false}
       />
       {/* Gradient overlay for text readability */}
       <LinearGradient

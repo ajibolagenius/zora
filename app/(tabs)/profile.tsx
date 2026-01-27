@@ -5,7 +5,6 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
-  Image,
   Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -26,12 +25,14 @@ import {
   UserPlus,
   QrCode,
   Package,
+  Heart,
 } from 'phosphor-react-native';
 import { Colors } from '../../constants/colors';
 import { ImageUrlBuilders, OrderConfig, CommonImages } from '../../constants';
 import { Spacing, BorderRadius } from '../../constants/spacing';
 import { FontSize, FontFamily, LetterSpacing } from '../../constants/typography';
 import { useAuthStore } from '../../stores/authStore';
+import { LazyAvatar, LazyImage } from '../../components/ui';
 
 interface MenuItem {
   id: string;
@@ -64,13 +65,14 @@ const shuffleArray = <T,>(array: T[]): T[] => {
 const MENU_ITEMS: MenuItem[] = [
   { id: '1', icon: User, label: 'Personal Information', route: '/settings/personal' },
   { id: '2', icon: Package, label: 'My Orders', route: '/orders' },
-  { id: '3', icon: QrCode, label: 'Scan QR Code', route: '/qr-scanner' },
-  { id: '4', icon: CreditCard, label: 'Payment Methods', route: '/settings/payment' },
-  { id: '5', icon: MapPin, label: 'Saved Addresses', route: '/settings/addresses' },
-  { id: '6', icon: Bell, label: 'Notification Settings', route: '/notification-settings' },
-  { id: '7', icon: UserPlus, label: 'Refer a Friend', route: '/referrals' },
-  { id: '8', icon: Question, label: 'Help & Support', route: '/help' },
-  { id: '9', icon: Info, label: 'About Zora', route: '/settings/about' },
+  { id: '3', icon: Heart, label: 'My Wishlist', route: '/wishlist' },
+  { id: '4', icon: QrCode, label: 'Scan QR Code', route: '/qr-scanner' },
+  { id: '5', icon: CreditCard, label: 'Payment Methods', route: '/settings/payment' },
+  { id: '6', icon: MapPin, label: 'Saved Addresses', route: '/settings/addresses' },
+  { id: '7', icon: Bell, label: 'Notification Settings', route: '/notification-settings' },
+  { id: '8', icon: UserPlus, label: 'Refer a Friend', route: '/referrals' },
+  { id: '9', icon: Question, label: 'Help & Support', route: '/help' },
+  { id: '10', icon: Info, label: 'About Zora', route: '/settings/about' },
 ];
 
 const STATS = [
@@ -168,10 +170,11 @@ export default function ProfileTab() {
         <View style={styles.profileSection}>
           {/* Avatar */}
           <View style={styles.avatarContainer}>
-            <Image
-              source={{ 
-                uri: user?.picture || CommonImages.defaultUser 
-              }}
+            <LazyAvatar
+              source={user?.picture || CommonImages.defaultUser}
+              name={user?.name}
+              userId={user?.user_id}
+              size={80}
               style={styles.avatar}
             />
             <TouchableOpacity 
@@ -238,12 +241,11 @@ export default function ProfileTab() {
           
           {/* QR Code */}
           <View style={styles.qrCodeContainer}>
-            <Image
-              source={{ 
-                uri: ImageUrlBuilders.qrCode(`${OrderConfig.orderNumberPrefix}${(user as any)?.id?.substring(0, 8) || (user?.user_id?.substring(0, 8)) || 'USER'}-${membershipTier.toUpperCase()}`) 
-              }}
+            <LazyImage
+              source={ImageUrlBuilders.qrCode(`${OrderConfig.orderNumberPrefix}${(user as any)?.id?.substring(0, 8) || (user?.user_id?.substring(0, 8)) || 'USER'}-${membershipTier.toUpperCase()}`)}
               style={styles.qrCode}
-              resizeMode="contain"
+              contentFit="contain"
+              showLoader={false}
             />
           </View>
           

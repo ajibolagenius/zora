@@ -14,6 +14,8 @@ export { ToastProvider, useToast } from './ToastProvider';
 
 // Feature Components
 export { ProductCard } from './ProductCard';
+export { LazyImage } from './LazyImage';
+export { LazyAvatar } from './LazyAvatar';
 export { VendorCard } from './VendorCard';
 export { RegionCard } from './RegionCard';
 export { SearchBar } from './SearchBar';

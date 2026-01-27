@@ -8,13 +8,13 @@ import {
   TextInput,
   KeyboardAvoidingView,
   Platform,
-  Image,
   Animated,
   Easing,
   Keyboard,
   ActivityIndicator,
   Alert,
 } from 'react-native';
+import { LazyImage } from '../../components/ui/LazyImage';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import * as Location from 'expo-location';
@@ -385,13 +385,12 @@ export default function LocationScreen() {
                   >
                     {nearbyVendors.map((vendor) => (
                       <View key={vendor.id} style={styles.vendorCard}>
-                        <Image
-                          source={{ 
-                            uri: vendor.cover_image_url || vendor.logo_url || 'https://images.unsplash.com/photo-1604329760661-e71dc83f8f26?w=200'
-                          }}
-                          style={styles.vendorImage}
-                          resizeMode="cover"
-                        />
+                      <LazyImage
+                        source={vendor.cover_image_url || vendor.logo_url || 'https://images.unsplash.com/photo-1604329760661-e71dc83f8f26?w=200'}
+                        style={styles.vendorImage}
+                        contentFit="cover"
+                        showLoader={false}
+                      />
                         <View style={styles.vendorInfo}>
                           <Text style={styles.vendorName} numberOfLines={1}>{vendor.shop_name}</Text>
                           <View style={styles.vendorMeta}>

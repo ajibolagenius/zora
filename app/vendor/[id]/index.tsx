@@ -5,13 +5,13 @@ import {
     StyleSheet,
     ScrollView,
     TouchableOpacity,
-    Image,
     ActivityIndicator,
     useWindowDimensions,
     Platform,
     Animated,
     Easing,
 } from 'react-native';
+import { LazyImage, LazyAvatar } from '../../../components/ui';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import {
@@ -165,10 +165,11 @@ export default function VendorScreen() {
             >
                 {/* Header Image (Shop Front) */}
                 <View style={styles.headerImageContainer}>
-                    <Image
-                        source={{ uri: vendor.cover_image_url }}
+                    <LazyImage
+                        source={vendor.cover_image_url}
                         style={styles.headerImage}
-                        resizeMode="cover"
+                        contentFit="cover"
+                        showLoader={false}
                     />
                     <View style={styles.headerOverlay} />
 
@@ -203,10 +204,10 @@ export default function VendorScreen() {
                     {/* Avatar overlapping header */}
                     <View style={styles.avatarContainer}>
                         <View style={styles.avatarWrapper}>
-                            <Image
-                                source={{ uri: vendor.logo_url }}
+                            <LazyAvatar
+                                source={vendor.logo_url}
+                                size={80}
                                 style={styles.avatar}
-                                resizeMode="cover"
                             />
                         </View>
                     </View>
@@ -315,10 +316,11 @@ export default function VendorScreen() {
                                 >
                                     {/* Product Image */}
                                     <View style={styles.productImageContainer}>
-                                        <Image
-                                            source={{ uri: product.image_urls[0] }}
+                                        <LazyImage
+                                            source={product.image_urls[0]}
                                             style={styles.productImage}
-                                            resizeMode="cover"
+                                            contentFit="cover"
+                                            showLoader={false}
                                         />
 
                                         {/* Badge */}
@@ -389,8 +391,10 @@ export default function VendorScreen() {
                                 {reviews.slice(0, 3).map((review) => (
                                     <View key={review.id} style={styles.reviewCard}>
                                         <View style={styles.reviewHeader}>
-                                            <Image
-                                                source={{ uri: review.user_avatar || ImageUrlBuilders.dicebearAvatar(review.user_name) }}
+                                            <LazyAvatar
+                                                source={review.user_avatar || ImageUrlBuilders.dicebearAvatar(review.user_name)}
+                                                name={review.user_name}
+                                                size={40}
                                                 style={styles.reviewAvatar}
                                             />
                                             <View style={styles.reviewMeta}>

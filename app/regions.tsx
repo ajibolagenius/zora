@@ -5,11 +5,11 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
-  Image,
   Animated,
   Easing,
   ActivityIndicator,
 } from 'react-native';
+import { LazyImage } from '../components/ui';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { ArrowLeft, MapPin, Storefront, Package } from 'phosphor-react-native';
@@ -101,10 +101,11 @@ export default function RegionsScreen() {
                 onPress={() => handleRegionPress(region)}
                 activeOpacity={0.8}
               >
-                <Image
-                  source={{ uri: region.image_url }}
+                <LazyImage
+                  source={region.image_url}
                   style={styles.regionImage}
-                  resizeMode="cover"
+                  contentFit="cover"
+                  showLoader={false}
                 />
                 <View style={styles.regionOverlay} />
                 <View style={styles.regionContent}>

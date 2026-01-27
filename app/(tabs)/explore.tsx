@@ -5,12 +5,12 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
-  Image,
   Platform,
   Animated,
   Easing,
   useWindowDimensions,
 } from 'react-native';
+import { LazyImage } from '../../components/ui';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import {
@@ -210,10 +210,11 @@ export default function ExploreScreen() {
             >
               {/* Vendor Image */}
               <View style={styles.vendorImageContainer}>
-                <Image
-                  source={{ uri: vendor.image }}
+                <LazyImage
+                  source={vendor.image}
                   style={styles.vendorImage}
-                  resizeMode="cover"
+                  contentFit="cover"
+                  showLoader={false}
                 />
               </View>
 

@@ -5,13 +5,12 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
-  Image,
   ActivityIndicator,
   useWindowDimensions,
-  ImageBackground,
   FlatList,
   Animated,
 } from 'react-native';
+import { LazyImage, LazyAvatar } from '../../components/ui';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams, Link } from 'expo-router';
@@ -170,16 +169,18 @@ export default function ProductScreen() {
                 })}
                 renderItem={({ item }) => (
                   <View style={[styles.heroSection, { height: screenHeight * 0.45, width: screenWidth }]}>
-                    <ImageBackground
-                      source={{ uri: item }}
-                      style={styles.heroImage}
-                      resizeMode="cover"
-                    >
+                    <View style={styles.heroImage}>
+                      <LazyImage
+                        source={item}
+                        style={StyleSheet.absoluteFill}
+                        contentFit="cover"
+                        showLoader={false}
+                      />
                       <LinearGradient
                         colors={[Colors.black40, 'transparent', 'rgba(0, 0, 0, 0.6)']} // 60% opacity
                         style={styles.heroGradient}
                       />
-                    </ImageBackground>
+                    </View>
                   </View>
                 )}
               />
@@ -221,16 +222,18 @@ export default function ProductScreen() {
             </>
           ) : (
             <View style={[styles.heroSection, { height: screenHeight * 0.45 }]}>
-              <ImageBackground
-                source={{ uri: productImages[0] || '' }}
-                style={styles.heroImage}
-                resizeMode="cover"
-              >
+              <View style={styles.heroImage}>
+                <LazyImage
+                  source={productImages[0] || ''}
+                  style={StyleSheet.absoluteFill}
+                  contentFit="cover"
+                  showLoader={false}
+                />
                 <LinearGradient
                   colors={[Colors.black40, 'transparent', 'rgba(0, 0, 0, 0.6)']} // 60% opacity
                   style={styles.heroGradient}
                 />
-              </ImageBackground>
+              </View>
             </View>
           )}
           
@@ -315,8 +318,9 @@ export default function ProductScreen() {
               }}
               activeOpacity={0.8}
             >
-              <Image
-                source={{ uri: vendor.logo_url }}
+              <LazyAvatar
+                source={vendor.logo_url}
+                size={48}
                 style={styles.vendorAvatar}
               />
               <View style={styles.vendorInfo}>
@@ -451,8 +455,9 @@ export default function ProductScreen() {
                 {reviews.slice(0, 3).map((review) => (
                   <View key={review.id} style={styles.reviewCard}>
                     <View style={styles.reviewHeader}>
-                      <Image
-                        source={{ uri: review.user_avatar || ImageUrlBuilders.dicebearAvatar('User') }}
+                      <LazyAvatar
+                        source={review.user_avatar || ImageUrlBuilders.dicebearAvatar('User')}
+                        size={40}
                         style={styles.reviewAvatar}
                       />
                       <View style={styles.reviewMeta}>

@@ -1,9 +1,10 @@
 import React from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Star, Clock, Truck, ShieldCheck, MapPin } from 'phosphor-react-native';
 import { Colors } from '../../constants/colors';
 import { BorderRadius, Spacing, Shadows } from '../../constants/spacing';
 import { FontSize, FontWeight, FontFamily } from '../../constants/typography';
+import { LazyImage } from './LazyImage';
 
 // Updated Vendor interface for mock database
 interface Vendor {
@@ -63,10 +64,11 @@ export const VendorCard: React.FC<VendorCardProps> = ({ vendor, onPress, variant
       activeOpacity={0.8}
     >
       <View style={[styles.imageContainer, isCarousel && styles.imageContainerCarousel]}>
-        <Image
-          source={{ uri: coverImage }}
+        <LazyImage
+          source={coverImage}
           style={styles.coverImage}
-          resizeMode="cover"
+          contentFit="cover"
+          showLoader={false}
         />
         
         {/* Tag Badge */}

@@ -209,10 +209,11 @@ export default function VendorProductsScreen() {
               activeOpacity={0.95}
             >
               <View style={styles.productImageContainer}>
-                <Image
-                  source={{ uri: product.image_urls[0] }}
+                <LazyImage
+                  source={product.image_urls[0]}
                   style={styles.productImage}
-                  resizeMode="cover"
+                  contentFit="cover"
+                  showLoader={false}
                 />
                 
                 {product.badge && (

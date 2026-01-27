@@ -4,3 +4,4 @@ export { onboardingService } from './onboardingService';
 export type { Region, Category, Address } from './onboardingService';
 export { homeService as homeServiceNew } from './homeService';
 export type { HomeData, Banner } from './homeService';
+export { wishlistService } from './wishlistService';

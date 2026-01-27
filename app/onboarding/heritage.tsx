@@ -5,13 +5,13 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
-  Image,
   Dimensions,
   Animated,
   Easing,
   useWindowDimensions,
   ActivityIndicator,
 } from 'react-native';
+import { LazyImage } from '../../components/ui/LazyImage';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { ArrowLeft, ArrowRight, Check } from 'phosphor-react-native';
@@ -211,11 +211,12 @@ export default function HeritageScreen() {
                   onPress={() => toggleRegion(region.slug)}
                   activeOpacity={0.8}
                 >
-                  <Image
-                    source={{ uri: getRegionImage(region) }}
-                    style={styles.regionImage}
-                    resizeMode="cover"
-                  />
+                <LazyImage
+                  source={getRegionImage(region)}
+                  style={styles.regionImage}
+                  contentFit="cover"
+                  showLoader={false}
+                />
                   <View style={styles.regionOverlay} />
                   <View style={styles.regionContent}>
                     <View>

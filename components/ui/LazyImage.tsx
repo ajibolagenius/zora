@@ -1,0 +1,116 @@
+import React, { useState, useEffect, useRef } from 'react';
+import { View, StyleSheet, ActivityIndicator, Animated } from 'react-native';
+import { Image, ImageProps } from 'expo-image';
+import { Colors } from '../../constants/colors';
+import { PlaceholderImages } from '../../constants/assets';
+
+interface LazyImageProps extends Omit<ImageProps, 'source'> {
+  source: string | { uri: string } | null | undefined;
+  placeholder?: string;
+  fallback?: string;
+  showLoader?: boolean;
+  blurhash?: string;
+}
+
+/**
+ * LazyImage Component
+ * Optimized image component with lazy loading, placeholder, and error handling
+ * Uses expo-image for better performance and caching
+ */
+export const LazyImage: React.FC<LazyImageProps> = ({
+  source,
+  placeholder,
+  fallback,
+  showLoader = true,
+  blurhash,
+  style,
+  ...props
+}) => {
+  const [isLoading, setIsLoading] = useState(true);
+  const [hasError, setHasError] = useState(false);
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+
+  // Normalize source to string or object
+  const imageUri = typeof source === 'string' 
+    ? source 
+    : source?.uri || null;
+
+  // Determine placeholder and fallback
+  const placeholderUri = placeholder || PlaceholderImages.image;
+  const fallbackUri = fallback || PlaceholderImages.image;
+  
+  // Handle require() for local images and normalize source
+  const getImageSource = (uri: string | null | undefined) => {
+    if (!uri) return fallbackUri;
+    return uri;
+  };
+
+  useEffect(() => {
+    if (imageUri && !hasError) {
+      setIsLoading(true);
+      setHasError(false);
+    }
+  }, [imageUri, hasError]);
+
+  const handleLoadEnd = () => {
+    setIsLoading(false);
+    Animated.timing(fadeAnim, {
+      toValue: 1,
+      duration: 300,
+      useNativeDriver: true,
+    }).start();
+  };
+
+  const handleError = () => {
+    setIsLoading(false);
+    setHasError(true);
+  };
+
+  const finalImageUri = imageUri || fallbackUri;
+  const finalPlaceholder = blurhash || placeholderUri;
+  const finalFallback = fallbackUri;
+
+  return (
+    <View style={[styles.container, style]}>
+      <Image
+        source={finalImageUri}
+        style={StyleSheet.absoluteFill}
+        contentFit={props.contentFit || 'cover'}
+        placeholder={finalPlaceholder}
+        transition={200}
+        cachePolicy="memory-disk"
+        onLoadEnd={handleLoadEnd}
+        onError={handleError}
+        {...props}
+      />
+      
+      {/* Loading Indicator */}
+      {isLoading && showLoader && (
+        <View style={[styles.loaderContainer, StyleSheet.absoluteFill]}>
+          <ActivityIndicator size="small" color={Colors.primary} />
+        </View>
+      )}
+
+      {/* Error Fallback */}
+      {hasError && finalImageUri !== finalFallback && (
+        <Image
+          source={finalFallback}
+          style={StyleSheet.absoluteFill}
+          contentFit={props.contentFit || 'cover'}
+          cachePolicy="memory-disk"
+        />
+      )}
+    </View>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    overflow: 'hidden',
+  },
+  loaderContainer: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: Colors.backgroundDark,
+  },
+});

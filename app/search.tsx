@@ -5,12 +5,12 @@ import {
   TextInput,
   TouchableOpacity,
   ScrollView,
-  Image,
   ActivityIndicator,
   Modal,
   Pressable,
   Keyboard,
 } from 'react-native';
+import { LazyImage } from '../components/ui';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import {
@@ -345,10 +345,11 @@ export default function SearchScreen() {
                   activeOpacity={0.8}
                 >
                   <View className="bg-card-dark rounded-xl overflow-hidden">
-                    <Image
-                      source={{ uri: product.image_urls?.[0] || PlaceholderImages.image200 }}
-                      className="w-full h-32"
-                      resizeMode="cover"
+                    <LazyImage
+                      source={product.image_urls?.[0] || PlaceholderImages.image200}
+                      style={{ width: '100%', height: 128 }}
+                      contentFit="cover"
+                      showLoader={false}
                     />
                     <View className="p-3">
                       <Text className="text-text-primary text-sm font-semibold" numberOfLines={2}>

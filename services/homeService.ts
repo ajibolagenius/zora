@@ -47,7 +47,7 @@ export const homeService = {
     // Fetch featured vendors
     const featured_vendors = await vendorService.getFeatured(userRegion, 10);
 
-    // Fetch popular products
+    // Fetch popular products (initial batch)
     const popular_products = await productService.getFeatured(userRegion, 20);
 
     return {
@@ -56,6 +56,43 @@ export const homeService = {
       featured_vendors,
       popular_products,
     };
+  },
+
+  /**
+   * Fetch more products for infinite scrolling
+   */
+  getMoreProducts: async (
+    userRegion?: string,
+    offset: number = 0,
+    limit: number = 20
+  ): Promise<Product[]> => {
+    if (!isSupabaseConfigured()) {
+      // For mock data, return empty array after initial batch
+      return [];
+    }
+
+    const fromMethod = await getSupabaseFrom();
+    if (!fromMethod) {
+      return [];
+    }
+
+    // Fetch products with pagination
+    let query = fromMethod('products')
+      .select('*')
+      .eq('is_active', true)
+      .order('is_featured', { ascending: false })
+      .order('rating', { ascending: false })
+      .order('created_at', { ascending: false })
+      .range(offset, offset + limit - 1);
+
+    const { data, error } = await query;
+
+    if (error) {
+      console.error('Error fetching more products:', error);
+      return [];
+    }
+
+    return data || [];
   },
 
   /**

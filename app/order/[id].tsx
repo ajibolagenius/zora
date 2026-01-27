@@ -6,7 +6,6 @@ import {
   ScrollView,
   TouchableOpacity,
   ActivityIndicator,
-  Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -14,7 +13,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Colors } from '../../constants/colors';
 import { Spacing, BorderRadius } from '../../constants/spacing';
 import { FontSize, FontWeight, FontFamily } from '../../constants/typography';
-import { Button } from '../../components/ui';
+import { Button, LazyImage } from '../../components/ui';
 import { orderService } from '../../services/dataService';
 import { Order } from '../../types';
 import { useAuthStore } from '../../stores/authStore';
@@ -175,7 +174,7 @@ export default function OrderDetailScreen() {
           <Text style={styles.sectionTitle}>Order Items</Text>
           {order.items.map((item, index) => (
             <View key={index} style={styles.itemRow}>
-              <Image source={{ uri: item.image_url }} style={styles.itemImage} />
+              <LazyImage source={item.image_url} style={styles.itemImage} contentFit="cover" showLoader={false} />
               <View style={styles.itemInfo}>
                 <Text style={styles.itemName}>{item.name}</Text>
                 <Text style={styles.itemQuantity}>Qty: {item.quantity}</Text>
