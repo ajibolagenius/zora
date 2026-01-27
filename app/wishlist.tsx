@@ -108,10 +108,14 @@ export default function WishlistScreen() {
   };
 
   const handleClearWishlist = async () => {
+    // Get items BEFORE clearing the store
+    const { items: currentItems } = useWishlistStore.getState();
+    
+    // Clear local store
     clearWishlist();
-    if (user?.user_id) {
-      // Remove all items from database
-      const { items: currentItems } = useWishlistStore.getState();
+    
+    // Remove all items from database
+    if (user?.user_id && currentItems.length > 0) {
       for (const item of currentItems) {
         await wishlistService.removeFromWishlist(user.user_id, item.id);
       }

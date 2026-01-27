@@ -112,12 +112,15 @@ export default function HomeScreen() {
         setHasMoreProducts(false);
       } else {
         // Deduplicate products by ID to prevent duplicate keys
+        let newProductsCount = 0;
         setAllProducts((prev) => {
           const existingIds = new Set(prev.map(p => p.id));
           const newProducts = moreProducts.filter(p => !existingIds.has(p.id));
+          newProductsCount = newProducts.length;
           return [...prev, ...newProducts];
         });
-        setProductOffset((prev) => prev + moreProducts.length);
+        // Only increment offset by the number of actually added products
+        setProductOffset((prev) => prev + newProductsCount);
         setHasMoreProducts(moreProducts.length >= 20); // More available if we got full batch
       }
     } catch (error) {
