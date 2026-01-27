@@ -12,9 +12,12 @@ import {
   Animated,
   Easing,
   Keyboard,
+  ActivityIndicator,
+  Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
+import * as Location from 'expo-location';
 import {
   ArrowLeft,
   ArrowRight,
@@ -28,29 +31,28 @@ import { Spacing, BorderRadius, Heights } from '../../constants/spacing';
 import { FontSize, FontFamily } from '../../constants/typography';
 import { Placeholders, AnimationDuration, AnimationEasing } from '../../constants';
 import { useAuthStore } from '../../stores/authStore';
+import { onboardingService } from '../../services/onboardingService';
+import { vendorService } from '../../services/supabaseService';
 
-const NEARBY_VENDORS = [
-  {
-    id: '1',
-    name: "Mama Africa's",
-    rating: 4.8,
-    distance: '1.2 mi',
-    image: 'https://images.unsplash.com/photo-1604329760661-e71dc83f8f26?w=200',
-  },
-  {
-    id: '2',
-    name: 'Lagos Spices',
-    rating: 4.6,
-    distance: '1.8 mi',
-    image: 'https://images.unsplash.com/photo-1596040033229-a9821ebd058d?w=200',
-  },
-];
+interface NearbyVendor {
+  id: string;
+  shop_name: string;
+  rating: number;
+  distance?: string;
+  logo_url?: string | null;
+  cover_image_url?: string | null;
+}
 
 export default function LocationScreen() {
   const router = useRouter();
-  const { setOnboardingComplete } = useAuthStore();
+  const { user, setOnboardingComplete } = useAuthStore();
   const [searchQuery, setSearchQuery] = useState('');
   const [isLocationEnabled, setIsLocationEnabled] = useState(false);
+  const [currentLocation, setCurrentLocation] = useState<{ latitude: number; longitude: number } | null>(null);
+  const [nearbyVendors, setNearbyVendors] = useState<NearbyVendor[]>([]);
+  const [isLoadingLocation, setIsLoadingLocation] = useState(false);
+  const [isLoadingVendors, setIsLoadingVendors] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   
   // Animation values
   const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -73,13 +75,135 @@ export default function LocationScreen() {
     ]).start();
   }, []);
 
-  const handleComplete = () => {
-    setOnboardingComplete(true);
-    router.replace('/(tabs)');
+  const handleUseCurrentLocation = async () => {
+    try {
+      setIsLoadingLocation(true);
+      
+      // Request location permissions
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert(
+          'Permission Denied',
+          'Location permission is required to find nearby vendors. Please enable it in your device settings.'
+        );
+        setIsLoadingLocation(false);
+        return;
+      }
+
+      // Get current location
+      const location = await Location.getCurrentPositionAsync({
+        accuracy: Location.Accuracy.Balanced,
+      });
+
+      const coords = {
+        latitude: location.coords.latitude,
+        longitude: location.coords.longitude,
+      };
+
+      setCurrentLocation(coords);
+      setIsLocationEnabled(true);
+
+      // Fetch nearby vendors
+      await fetchNearbyVendors(coords.latitude, coords.longitude);
+    } catch (error) {
+      console.error('Error getting location:', error);
+      Alert.alert('Error', 'Failed to get your location. Please try again.');
+    } finally {
+      setIsLoadingLocation(false);
+    }
   };
 
-  const handleUseCurrentLocation = () => {
-    setIsLocationEnabled(true);
+  const fetchNearbyVendors = async (lat: number, lng: number) => {
+    try {
+      setIsLoadingVendors(true);
+      const vendors = await onboardingService.getNearbyVendors(lat, lng, 10);
+      
+      // Format vendors for display
+      const formattedVendors: NearbyVendor[] = vendors.map((vendor: any) => ({
+        id: vendor.id,
+        shop_name: vendor.shop_name,
+        rating: vendor.rating || 0,
+        logo_url: vendor.logo_url,
+        cover_image_url: vendor.cover_image_url,
+        // Calculate distance if needed
+        distance: calculateDistance(lat, lng, vendor.latitude, vendor.longitude),
+      }));
+
+      setNearbyVendors(formattedVendors);
+    } catch (error) {
+      console.error('Error fetching nearby vendors:', error);
+    } finally {
+      setIsLoadingVendors(false);
+    }
+  };
+
+  const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): string => {
+    const R = 3959; // Earth's radius in miles
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = 
+      Math.sin(dLat/2) * Math.sin(dLat/2) +
+      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+      Math.sin(dLon/2) * Math.sin(dLon/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    const distance = R * c;
+    
+    if (distance < 1) {
+      return `${Math.round(distance * 10) / 10} mi`;
+    }
+    return `${Math.round(distance * 10) / 10} mi`;
+  };
+
+  const handleComplete = async () => {
+    if (!user) return;
+
+    // Validate that we have either location or search query
+    if (!isLocationEnabled && !searchQuery.trim()) {
+      Alert.alert('Location Required', 'Please enable location or enter a postcode to continue.');
+      return;
+    }
+
+    try {
+      setIsSaving(true);
+
+      // If we have current location, save it as address
+      if (currentLocation && isLocationEnabled) {
+        // For now, we'll save a basic address with location
+        // In a real app, you'd want to reverse geocode to get full address
+        await onboardingService.saveDeliveryAddress(user.user_id, {
+          label: 'Home',
+          full_name: user.name || 'User',
+          phone: user.phone || '',
+          address_line1: 'Current Location',
+          city: 'London', // Default city, should be reverse geocoded
+          postcode: searchQuery.trim() || 'SW9 7AB', // Use search query or default
+          country: 'United Kingdom',
+          latitude: currentLocation.latitude,
+          longitude: currentLocation.longitude,
+          is_default: true,
+        });
+      } else if (searchQuery.trim()) {
+        // Save address with postcode (without coordinates)
+        await onboardingService.saveDeliveryAddress(user.user_id, {
+          label: 'Home',
+          full_name: user.name || 'User',
+          phone: user.phone || '',
+          address_line1: 'Address',
+          city: 'London',
+          postcode: searchQuery.trim(),
+          country: 'United Kingdom',
+          is_default: true,
+        });
+      }
+
+      setOnboardingComplete(true);
+      router.replace('/(tabs)');
+    } catch (error) {
+      console.error('Error saving delivery address:', error);
+      Alert.alert('Error', 'Failed to save delivery address. Please try again.');
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
@@ -139,12 +263,23 @@ export default function LocationScreen() {
             style={[
               styles.currentLocationButton,
               isLocationEnabled && styles.locationButtonActive,
+              isLoadingLocation && styles.locationButtonDisabled,
             ]}
             onPress={handleUseCurrentLocation}
+            disabled={isLoadingLocation}
             activeOpacity={0.8}
           >
-            <Crosshair size={20} color={Colors.primary} weight="fill" />
-            <Text style={styles.currentLocationText}>Use Current Location</Text>
+            {isLoadingLocation ? (
+              <>
+                <ActivityIndicator size="small" color={Colors.primary} />
+                <Text style={styles.currentLocationText}>Getting Location...</Text>
+              </>
+            ) : (
+              <>
+                <Crosshair size={20} color={Colors.primary} weight="fill" />
+                <Text style={styles.currentLocationText}>Use Current Location</Text>
+              </>
+            )}
           </TouchableOpacity>
 
           {/* Map Section */}
@@ -177,30 +312,47 @@ export default function LocationScreen() {
             {/* Nearby Vendors Section */}
             {isLocationEnabled && (
               <View style={styles.vendorsSection}>
-                <Text style={styles.vendorsSectionTitle}>POPULAR NEAR BRIXTON</Text>
-                <ScrollView 
-                  horizontal 
-                  showsHorizontalScrollIndicator={false}
-                  contentContainerStyle={styles.vendorsScrollContent}
-                >
-                  {NEARBY_VENDORS.map((vendor) => (
-                    <View key={vendor.id} style={styles.vendorCard}>
-                      <Image
-                        source={{ uri: vendor.image }}
-                        style={styles.vendorImage}
-                        resizeMode="cover"
-                      />
-                      <View style={styles.vendorInfo}>
-                        <Text style={styles.vendorName} numberOfLines={1}>{vendor.name}</Text>
-                        <View style={styles.vendorMeta}>
-                          <Star size={12} color={Colors.secondary} weight="fill" />
-                          <Text style={styles.vendorRating}>{vendor.rating}</Text>
-                          <Text style={styles.vendorDistance}>• {vendor.distance}</Text>
+                <Text style={styles.vendorsSectionTitle}>
+                  {isLoadingVendors ? 'FINDING NEARBY VENDORS...' : 'POPULAR NEAR YOU'}
+                </Text>
+                {isLoadingVendors ? (
+                  <View style={styles.vendorsLoadingContainer}>
+                    <ActivityIndicator size="small" color={Colors.primary} />
+                    <Text style={styles.vendorsLoadingText}>Loading vendors...</Text>
+                  </View>
+                ) : nearbyVendors.length > 0 ? (
+                  <ScrollView 
+                    horizontal 
+                    showsHorizontalScrollIndicator={false}
+                    contentContainerStyle={styles.vendorsScrollContent}
+                  >
+                    {nearbyVendors.map((vendor) => (
+                      <View key={vendor.id} style={styles.vendorCard}>
+                        <Image
+                          source={{ 
+                            uri: vendor.cover_image_url || vendor.logo_url || 'https://images.unsplash.com/photo-1604329760661-e71dc83f8f26?w=200'
+                          }}
+                          style={styles.vendorImage}
+                          resizeMode="cover"
+                        />
+                        <View style={styles.vendorInfo}>
+                          <Text style={styles.vendorName} numberOfLines={1}>{vendor.shop_name}</Text>
+                          <View style={styles.vendorMeta}>
+                            <Star size={12} color={Colors.secondary} weight="fill" />
+                            <Text style={styles.vendorRating}>{vendor.rating.toFixed(1)}</Text>
+                            {vendor.distance && (
+                              <Text style={styles.vendorDistance}>• {vendor.distance}</Text>
+                            )}
+                          </View>
                         </View>
                       </View>
-                    </View>
-                  ))}
-                </ScrollView>
+                    ))}
+                  </ScrollView>
+                ) : (
+                  <View style={styles.noVendorsContainer}>
+                    <Text style={styles.noVendorsText}>No vendors found nearby</Text>
+                  </View>
+                )}
               </View>
             )}
           </ScrollView>
@@ -211,14 +363,23 @@ export default function LocationScreen() {
           <TouchableOpacity
             style={[
               styles.completeButton,
-              !isLocationEnabled && !searchQuery && styles.completeButtonDisabled,
+              (!isLocationEnabled && !searchQuery.trim()) || isSaving && styles.completeButtonDisabled,
             ]}
             onPress={handleComplete}
-            disabled={!isLocationEnabled && !searchQuery}
+            disabled={(!isLocationEnabled && !searchQuery.trim()) || isSaving}
             activeOpacity={0.8}
           >
-            <Text style={styles.completeButtonText}>Start Shopping</Text>
-            <ArrowRight size={20} color={Colors.textPrimary} weight="bold" />
+            {isSaving ? (
+              <>
+                <ActivityIndicator size="small" color={Colors.textPrimary} />
+                <Text style={styles.completeButtonText}>Saving...</Text>
+              </>
+            ) : (
+              <>
+                <Text style={styles.completeButtonText}>Start Shopping</Text>
+                <ArrowRight size={20} color={Colors.textPrimary} weight="bold" />
+              </>
+            )}
           </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>
@@ -325,6 +486,9 @@ const styles = StyleSheet.create({
   },
   locationButtonActive: {
     backgroundColor: Colors.primary10,
+  },
+  locationButtonDisabled: {
+    opacity: 0.6,
   },
   currentLocationText: {
     fontFamily: FontFamily.bodySemiBold,
@@ -447,6 +611,25 @@ const styles = StyleSheet.create({
     fontFamily: FontFamily.body,
     color: Colors.textMuted,
     fontSize: FontSize.caption,
+  },
+  vendorsLoadingContainer: {
+    paddingVertical: Spacing.lg,
+    alignItems: 'center',
+    gap: Spacing.sm,
+  },
+  vendorsLoadingText: {
+    fontFamily: FontFamily.body,
+    color: Colors.textMuted,
+    fontSize: FontSize.small,
+  },
+  noVendorsContainer: {
+    paddingVertical: Spacing.lg,
+    alignItems: 'center',
+  },
+  noVendorsText: {
+    fontFamily: FontFamily.body,
+    color: Colors.textMuted,
+    fontSize: FontSize.small,
   },
   footer: {
     paddingHorizontal: Spacing.base,

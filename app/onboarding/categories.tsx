@@ -8,6 +8,7 @@ import {
   useWindowDimensions,
   Animated,
   Easing,
+  ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -20,44 +21,35 @@ import {
   TShirt,
   Palette,
   Sparkle,
+  Grain,
+  Drop,
+  Cookie,
+  House,
+  Heart,
+  BookOpen,
 } from 'phosphor-react-native';
 import { Colors } from '../../constants/colors';
 import { Spacing, BorderRadius, Heights } from '../../constants/spacing';
 import { FontSize, FontFamily } from '../../constants/typography';
 import { AnimationDuration, AnimationEasing } from '../../constants';
+import { onboardingService, Category } from '../../services/onboardingService';
+import { useAuthStore } from '../../stores/authStore';
 
-const CATEGORIES = [
-  {
-    id: 'traditional-ingredients',
-    name: 'Traditional\nIngredients',
-    icon: CookingPot,
-  },
-  {
-    id: 'spices-seasonings',
-    name: 'Spices &\nSeasonings',
-    icon: Leaf,
-  },
-  {
-    id: 'beverages',
-    name: 'Beverages',
-    icon: Coffee,
-  },
-  {
-    id: 'beauty-skincare',
-    name: 'Beauty &\nSkincare',
-    icon: Sparkle,
-  },
-  {
-    id: 'fashion-textiles',
-    name: 'Fashion &\nTextiles',
-    icon: TShirt,
-  },
-  {
-    id: 'art-crafts',
-    name: 'Art & Crafts',
-    icon: Palette,
-  },
-];
+// Icon mapping for categories
+const CATEGORY_ICONS: Record<string, any> = {
+  'traditional-ingredients': CookingPot,
+  'spices-seasonings': Leaf,
+  'beverages': Coffee,
+  'beauty-skincare': Sparkle,
+  'fashion-textiles': TShirt,
+  'art-crafts': Palette,
+  'grains-cereals': Grain,
+  'oils-condiments': Drop,
+  'snacks-treats': Cookie,
+  'home-living': House,
+  'health-wellness': Heart,
+  'books-media': BookOpen,
+};
 
 // Available colors from Design System
 const DESIGN_SYSTEM_COLORS = [
@@ -78,55 +70,110 @@ const shuffleArray = <T,>(array: T[]): T[] => {
   return shuffled;
 };
 
-// Assign random colors to categories (shuffled once per render)
-const getCategoriesWithColors = () => {
-  const shuffledColors = shuffleArray(DESIGN_SYSTEM_COLORS);
-  return CATEGORIES.map((category, index) => ({
-    ...category,
-    color: shuffledColors[index % shuffledColors.length],
-  }));
-};
-
 export default function CategoriesScreen() {
   const router = useRouter();
+  const { user, updateProfile } = useAuthStore();
+  const [categories, setCategories] = useState<Category[]>([]);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
   const { width } = useWindowDimensions();
   const cardWidth = Math.max(140, (width - Spacing.base * 2 - Spacing.md) / 2);
   
   // Get categories with random colors assigned (computed once on mount)
-  const categoriesWithColors = useMemo(() => getCategoriesWithColors(), []);
+  const categoriesWithColors = useMemo(() => {
+    const shuffledColors = shuffleArray(DESIGN_SYSTEM_COLORS);
+    return categories.map((category, index) => ({
+      ...category,
+      icon: CATEGORY_ICONS[category.slug] || CookingPot,
+      color: shuffledColors[index % shuffledColors.length],
+    }));
+  }, [categories]);
   
   // Animation values
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(30)).current;
 
+  // Fetch categories from database
   useEffect(() => {
-    Animated.parallel([
-      Animated.timing(fadeAnim, {
-        toValue: 1,
-        duration: AnimationDuration.default,
-        easing: AnimationEasing.standard,
-        useNativeDriver: true,
-      }),
-      Animated.timing(slideAnim, {
-        toValue: 0,
-        duration: AnimationDuration.default,
-        easing: AnimationEasing.standard,
-        useNativeDriver: true,
-      }),
-    ]).start();
+    const loadCategories = async () => {
+      try {
+        setIsLoading(true);
+        const fetchedCategories = await onboardingService.getCategories();
+        setCategories(fetchedCategories);
+        
+        // Load existing selections from user profile if available
+        // Note: We'll need to check preferred_categories field once migration is run
+        // For now, we'll start with empty selection
+      } catch (error) {
+        console.error('Error loading categories:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadCategories();
+
+    // Subscribe to real-time updates
+    const unsubscribe = onboardingService.subscribeToCategories((updatedCategories) => {
+      setCategories(updatedCategories);
+    });
+
+    return () => {
+      unsubscribe();
+    };
   }, []);
 
-  const toggleCategory = (categoryId: string) => {
+  useEffect(() => {
+    if (!isLoading) {
+      Animated.parallel([
+        Animated.timing(fadeAnim, {
+          toValue: 1,
+          duration: AnimationDuration.default,
+          easing: AnimationEasing.standard,
+          useNativeDriver: true,
+        }),
+        Animated.timing(slideAnim, {
+          toValue: 0,
+          duration: AnimationDuration.default,
+          easing: AnimationEasing.standard,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    }
+  }, [isLoading]);
+
+  const toggleCategory = (categorySlug: string) => {
     setSelectedCategories((prev) =>
-      prev.includes(categoryId)
-        ? prev.filter((id) => id !== categoryId)
-        : [...prev, categoryId]
+      prev.includes(categorySlug)
+        ? prev.filter((slug) => slug !== categorySlug)
+        : [...prev, categorySlug]
     );
   };
 
-  const handleContinue = () => {
-    router.push('/onboarding/location');
+  const handleContinue = async () => {
+    if (!user || selectedCategories.length === 0) return;
+
+    try {
+      setIsSaving(true);
+      // Save to database
+      await onboardingService.saveCategorySelection(user.user_id, selectedCategories);
+      
+      router.push('/onboarding/location');
+    } catch (error) {
+      console.error('Error saving category selection:', error);
+      // Still allow navigation even if save fails
+      router.push('/onboarding/location');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  // Format category name for display (handle line breaks)
+  const formatCategoryName = (name: string): string => {
+    // If name contains newline, return as is, otherwise add line break before "&"
+    if (name.includes('\n')) return name;
+    return name.replace(' & ', ' &\n');
   };
 
   return (
@@ -166,47 +213,54 @@ export default function CategoriesScreen() {
         <View style={styles.divider} />
 
         {/* Categories Grid */}
-        <ScrollView
-          style={styles.scrollView}
-          contentContainerStyle={styles.scrollContent}
-          showsVerticalScrollIndicator={false}
-        >
-          <View style={styles.grid}>
-            {categoriesWithColors.map((category) => {
-              const isSelected = selectedCategories.includes(category.id);
-              const IconComponent = category.icon;
-              return (
-                <TouchableOpacity
-                  key={category.id}
-                  style={[
-                    styles.categoryCard,
-                    { width: cardWidth, height: cardWidth * 0.9 },
-                    isSelected && styles.categoryCardSelected,
-                  ]}
-                  onPress={() => toggleCategory(category.id)}
-                  activeOpacity={0.8}
-                >
-                  {/* Selection Indicator */}
-                  {isSelected && (
-                    <View style={styles.checkmark}>
-                      <Check size={12} color={Colors.textPrimary} weight="bold" />
-                    </View>
-                  )}
-                  
-                  {/* Icon with random color from design system */}
-                  <IconComponent
-                    size={28}
-                    color={category.color}
-                    weight="duotone"
-                  />
-                  
-                  {/* Name */}
-                  <Text style={styles.categoryName}>{category.name}</Text>
-                </TouchableOpacity>
-              );
-            })}
+        {isLoading ? (
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="large" color={Colors.primary} />
+            <Text style={styles.loadingText}>Loading categories...</Text>
           </View>
-        </ScrollView>
+        ) : (
+          <ScrollView
+            style={styles.scrollView}
+            contentContainerStyle={styles.scrollContent}
+            showsVerticalScrollIndicator={false}
+          >
+            <View style={styles.grid}>
+              {categoriesWithColors.map((category) => {
+                const isSelected = selectedCategories.includes(category.slug);
+                const IconComponent = category.icon;
+                return (
+                  <TouchableOpacity
+                    key={category.id}
+                    style={[
+                      styles.categoryCard,
+                      { width: cardWidth, height: cardWidth * 0.9 },
+                      isSelected && styles.categoryCardSelected,
+                    ]}
+                    onPress={() => toggleCategory(category.slug)}
+                    activeOpacity={0.8}
+                  >
+                    {/* Selection Indicator */}
+                    {isSelected && (
+                      <View style={styles.checkmark}>
+                        <Check size={12} color={Colors.textPrimary} weight="bold" />
+                      </View>
+                    )}
+                    
+                    {/* Icon with random color from design system */}
+                    <IconComponent
+                      size={28}
+                      color={category.color}
+                      weight="duotone"
+                    />
+                    
+                    {/* Name */}
+                    <Text style={styles.categoryName}>{formatCategoryName(category.name)}</Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+          </ScrollView>
+        )}
       </Animated.View>
 
       {/* Continue Button */}
@@ -214,13 +268,20 @@ export default function CategoriesScreen() {
         <TouchableOpacity
           style={[
             styles.continueButton,
-            selectedCategories.length === 0 && styles.continueButtonDisabled,
+            (selectedCategories.length === 0 || isSaving || isLoading) && styles.continueButtonDisabled,
           ]}
           onPress={handleContinue}
-          disabled={selectedCategories.length === 0}
+          disabled={selectedCategories.length === 0 || isSaving || isLoading}
           activeOpacity={0.8}
         >
-          <Text style={styles.continueButtonText}>Continue</Text>
+          {isSaving ? (
+            <>
+              <ActivityIndicator size="small" color={Colors.textPrimary} />
+              <Text style={styles.continueButtonText}>Saving...</Text>
+            </>
+          ) : (
+            <Text style={styles.continueButtonText}>Continue</Text>
+          )}
         </TouchableOpacity>
       </View>
     </SafeAreaView>
@@ -357,5 +418,17 @@ const styles = StyleSheet.create({
     fontFamily: FontFamily.bodyBold,
     color: Colors.textPrimary,
     fontSize: FontSize.body,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: Spacing.xl,
+  },
+  loadingText: {
+    fontFamily: FontFamily.body,
+    color: Colors.textMuted,
+    fontSize: FontSize.small,
+    marginTop: Spacing.md,
   },
 });

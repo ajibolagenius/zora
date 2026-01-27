@@ -10,6 +10,7 @@ import {
   Animated,
   Easing,
   useWindowDimensions,
+  ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -18,47 +19,20 @@ import { Colors } from '../../constants/colors';
 import { Spacing, BorderRadius, Heights } from '../../constants/spacing';
 import { FontSize, FontFamily } from '../../constants/typography';
 import { AnimationDuration, AnimationEasing, CommonImages } from '../../constants';
+import { onboardingService, Region } from '../../services/onboardingService';
+import { useAuthStore } from '../../stores/authStore';
 
 const { width } = Dimensions.get('window');
-
-const REGIONS = [
-  {
-    id: 'west-africa',
-    name: 'West Africa',
-    countries: 'Nigeria, Ghana, Senegal, Mali...',
-    image: CommonImages.westAfrica,
-  },
-  {
-    id: 'east-africa',
-    name: 'East Africa',
-    countries: 'Kenya, Ethiopia, Tanzania, Uganda...',
-    image: CommonImages.eastAfrica,
-  },
-  {
-    id: 'southern-africa',
-    name: 'Southern Africa',
-    countries: 'South Africa, Zimbabwe, Botswana...',
-    image: CommonImages.southernAfrica,
-  },
-  {
-    id: 'central-africa',
-    name: 'Central Africa',
-    countries: 'Congo, Cameroon, Gabon...',
-    image: CommonImages.centralAfrica,
-  },
-  {
-    id: 'north-africa',
-    name: 'North Africa',
-    countries: 'Morocco, Egypt, Tunisia, Algeria...',
-    image: CommonImages.northAfrica,
-  },
-];
 
 export default function HeritageScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { height: screenHeight } = useWindowDimensions();
+  const { user, updateProfile } = useAuthStore();
+  const [regions, setRegions] = useState<Region[]>([]);
   const [selectedRegions, setSelectedRegions] = useState<string[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
   
   // Animation values
   const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -71,36 +45,118 @@ export default function HeritageScreen() {
   const footerHeight = Heights.button + (Spacing.lg * 2) + insets.bottom; // button + padding + safe area bottom
   const scrollPadding = Spacing.base * 2; // top and bottom padding in scroll content
   const availableHeight = screenHeight - headerHeight - titleHeight - footerHeight - scrollPadding;
-  const gapHeight = Spacing.md * (REGIONS.length - 1); // Total gap between cards
-  const cardHeight = Math.max((availableHeight - gapHeight) / REGIONS.length, 80); // Minimum 80px
+  const gapHeight = Spacing.md * (regions.length || 5 - 1); // Total gap between cards
+  const cardHeight = Math.max((availableHeight - gapHeight) / (regions.length || 5), 80); // Minimum 80px
+
+  // Fetch regions from database
+  useEffect(() => {
+    const loadRegions = async () => {
+      try {
+        setIsLoading(true);
+        const fetchedRegions = await onboardingService.getRegions();
+        setRegions(fetchedRegions);
+        
+        // Load existing selections from user profile if available
+        if (user?.cultural_interests && user.cultural_interests.length > 0) {
+          setSelectedRegions(user.cultural_interests);
+        }
+      } catch (error) {
+        console.error('Error loading regions:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadRegions();
+
+    // Subscribe to real-time updates
+    const unsubscribe = onboardingService.subscribeToRegions((updatedRegions) => {
+      setRegions(updatedRegions);
+    });
+
+    return () => {
+      unsubscribe();
+    };
+  }, [user]);
 
   useEffect(() => {
-    Animated.parallel([
-      Animated.timing(fadeAnim, {
-        toValue: 1,
-        duration: AnimationDuration.default,
-        easing: AnimationEasing.standard,
-        useNativeDriver: true,
-      }),
-      Animated.timing(slideAnim, {
-        toValue: 0,
-        duration: AnimationDuration.default,
-        easing: AnimationEasing.standard,
-        useNativeDriver: true,
-      }),
-    ]).start();
-  }, []);
+    if (!isLoading) {
+      Animated.parallel([
+        Animated.timing(fadeAnim, {
+          toValue: 1,
+          duration: AnimationDuration.default,
+          easing: AnimationEasing.standard,
+          useNativeDriver: true,
+        }),
+        Animated.timing(slideAnim, {
+          toValue: 0,
+          duration: AnimationDuration.default,
+          easing: AnimationEasing.standard,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    }
+  }, [isLoading]);
 
-  const toggleRegion = (regionId: string) => {
+  const toggleRegion = (regionSlug: string) => {
     setSelectedRegions((prev) =>
-      prev.includes(regionId)
-        ? prev.filter((id) => id !== regionId)
-        : [...prev, regionId]
+      prev.includes(regionSlug)
+        ? prev.filter((slug) => slug !== regionSlug)
+        : [...prev, regionSlug]
     );
   };
 
-  const handleContinue = () => {
-    router.push('/onboarding/categories');
+  const handleContinue = async () => {
+    if (!user || selectedRegions.length === 0) return;
+
+    try {
+      setIsSaving(true);
+      // Save to database
+      await onboardingService.saveHeritageSelection(user.user_id, selectedRegions);
+      
+      // Update local state
+      await updateProfile({ cultural_interests: selectedRegions });
+      
+      router.push('/onboarding/categories');
+    } catch (error) {
+      console.error('Error saving heritage selection:', error);
+      // Still allow navigation even if save fails
+      router.push('/onboarding/categories');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  // Get image URL for region (use image_url from DB or fallback to CommonImages)
+  const getRegionImage = (region: Region): string => {
+    if (region.image_url) return region.image_url;
+    
+    // Fallback to CommonImages based on slug
+    const imageMap: Record<string, string> = {
+      'west-africa': CommonImages.westAfrica,
+      'east-africa': CommonImages.eastAfrica,
+      'southern-africa': CommonImages.southernAfrica,
+      'central-africa': CommonImages.centralAfrica,
+      'north-africa': CommonImages.northAfrica,
+    };
+    
+    return imageMap[region.slug] || CommonImages.westAfrica;
+  };
+
+  // Get description for region
+  const getRegionDescription = (region: Region): string => {
+    if (region.description) return region.description;
+    
+    // Fallback descriptions
+    const descMap: Record<string, string> = {
+      'west-africa': 'Nigeria, Ghana, Senegal, Mali...',
+      'east-africa': 'Kenya, Ethiopia, Tanzania, Uganda...',
+      'southern-africa': 'South Africa, Zimbabwe, Botswana...',
+      'central-africa': 'Congo, Cameroon, Gabon...',
+      'north-africa': 'Morocco, Egypt, Tunisia, Algeria...',
+    };
+    
+    return descMap[region.slug] || region.name;
   };
 
   return (
@@ -131,48 +187,55 @@ export default function HeritageScreen() {
         </View>
 
         {/* Regions List */}
-        <ScrollView
-          style={styles.scrollView}
-          contentContainerStyle={styles.scrollContent}
-          showsVerticalScrollIndicator={false}
-        >
-          {REGIONS.map((region) => {
-            const isSelected = selectedRegions.includes(region.id);
-            return (
-              <TouchableOpacity
-                key={region.id}
-                style={[
-                  styles.regionCard,
-                  { height: Math.max(cardHeight, 80) }, // Minimum 80px height
-                  isSelected && styles.regionCardSelected,
-                ]}
-                onPress={() => toggleRegion(region.id)}
-                activeOpacity={0.8}
-              >
-                <Image
-                  source={{ uri: region.image }}
-                  style={styles.regionImage}
-                  resizeMode="cover"
-                />
-                <View style={styles.regionOverlay} />
-                <View style={styles.regionContent}>
-                  <View>
-                    <Text style={styles.regionName}>{region.name}</Text>
-                    <Text style={styles.regionCountries}>{region.countries}</Text>
+        {isLoading ? (
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="large" color={Colors.primary} />
+            <Text style={styles.loadingText}>Loading regions...</Text>
+          </View>
+        ) : (
+          <ScrollView
+            style={styles.scrollView}
+            contentContainerStyle={styles.scrollContent}
+            showsVerticalScrollIndicator={false}
+          >
+            {regions.map((region) => {
+              const isSelected = selectedRegions.includes(region.slug);
+              return (
+                <TouchableOpacity
+                  key={region.id}
+                  style={[
+                    styles.regionCard,
+                    { height: Math.max(cardHeight, 80) }, // Minimum 80px height
+                    isSelected && styles.regionCardSelected,
+                  ]}
+                  onPress={() => toggleRegion(region.slug)}
+                  activeOpacity={0.8}
+                >
+                  <Image
+                    source={{ uri: getRegionImage(region) }}
+                    style={styles.regionImage}
+                    resizeMode="cover"
+                  />
+                  <View style={styles.regionOverlay} />
+                  <View style={styles.regionContent}>
+                    <View>
+                      <Text style={styles.regionName}>{region.name}</Text>
+                      <Text style={styles.regionCountries}>{getRegionDescription(region)}</Text>
+                    </View>
+                    <View style={[
+                      styles.selectionIndicator,
+                      isSelected && styles.selectionIndicatorSelected,
+                    ]}>
+                      {isSelected && (
+                        <Check size={16} color={Colors.textPrimary} weight="bold" />
+                      )}
+                    </View>
                   </View>
-                  <View style={[
-                    styles.selectionIndicator,
-                    isSelected && styles.selectionIndicatorSelected,
-                  ]}>
-                    {isSelected && (
-                      <Check size={16} color={Colors.textPrimary} weight="bold" />
-                    )}
-                  </View>
-                </View>
-              </TouchableOpacity>
-            );
-          })}
-        </ScrollView>
+                </TouchableOpacity>
+              );
+            })}
+          </ScrollView>
+        )}
       </Animated.View>
 
       {/* Continue Button */}
@@ -180,14 +243,23 @@ export default function HeritageScreen() {
         <TouchableOpacity
           style={[
             styles.continueButton,
-            selectedRegions.length === 0 && styles.continueButtonDisabled,
+            (selectedRegions.length === 0 || isSaving || isLoading) && styles.continueButtonDisabled,
           ]}
           onPress={handleContinue}
-          disabled={selectedRegions.length === 0}
+          disabled={selectedRegions.length === 0 || isSaving || isLoading}
           activeOpacity={0.8}
         >
-          <Text style={styles.continueButtonText}>Start Shopping</Text>
-          <ArrowRight size={20} color={Colors.textPrimary} weight="bold" />
+          {isSaving ? (
+            <>
+              <ActivityIndicator size="small" color={Colors.textPrimary} />
+              <Text style={styles.continueButtonText}>Saving...</Text>
+            </>
+          ) : (
+            <>
+              <Text style={styles.continueButtonText}>Start Shopping</Text>
+              <ArrowRight size={20} color={Colors.textPrimary} weight="bold" />
+            </>
+          )}
         </TouchableOpacity>
       </View>
     </SafeAreaView>
@@ -313,5 +385,17 @@ const styles = StyleSheet.create({
     fontFamily: FontFamily.bodyBold,
     color: Colors.textPrimary,
     fontSize: FontSize.body,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: Spacing.xl,
+  },
+  loadingText: {
+    fontFamily: FontFamily.body,
+    color: Colors.textMuted,
+    fontSize: FontSize.small,
+    marginTop: Spacing.md,
   },
 });
