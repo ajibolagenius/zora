@@ -82,8 +82,9 @@ INSERT INTO public.vendors (
     ('1c1ba3b9-cc67-4052-afcd-6aa276fd0c43', '92333c7b-f7d4-4332-946e-8213f324e0d8', 'Authentic West Africa', 'authentic-west-africa', 'Your trusted source for authentic West Africa products. We bring the flavors and traditions of West Africa to your doorstep.', NULL, NULL, '107 Avenue, Camden, London', 51.548862, -0.13846299999999997, 8.11, TRUE, 4.3, 392, ARRAY['Nigeria', 'Ghana'], ARRAY['Spices', 'Grains', 'Vegetables', 'Meats'], 26, 67, 4.65, 15, FALSE, NULL, NOW(), NOW()),
     ('e4b8d916-257e-4aed-be00-9fe60cd8d87f', '776a5925-a1ff-488b-89f8-2a7ddbbf666a', 'East Africa Groceries', 'east-africa-groceries', 'Your trusted source for authentic East Africa products. We bring the flavors and traditions of East Africa to your doorstep.', NULL, NULL, '151 High Street, Tottenham, London', 51.558571, -0.058827, 13.68, TRUE, 4.8, 29, ARRAY['Kenya', 'Tanzania', 'Ethiopia'], ARRAY['Spices', 'Grains', 'Vegetables', 'Meats'], 24, 58, 3.19, 26.43, FALSE, NULL, NOW(), NOW()),
     ('b90611e2-b35a-4c68-beb3-23962ab301af', '46afdc7a-55f2-4324-8396-ad1478b597fc', 'Taste of East Africa', 'taste-of-east-africa', 'Your trusted source for authentic East Africa products. We bring the flavors and traditions of East Africa to your doorstep.', NULL, NULL, '28 Avenue, Brixton, London', 51.465726, -0.073126, 7.22, TRUE, 4.8, 70, ARRAY['Kenya'], ARRAY['Spices', 'Grains'], 38, 85, 5.32, 20.54, FALSE, NULL, NOW(), NOW())
-ON CONFLICT (slug) DO UPDATE SET
+ON CONFLICT (id) DO UPDATE SET
     shop_name = EXCLUDED.shop_name,
+    slug = EXCLUDED.slug,
     description = EXCLUDED.description,
     updated_at = NOW();
 
