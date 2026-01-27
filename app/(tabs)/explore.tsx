@@ -9,6 +9,7 @@ import {
   Animated,
   Easing,
   useWindowDimensions,
+  ActivityIndicator,
 } from 'react-native';
 import { LazyImage } from '../../components/ui';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -26,7 +27,10 @@ import { Colors } from '../../constants/colors';
 import { Spacing, BorderRadius, Heights } from '../../constants/spacing';
 import { FontSize, FontFamily } from '../../constants/typography';
 import { AnimationDuration, AnimationEasing } from '../../constants';
-import { vendorService, type Vendor } from '../../services/mockDataService';
+import { vendorService as mockVendorService, type Vendor as MockVendor } from '../../services/mockDataService';
+import { vendorService as supabaseVendorService, type Vendor } from '../../services/supabaseService';
+import { realtimeService } from '../../services/realtimeService';
+import { isSupabaseConfigured } from '../../lib/supabase';
 import { getVendorRoute } from '../../lib/navigationHelpers';
 
 type FilterType = 'open' | 'delivery' | 'pickup' | 'topRated';
@@ -39,16 +43,17 @@ const FILTERS: { id: FilterType; label: string }[] = [
 ];
 
 // Transform vendor data for display
-const transformVendorForDisplay = (vendor: Vendor) => ({
+const transformVendorForDisplay = (vendor: Vendor | MockVendor) => ({
   id: vendor.id,
   name: vendor.shop_name,
-  category: vendor.categories.join(' • '),
+  category: Array.isArray(vendor.categories) ? vendor.categories.join(' • ') : '',
   image: vendor.cover_image_url,
   rating: vendor.rating,
   distance: `${(Math.random() * 2 + 0.5).toFixed(1)} km`,
-  deliveryTime: `${vendor.delivery_time_min} min`,
+  deliveryTime: `${vendor.delivery_time_min || 30} min`,
   status: 'Open until 8pm',
   statusColor: '#22C55E',
+  vendor: vendor, // Keep reference to original vendor for navigation
 });
 
 export default function ExploreScreen() {
@@ -56,37 +61,92 @@ export default function ExploreScreen() {
   const { height: screenHeight } = useWindowDimensions();
   const [activeFilter, setActiveFilter] = useState<FilterType>('open');
   const [isListView, setIsListView] = useState(false);
+  const [vendors, setVendors] = useState<ReturnType<typeof transformVendorForDisplay>[]>([]);
+  const [loading, setLoading] = useState(true);
   
   // Animation values
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(30)).current;
-  
-  // Get vendors from mock database
-  const allVendors = vendorService.getAll();
-  const vendors = allVendors.map(transformVendorForDisplay);
+
+  const fetchVendors = async () => {
+    try {
+      setLoading(true);
+      let vendorData: (Vendor | MockVendor)[];
+      
+      if (isSupabaseConfigured()) {
+        vendorData = await supabaseVendorService.getAll();
+      } else {
+        vendorData = mockVendorService.getAll();
+      }
+      
+      const transformedVendors = vendorData.map(transformVendorForDisplay);
+      setVendors(transformedVendors);
+    } catch (error) {
+      console.error('Error fetching vendors:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    Animated.parallel([
-      Animated.timing(fadeAnim, {
-        toValue: 1,
-        duration: AnimationDuration.default,
-        easing: AnimationEasing.standard,
-        useNativeDriver: true,
-      }),
-      Animated.timing(slideAnim, {
-        toValue: 0,
-        duration: AnimationDuration.default,
-        easing: AnimationEasing.standard,
-        useNativeDriver: true,
-      }),
-    ]).start();
+    fetchVendors();
+
+    // Subscribe to real-time updates
+    const unsubscribers: (() => void)[] = [];
+
+    if (isSupabaseConfigured()) {
+      realtimeService.subscribeToTable('vendors', '*', async () => {
+        // Refresh vendors when database changes
+        await fetchVendors();
+      }).then((unsub) => {
+        if (unsub) unsubscribers.push(unsub);
+      });
+    }
+
+    return () => {
+      unsubscribers.forEach((unsub) => {
+        if (typeof unsub === 'function') {
+          unsub();
+        }
+      });
+    };
   }, []);
 
+  useEffect(() => {
+    if (!loading) {
+      Animated.parallel([
+        Animated.timing(fadeAnim, {
+          toValue: 1,
+          duration: AnimationDuration.default,
+          easing: AnimationEasing.standard,
+          useNativeDriver: true,
+        }),
+        Animated.timing(slideAnim, {
+          toValue: 0,
+          duration: AnimationDuration.default,
+          easing: AnimationEasing.standard,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    }
+  }, [loading]);
+
   const handleVendorPress = (vendorId: string) => {
-    // Try to get vendor to get slug
-    const vendors = vendorService.getAll();
+    // Find vendor from current list
     const vendor = vendors.find(v => v.id === vendorId);
-    router.push(getVendorRoute(vendor as any, vendorId));
+    if (vendor && vendor.vendor) {
+      router.push(getVendorRoute(vendor.vendor as any, vendorId));
+    } else {
+      // Fallback: try to get vendor from service
+      if (isSupabaseConfigured()) {
+        supabaseVendorService.getById(vendorId).then(v => {
+          if (v) router.push(getVendorRoute(v as any, vendorId));
+        });
+      } else {
+        const v = mockVendorService.getById(vendorId);
+        if (v) router.push(getVendorRoute(v as any, vendorId));
+      }
+    }
   };
 
   const handleFilterPress = () => {
@@ -191,17 +251,22 @@ export default function ExploreScreen() {
         {/* Vendor Count */}
         <View style={styles.vendorCountContainer}>
           <Text style={styles.vendorCountText}>
-            {vendors.length} VENDORS NEARBY
+            {loading ? 'Loading...' : `${vendors.length} VENDORS NEARBY`}
           </Text>
         </View>
 
         {/* Vendors List */}
-        <ScrollView
-          style={styles.vendorsList}
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={styles.vendorsListContent}
-        >
-          {vendors.map((vendor) => (
+        {loading ? (
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="large" color={Colors.primary} />
+          </View>
+        ) : (
+          <ScrollView
+            style={styles.vendorsList}
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={styles.vendorsListContent}
+          >
+            {vendors.map((vendor) => (
             <TouchableOpacity
               key={vendor.id}
               style={styles.vendorCard}
@@ -245,9 +310,10 @@ export default function ExploreScreen() {
             </TouchableOpacity>
           ))}
 
-          {/* Bottom padding for tab bar */}
-          <View style={{ height: 140 }} />
-        </ScrollView>
+            {/* Bottom padding for tab bar */}
+            <View style={{ height: 140 }} />
+          </ScrollView>
+        )}
       </Animated.View>
 
       {/* Floating List View Button */}
@@ -588,5 +654,11 @@ const styles = StyleSheet.create({
     fontFamily: FontFamily.bodySemiBold,
     color: Colors.textPrimary,
     fontSize: FontSize.small,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: Spacing.xl,
   },
 });

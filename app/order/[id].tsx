@@ -14,7 +14,9 @@ import { Colors } from '../../constants/colors';
 import { Spacing, BorderRadius } from '../../constants/spacing';
 import { FontSize, FontWeight, FontFamily } from '../../constants/typography';
 import { Button, LazyImage } from '../../components/ui';
-import { orderService } from '../../services/dataService';
+import { orderService } from '../../services/supabaseService';
+import { realtimeService } from '../../services/realtimeService';
+import { isSupabaseConfigured } from '../../lib/supabase';
 import { Order } from '../../types';
 import { useAuthStore } from '../../stores/authStore';
 import NotFoundScreen from '../../components/errors/NotFoundScreen';
@@ -65,14 +67,41 @@ export default function OrderDetailScreen() {
     }
   }, [id, sessionToken]);
 
+  useEffect(() => {
+    if (!id || !isSupabaseConfigured()) return;
+
+    // Subscribe to real-time order updates
+    const unsubscribe = realtimeService.subscribeToTable(
+      'orders',
+      'UPDATE',
+      async (payload) => {
+        if (payload.new?.id === id) {
+          // Order was updated, refresh the order data
+          await fetchOrder();
+        }
+      },
+      `id=eq.${id}`
+    );
+
+    return () => {
+      if (unsubscribe) {
+        unsubscribe.then((unsub) => {
+          if (typeof unsub === 'function') {
+            unsub();
+          }
+        });
+      }
+    };
+  }, [id]);
+
   const fetchOrder = async () => {
-    if (!sessionToken) {
+    if (!sessionToken || !id) {
       setLoading(false);
       return;
     }
     
     try {
-      const data = await orderService.getById(id!, sessionToken);
+      const data = await orderService.getById(id);
       setOrder(data);
     } catch (error) {
       console.error('Error fetching order:', error);

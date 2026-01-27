@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState, useMemo } from 'react';
 import {
   View,
   Text,
@@ -10,6 +10,7 @@ import {
   Animated,
   Easing,
   Platform,
+  ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
@@ -30,6 +31,11 @@ import { Colors } from '../../constants/colors';
 import { Spacing, BorderRadius } from '../../constants/spacing';
 import { FontSize, FontFamily } from '../../constants/typography';
 import { AnimationDuration, AnimationEasing, ImageUrlBuilders } from '../../constants';
+import { orderService } from '../../services/supabaseService';
+import { realtimeService } from '../../services/realtimeService';
+import { isSupabaseConfigured } from '../../lib/supabase';
+import { Order } from '../../types';
+import { useAuthStore } from '../../stores/authStore';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
@@ -41,59 +47,151 @@ interface TimelineStep {
   status: 'completed' | 'active' | 'pending';
 }
 
+const ORDER_STATUS_MAP: Record<string, { label: string; stepIndex: number }> = {
+  'pending': { label: 'Order Confirmed', stepIndex: 0 },
+  'confirmed': { label: 'Order Confirmed', stepIndex: 0 },
+  'preparing': { label: 'Order Prepared', stepIndex: 1 },
+  'ready': { label: 'Picked Up', stepIndex: 2 },
+  'out_for_delivery': { label: 'Out for delivery', stepIndex: 3 },
+  'delivered': { label: 'Delivered', stepIndex: 4 },
+  'cancelled': { label: 'Cancelled', stepIndex: -1 },
+};
+
 const TIMELINE_STEPS: TimelineStep[] = [
-  { id: '1', label: 'Order Confirmed', time: '10:45 AM', status: 'completed' },
-  { id: '2', label: 'Order Prepared', time: '11:15 AM', status: 'completed' },
-  { id: '3', label: 'Picked Up', time: '11:30 AM', status: 'completed' },
-  { id: '4', label: 'Out for delivery', description: 'David is heading your way', status: 'active' },
+  { id: '1', label: 'Order Confirmed', status: 'pending' },
+  { id: '2', label: 'Order Prepared', status: 'pending' },
+  { id: '3', label: 'Picked Up', status: 'pending' },
+  { id: '4', label: 'Out for delivery', status: 'pending' },
   { id: '5', label: 'Delivered', status: 'pending' },
 ];
 
 export default function OrderTrackingScreen() {
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
-  const orderNumber = id || '8821';
+  const { session } = useAuthStore();
+  const [order, setOrder] = useState<Order | null>(null);
+  const [loading, setLoading] = useState(true);
 
   // Animation values
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(30)).current;
   const pulseAnim = useRef(new Animated.Value(1)).current;
 
-  useEffect(() => {
-    // Entrance animation
-    Animated.parallel([
-      Animated.timing(fadeAnim, {
-        toValue: 1,
-        duration: AnimationDuration.default,
-        easing: AnimationEasing.standard,
-        useNativeDriver: true,
-      }),
-      Animated.timing(slideAnim, {
-        toValue: 0,
-        duration: AnimationDuration.default,
-        easing: AnimationEasing.standard,
-        useNativeDriver: true,
-      }),
-    ]).start();
+  const fetchOrder = async () => {
+    if (!id) {
+      setLoading(false);
+      return;
+    }
 
-    // Driver pin pulse animation
-    Animated.loop(
-      Animated.sequence([
-        Animated.timing(pulseAnim, {
-          toValue: 1.2,
-          duration: 1000,
-          easing: Easing.inOut(Easing.ease),
-          useNativeDriver: true,
-        }),
-        Animated.timing(pulseAnim, {
+    try {
+      setLoading(true);
+      const orderData = await orderService.getById(id);
+      setOrder(orderData);
+    } catch (error) {
+      console.error('Error fetching order:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchOrder();
+
+    // Subscribe to real-time order updates
+    if (isSupabaseConfigured() && id) {
+      const unsubscribe = realtimeService.subscribeToTable(
+        'orders',
+        'UPDATE',
+        async (payload) => {
+          if (payload.new?.id === id) {
+            // Order was updated, refresh the order data
+            await fetchOrder();
+          }
+        },
+        `id=eq.${id}`
+      );
+
+      return () => {
+        if (unsubscribe) {
+          unsubscribe.then((unsub) => {
+            if (typeof unsub === 'function') {
+              unsub();
+            }
+          });
+        }
+      };
+    }
+  }, [id]);
+
+  useEffect(() => {
+    if (!loading) {
+      // Entrance animation
+      Animated.parallel([
+        Animated.timing(fadeAnim, {
           toValue: 1,
-          duration: 1000,
-          easing: Easing.inOut(Easing.ease),
+          duration: AnimationDuration.default,
+          easing: AnimationEasing.standard,
           useNativeDriver: true,
         }),
-      ])
-    ).start();
-  }, []);
+        Animated.timing(slideAnim, {
+          toValue: 0,
+          duration: AnimationDuration.default,
+          easing: AnimationEasing.standard,
+          useNativeDriver: true,
+        }),
+      ]).start();
+
+      // Driver pin pulse animation (only if order is in transit)
+      if (order && order.status === 'out_for_delivery') {
+        Animated.loop(
+          Animated.sequence([
+            Animated.timing(pulseAnim, {
+              toValue: 1.2,
+              duration: 1000,
+              easing: Easing.inOut(Easing.ease),
+              useNativeDriver: true,
+            }),
+            Animated.timing(pulseAnim, {
+              toValue: 1,
+              duration: 1000,
+              easing: Easing.inOut(Easing.ease),
+              useNativeDriver: true,
+            }),
+          ])
+        ).start();
+      }
+    }
+  }, [loading, order]);
+
+  // Calculate timeline steps based on order status
+  const timelineSteps = useMemo(() => {
+    if (!order) return TIMELINE_STEPS;
+
+    const statusInfo = ORDER_STATUS_MAP[order.status] || ORDER_STATUS_MAP['pending'];
+    const currentStepIndex = statusInfo.stepIndex;
+
+    return TIMELINE_STEPS.map((step, index) => {
+      if (index < currentStepIndex) {
+        return { ...step, status: 'completed' as const };
+      } else if (index === currentStepIndex) {
+        return { ...step, status: 'active' as const };
+      } else {
+        return { ...step, status: 'pending' as const };
+      }
+    });
+  }, [order]);
+
+  const orderNumber = order?.order_number || order?.id?.substring(0, 8) || id || '8821';
+
+  if (loading) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color={Colors.primary} />
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -217,8 +315,8 @@ export default function OrderTrackingScreen() {
 
           {/* Timeline */}
           <View style={styles.timelineContainer}>
-            {TIMELINE_STEPS.map((step, index) => {
-              const isLast = index === TIMELINE_STEPS.length - 1;
+            {timelineSteps.map((step, index) => {
+              const isLast = index === timelineSteps.length - 1;
               
               return (
                 <View key={step.id} style={styles.timelineStep}>
@@ -259,11 +357,17 @@ export default function OrderTrackingScreen() {
                     ]}>
                       {step.label}
                     </Text>
-                    {step.time && step.status === 'completed' && (
-                      <Text style={styles.stepTime}>{step.time}</Text>
+                    {step.status === 'completed' && order?.updated_at && (
+                      <Text style={styles.stepTime}>
+                        {new Date(order.updated_at).toLocaleTimeString('en-US', { 
+                          hour: 'numeric', 
+                          minute: '2-digit',
+                          hour12: true 
+                        })}
+                      </Text>
                     )}
-                    {step.description && (
-                      <Text style={styles.stepDescription}>{step.description}</Text>
+                    {step.status === 'active' && order?.status === 'out_for_delivery' && (
+                      <Text style={styles.stepDescription}>Driver is heading your way</Text>
                     )}
                   </View>
                 </View>
@@ -301,6 +405,11 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.backgroundDark,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   
   // Map

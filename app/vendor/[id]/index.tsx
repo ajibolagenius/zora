@@ -32,7 +32,10 @@ import { Colors } from '../../../constants/colors';
 import { Spacing, BorderRadius, TouchTarget } from '../../../constants/spacing';
 import { FontSize, FontWeight, FontFamily } from '../../../constants/typography';
 import { AnimationDuration, AnimationEasing, ImageUrlBuilders, ValidationLimits } from '../../../constants';
-import { vendorService, productService, reviewService, type Vendor, type Product, type Review } from '../../../services/mockDataService';
+import { vendorService as mockVendorService, productService as mockProductService, reviewService as mockReviewService, type Vendor as MockVendor, type Product as MockProduct, type Review as MockReview } from '../../../services/mockDataService';
+import { vendorService as supabaseVendorService, productService as supabaseProductService, reviewService as supabaseReviewService, type Vendor, type Product, type Review } from '../../../services/supabaseService';
+import { realtimeService } from '../../../services/realtimeService';
+import { isSupabaseConfigured } from '../../../lib/supabase';
 import { Link } from 'expo-router';
 import { useCartStore } from '../../../stores/cartStore';
 import FloatingTabBar from '../../../components/ui/FloatingTabBar';
@@ -52,9 +55,9 @@ export default function VendorScreen() {
     const addToCart = useCartStore((state) => state.addItem);
     const cartItemCount = useCartStore((state) => state.getItemCount());
 
-    const [vendor, setVendor] = useState<Vendor | null>(null);
-    const [products, setProducts] = useState<Product[]>([]);
-    const [reviews, setReviews] = useState<Review[]>([]);
+    const [vendor, setVendor] = useState<Vendor | MockVendor | null>(null);
+    const [products, setProducts] = useState<(Product | MockProduct)[]>([]);
+    const [reviews, setReviews] = useState<(Review | MockReview)[]>([]);
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState<TabType>('products');
     const [isFollowing, setIsFollowing] = useState(false);
@@ -64,25 +67,40 @@ export default function VendorScreen() {
     const fadeAnim = useRef(new Animated.Value(0)).current;
     const slideAnim = useRef(new Animated.Value(20)).current;
 
-    const fetchData = useCallback(() => {
+    const fetchData = useCallback(async () => {
         if (!id) return;
         try {
-            const vendorData = vendorService.getById(id);
+            setLoading(true);
+            let vendorData: Vendor | MockVendor | null = null;
+            let vendorProducts: (Product | MockProduct)[] = [];
+            let vendorReviews: (Review | MockReview)[] = [];
+
+            if (isSupabaseConfigured()) {
+                vendorData = await supabaseVendorService.getById(id);
+                if (vendorData) {
+                    vendorProducts = await supabaseProductService.getByVendor(vendorData.id);
+                    vendorReviews = await supabaseReviewService.getByVendor(vendorData.id);
+                }
+            } else {
+                vendorData = mockVendorService.getById(id);
+                if (vendorData) {
+                    vendorProducts = mockProductService.getByVendor(vendorData.id);
+                    vendorReviews = mockReviewService.getByVendor(vendorData.id);
+                } else {
+                    // Fallback: get first vendor if ID not found
+                    const allVendors = mockVendorService.getAll();
+                    if (allVendors.length > 0) {
+                        vendorData = allVendors[0];
+                        vendorProducts = mockProductService.getByVendor(allVendors[0].id);
+                        vendorReviews = mockReviewService.getByVendor(allVendors[0].id);
+                    }
+                }
+            }
+
             if (vendorData) {
                 setVendor(vendorData);
-                const vendorProducts = productService.getByVendor(vendorData.id);
                 setProducts(vendorProducts);
-                // Fetch reviews for this vendor
-                const vendorReviews = reviewService.getByVendor(vendorData.id);
                 setReviews(vendorReviews);
-            } else {
-                const allVendors = vendorService.getAll();
-                if (allVendors.length > 0) {
-                    setVendor(allVendors[0]);
-                    setProducts(productService.getByVendor(allVendors[0].id));
-                    const vendorReviews = reviewService.getByVendor(allVendors[0].id);
-                    setReviews(vendorReviews);
-                }
             }
         } catch (error) {
             console.error('Error fetching vendor:', error);
@@ -93,7 +111,49 @@ export default function VendorScreen() {
 
     useEffect(() => {
         fetchData();
-    }, [fetchData]);
+
+        // Subscribe to real-time updates
+        const unsubscribers: (() => void)[] = [];
+
+        if (isSupabaseConfigured() && id) {
+            // Subscribe to vendor updates
+            realtimeService.subscribeToTable('vendors', '*', async (payload) => {
+                if (payload.new?.id === id || payload.old?.id === id) {
+                    await fetchData();
+                }
+            }).then((unsub) => {
+                if (unsub) unsubscribers.push(unsub);
+            });
+
+            // Subscribe to products updates for this vendor
+            realtimeService.subscribeToTable('products', '*', async (payload) => {
+                if (payload.new?.vendor_id === id || payload.old?.vendor_id === id) {
+                    const updatedProducts = await supabaseProductService.getByVendor(id);
+                    setProducts(updatedProducts);
+                }
+            }).then((unsub) => {
+                if (unsub) unsubscribers.push(unsub);
+            });
+
+            // Subscribe to reviews updates for this vendor
+            realtimeService.subscribeToTable('reviews', '*', async (payload) => {
+                if (payload.new?.vendor_id === id || payload.old?.vendor_id === id) {
+                    const updatedReviews = await supabaseReviewService.getByVendor(id);
+                    setReviews(updatedReviews);
+                }
+            }).then((unsub) => {
+                if (unsub) unsubscribers.push(unsub);
+            });
+        }
+
+        return () => {
+            unsubscribers.forEach((unsub) => {
+                if (typeof unsub === 'function') {
+                    unsub();
+                }
+            });
+        };
+    }, [id, fetchData]);
 
     useEffect(() => {
         if (!loading) {
@@ -122,17 +182,20 @@ export default function VendorScreen() {
         router.push(getProductRoute(productId));
     };
 
-    const handleAddToCart = (product: Product) => {
+    const handleAddToCart = (product: Product | MockProduct) => {
+        const imageUrls = Array.isArray(product.image_urls) 
+            ? product.image_urls 
+            : [product.image_urls || ''];
         addToCart({
             id: product.id,
             name: product.name,
             price: product.price,
-            image_url: product.image_urls[0],
+            image_url: imageUrls[0],
             vendor_id: product.vendor_id,
             category: product.category,
             rating: product.rating,
-            review_count: product.review_count,
-            in_stock: product.stock_quantity > 0,
+            review_count: product.review_count || 0,
+            in_stock: (product.stock_quantity || 0) > 0,
         } as any, 1);
     };
 
@@ -317,7 +380,7 @@ export default function VendorScreen() {
                                     {/* Product Image */}
                                     <View style={styles.productImageContainer}>
                                         <LazyImage
-                                            source={product.image_urls[0]}
+                                            source={Array.isArray(product.image_urls) ? product.image_urls[0] : (product.image_urls || '')}
                                             style={styles.productImage}
                                             contentFit="cover"
                                             showLoader={false}
