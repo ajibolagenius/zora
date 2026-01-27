@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 import { LazyImage, LazyAvatar } from '../../../components/ui';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useRouter, useLocalSearchParams } from 'expo-router';
+import { useRouter, useLocalSearchParams, useFocusEffect } from 'expo-router';
 import {
     ArrowLeft,
     MagnifyingGlass,
@@ -38,6 +38,7 @@ import { realtimeService } from '../../../services/realtimeService';
 import { isSupabaseConfigured } from '../../../lib/supabase';
 import { Link } from 'expo-router';
 import { useCartStore } from '../../../stores/cartStore';
+import { useWishlistStore } from '../../../stores/wishlistStore';
 import FloatingTabBar from '../../../components/ui/FloatingTabBar';
 import { getProductRoute } from '../../../lib/navigationHelpers';
 import NotFoundScreen from '../../../components/errors/NotFoundScreen';
@@ -45,6 +46,29 @@ import NotFoundScreen from '../../../components/errors/NotFoundScreen';
 type TabType = 'products' | 'reviews' | 'about';
 
 const MAX_BIO_LENGTH = ValidationLimits.maxBioLength;
+
+// Favorite Button Component
+const FavoriteButton = ({ product }: { product: Product | MockProduct }) => {
+    const isInWishlist = useWishlistStore((state) => state.isInWishlist(product.id));
+    const toggleWishlist = useWishlistStore((state) => state.toggleWishlist);
+
+    return (
+        <TouchableOpacity 
+            style={styles.favoriteButton}
+            onPress={(e) => {
+                e.stopPropagation();
+                toggleWishlist(product as any);
+            }}
+            activeOpacity={0.7}
+        >
+            <Heart 
+                size={16} 
+                color={isInWishlist ? Colors.primary : Colors.textPrimary} 
+                weight={isInWishlist ? 'fill' : 'regular'} 
+            />
+        </TouchableOpacity>
+    );
+};
 
 export default function VendorScreen() {
     const router = useRouter();
@@ -79,7 +103,13 @@ export default function VendorScreen() {
                 vendorData = await supabaseVendorService.getById(id);
                 if (vendorData) {
                     vendorProducts = await supabaseProductService.getByVendor(vendorData.id);
-                    vendorReviews = await supabaseReviewService.getByVendor(vendorData.id);
+                    try {
+                        vendorReviews = await supabaseReviewService.getByVendor(vendorData.id);
+                        console.log(`Loaded ${vendorReviews.length} reviews for vendor ${vendorData.id}`);
+                    } catch (error) {
+                        console.error('Error fetching vendor reviews:', error);
+                        vendorReviews = [];
+                    }
                 }
             } else {
                 vendorData = mockVendorService.getById(id);
@@ -109,50 +139,64 @@ export default function VendorScreen() {
         }
     }, [id]);
 
+    // Refetch data when screen comes into focus (e.g., after submitting a review)
+    useFocusEffect(
+        useCallback(() => {
+            fetchData();
+        }, [fetchData])
+    );
+
     useEffect(() => {
-        fetchData();
-
         // Subscribe to real-time updates
-        const unsubscribers: (() => void)[] = [];
-
         if (isSupabaseConfigured() && id) {
-            // Subscribe to vendor updates
-            realtimeService.subscribeToTable('vendors', '*', async (payload) => {
-                if (payload.new?.id === id || payload.old?.id === id) {
-                    await fetchData();
+            let unsubscribers: (() => void)[] = [];
+            let isMounted = true;
+
+            // Set up all subscriptions and wait for them to complete
+            Promise.all([
+                realtimeService.subscribeToTable('vendors', '*', async (payload) => {
+                    if (isMounted && (payload.new?.id === id || payload.old?.id === id)) {
+                        await fetchData();
+                    }
+                }),
+                realtimeService.subscribeToTable('products', '*', async (payload) => {
+                    if (isMounted && (payload.new?.vendor_id === id || payload.old?.vendor_id === id)) {
+                        const updatedProducts = await supabaseProductService.getByVendor(id);
+                        setProducts(updatedProducts);
+                    }
+                }),
+                realtimeService.subscribeToTable('reviews', '*', async (payload) => {
+                    if (isMounted && (payload.new?.vendor_id === id || payload.old?.vendor_id === id)) {
+                        const updatedReviews = await supabaseReviewService.getByVendor(id);
+                        setReviews(updatedReviews);
+                    }
+                }),
+            ]).then((unsubs) => {
+                // Only add unsubscribe functions if component is still mounted
+                if (isMounted) {
+                    unsubscribers = unsubs.filter((unsub): unsub is (() => void) => typeof unsub === 'function');
+                } else {
+                    // Component unmounted before subscriptions completed, clean up immediately
+                    unsubs.forEach((unsub) => {
+                        if (typeof unsub === 'function') {
+                            unsub();
+                        }
+                    });
                 }
-            }).then((unsub) => {
-                if (unsub) unsubscribers.push(unsub);
+            }).catch((error) => {
+                console.error('Error setting up real-time subscriptions:', error);
             });
 
-            // Subscribe to products updates for this vendor
-            realtimeService.subscribeToTable('products', '*', async (payload) => {
-                if (payload.new?.vendor_id === id || payload.old?.vendor_id === id) {
-                    const updatedProducts = await supabaseProductService.getByVendor(id);
-                    setProducts(updatedProducts);
-                }
-            }).then((unsub) => {
-                if (unsub) unsubscribers.push(unsub);
-            });
-
-            // Subscribe to reviews updates for this vendor
-            realtimeService.subscribeToTable('reviews', '*', async (payload) => {
-                if (payload.new?.vendor_id === id || payload.old?.vendor_id === id) {
-                    const updatedReviews = await supabaseReviewService.getByVendor(id);
-                    setReviews(updatedReviews);
-                }
-            }).then((unsub) => {
-                if (unsub) unsubscribers.push(unsub);
-            });
+            return () => {
+                isMounted = false;
+                // Clean up all subscriptions
+                unsubscribers.forEach((unsub) => {
+                    if (typeof unsub === 'function') {
+                        unsub();
+                    }
+                });
+            };
         }
-
-        return () => {
-            unsubscribers.forEach((unsub) => {
-                if (typeof unsub === 'function') {
-                    unsub();
-                }
-            });
-        };
     }, [id, fetchData]);
 
     useEffect(() => {
@@ -363,7 +407,15 @@ export default function VendorScreen() {
                         {/* Section Header */}
                         <View style={styles.sectionHeader}>
                             <Text style={styles.sectionTitle}>Featured Products</Text>
-                            <TouchableOpacity onPress={() => router.push(`/vendor/${id}/products`)}>
+                            <TouchableOpacity onPress={() => {
+                                // Use slug-based route if vendor has slug, otherwise use ID
+                                const vendorSlug = vendor.slug || (vendor.shop_name?.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, ''));
+                                if (vendorSlug) {
+                                    router.push(`/store/${vendorSlug}/products`);
+                                } else {
+                                    router.push(`/vendor/${id}/products`);
+                                }
+                            }}>
                                 <Text style={styles.seeAllText}>See all</Text>
                             </TouchableOpacity>
                         </View>
@@ -394,9 +446,7 @@ export default function VendorScreen() {
                                         )}
 
                                         {/* Favorite Button */}
-                                        <TouchableOpacity style={styles.favoriteButton}>
-                                            <Heart size={16} color={Colors.textPrimary} weight="regular" />
-                                        </TouchableOpacity>
+                                        <FavoriteButton product={product} />
                                     </View>
 
                                     {/* Product Info */}
@@ -441,7 +491,7 @@ export default function VendorScreen() {
                                 href={`/write-review?vendorId=${id}&vendorName=${encodeURIComponent(vendor.shop_name)}`}
                                 asChild
                             >
-                                <TouchableOpacity style={styles.writeReviewButton}>
+                                <TouchableOpacity style={styles.writeReviewButton} activeOpacity={0.8}>
                                     <PencilSimple size={18} color={Colors.primary} weight="bold" />
                                     <Text style={styles.writeReviewText}>Write Review</Text>
                                 </TouchableOpacity>

@@ -841,12 +841,53 @@ export const reviewService = {
       return mockDatabase.reviews?.filter(r => r.product_id === productId) || [];
     }
     
-    const { data } = await fromMethod('reviews')
-      .select('*, users(name, avatar_url)')
+    // Fetch reviews first
+    const { data: reviews, error: reviewsError } = await fromMethod('reviews')
+      .select('*')
       .eq('product_id', productId)
       .order('created_at', { ascending: false });
     
-    return data || [];
+    if (reviewsError) {
+      console.error('Error fetching product reviews:', reviewsError);
+      return [];
+    }
+    
+    if (!reviews || reviews.length === 0) {
+      return [];
+    }
+    
+    // Fetch profiles for all unique user_ids
+    const userIds = [...new Set(reviews.map((r: any) => r.user_id).filter(Boolean))];
+    let profilesMap: Record<string, any> = {};
+    
+    if (userIds.length > 0) {
+      try {
+        const { data: profiles } = await fromMethod('profiles')
+          .select('id, full_name, avatar_url')
+          .in('id', userIds);
+        
+        if (profiles) {
+          profilesMap = profiles.reduce((acc: Record<string, any>, profile: any) => {
+            acc[profile.id] = profile;
+            return acc;
+          }, {});
+        }
+      } catch (profileError) {
+        console.warn('Error fetching profiles for reviews (non-critical):', profileError);
+        // Continue without profile data
+      }
+    }
+    
+    // Transform reviews with profile data
+    return reviews.map((review: any) => {
+      const profile = profilesMap[review.user_id];
+      return {
+        ...review,
+        user_name: profile?.full_name || 'Anonymous',
+        user_avatar: profile?.avatar_url || null,
+        content: review.content || '',
+      };
+    });
   },
   
   getByVendor: async (vendorId: string): Promise<Review[]> => {
@@ -859,12 +900,53 @@ export const reviewService = {
       return mockDatabase.reviews?.filter(r => r.vendor_id === vendorId) || [];
     }
     
-    const { data } = await fromMethod('reviews')
-      .select('*, users(name, avatar_url)')
+    // Fetch reviews first
+    const { data: reviews, error: reviewsError } = await fromMethod('reviews')
+      .select('*')
       .eq('vendor_id', vendorId)
       .order('created_at', { ascending: false });
     
-    return data || [];
+    if (reviewsError) {
+      console.error('Error fetching vendor reviews:', reviewsError);
+      return [];
+    }
+    
+    if (!reviews || reviews.length === 0) {
+      return [];
+    }
+    
+    // Fetch profiles for all unique user_ids
+    const userIds = [...new Set(reviews.map((r: any) => r.user_id).filter(Boolean))];
+    let profilesMap: Record<string, any> = {};
+    
+    if (userIds.length > 0) {
+      try {
+        const { data: profiles } = await fromMethod('profiles')
+          .select('id, full_name, avatar_url')
+          .in('id', userIds);
+        
+        if (profiles) {
+          profilesMap = profiles.reduce((acc: Record<string, any>, profile: any) => {
+            acc[profile.id] = profile;
+            return acc;
+          }, {});
+        }
+      } catch (profileError) {
+        console.warn('Error fetching profiles for reviews (non-critical):', profileError);
+        // Continue without profile data
+      }
+    }
+    
+    // Transform reviews with profile data
+    return reviews.map((review: any) => {
+      const profile = profilesMap[review.user_id];
+      return {
+        ...review,
+        user_name: profile?.full_name || 'Anonymous',
+        user_avatar: profile?.avatar_url || null,
+        content: review.content || '',
+      };
+    });
   },
   
   create: async (reviewData: Partial<Review>): Promise<Review | null> => {

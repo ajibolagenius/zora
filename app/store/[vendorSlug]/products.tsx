@@ -24,14 +24,13 @@ import { Colors } from '../../../constants/colors';
 import { Spacing, BorderRadius, Heights } from '../../../constants/spacing';
 import { FontSize, FontFamily } from '../../../constants/typography';
 import { SortOptions, CategoryOptions, AnimationDuration, AnimationEasing, UiConfig } from '../../../constants';
-import { vendorService as mockVendorService, productService as mockProductService, type Vendor as MockVendor, type Product as MockProduct } from '../../../services/mockDataService';
 import { vendorService as supabaseVendorService, productService as supabaseProductService } from '../../../services/supabaseService';
 import type { Vendor, Product } from '../../../types/supabase';
 import { realtimeService } from '../../../services/realtimeService';
 import { isSupabaseConfigured, getSupabaseFrom } from '../../../lib/supabase';
 import { useCartStore } from '../../../stores/cartStore';
 import { useWishlistStore } from '../../../stores/wishlistStore';
-import { getProductRoute, getVendorRoute } from '../../../lib/navigationHelpers';
+import { getProductRoute } from '../../../lib/navigationHelpers';
 import { LazyImage } from '../../../components/ui';
 import NotFoundScreen from '../../../components/errors/NotFoundScreen';
 
@@ -41,7 +40,7 @@ const PRODUCT_GAP = UiConfig.productGap;
 const PRODUCTS_PER_PAGE = 20;
 
 // Favorite Button Component
-const FavoriteButton = ({ product }: { product: Product | MockProduct }) => {
+const FavoriteButton = ({ product }: { product: Product }) => {
     const isInWishlist = useWishlistStore((state) => state.isInWishlist(product.id));
     const toggleWishlist = useWishlistStore((state) => state.toggleWishlist);
 
@@ -63,17 +62,17 @@ const FavoriteButton = ({ product }: { product: Product | MockProduct }) => {
     );
 };
 
-export default function VendorProductsScreen() {
+export default function StoreProductsScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { id } = useLocalSearchParams<{ id: string }>();
+  const { vendorSlug } = useLocalSearchParams<{ vendorSlug: string }>();
   const { width: screenWidth } = useWindowDimensions();
   const productCardWidth = (screenWidth - 48 - PRODUCT_GAP) / 2;
   const addToCart = useCartStore((state) => state.addItem);
 
-  const [vendor, setVendor] = useState<Vendor | MockVendor | null>(null);
-  const [products, setProducts] = useState<(Product | MockProduct)[]>([]);
-  const [filteredProducts, setFilteredProducts] = useState<(Product | MockProduct)[]>([]);
+  const [vendor, setVendor] = useState<Vendor | null>(null);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMoreProducts, setHasMoreProducts] = useState(true);
@@ -88,26 +87,25 @@ export default function VendorProductsScreen() {
   const filterSlideAnim = useRef(new Animated.Value(300)).current;
 
   const fetchVendor = useCallback(async () => {
-    if (!id) return null;
+    if (!vendorSlug) return null;
     
     try {
       if (isSupabaseConfigured()) {
-        return await supabaseVendorService.getById(id);
-      } else {
-        return mockVendorService.getById(id);
+        return await supabaseVendorService.getBySlug(vendorSlug);
       }
+      return null;
     } catch (error) {
       console.error('Error fetching vendor:', error);
       return null;
     }
-  }, [id]);
+  }, [vendorSlug]);
 
   const fetchProducts = useCallback(async (vendorId: string, offset: number = 0, limit: number = PRODUCTS_PER_PAGE) => {
     try {
       if (isSupabaseConfigured()) {
         const fromMethod = await getSupabaseFrom();
         if (!fromMethod) {
-          return mockProductService.getByVendor(vendorId);
+          return [];
         }
         
         const { data, error } = await fromMethod('products')
@@ -125,10 +123,8 @@ export default function VendorProductsScreen() {
         }
         
         return data || [];
-      } else {
-        const allProducts = mockProductService.getByVendor(vendorId);
-        return allProducts.slice(offset, offset + limit);
       }
+      return [];
     } catch (error) {
       console.error('Error fetching products:', error);
       return [];
@@ -136,7 +132,7 @@ export default function VendorProductsScreen() {
   }, []);
 
   const fetchData = useCallback(async () => {
-    if (!id) return;
+    if (!vendorSlug) return;
     
     try {
       setLoading(true);
@@ -155,7 +151,7 @@ export default function VendorProductsScreen() {
     } finally {
       setLoading(false);
     }
-  }, [id, fetchVendor, fetchProducts]);
+  }, [vendorSlug, fetchVendor, fetchProducts]);
 
   const loadMoreProducts = useCallback(async () => {
     if (loadingMore || !hasMoreProducts || !vendor) return;
@@ -167,11 +163,10 @@ export default function VendorProductsScreen() {
       if (moreProducts.length === 0) {
         setHasMoreProducts(false);
       } else {
-        // Deduplicate products by ID
         let newProductsCount = 0;
-        setProducts((prev) => {
-          const existingIds = new Set(prev.map(p => p.id));
-          const newProducts = moreProducts.filter(p => !existingIds.has(p.id));
+        setProducts((prev: Product[]) => {
+          const existingIds = new Set(prev.map((p) => p.id));
+          const newProducts = moreProducts.filter((p: Product) => !existingIds.has(p.id));
           newProductsCount = newProducts.length;
           return [...prev, ...newProducts];
         });
@@ -198,19 +193,18 @@ export default function VendorProductsScreen() {
       Promise.all([
         realtimeService.subscribeToTable('vendors', 'UPDATE', async (payload) => {
           if (isMounted && payload.new?.id === vendor.id) {
-            const updatedVendor = await supabaseVendorService.getById(vendor.id);
+            const updatedVendor = await supabaseVendorService.getBySlug(vendorSlug || '');
             if (updatedVendor) {
               setVendor(updatedVendor);
             }
           }
         }, `id=eq.${vendor.id}`),
         realtimeService.subscribeToTable('products', '*', async (payload) => {
-          if (isMounted && vendor.id && (payload.new?.vendor_id === vendor.id || payload.old?.vendor_id === vendor.id)) {
-            // Refetch products when vendor's products change
+          if (isMounted && vendor?.id && (payload.new?.vendor_id === vendor.id || payload.old?.vendor_id === vendor.id)) {
             const updatedProducts = await fetchProducts(vendor.id, 0, productOffset + PRODUCTS_PER_PAGE);
             setProducts(updatedProducts);
           }
-        }, `vendor_id=eq.${vendor.id}`),
+        }, vendor?.id ? `vendor_id=eq.${vendor.id}` : undefined),
       ]).then((unsubs) => {
         if (isMounted) {
           unsubscribers = unsubs.filter((unsub): unsub is (() => void) => typeof unsub === 'function');
@@ -234,7 +228,7 @@ export default function VendorProductsScreen() {
         });
       };
     }
-  }, [fetchData, vendor?.id, productOffset, fetchProducts]);
+  }, [fetchData, vendor?.id, vendorSlug, productOffset, fetchProducts]);
 
   useEffect(() => {
     if (!loading) {
@@ -268,21 +262,23 @@ export default function VendorProductsScreen() {
     // Apply sorting
     switch (selectedSort) {
       case 'price_low':
-        filtered.sort((a, b) => a.price - b.price);
+        filtered.sort((a, b) => Number(a.price) - Number(b.price));
         break;
       case 'price_high':
-        filtered.sort((a, b) => b.price - a.price);
+        filtered.sort((a, b) => Number(b.price) - Number(a.price));
         break;
       case 'rating':
-        filtered.sort((a, b) => b.rating - a.rating);
+        filtered.sort((a, b) => Number(b.rating || 0) - Number(a.rating || 0));
         break;
       case 'newest':
-        // Assuming newer products have higher IDs
-        filtered.sort((a, b) => b.id.localeCompare(a.id));
+        filtered.sort((a, b) => {
+          const dateA = new Date(a.created_at || 0).getTime();
+          const dateB = new Date(b.created_at || 0).getTime();
+          return dateB - dateA;
+        });
         break;
       default:
-        // Popular - sort by review count
-        filtered.sort((a, b) => b.review_count - a.review_count);
+        filtered.sort((a, b) => (b.review_count || 0) - (a.review_count || 0));
     }
 
     setFilteredProducts(filtered);
@@ -307,7 +303,7 @@ export default function VendorProductsScreen() {
     }
   };
 
-  const handleAddToCart = (product: Product | MockProduct) => {
+  const handleAddToCart = (product: Product) => {
     const imageUrls = Array.isArray(product.image_urls) 
       ? product.image_urls 
       : [product.image_urls || ''];
@@ -340,8 +336,8 @@ export default function VendorProductsScreen() {
   if (!vendor) {
     return (
       <NotFoundScreen
-        title="Vendor Not Found"
-        message="This vendor doesn't exist or may have been removed."
+        title="Store Not Found"
+        message="This store doesn't exist or may have been removed."
         onBack={() => router.back()}
       />
     );
@@ -358,7 +354,7 @@ export default function VendorProductsScreen() {
           <ArrowLeft size={22} color={Colors.textPrimary} weight="bold" />
         </TouchableOpacity>
         <Text style={styles.headerTitle} numberOfLines={1}>
-          {vendor?.shop_name || 'Products'}
+          {(vendor as any).shop_name || 'Products'}
         </Text>
         <TouchableOpacity 
           style={styles.filterButton}
@@ -568,8 +564,11 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Colors.backgroundDark,
   },
-  
-  // Header
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -615,8 +614,6 @@ const styles = StyleSheet.create({
     fontSize: 10,
     color: Colors.textPrimary,
   },
-  
-  // Product Count
   productCountRow: {
     paddingHorizontal: Spacing.base,
     marginBottom: Spacing.sm,
@@ -626,8 +623,6 @@ const styles = StyleSheet.create({
     fontSize: FontSize.small,
     color: Colors.textMuted,
   },
-  
-  // Scroll
   scrollView: {
     flex: 1,
   },
@@ -635,34 +630,15 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.base,
     paddingBottom: Spacing.base,
   },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  loadingMoreContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: Spacing.lg,
-    gap: Spacing.sm,
-  },
-  loadingMoreText: {
-    fontFamily: FontFamily.body,
-    fontSize: FontSize.small,
-    color: Colors.textMuted,
-  },
-  
-  // Product Grid
   productGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: Spacing.md,
   },
   productCard: {
     backgroundColor: Colors.cardDark,
     borderRadius: BorderRadius.lg,
     overflow: 'hidden',
+    width: '100%',
   },
   productImageContainer: {
     aspectRatio: 1,
@@ -739,7 +715,7 @@ const styles = StyleSheet.create({
   productPrice: {
     fontFamily: FontFamily.displaySemiBold,
     fontSize: FontSize.body,
-    color: Colors.primary,
+    color: Colors.secondary,
   },
   addButton: {
     width: 28,
@@ -749,8 +725,18 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  
-  // Filter Panel
+  loadingMoreContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: Spacing.lg,
+    gap: Spacing.sm,
+  },
+  loadingMoreText: {
+    fontFamily: FontFamily.body,
+    fontSize: FontSize.small,
+    color: Colors.textMuted,
+  },
   filterOverlay: {
     ...StyleSheet.absoluteFillObject,
     backgroundColor: Colors.black50,

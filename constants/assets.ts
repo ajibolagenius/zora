@@ -13,7 +13,7 @@ export const PlaceholderImages = {
     productLarge: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800',
 
     // Vendor images
-    vendorLogo: 'https://via.placeholder.com/40',
+    vendorLogo: 'https://api.dicebear.com/7.x/identicon/svg?seed=Vendor&size=40',
     vendorCover: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800',
     vendorAvatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Vendor',
 
@@ -21,11 +21,11 @@ export const PlaceholderImages = {
     userAvatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=User',
     userAvatarDefault: 'https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=200',
 
-    // Generic placeholders
-    image: 'https://via.placeholder.com/200',
-    image100: 'https://via.placeholder.com/100',
-    image200: 'https://via.placeholder.com/200',
-    image400: 'https://via.placeholder.com/400',
+    // Generic placeholders - using Unsplash instead of via.placeholder
+    image: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=200',
+    image100: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=100',
+    image200: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=200',
+    image400: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=400',
 } as const;
 
 /**

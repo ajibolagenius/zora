@@ -10,7 +10,7 @@ import {
     Animated,
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useRouter, useLocalSearchParams } from 'expo-router';
+import { useRouter, useLocalSearchParams, useFocusEffect } from 'expo-router';
 import { LazyImage, LazyAvatar } from '../../components/ui';
 import {
     ArrowLeft,
@@ -35,6 +35,7 @@ import { realtimeService } from '../../services/realtimeService';
 import type { Vendor, Product, Review } from '../../types/supabase';
 import { Link } from 'expo-router';
 import { useCartStore } from '../../stores/cartStore';
+import { useWishlistStore } from '../../stores/wishlistStore';
 import FloatingTabBar from '../../components/ui/FloatingTabBar';
 import { encodeProductSlug, isValidVendorSlug } from '../../lib/slugUtils';
 import { isValidRouteParam } from '../../lib/navigationHelpers';
@@ -43,6 +44,29 @@ import NotFoundScreen from '../../components/errors/NotFoundScreen';
 type TabType = 'products' | 'reviews' | 'about';
 
 const MAX_BIO_LENGTH = ValidationLimits.maxBioLength;
+
+// Favorite Button Component
+const FavoriteButton = ({ product }: { product: Product }) => {
+    const isInWishlist = useWishlistStore((state) => state.isInWishlist(product.id));
+    const toggleWishlist = useWishlistStore((state) => state.toggleWishlist);
+
+    return (
+        <TouchableOpacity 
+            style={styles.favoriteButton}
+            onPress={(e) => {
+                e.stopPropagation();
+                toggleWishlist(product as any);
+            }}
+            activeOpacity={0.7}
+        >
+            <Heart 
+                size={16} 
+                color={isInWishlist ? Colors.primary : Colors.textPrimary} 
+                weight={isInWishlist ? 'fill' : 'regular'} 
+            />
+        </TouchableOpacity>
+    );
+};
 
 export default function StoreScreen() {
     const router = useRouter();
@@ -83,8 +107,14 @@ export default function StoreScreen() {
                 const vendorProducts = await productService.getByVendor(vendorData.id);
                 setProducts(vendorProducts);
                 // Fetch reviews for this vendor
-                const vendorReviews = await reviewService.getByVendor(vendorData.id);
-                setReviews(vendorReviews);
+                try {
+                    const vendorReviews = await reviewService.getByVendor(vendorData.id);
+                    setReviews(vendorReviews);
+                    console.log(`Loaded ${vendorReviews.length} reviews for vendor ${vendorData.id}`);
+                } catch (error) {
+                    console.error('Error fetching vendor reviews:', error);
+                    setReviews([]);
+                }
             }
         } catch (error) {
             console.error('Error fetching vendor:', error);
@@ -93,68 +123,82 @@ export default function StoreScreen() {
         }
     }, [vendorSlug]);
 
+    // Refetch data when screen comes into focus (e.g., after submitting a review)
+    useFocusEffect(
+        useCallback(() => {
+            fetchData();
+        }, [fetchData])
+    );
+
     useEffect(() => {
-        fetchData();
-
         // Subscribe to real-time updates
-        const unsubscribers: (() => void)[] = [];
-
         if (vendor?.id) {
-            // Subscribe to vendor updates
-            realtimeService.subscribeToTable(
-                'vendors',
-                'UPDATE',
-                async (payload) => {
-                    if (payload.new?.id === vendor.id) {
-                        const updatedVendor = await vendorService.getBySlug(vendorSlug || '');
-                        if (updatedVendor) {
-                            setVendor(updatedVendor);
+            let unsubscribers: (() => void)[] = [];
+            let isMounted = true;
+
+            // Set up all subscriptions and wait for them to complete
+            Promise.all([
+                realtimeService.subscribeToTable(
+                    'vendors',
+                    'UPDATE',
+                    async (payload) => {
+                        if (isMounted && payload.new?.id === vendor.id) {
+                            const updatedVendor = await vendorService.getBySlug(vendorSlug || '');
+                            if (updatedVendor) {
+                                setVendor(updatedVendor);
+                            }
                         }
-                    }
-                },
-                `id=eq.${vendor.id}`
-            ).then((unsub) => {
-                if (unsub) unsubscribers.push(unsub);
-            });
-
-            // Subscribe to products updates for this vendor
-            realtimeService.subscribeToTable(
-                'products',
-                '*',
-                async () => {
-                    if (vendor.id) {
-                        const updatedProducts = await productService.getByVendor(vendor.id);
-                        setProducts(updatedProducts);
-                    }
-                },
-                `vendor_id=eq.${vendor.id}`
-            ).then((unsub) => {
-                if (unsub) unsubscribers.push(unsub);
-            });
-
-            // Subscribe to reviews updates for this vendor
-            realtimeService.subscribeToTable(
-                'reviews',
-                '*',
-                async () => {
-                    if (vendor.id) {
-                        const updatedReviews = await reviewService.getByVendor(vendor.id);
-                        setReviews(updatedReviews);
-                    }
-                },
-                `vendor_id=eq.${vendor.id}`
-            ).then((unsub) => {
-                if (unsub) unsubscribers.push(unsub);
-            });
-        }
-
-        return () => {
-            unsubscribers.forEach((unsub) => {
-                if (typeof unsub === 'function') {
-                    unsub();
+                    },
+                    `id=eq.${vendor.id}`
+                ),
+                realtimeService.subscribeToTable(
+                    'products',
+                    '*',
+                    async (payload) => {
+                        if (isMounted && vendor.id && (payload.new?.vendor_id === vendor.id || payload.old?.vendor_id === vendor.id)) {
+                            const updatedProducts = await productService.getByVendor(vendor.id);
+                            setProducts(updatedProducts);
+                        }
+                    },
+                    `vendor_id=eq.${vendor.id}`
+                ),
+                realtimeService.subscribeToTable(
+                    'reviews',
+                    '*',
+                    async (payload) => {
+                        if (isMounted && vendor.id && (payload.new?.vendor_id === vendor.id || payload.old?.vendor_id === vendor.id)) {
+                            const updatedReviews = await reviewService.getByVendor(vendor.id);
+                            setReviews(updatedReviews);
+                        }
+                    },
+                    `vendor_id=eq.${vendor.id}`
+                ),
+            ]).then((unsubs) => {
+                // Only add unsubscribe functions if component is still mounted
+                if (isMounted) {
+                    unsubscribers = unsubs.filter((unsub): unsub is (() => void) => typeof unsub === 'function');
+                } else {
+                    // Component unmounted before subscriptions completed, clean up immediately
+                    unsubs.forEach((unsub) => {
+                        if (typeof unsub === 'function') {
+                            unsub();
+                        }
+                    });
                 }
+            }).catch((error) => {
+                console.error('Error setting up real-time subscriptions:', error);
             });
-        };
+
+            return () => {
+                isMounted = false;
+                // Clean up all subscriptions
+                unsubscribers.forEach((unsub) => {
+                    if (typeof unsub === 'function') {
+                        unsub();
+                    }
+                });
+            };
+        }
     }, [fetchData, vendor?.id, vendorSlug]);
 
     useEffect(() => {
@@ -380,7 +424,7 @@ export default function StoreScreen() {
                         {/* Section Header */}
                         <View style={styles.sectionHeader}>
                             <Text style={styles.sectionTitle}>Featured Products</Text>
-                            <TouchableOpacity onPress={() => router.push(`/vendor/${vendorId}/products`)}>
+                            <TouchableOpacity onPress={() => router.push(`/store/${vendorSlug}/products`)}>
                                 <Text style={styles.seeAllText}>See all</Text>
                             </TouchableOpacity>
                         </View>
@@ -416,9 +460,7 @@ export default function StoreScreen() {
                                             )}
 
                                             {/* Favorite Button */}
-                                            <TouchableOpacity style={styles.favoriteButton}>
-                                                <Heart size={16} color={Colors.textPrimary} weight="regular" />
-                                            </TouchableOpacity>
+                                            <FavoriteButton product={product} />
                                         </View>
 
                                         {/* Product Info */}
@@ -446,23 +488,96 @@ export default function StoreScreen() {
                     </Animated.View>
                 )}
 
-                {/* Reviews Tab Content - Simplified for now */}
+                {/* Reviews Tab Content */}
                 {activeTab === 'reviews' && (
                     <Animated.View style={[styles.tabContent, { opacity: fadeAnim }]}>
+                        {/* Reviews Section Header */}
                         <View style={styles.reviewsHeader}>
                             <View>
                                 <Text style={styles.reviewsTitle}>Customer Reviews</Text>
                                 <View style={styles.reviewsRating}>
                                     <Star size={16} color={Colors.secondary} weight="fill" />
                                     <Text style={styles.reviewsRatingText}>
-                                        {Number((vendor as any).rating || 0).toFixed(1)} ({reviews.length} reviews)
+                                        {Number((vendor as any).rating || 0).toFixed(1)} ({(vendor as any).review_count || reviews.length} reviews)
                                     </Text>
                                 </View>
                             </View>
+                            <Link
+                                href={`/write-review?vendorId=${vendor.id}&vendorName=${encodeURIComponent(shopName)}`}
+                                asChild
+                            >
+                                <TouchableOpacity style={styles.writeReviewButton} activeOpacity={0.8}>
+                                    <PencilSimple size={18} color={Colors.primary} weight="bold" />
+                                    <Text style={styles.writeReviewText}>Write Review</Text>
+                                </TouchableOpacity>
+                            </Link>
                         </View>
-                        {reviews.length === 0 && (
+
+                        {/* Reviews List */}
+                        {reviews.length > 0 ? (
+                            <View style={styles.reviewsList}>
+                                {reviews.slice(0, 3).map((review) => (
+                                    <View key={review.id} style={styles.reviewCard}>
+                                        <View style={styles.reviewHeader}>
+                                            <LazyAvatar
+                                                source={(review as any).user_avatar || ImageUrlBuilders.dicebearAvatar((review as any).user_name)}
+                                                name={(review as any).user_name}
+                                                size={40}
+                                                style={styles.reviewAvatar}
+                                            />
+                                            <View style={styles.reviewMeta}>
+                                                <Text style={styles.reviewerName}>{(review as any).user_name}</Text>
+                                                <View style={styles.reviewStars}>
+                                                    {[1, 2, 3, 4, 5].map((star) => (
+                                                        <Star
+                                                            key={star}
+                                                            size={12}
+                                                            color={star <= review.rating ? Colors.secondary : Colors.borderDark}
+                                                            weight={star <= review.rating ? 'fill' : 'regular'}
+                                                        />
+                                                    ))}
+                                                    <Text style={styles.reviewDate}>
+                                                        {new Date(review.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
+                                                    </Text>
+                                                </View>
+                                            </View>
+                                            {(review as any).verified_purchase && (
+                                                <View style={styles.verifiedBadge}>
+                                                    <SealCheck size={14} color={Colors.success} weight="fill" />
+                                                    <Text style={styles.verifiedText}>Verified</Text>
+                                                </View>
+                                            )}
+                                        </View>
+                                        {(review as any).title && (
+                                            <Text style={styles.reviewTitle}>{(review as any).title}</Text>
+                                        )}
+                                        <Text style={styles.reviewContent} numberOfLines={3}>
+                                            {review.content}
+                                        </Text>
+                                    </View>
+                                ))}
+                                {reviews.length > 3 && (
+                                    <TouchableOpacity
+                                        style={styles.viewAllReviews}
+                                        onPress={() => router.push(`/store/${vendorSlug}/reviews`)}
+                                        activeOpacity={0.8}
+                                    >
+                                        <Text style={styles.viewAllReviewsText}>View All {reviews.length} Reviews</Text>
+                                        <CaretRight size={16} color={Colors.primary} weight="bold" />
+                                    </TouchableOpacity>
+                                )}
+                            </View>
+                        ) : (
                             <View style={styles.noReviews}>
                                 <Text style={styles.noReviewsText}>No reviews yet. Be the first to review!</Text>
+                                <Link
+                                    href={`/write-review?vendorId=${vendor.id}&vendorName=${encodeURIComponent(shopName)}`}
+                                    asChild
+                                >
+                                    <TouchableOpacity style={styles.firstReviewButton}>
+                                        <Text style={styles.firstReviewText}>Write a Review</Text>
+                                    </TouchableOpacity>
+                                </Link>
                             </View>
                         )}
                     </Animated.View>
@@ -864,5 +979,106 @@ const styles = StyleSheet.create({
         fontSize: FontSize.small,
         color: Colors.textMuted,
         lineHeight: 22,
+    },
+    // Reviews Section Styles
+    reviewsList: {
+        gap: Spacing.md,
+    },
+    reviewCard: {
+        backgroundColor: Colors.cardDark,
+        borderRadius: BorderRadius.lg,
+        padding: Spacing.base,
+        borderWidth: 1,
+        borderColor: Colors.borderDark,
+    },
+    reviewHeader: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: Spacing.sm,
+    },
+    reviewAvatar: {
+        width: 40,
+        height: 40,
+        borderRadius: 20,
+        marginRight: Spacing.sm,
+    },
+    reviewMeta: {
+        flex: 1,
+    },
+    reviewerName: {
+        fontFamily: FontFamily.bodySemiBold,
+        fontSize: FontSize.small,
+        color: Colors.textPrimary,
+        marginBottom: 2,
+    },
+    reviewStars: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 2,
+    },
+    reviewDate: {
+        fontFamily: FontFamily.body,
+        fontSize: FontSize.caption,
+        color: Colors.textMuted,
+        marginLeft: Spacing.sm,
+    },
+    verifiedBadge: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 2,
+        backgroundColor: Colors.success + '20',
+        paddingHorizontal: Spacing.sm,
+        paddingVertical: 2,
+        borderRadius: BorderRadius.full,
+    },
+    reviewTitle: {
+        fontFamily: FontFamily.bodySemiBold,
+        fontSize: FontSize.small,
+        color: Colors.textPrimary,
+        marginBottom: Spacing.xs,
+    },
+    reviewContent: {
+        fontFamily: FontFamily.body,
+        fontSize: FontSize.small,
+        color: Colors.textMuted,
+        lineHeight: 20,
+    },
+    viewAllReviews: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingVertical: Spacing.md,
+        gap: Spacing.xs,
+    },
+    viewAllReviewsText: {
+        fontFamily: FontFamily.bodySemiBold,
+        fontSize: FontSize.small,
+        color: Colors.primary,
+    },
+    firstReviewButton: {
+        backgroundColor: Colors.primary,
+        paddingHorizontal: Spacing.lg,
+        paddingVertical: Spacing.sm,
+        borderRadius: BorderRadius.full,
+    },
+    firstReviewText: {
+        fontFamily: FontFamily.bodySemiBold,
+        fontSize: FontSize.small,
+        color: Colors.textPrimary,
+    },
+    writeReviewButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: Spacing.xs,
+        paddingHorizontal: Spacing.md,
+        paddingVertical: Spacing.sm,
+        borderRadius: BorderRadius.full,
+        borderWidth: 1,
+        borderColor: Colors.primary,
+    },
+    writeReviewText: {
+        fontFamily: FontFamily.bodySemiBold,
+        fontSize: FontSize.small,
+        color: Colors.primary,
     },
 });

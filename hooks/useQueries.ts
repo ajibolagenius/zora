@@ -281,26 +281,42 @@ export function useCreateReview() {
 
   return useMutation({
     mutationFn: async (input: CreateReviewInput) => {
+      // Get current user ID from auth store
+      const { useAuthStore } = require('../stores/authStore');
+      const user = useAuthStore.getState().user;
+      
+      if (!user?.user_id) {
+        throw new Error('You must be logged in to submit a review');
+      }
+
       const newReview = await reviewService.create({
         product_id: input.productId,
         vendor_id: input.vendorId,
         rating: input.rating,
         title: input.title,
         content: input.comment,
-        user_id: 'current_user', // Would come from auth context
+        user_id: user.user_id,
       });
 
       return newReview;
     },
-    onSuccess: (data, variables) => {
-      // Invalidate relevant queries
+    onSuccess: async (data, variables) => {
+      // Invalidate and refetch relevant queries immediately
       if (variables.productId) {
-        queryClient.invalidateQueries({ queryKey: queryKeys.reviews.byProduct(variables.productId) });
-        queryClient.invalidateQueries({ queryKey: queryKeys.products.detail(variables.productId) });
+        await Promise.all([
+          queryClient.invalidateQueries({ queryKey: queryKeys.reviews.byProduct(variables.productId) }),
+          queryClient.invalidateQueries({ queryKey: queryKeys.products.detail(variables.productId) }),
+        ]);
+        // Refetch immediately
+        queryClient.refetchQueries({ queryKey: queryKeys.reviews.byProduct(variables.productId) });
       }
       if (variables.vendorId) {
-        queryClient.invalidateQueries({ queryKey: queryKeys.reviews.byVendor(variables.vendorId) });
-        queryClient.invalidateQueries({ queryKey: queryKeys.vendors.detail(variables.vendorId) });
+        await Promise.all([
+          queryClient.invalidateQueries({ queryKey: queryKeys.reviews.byVendor(variables.vendorId) }),
+          queryClient.invalidateQueries({ queryKey: queryKeys.vendors.detail(variables.vendorId) }),
+        ]);
+        // Refetch immediately
+        queryClient.refetchQueries({ queryKey: queryKeys.reviews.byVendor(variables.vendorId) });
       }
     },
     networkMode: 'offlineFirst',

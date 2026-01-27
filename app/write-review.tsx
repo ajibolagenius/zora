@@ -18,6 +18,8 @@ import { useRouter, useLocalSearchParams } from 'expo-router';
 import { ArrowLeft, Star, Info } from 'phosphor-react-native';
 import { useProduct, useCreateReview } from '../hooks/useQueries';
 import { useDraftStore } from '../stores/draftStore';
+import { useToast } from '../components/ui/ToastProvider';
+import { useAuthStore } from '../stores/authStore';
 import { Colors } from '../constants/colors';
 import { Spacing, BorderRadius, Heights } from '../constants/spacing';
 import { FontSize, FontFamily, LetterSpacing } from '../constants/typography';
@@ -36,11 +38,31 @@ export default function WriteReviewScreen() {
     const { getDraft, saveDraft, removeDraft } = useDraftStore();
     const existingDraft = productId ? getDraft(productId) : null;
 
-    // Form state - Initialize from draft if available
+    // Auth store - get current user
+    const { user } = useAuthStore();
+
+    // Toast notifications
+    const { showToast } = useToast();
+
+    // Get user's name from profile, fallback to draft or empty
+    const getUserName = () => {
+        if (existingDraft?.userName) return existingDraft.userName;
+        if (user?.name) return user.name;
+        return '';
+    };
+
+    // Form state - Initialize from draft if available, otherwise use logged-in user's name
     const [rating, setRating] = useState(existingDraft?.rating || 0);
     const [title, setTitle] = useState(existingDraft?.title || '');
     const [comment, setComment] = useState(existingDraft?.comment || '');
-    const [userName, setUserName] = useState(existingDraft?.userName || '');
+    const [userName, setUserName] = useState(getUserName());
+
+    // Update userName when user changes (e.g., after login)
+    useEffect(() => {
+        if (user?.name && !existingDraft?.userName) {
+            setUserName(user.name);
+        }
+    }, [user?.name, existingDraft?.userName]);
 
     // Get product details if available
     const { data: product } = useProduct(productId || '');
@@ -70,7 +92,7 @@ export default function WriteReviewScreen() {
     // Submit review
     const handleSubmit = async () => {
         if (!isValid) {
-            Alert.alert('Incomplete Review', 'Please fill in all required fields.');
+            showToast('Please fill in all required fields.', 'error');
             return;
         }
 
@@ -89,13 +111,18 @@ export default function WriteReviewScreen() {
                 removeDraft(productId);
             }
 
-            Alert.alert(
-                'Review Submitted!',
-                'Thank you for sharing your feedback.',
-                [{ text: 'OK', onPress: () => router.back() }]
-            );
-        } catch (error) {
-            Alert.alert('Error', 'Failed to submit review. Please try again.');
+            // Show success toast
+            showToast('Review submitted successfully! Thank you for your feedback.', 'success');
+            
+            // Wait a moment for the database to update, then navigate back
+            // The query invalidation will trigger a refetch on the previous screen
+            setTimeout(() => {
+                router.back();
+            }, 1000);
+        } catch (error: any) {
+            console.error('Error submitting review:', error);
+            const errorMessage = error?.message || 'Failed to submit review. Please try again.';
+            showToast(errorMessage, 'error');
         }
     };
 
@@ -193,14 +220,24 @@ export default function WriteReviewScreen() {
                                 Your Name <Text style={styles.required}>*</Text>
                             </Text>
                             <TextInput
-                                style={styles.input}
+                                style={[
+                                    styles.input,
+                                    user?.name ? styles.inputDisabled : undefined
+                                ]}
                                 placeholder={Placeholders.form.reviewName}
                                 placeholderTextColor={Colors.textMuted}
                                 value={userName}
                                 onChangeText={setUserName}
                                 maxLength={ValidationLimits.maxNameLength}
                                 onBlur={() => Keyboard.dismiss()}
+                                editable={!user?.name}
+                                selectTextOnFocus={false}
                             />
+                            {user?.name && (
+                                <Text style={styles.disabledHint}>
+                                    Your name is automatically filled from your profile
+                                </Text>
+                            )}
                         </View>
 
                         {/* Review Title */}
@@ -445,6 +482,17 @@ const styles = StyleSheet.create({
         color: Colors.textPrimary,
         borderWidth: 1,
         borderColor: Colors.borderDark,
+    },
+    inputDisabled: {
+        backgroundColor: Colors.backgroundDark,
+        opacity: 0.6,
+    },
+    disabledHint: {
+        fontFamily: FontFamily.body,
+        fontSize: FontSize.caption,
+        color: Colors.textMuted,
+        marginTop: Spacing.xs,
+        fontStyle: 'italic',
     },
     textArea: {
         minHeight: 120,
