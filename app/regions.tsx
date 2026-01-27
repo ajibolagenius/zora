@@ -19,25 +19,156 @@ import { FontSize, FontFamily } from '../constants/typography';
 import { AnimationDuration, AnimationEasing } from '../constants';
 import { regionService, type Region } from '../services/mockDataService';
 import { onboardingService, type Region as OnboardingRegion } from '../services/onboardingService';
-import { isSupabaseConfigured } from '../lib/supabase';
+import { productService, vendorService } from '../services/supabaseService';
+import { realtimeService } from '../services/realtimeService';
+import { isSupabaseConfigured, getSupabaseFrom } from '../lib/supabase';
 
-// Map onboardingService Region to mockDataService Region format
-const mapOnboardingRegionToRegion = (region: OnboardingRegion): Region => {
-  // Parse countries from description if available
+// Unsplash photo IDs for African regional cultural images
+// These are curated to represent each region's cultural identity
+const REGION_UNSPLASH_PHOTOS: Record<string, string[]> = {
+  'West Africa': [
+    '1596040033229-a9821ebd058d', // West African cuisine
+    '1504674900247-0877df9cc836', // Vibrant market scene
+    '1590001155093-a3c66ab0c3ff', // Traditional market
+    '1489392191049-fc10c97e64b6', // Colorful food display
+  ],
+  'East Africa': [
+    '1532336414038-cf19250c5757', // Spices and traditional ingredients
+    '1608571423902-eed4a5ad8108', // Natural African products
+    '1474979266404-7eaacbcd87c5', // Grains and staples
+    '1542838132-92c53300491e',    // Traditional spices
+  ],
+  'North Africa': [
+    '1523805009345-7448845a9e53', // Traditional market interior
+    '1539635278303-d4002c07eae3', // Market stall with goods
+    '1484318571209-661cf29a69c3', // Fresh produce display
+    '1513475382585-d06e58bcb0e0', // Cultural market scene
+  ],
+  'South Africa': [
+    '1507003211169-0a1dd7228f2d', // Modern African market
+    '1531746020798-e6953c6e8e04', // Professional food display
+    '1604329760661-e71dc83f8f26', // Traditional storefront
+    '1523805009345-7448845a9e53', // Market interior
+  ],
+  'Central Africa': [
+    '1590001155093-a3c66ab0c3ff', // Central African market
+    '1489392191049-fc10c97e64b6', // Traditional food display
+    '1539635278303-d4002c07eae3', // Market stall
+    '1484318571209-661cf29a69c3', // Fresh produce
+  ],
+};
+
+/**
+ * Generate region cultural image URL using Unsplash
+ * Randomly selects a photo each time for a fresh experience
+ * Ensures no duplicate images across regions
+ */
+function generateRegionImage(
+  regionName: string, 
+  usedPhotoIds: Set<string> = new Set(),
+  width: number = 800
+): string {
+  const photos = REGION_UNSPLASH_PHOTOS[regionName] || REGION_UNSPLASH_PHOTOS['West Africa'];
+  
+  // Filter out already used photos
+  const availablePhotos = photos.filter(photoId => !usedPhotoIds.has(photoId));
+  
+  // If all photos for this region are used, fall back to all photos (shouldn't happen with 4+ photos per region)
+  const photosToChooseFrom = availablePhotos.length > 0 ? availablePhotos : photos;
+  
+  // Randomly select a photo index
+  const index = Math.floor(Math.random() * photosToChooseFrom.length);
+  const photoId = photosToChooseFrom[index];
+  
+  // Mark this photo as used
+  usedPhotoIds.add(photoId);
+  
+  // Unsplash Source API - free, no key required
+  return `https://images.unsplash.com/photo-${photoId}?w=${width}&auto=format&fit=crop`;
+}
+
+// Convert slug to region name format (e.g., "west-africa" -> "West Africa")
+const slugToRegionName = (slug: string): string => {
+  return slug
+    .split('-')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+};
+
+// Get product count for a region
+const getProductCount = async (regionName: string): Promise<number> => {
+  // Fetch all products and filter in memory to match the same logic used in products screen
+  const allProducts = await productService.getAll();
+  const normalizedRegionName = regionName.toLowerCase();
+  
+  return allProducts.filter(p => 
+    p.cultural_region?.toLowerCase().includes(normalizedRegionName)
+  ).length;
+};
+
+// Region to country mapping (matching the SQL query logic)
+const REGION_COUNTRY_MAP: Record<string, string[]> = {
+  'West Africa': ['Nigeria', 'Ghana', 'Senegal', 'Mali'],
+  'East Africa': ['Kenya', 'Ethiopia', 'Tanzania', 'Uganda'],
+  'North Africa': ['Morocco', 'Egypt', 'Tunisia', 'Algeria'],
+  'South Africa': ['South Africa', 'Zimbabwe', 'Botswana', 'Namibia'],
+  'Central Africa': ['Congo', 'Cameroon', 'Gabon', 'Chad'],
+};
+
+// Get vendor count for a region using country mapping
+const getVendorCount = async (regionName: string): Promise<number> => {
+  // Fetch all vendors and filter by countries in the region
+  const allVendors = await vendorService.getAll();
+  const regionCountries = REGION_COUNTRY_MAP[regionName] || [];
+  
+  if (regionCountries.length === 0) return 0;
+  
+  return allVendors.filter(v => {
+    const specialties = Array.isArray(v.cultural_specialties) 
+      ? v.cultural_specialties 
+      : [];
+    // Check if any specialty matches any country in the region
+    return specialties.some((specialty: string) => 
+      regionCountries.some(country => 
+        specialty.toLowerCase().includes(country.toLowerCase()) ||
+        country.toLowerCase().includes(specialty.toLowerCase())
+      )
+    );
+  }).length;
+};
+
+// Map onboardingService Region to mockDataService Region format with counts
+// Accepts usedPhotoIds to ensure no duplicate images across regions
+const mapOnboardingRegionToRegion = async (
+  region: OnboardingRegion,
+  usedPhotoIds?: Set<string>
+): Promise<Region> => {
+  // Parse countries from description if available, or use the mapping
+  const regionCountries = REGION_COUNTRY_MAP[region.name] || [];
   const countries = region.description 
     ? region.description.split(',').map(c => c.trim()).filter(Boolean)
-    : [];
+    : regionCountries;
+  
+  // Get counts for this region
+  const regionName = region.name;
+  const [productCount, vendorCount] = await Promise.all([
+    getProductCount(regionName),
+    getVendorCount(regionName),
+  ]);
+  
+  // Generate region image if not provided, ensuring uniqueness
+  const imageUrl = region.image_url || generateRegionImage(regionName, usedPhotoIds);
   
   return {
     id: region.id,
     name: region.name,
     slug: region.slug,
-    image_url: region.image_url || '',
+    image_url: imageUrl,
     countries: countries,
     description: region.description || '',
     is_selected: false,
-    vendor_count: 0, // These would need to be fetched separately if needed
-    product_count: 0, // These would need to be fetched separately if needed
+    vendor_count: vendorCount,
+    product_count: productCount,
   };
 };
 
@@ -59,7 +190,12 @@ export default function RegionsScreen() {
       let data: Region[];
       if (isSupabaseConfigured()) {
         const onboardingRegions = await onboardingService.getRegions();
-        data = onboardingRegions.map(mapOnboardingRegionToRegion);
+        // Create a shared set to track used photo IDs across all regions
+        const usedPhotoIds = new Set<string>();
+        // Map regions with counts (async mapping), ensuring unique images
+        data = await Promise.all(
+          onboardingRegions.map(region => mapOnboardingRegionToRegion(region, usedPhotoIds))
+        );
       } else {
         data = regionService.getAll();
       }
@@ -91,10 +227,52 @@ export default function RegionsScreen() {
 
     // Subscribe to real-time updates for regions
     if (isSupabaseConfigured()) {
-      onboardingService.subscribeToRegions((updatedRegions) => {
-        const mappedRegions = updatedRegions.map(mapOnboardingRegionToRegion);
+      onboardingService.subscribeToRegions(async (updatedRegions) => {
+        // Create a shared set to track used photo IDs across all regions
+        const usedPhotoIds = new Set<string>();
+        // Map regions with counts (async mapping), ensuring unique images
+        const mappedRegions = await Promise.all(
+          updatedRegions.map((region) => mapOnboardingRegionToRegion(region, usedPhotoIds))
+        );
         setRegions(mappedRegions);
       });
+
+      // Also subscribe to products and vendors updates to refresh counts
+      const unsubscribers: (() => void)[] = [];
+
+      realtimeService.subscribeToTable('products', '*', async () => {
+        // Refresh region counts when products change
+        const onboardingRegions = await onboardingService.getRegions();
+        // Create a shared set to track used photo IDs across all regions
+        const usedPhotoIds = new Set<string>();
+        const mappedRegions = await Promise.all(
+          onboardingRegions.map(region => mapOnboardingRegionToRegion(region, usedPhotoIds))
+        );
+        setRegions(mappedRegions);
+      }).then((unsub) => {
+        if (unsub) unsubscribers.push(unsub);
+      });
+
+      realtimeService.subscribeToTable('vendors', '*', async () => {
+        // Refresh region counts when vendors change
+        const onboardingRegions = await onboardingService.getRegions();
+        // Create a shared set to track used photo IDs across all regions
+        const usedPhotoIds = new Set<string>();
+        const mappedRegions = await Promise.all(
+          onboardingRegions.map(region => mapOnboardingRegionToRegion(region, usedPhotoIds))
+        );
+        setRegions(mappedRegions);
+      }).then((unsub) => {
+        if (unsub) unsubscribers.push(unsub);
+      });
+
+      return () => {
+        unsubscribers.forEach((unsub) => {
+          if (typeof unsub === 'function') {
+            unsub();
+          }
+        });
+      };
     }
   }, []);
 
