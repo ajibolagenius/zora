@@ -5,13 +5,13 @@ import {
     StyleSheet,
     ScrollView,
     TouchableOpacity,
-    Image,
     ActivityIndicator,
     useWindowDimensions,
     Animated,
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
+import { LazyImage, LazyAvatar } from '../../components/ui';
 import {
     ArrowLeft,
     MagnifyingGlass,
