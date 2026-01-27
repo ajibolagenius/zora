@@ -31,6 +31,7 @@ import { homeService, type HomeData } from '../../services/homeService';
 import type { Vendor, Product } from '../../types/supabase';
 import { useCartStore } from '../../stores/cartStore';
 import { useAuthStore } from '../../stores/authStore';
+import { useNotificationStore } from '../../stores/notificationStore';
 import { getProductRoute, getVendorRoute } from '../../lib/navigationHelpers';
 import { CommonImages } from '../../constants';
 
@@ -66,6 +67,7 @@ export default function HomeScreen() {
   });
   const addToCart = useCartStore((state) => state.addItem);
   const { user } = useAuthStore();
+  const unreadCount = useNotificationStore((state) => state.unreadCount);
   
   // Get user's primary cultural region for personalized ranking
   const userRegion = user?.cultural_interests?.[0] || undefined;
@@ -74,15 +76,36 @@ export default function HomeScreen() {
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(20)).current;
 
+  // Shuffle array randomly
+  const shuffleArray = <T,>(array: T[]): T[] => {
+    const shuffled = [...array];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled;
+  };
+
   const fetchHomeData = async () => {
     try {
       // Fetch all home data from database
       const data = await homeService.getHomeData(userRegion);
-      setHomeData(data);
       
-      // Initialize products list with initial batch (deduplicated)
+      // Randomize featured vendors
+      const randomizedVendors = shuffleArray(data.featured_vendors);
+      
+      // Randomize popular products
+      const randomizedProducts = shuffleArray(data.popular_products);
+      
+      setHomeData({
+        ...data,
+        featured_vendors: randomizedVendors,
+        popular_products: randomizedProducts,
+      });
+      
+      // Initialize products list with randomized batch (deduplicated)
       const uniqueProducts = Array.from(
-        new Map(data.popular_products.map(p => [p.id, p])).values()
+        new Map(randomizedProducts.map(p => [p.id, p])).values()
       );
       setAllProducts(uniqueProducts);
       setProductOffset(uniqueProducts.length);
@@ -145,18 +168,32 @@ export default function HomeScreen() {
       (updatedData) => {
         setHomeData((prev) => {
           if (!prev) return prev;
+          
+          // Randomize vendors and products when updated
+          const updatedVendors = updatedData.featured_vendors 
+            ? shuffleArray(updatedData.featured_vendors)
+            : prev.featured_vendors;
+          
+          const updatedProducts = updatedData.popular_products
+            ? shuffleArray(updatedData.popular_products)
+            : prev.popular_products;
+          
           return {
             ...prev,
             ...updatedData,
+            featured_vendors: updatedVendors,
+            popular_products: updatedProducts,
           };
         });
         
-        // If popular_products were updated, merge them with allProducts (deduplicated)
+        // If popular_products were updated, merge them with allProducts (deduplicated and randomized)
         if (updatedData.popular_products) {
+          const randomizedNewProducts = shuffleArray(updatedData.popular_products);
           setAllProducts((prev) => {
             const existingIds = new Set(prev.map(p => p.id));
-            const newProducts = updatedData.popular_products!.filter(p => !existingIds.has(p.id));
-            return [...prev, ...newProducts];
+            const newProducts = randomizedNewProducts.filter(p => !existingIds.has(p.id));
+            // Shuffle the combined list to randomize order
+            return shuffleArray([...prev, ...newProducts]);
           });
         }
       },
@@ -201,11 +238,11 @@ export default function HomeScreen() {
   };
 
   const handleProductPress = (product: Product) => {
-    router.push(getProductRoute(product.id));
+    router.push(getProductRoute(product.id) as any);
   };
 
   const handleVendorPress = (vendor: Vendor) => {
-    router.push(getVendorRoute(vendor as any, vendor.id));
+    router.push(getVendorRoute(vendor as any, vendor.id) as any);
   };
 
   const handleAddToCart = (product: Product) => {
@@ -299,7 +336,13 @@ export default function HomeScreen() {
             activeOpacity={0.8}
           >
             <Bell size={24} color={Colors.textPrimary} weight="duotone" />
-            <View style={styles.notificationBadge} />
+            {unreadCount > 0 && (
+              <View style={styles.notificationBadge}>
+                <Text style={styles.notificationBadgeText}>
+                  {unreadCount > 9 ? '9+' : unreadCount}
+                </Text>
+              </View>
+            )}
           </TouchableOpacity>
         </View>
 
@@ -386,13 +429,8 @@ export default function HomeScreen() {
                     region={{
                       id: region.id,
                       name: region.name,
-                      slug: region.slug,
-                      image_url: getRegionImage(region.slug),
-                      countries: region.description ? [region.description] : [],
-                      description: region.description || '',
-                      is_selected: selectedRegion === region.name,
-                      vendor_count: 0,
-                      product_count: 0,
+                      image_url: getRegionImage(region.slug || region.id),
+                      description: region.description || undefined,
                     }}
                     selected={selectedRegion === region.name}
                     onPress={() => handleRegionPress({ name: region.name })}
@@ -418,7 +456,10 @@ export default function HomeScreen() {
               {homeData?.featured_vendors.map((vendor) => (
                 <VendorCard
                   key={vendor.id}
-                  vendor={vendor}
+                  vendor={{
+                    ...vendor,
+                    description: vendor.description || undefined,
+                  } as any}
                   variant="carousel"
                   onPress={() => handleVendorPress(vendor)}
                 />
@@ -453,7 +494,10 @@ export default function HomeScreen() {
                   }}
                 >
                   <ProductCard
-                    product={product}
+                    product={{
+                      ...product,
+                      description: product.description || undefined,
+                    } as any}
                     onPress={() => handleProductPress(product)}
                     onAddToCart={() => handleAddToCart(product)}
                   />
@@ -526,12 +570,23 @@ const styles = StyleSheet.create({
   },
   notificationBadge: {
     position: 'absolute',
-    top: 10,
-    right: 10,
-    width: 8,
-    height: 8,
-    borderRadius: 4,
+    top: 8,
+    right: 8,
+    minWidth: 18,
+    height: 18,
+    borderRadius: 9,
     backgroundColor: Colors.primary,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 4,
+    borderWidth: 2,
+    borderColor: Colors.backgroundDark,
+  },
+  notificationBadgeText: {
+    fontFamily: FontFamily.bodyBold,
+    fontSize: 10,
+    color: Colors.textPrimary,
+    lineHeight: 12,
   },
   searchContainer: {
     paddingHorizontal: Spacing.base,

@@ -2,16 +2,18 @@ import React, { useState, useEffect, useRef, useMemo } from 'react';
 import {
   View,
   Text,
+  TextInput,
   StyleSheet,
   ScrollView,
   TouchableOpacity,
   Animated,
   Easing,
   ActivityIndicator,
+  Keyboard,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import { ArrowLeft, Funnel, X, Star, Storefront } from 'phosphor-react-native';
+import { ArrowLeft, Funnel, X, Star, Storefront, MagnifyingGlass } from 'phosphor-react-native';
 import { Colors } from '../constants/colors';
 import { Spacing, BorderRadius, Heights } from '../constants/spacing';
 import { FontSize, FontFamily } from '../constants/typography';
@@ -21,11 +23,21 @@ import { onboardingService, type Region as OnboardingRegion } from '../services/
 import { realtimeService } from '../services/realtimeService';
 import { isSupabaseConfigured } from '../lib/supabase';
 
+// Region to country mapping (matching the SQL query logic)
+const REGION_COUNTRY_MAP: Record<string, string[]> = {
+  'West Africa': ['Nigeria', 'Ghana', 'Senegal', 'Mali'],
+  'East Africa': ['Kenya', 'Ethiopia', 'Tanzania', 'Uganda'],
+  'North Africa': ['Morocco', 'Egypt', 'Tunisia', 'Algeria'],
+  'South Africa': ['South Africa', 'Zimbabwe', 'Botswana', 'Namibia'],
+  'Central Africa': ['Congo', 'Cameroon', 'Gabon', 'Chad'],
+};
+
 // Map onboardingService Region to mockDataService Region format
 const mapOnboardingRegionToRegion = (region: OnboardingRegion): Region => {
+  const regionCountries = REGION_COUNTRY_MAP[region.name] || [];
   const countries = region.description 
     ? region.description.split(',').map(c => c.trim()).filter(Boolean)
-    : [];
+    : regionCountries;
   
   return {
     id: region.id,
@@ -55,6 +67,7 @@ export default function VendorsScreen() {
   const [selectedRegion, setSelectedRegion] = useState<string | null>(params.region || null);
   const [sortBy, setSortBy] = useState<string>('rating');
   const [showFilters, setShowFilters] = useState(false);
+  const [searchQuery, setSearchQuery] = useState<string>('');
 
   // Animation values
   const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -67,7 +80,22 @@ export default function VendorsScreen() {
       // Fetch vendors from database or mock
       let vendorData: Vendor[];
       if (isSupabaseConfigured()) {
-        vendorData = await supabaseVendorService.getAll();
+        const supabaseVendors = await supabaseVendorService.getAll();
+        // Map Supabase vendors to mock Vendor format
+        vendorData = supabaseVendors.map(v => ({
+          ...v,
+          location: {
+            type: 'Point',
+            coordinates: [v.longitude || 0, v.latitude || 0],
+          },
+          cultural_specialties: Array.isArray(v.cultural_specialties) ? v.cultural_specialties : [],
+          categories: Array.isArray(v.categories) ? v.categories : [],
+          delivery_time_min: v.delivery_time_min || 30,
+          delivery_time_max: v.delivery_time_max || 45,
+          delivery_fee: v.delivery_fee || 2.99,
+          minimum_order: v.minimum_order || 15.00,
+          coverage_radius_km: v.coverage_radius_km || 5.0,
+        })) as unknown as Vendor[];
       } else {
         vendorData = vendorService.getAll();
       }
@@ -113,7 +141,22 @@ export default function VendorsScreen() {
     if (isSupabaseConfigured()) {
       // Subscribe to vendors updates
       realtimeService.subscribeToTable('vendors', '*', async () => {
-        const updatedVendors = await supabaseVendorService.getAll();
+        const supabaseVendors = await supabaseVendorService.getAll();
+        // Map Supabase vendors to mock Vendor format
+        const updatedVendors = supabaseVendors.map(v => ({
+          ...v,
+          location: {
+            type: 'Point',
+            coordinates: [v.longitude || 0, v.latitude || 0],
+          },
+          cultural_specialties: Array.isArray(v.cultural_specialties) ? v.cultural_specialties : [],
+          categories: Array.isArray(v.categories) ? v.categories : [],
+          delivery_time_min: v.delivery_time_min || 30,
+          delivery_time_max: v.delivery_time_max || 45,
+          delivery_fee: v.delivery_fee || 2.99,
+          minimum_order: v.minimum_order || 15.00,
+          coverage_radius_km: v.coverage_radius_km || 5.0,
+        })) as unknown as Vendor[];
         setVendors(updatedVendors);
       }).then((unsub) => {
         if (unsub) unsubscribers.push(unsub);
@@ -137,37 +180,104 @@ export default function VendorsScreen() {
 
   // Filtered and sorted vendors
   const filteredVendors = useMemo(() => {
+    if (!vendors || vendors.length === 0) {
+      return [];
+    }
+
     let result = [...vendors];
 
-    // Filter by region
+    // Filter by search query first (before region filter)
+    if (searchQuery && searchQuery.trim().length > 0) {
+      const query = searchQuery.toLowerCase().trim();
+      result = result.filter(v => {
+        // Safely get and normalize all searchable fields
+        const shopName = String(v.shop_name || '').toLowerCase();
+        const description = String(v.description || '').toLowerCase();
+        const address = String(v.address || '').toLowerCase();
+        
+        // Also search in cultural_specialties and categories
+        const specialties = Array.isArray(v.cultural_specialties) 
+          ? v.cultural_specialties.map(s => String(s || '').toLowerCase()).join(' ')
+          : '';
+        const categories = Array.isArray(v.categories)
+          ? v.categories.map(c => String(c || '').toLowerCase()).join(' ')
+          : '';
+        
+        // Check if query matches any field
+        return shopName.includes(query) ||
+               description.includes(query) ||
+               address.includes(query) ||
+               specialties.includes(query) ||
+               categories.includes(query);
+      });
+    }
+
+    // Filter by region using country mapping
     if (selectedRegion) {
-      result = result.filter(v =>
-        v.cultural_specialties?.some(s =>
-          s.toLowerCase().includes(selectedRegion.toLowerCase())
-        )
-      );
+      // Find the region name from slug
+      const region = regions.find(r => r.slug === selectedRegion);
+      if (region) {
+        const regionCountries = REGION_COUNTRY_MAP[region.name] || [];
+        if (regionCountries.length > 0) {
+          result = result.filter(v => {
+            const specialties = Array.isArray(v.cultural_specialties) 
+              ? v.cultural_specialties 
+              : [];
+            // Check if any specialty matches any country in the region
+            return specialties.some((specialty: string) => {
+              const normalizedSpecialty = String(specialty || '').toLowerCase();
+              return regionCountries.some(country => {
+                const normalizedCountry = country.toLowerCase();
+                return normalizedSpecialty.includes(normalizedCountry) ||
+                       normalizedCountry.includes(normalizedSpecialty);
+              });
+            });
+          });
+        }
+      }
     }
 
     // Sort
     switch (sortBy) {
       case 'rating':
-        result.sort((a, b) => b.rating - a.rating);
+        result.sort((a, b) => (b.rating || 0) - (a.rating || 0));
         break;
       case 'name':
-        result.sort((a, b) => a.shop_name.localeCompare(b.shop_name));
+        result.sort((a, b) => {
+          const nameA = String(a.shop_name || '').toLowerCase();
+          const nameB = String(b.shop_name || '').toLowerCase();
+          return nameA.localeCompare(nameB);
+        });
         break;
       case 'delivery':
-        result.sort((a, b) => a.delivery_time_min - b.delivery_time_min);
+        result.sort((a, b) => (a.delivery_time_min || 0) - (b.delivery_time_min || 0));
         break;
     }
 
     return result;
-  }, [vendors, selectedRegion, sortBy]);
+  }, [vendors, selectedRegion, sortBy, searchQuery, regions]);
 
-  const activeFilterCount = (selectedRegion ? 1 : 0) + (sortBy !== 'rating' ? 1 : 0);
+  const activeFilterCount = 
+    (selectedRegion ? 1 : 0) + 
+    (sortBy !== 'rating' ? 1 : 0) +
+    (searchQuery.trim() ? 1 : 0);
+
+  const handleBack = () => {
+    if (router.canGoBack()) {
+      router.back();
+    } else {
+      router.replace('/(tabs)');
+    }
+  };
 
   const handleVendorPress = (vendor: Vendor) => {
     router.push(getVendorRoute(vendor as any, vendor.id) as any);
+  };
+
+  const clearAllFilters = () => {
+    setSelectedRegion(null);
+    setSortBy('rating');
+    setSearchQuery('');
   };
 
   if (loading) {
@@ -186,7 +296,7 @@ export default function VendorsScreen() {
       <View style={styles.header}>
         <TouchableOpacity
           style={styles.backButton}
-          onPress={() => router.back()}
+          onPress={handleBack}
           activeOpacity={0.8}
         >
           <ArrowLeft size={22} color={Colors.textPrimary} weight="bold" />
@@ -204,6 +314,35 @@ export default function VendorsScreen() {
             </View>
           )}
         </TouchableOpacity>
+      </View>
+
+      {/* Search Bar */}
+      <View style={styles.searchContainer}>
+        <View style={styles.searchBar}>
+          <MagnifyingGlass size={20} color={Colors.textMuted} weight="regular" />
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Search vendors by name, location..."
+            placeholderTextColor={Colors.textMuted}
+            value={searchQuery}
+            onChangeText={(text) => {
+              setSearchQuery(text);
+            }}
+            returnKeyType="search"
+            onSubmitEditing={() => Keyboard.dismiss()}
+            clearButtonMode="never"
+            autoCorrect={false}
+            autoCapitalize="none"
+          />
+          {searchQuery.length > 0 && (
+            <TouchableOpacity 
+              onPress={() => setSearchQuery('')}
+              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+            >
+              <X size={18} color={Colors.textMuted} weight="bold" />
+            </TouchableOpacity>
+          )}
+        </View>
       </View>
 
       {/* Filters Panel */}
@@ -259,7 +398,7 @@ export default function VendorsScreen() {
       <View style={styles.resultsHeader}>
         <Text style={styles.resultsCount}>{filteredVendors.length} vendors found</Text>
         {activeFilterCount > 0 && (
-          <TouchableOpacity onPress={() => { setSelectedRegion(null); setSortBy('rating'); }}>
+          <TouchableOpacity onPress={clearAllFilters}>
             <Text style={styles.clearFilters}>Clear Filters</Text>
           </TouchableOpacity>
         )}
@@ -277,20 +416,24 @@ export default function VendorsScreen() {
                 <Storefront size={48} color={Colors.textMuted} weight="duotone" />
               </View>
               <Text style={styles.emptyTitle}>No vendors found</Text>
-              <Text style={styles.emptySubtitle}>Try adjusting your filters to find what you're looking for</Text>
+              <Text style={styles.emptySubtitle}>
+                {searchQuery.trim() 
+                  ? `No vendors match "${searchQuery}". Try a different search term or clear filters.`
+                  : 'Try adjusting your filters to find what you\'re looking for'}
+              </Text>
               {activeFilterCount > 0 && (
                 <Button
                   title="Clear Filters"
-                  onPress={() => { setSelectedRegion(null); setSortBy('rating'); }}
+                  onPress={clearAllFilters}
                   variant="secondary"
                   style={{ marginTop: Spacing.lg }}
                 />
               )}
             </View>
           ) : (
-            filteredVendors.map((vendor) => (
+            filteredVendors.map((vendor, index) => (
               <VendorCard
-                key={vendor.id}
+                key={`${vendor.id}-${index}`}
                 vendor={vendor}
                 onPress={() => handleVendorPress(vendor)}
               />
@@ -333,6 +476,26 @@ const styles = StyleSheet.create({
     fontFamily: FontFamily.displaySemiBold,
     fontSize: FontSize.h4,
     color: Colors.textPrimary,
+  },
+  searchContainer: {
+    paddingHorizontal: Spacing.base,
+    paddingBottom: Spacing.md,
+  },
+  searchBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: Colors.cardDark,
+    borderRadius: BorderRadius.full,
+    paddingLeft: Spacing.md,
+    paddingRight: Spacing.sm,
+    height: Heights.input,
+    gap: Spacing.sm,
+  },
+  searchInput: {
+    flex: 1,
+    fontFamily: FontFamily.body,
+    color: Colors.textPrimary,
+    fontSize: FontSize.small,
   },
   filterButton: {
     width: 44,

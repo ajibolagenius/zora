@@ -24,9 +24,13 @@ import {
   ClockCounterClockwise,
   TrendUp,
 } from 'phosphor-react-native';
-import { useProductSearch, useCategories, useRegions, usePriceRange, type ProductFilters } from '../hooks/useQueries';
+import { useProductSearch, useCategories, useRegions, usePriceRange, type ProductFilters, queryKeys } from '../hooks/useQueries';
 import { Colors, TrendingSearches, SortOptions, RatingOptions, Placeholders, PlaceholderImages } from '../constants';
 import { getProductRoute } from '../lib/navigationHelpers';
+import { realtimeService } from '../services/realtimeService';
+import { onboardingService } from '../services/onboardingService';
+import { isSupabaseConfigured } from '../lib/supabase';
+import { useQueryClient } from '@tanstack/react-query';
 
 // Use constants from app.ts
 const TRENDING_SEARCHES = TrendingSearches;
@@ -36,6 +40,7 @@ const RATING_OPTIONS = RatingOptions;
 export default function SearchScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const queryClient = useQueryClient();
   
   // Search state
   const [searchQuery, setSearchQuery] = useState('');
@@ -55,6 +60,43 @@ export default function SearchScreen() {
   const { data: regions = [] } = useRegions();
   const { data: priceRange } = usePriceRange();
   const { data: searchResults = [], isLoading, isFetching } = useProductSearch(searchQuery, filters);
+
+  // Real-time subscriptions
+  useEffect(() => {
+    if (!isSupabaseConfigured()) return;
+
+    const unsubscribers: (() => void)[] = [];
+
+    // Subscribe to products updates - invalidate search queries
+    realtimeService.subscribeToTable('products', '*', async () => {
+      // Invalidate all product-related queries to refetch
+      queryClient.invalidateQueries({ queryKey: queryKeys.products.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.products.search(searchQuery, filters) });
+      queryClient.invalidateQueries({ queryKey: ['categories'] });
+      queryClient.invalidateQueries({ queryKey: ['regions'] });
+      queryClient.invalidateQueries({ queryKey: ['priceRange'] });
+    }).then((unsub) => {
+      if (unsub) unsubscribers.push(unsub);
+    });
+
+    // Subscribe to regions updates
+    onboardingService.subscribeToRegions(() => {
+      queryClient.invalidateQueries({ queryKey: ['regions'] });
+    });
+
+    // Subscribe to categories updates
+    onboardingService.subscribeToCategories(() => {
+      queryClient.invalidateQueries({ queryKey: ['categories'] });
+    });
+
+    return () => {
+      unsubscribers.forEach((unsub) => {
+        if (typeof unsub === 'function') {
+          unsub();
+        }
+      });
+    };
+  }, [searchQuery, filters, queryClient]);
   
   // Active filter count
   const activeFilterCount = useMemo(() => {

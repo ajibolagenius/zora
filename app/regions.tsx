@@ -276,6 +276,15 @@ export default function RegionsScreen() {
     }
   }, []);
 
+  const handleBack = () => {
+    if (router.canGoBack()) {
+      router.back();
+    } else {
+      // Navigate to home screen if there's no navigation history
+      router.replace('/(tabs)');
+    }
+  };
+
   const handleRegionPress = (region: Region) => {
     setSelectedRegion(region.id);
     // Navigate to products filtered by region
@@ -298,7 +307,7 @@ export default function RegionsScreen() {
       <View style={styles.header}>
         <TouchableOpacity
           style={styles.backButton}
-          onPress={() => router.back()}
+          onPress={handleBack}
           activeOpacity={0.8}
         >
           <ArrowLeft size={22} color={Colors.textPrimary} weight="bold" />

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useMemo } from 'react';
 import {
   View,
   Text,
+  TextInput,
   StyleSheet,
   ScrollView,
   TouchableOpacity,
@@ -9,10 +10,12 @@ import {
   Easing,
   ActivityIndicator,
   useWindowDimensions,
+  Keyboard,
+  RefreshControl,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import { ArrowLeft, Funnel, X, Package } from 'phosphor-react-native';
+import { ArrowLeft, Funnel, X, Package, MagnifyingGlass } from 'phosphor-react-native';
 import { Colors } from '../constants/colors';
 import { Spacing, BorderRadius, Heights } from '../constants/spacing';
 import { FontSize, FontFamily } from '../constants/typography';
@@ -79,10 +82,12 @@ export default function ProductsScreen() {
   const [regions, setRegions] = useState<Region[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [selectedRegion, setSelectedRegion] = useState<string | null>(params.region || null);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(params.category || null);
   const [sortBy, setSortBy] = useState<string>('rating');
   const [showFilters, setShowFilters] = useState(false);
+  const [searchQuery, setSearchQuery] = useState<string>('');
 
   const addToCart = useCartStore((state) => state.addItem);
 
@@ -90,9 +95,11 @@ export default function ProductsScreen() {
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(20)).current;
 
-  const fetchData = async () => {
+  const fetchData = async (isRefresh = false) => {
     try {
-      setLoading(true);
+      if (!isRefresh) {
+        setLoading(true);
+      }
       
       // Fetch products from database or mock
       let productData: Product[];
@@ -123,25 +130,33 @@ export default function ProductsScreen() {
       }
       setCategories(categoryData);
 
-      Animated.parallel([
-        Animated.timing(fadeAnim, {
-          toValue: 1,
-          duration: AnimationDuration.default,
-          easing: AnimationEasing.standard,
-          useNativeDriver: true,
-        }),
-        Animated.timing(slideAnim, {
-          toValue: 0,
-          duration: AnimationDuration.default,
-          easing: AnimationEasing.standard,
-          useNativeDriver: true,
-        }),
-      ]).start();
+      if (!isRefresh) {
+        Animated.parallel([
+          Animated.timing(fadeAnim, {
+            toValue: 1,
+            duration: AnimationDuration.default,
+            easing: AnimationEasing.standard,
+            useNativeDriver: true,
+          }),
+          Animated.timing(slideAnim, {
+            toValue: 0,
+            duration: AnimationDuration.default,
+            easing: AnimationEasing.standard,
+            useNativeDriver: true,
+          }),
+        ]).start();
+      }
     } catch (error) {
       console.error('Error fetching products data:', error);
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
+  };
+
+  const onRefresh = () => {
+    setRefreshing(true);
+    fetchData(true);
   };
 
   useEffect(() => {
@@ -181,9 +196,39 @@ export default function ProductsScreen() {
     };
   }, []);
 
+  // Shuffle array randomly
+  const shuffleArray = <T,>(array: T[]): T[] => {
+    const shuffled = [...array];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled;
+  };
+
   // Filtered and sorted products
   const filteredProducts = useMemo(() => {
+    if (!products || products.length === 0) {
+      return [];
+    }
+
     let result = [...products];
+
+    // Filter by search query first
+    if (searchQuery && searchQuery.trim().length > 0) {
+      const query = searchQuery.toLowerCase().trim();
+      result = result.filter(p => {
+        const name = String(p.name || '').toLowerCase();
+        const description = String(p.description || '').toLowerCase();
+        const category = String(p.category || '').toLowerCase();
+        const culturalRegion = String(p.cultural_region || '').toLowerCase();
+        
+        return name.includes(query) ||
+               description.includes(query) ||
+               category.includes(query) ||
+               culturalRegion.includes(query);
+      });
+    }
 
     // Filter by region - convert slug format (west-africa) to match cultural_region (West Africa)
     if (selectedRegion) {
@@ -204,26 +249,32 @@ export default function ProductsScreen() {
     // Sort
     switch (sortBy) {
       case 'rating':
-        result.sort((a, b) => b.rating - a.rating);
+        result.sort((a, b) => (b.rating || 0) - (a.rating || 0));
         break;
       case 'price_asc':
-        result.sort((a, b) => a.price - b.price);
+        result.sort((a, b) => (a.price || 0) - (b.price || 0));
         break;
       case 'price_desc':
-        result.sort((a, b) => b.price - a.price);
+        result.sort((a, b) => (b.price || 0) - (a.price || 0));
         break;
       case 'name':
-        result.sort((a, b) => a.name.localeCompare(b.name));
+        result.sort((a, b) => {
+          const nameA = String(a.name || '').toLowerCase();
+          const nameB = String(b.name || '').toLowerCase();
+          return nameA.localeCompare(nameB);
+        });
         break;
     }
 
-    return result;
-  }, [products, selectedRegion, selectedCategory, sortBy]);
+    // Randomize the final results for variety
+    return shuffleArray(result);
+  }, [products, selectedRegion, selectedCategory, sortBy, searchQuery]);
 
   const activeFilterCount =
     (selectedRegion ? 1 : 0) +
     (selectedCategory ? 1 : 0) +
-    (sortBy !== 'rating' ? 1 : 0);
+    (sortBy !== 'rating' ? 1 : 0) +
+    (searchQuery.trim() ? 1 : 0);
 
   const handleProductPress = (product: Product) => {
     router.push(getProductRoute(product.id) as any);
@@ -233,10 +284,19 @@ export default function ProductsScreen() {
     addToCart(product as any, 1);
   };
 
+  const handleBack = () => {
+    if (router.canGoBack()) {
+      router.back();
+    } else {
+      router.replace('/(tabs)');
+    }
+  };
+
   const clearAllFilters = () => {
     setSelectedRegion(null);
     setSelectedCategory(null);
     setSortBy('rating');
+    setSearchQuery('');
   };
 
   // Get page title based on filters
@@ -270,7 +330,7 @@ export default function ProductsScreen() {
       <View style={styles.header}>
         <TouchableOpacity
           style={styles.backButton}
-          onPress={() => router.back()}
+          onPress={handleBack}
           activeOpacity={0.8}
         >
           <ArrowLeft size={22} color={Colors.textPrimary} weight="bold" />
@@ -288,6 +348,33 @@ export default function ProductsScreen() {
             </View>
           )}
         </TouchableOpacity>
+      </View>
+
+      {/* Search Bar */}
+      <View style={styles.searchContainer}>
+        <View style={styles.searchBar}>
+          <MagnifyingGlass size={20} color={Colors.textMuted} weight="regular" />
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Search products by name, category..."
+            placeholderTextColor={Colors.textMuted}
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+            returnKeyType="search"
+            onSubmitEditing={() => Keyboard.dismiss()}
+            clearButtonMode="never"
+            autoCorrect={false}
+            autoCapitalize="none"
+          />
+          {searchQuery.length > 0 && (
+            <TouchableOpacity 
+              onPress={() => setSearchQuery('')}
+              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+            >
+              <X size={18} color={Colors.textMuted} weight="bold" />
+            </TouchableOpacity>
+          )}
+        </View>
       </View>
 
       {/* Filters Panel */}
@@ -381,6 +468,13 @@ export default function ProductsScreen() {
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor={Colors.primary}
+          />
+        }
       >
         <Animated.View style={{ opacity: fadeAnim, transform: [{ translateY: slideAnim }] }}>
           {filteredProducts.length === 0 ? (
@@ -389,7 +483,11 @@ export default function ProductsScreen() {
                 <Package size={48} color={Colors.textMuted} weight="duotone" />
               </View>
               <Text style={styles.emptyTitle}>No products found</Text>
-              <Text style={styles.emptySubtitle}>Try adjusting your filters to find what you're looking for</Text>
+              <Text style={styles.emptySubtitle}>
+                {searchQuery.trim() 
+                  ? `No products match "${searchQuery}". Try a different search term or clear filters.`
+                  : 'Try adjusting your filters to find what you\'re looking for'}
+              </Text>
               {activeFilterCount > 0 && (
                 <Button
                   title="Clear Filters"
@@ -459,6 +557,26 @@ const styles = StyleSheet.create({
     color: Colors.textPrimary,
     textAlign: 'center',
     marginHorizontal: Spacing.sm,
+  },
+  searchContainer: {
+    paddingHorizontal: Spacing.base,
+    paddingBottom: Spacing.md,
+  },
+  searchBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: Colors.cardDark,
+    borderRadius: BorderRadius.full,
+    paddingLeft: Spacing.md,
+    paddingRight: Spacing.sm,
+    height: Heights.input,
+    gap: Spacing.sm,
+  },
+  searchInput: {
+    flex: 1,
+    fontFamily: FontFamily.body,
+    color: Colors.textPrimary,
+    fontSize: FontSize.small,
   },
   filterButton: {
     width: 44,

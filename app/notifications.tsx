@@ -17,10 +17,11 @@ import {
   PiggyBank,
   Truck,
   Bell,
+  ArrowLeft,
 } from 'phosphor-react-native';
 import { Button } from '../components/ui';
 import { Colors } from '../constants/colors';
-import { Spacing, BorderRadius } from '../constants/spacing';
+import { Spacing, BorderRadius, Shadows } from '../constants/spacing';
 import { FontSize, FontFamily } from '../constants/typography';
 import { useNotificationStore } from '../stores/notificationStore';
 import { useAuthStore } from '../stores/authStore';
@@ -63,6 +64,7 @@ export default function NotificationsScreen() {
   const [activeTab, setActiveTab] = useState<TabType>('all');
   const {
     notifications,
+    unreadCount,
     fetchNotifications,
     markAsRead,
     markAllAsRead,
@@ -87,43 +89,88 @@ export default function NotificationsScreen() {
   }, []);
 
   const getIconConfig = (type: string, isRead: boolean) => {
-    const opacityHex = isRead ? '80' : 'FF'; // 50% opacity = 80, 100% = FF
+    const baseOpacity = isRead ? 0.6 : 1.0;
     switch (type) {
       case 'order':
         return {
           icon: Package,
-          bgColor: `${Colors.info}${opacityHex}`,
+          bgColor: isRead ? Colors.info20 : Colors.info,
           iconColor: Colors.textPrimary,
         };
       case 'promo':
         return {
           icon: Confetti,
-          bgColor: Colors.secondary,
+          bgColor: isRead ? Colors.secondary20 : Colors.secondary,
           iconColor: Colors.backgroundDark,
         };
       case 'review':
         return {
           icon: Star,
-          bgColor: Colors.success,
+          bgColor: isRead ? Colors.success20 : Colors.success,
           iconColor: Colors.textPrimary,
         };
       case 'reward':
         return {
           icon: PiggyBank,
-          bgColor: `${ZORA_PURPLE}${opacityHex}`,
+          bgColor: isRead ? `${ZORA_PURPLE}80` : ZORA_PURPLE,
+          iconColor: Colors.textPrimary,
+        };
+      case 'system':
+        return {
+          icon: Bell,
+          bgColor: isRead ? Colors.primary20 : Colors.primary,
           iconColor: Colors.textPrimary,
         };
       default:
         return {
           icon: Package,
-          bgColor: Colors.info,
+          bgColor: isRead ? Colors.info20 : Colors.info,
           iconColor: Colors.textPrimary,
         };
     }
   };
 
+  const handleBack = () => {
+    if (router.canGoBack()) {
+      router.back();
+    } else {
+      router.replace('/(tabs)');
+    }
+  };
+
   const handleMarkAllRead = () => {
     markAllAsRead();
+  };
+
+  const handleNotificationPress = (notification: Notification) => {
+    // Mark as read first
+    if (!notification.is_read) {
+      markAsRead(notification.id);
+    }
+
+    // Navigate based on notification type or action_url
+    if (notification.action_url) {
+      router.push(notification.action_url as any);
+      return;
+    }
+
+    // Fallback navigation based on type
+    switch (notification.type) {
+      case 'order':
+        router.push('/(tabs)/orders' as any);
+        break;
+      case 'promo':
+        // Could navigate to promos/deals screen if exists
+        break;
+      case 'review':
+        // Could navigate to reviews screen or product
+        break;
+      case 'reward':
+        router.push('/rewards' as any);
+        break;
+      default:
+        break;
+    }
   };
 
   const categorizeNotifications = (filtered: Notification[]): NotificationGroup[] => {
@@ -173,10 +220,28 @@ export default function NotificationsScreen() {
       {/* Header */}
       <View style={styles.header}>
         <View style={styles.headerTop}>
-          <Text style={styles.headerTitle}>Notifications</Text>
-          <TouchableOpacity onPress={handleMarkAllRead}>
-            <Text style={styles.markAllRead}>Mark all read</Text>
-          </TouchableOpacity>
+          <View style={styles.headerLeft}>
+            <TouchableOpacity
+              style={styles.backButton}
+              onPress={handleBack}
+              activeOpacity={0.8}
+            >
+              <ArrowLeft size={22} color={Colors.textPrimary} weight="bold" />
+            </TouchableOpacity>
+            <Text style={styles.headerTitle}>Notifications</Text>
+            {unreadCount > 0 && (
+              <View style={styles.unreadBadge}>
+                <Text style={styles.unreadBadgeText}>
+                  {unreadCount > 99 ? '99+' : unreadCount}
+                </Text>
+              </View>
+            )}
+          </View>
+          {notifications.length > 0 && unreadCount > 0 && (
+            <TouchableOpacity onPress={handleMarkAllRead} activeOpacity={0.8}>
+              <Text style={styles.markAllRead}>Mark all read</Text>
+            </TouchableOpacity>
+          )}
         </View>
 
         {/* Filter Tabs */}
@@ -243,9 +308,10 @@ export default function NotificationsScreen() {
                       style={[
                         styles.notificationCard,
                         notification.is_read && styles.notificationCardRead,
+                        !notification.is_read && styles.notificationCardUnread,
                       ]}
                       activeOpacity={0.8}
-                      onPress={() => markAsRead(notification.id)}
+                      onPress={() => handleNotificationPress(notification)}
                     >
                       {/* Icon */}
                       <View
@@ -282,9 +348,11 @@ export default function NotificationsScreen() {
                         </Text>
                       </View>
 
-                      {/* Unread Dot */}
+                      {/* Unread Indicator */}
                       {!notification.is_read && (
-                        <View style={styles.unreadDot} />
+                        <View style={styles.unreadIndicator}>
+                          <View style={styles.unreadDot} />
+                        </View>
                       )}
                     </TouchableOpacity>
                   );
@@ -310,22 +378,54 @@ const styles = StyleSheet.create({
   header: {
     borderBottomWidth: 1,
     borderBottomColor: Colors.borderDark,
+    backgroundColor: Colors.backgroundDark,
+    ...Shadows.sm,
   },
   headerTop: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    paddingVertical: 16,
+    paddingHorizontal: Spacing.base,
+    paddingVertical: Spacing.md,
+  },
+  headerLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.md,
+    flex: 1,
+  },
+  backButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: 'transparent',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   headerTitle: {
-    fontFamily: FontFamily.display,
-    fontSize: 24,
+    fontFamily: FontFamily.displaySemiBold,
+    fontSize: FontSize.h3,
     color: Colors.textPrimary,
     letterSpacing: -0.5,
+    flex: 1,
+  },
+  unreadBadge: {
+    backgroundColor: Colors.primary,
+    borderRadius: BorderRadius.full,
+    paddingHorizontal: Spacing.sm,
+    paddingVertical: 2,
+    minWidth: 24,
+    height: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  unreadBadgeText: {
+    fontFamily: FontFamily.bodyBold,
+    fontSize: FontSize.tiny,
+    color: Colors.textPrimary,
   },
   markAllRead: {
-    fontFamily: FontFamily.bodyBold,
+    fontFamily: FontFamily.bodySemiBold,
     fontSize: FontSize.small,
     color: Colors.primary,
     letterSpacing: 0.3,
@@ -334,26 +434,30 @@ const styles = StyleSheet.create({
   // Tabs
   tabsContainer: {
     flexDirection: 'row',
-    paddingHorizontal: 20,
-    gap: 32,
+    paddingHorizontal: Spacing.base,
+    gap: Spacing.xl,
     borderBottomWidth: 1,
     borderBottomColor: Colors.borderDark,
+    backgroundColor: Colors.backgroundDark,
   },
   tab: {
-    paddingBottom: 12,
-    borderBottomWidth: 3,
+    paddingBottom: Spacing.md,
+    borderBottomWidth: 2,
     borderBottomColor: 'transparent',
+    position: 'relative',
   },
   tabActive: {
     borderBottomColor: Colors.primary,
   },
   tabText: {
-    fontFamily: FontFamily.bodyBold,
+    fontFamily: FontFamily.bodySemiBold,
     fontSize: FontSize.small,
     color: Colors.textMuted,
+    letterSpacing: 0.2,
   },
   tabTextActive: {
     color: Colors.textPrimary,
+    fontFamily: FontFamily.bodyBold,
   },
 
   // Scroll View
@@ -362,68 +466,80 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingHorizontal: Spacing.base,
-    paddingTop: 24,
+    paddingTop: Spacing.lg,
   },
 
   // Section
   section: {
-    marginBottom: 32,
+    marginBottom: Spacing['2xl'],
   },
   sectionTitle: {
     fontFamily: FontFamily.bodyBold,
     fontSize: FontSize.small,
     color: Colors.textPrimary,
     textTransform: 'uppercase',
-    letterSpacing: 1.5,
-    marginBottom: 16,
-    paddingHorizontal: 4,
-    opacity: 0.8,
+    letterSpacing: 1.2,
+    marginBottom: Spacing.base,
+    paddingHorizontal: Spacing.xs,
+    opacity: 0.9,
   },
 
   // Notification List
   notificationsList: {
-    gap: 12,
+    gap: Spacing.md,
   },
   notificationCard: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    gap: 16,
+    gap: Spacing.base,
     backgroundColor: Colors.cardDark,
     borderRadius: BorderRadius.xl,
-    padding: 16,
+    padding: Spacing.base,
     position: 'relative',
+    ...Shadows.sm,
+    borderWidth: 1,
+    borderColor: Colors.borderDark,
   },
   notificationCardRead: {
-    opacity: 0.7,
+    opacity: 0.6,
+    borderColor: 'transparent',
+  },
+  notificationCardUnread: {
+    borderColor: Colors.primary20,
+    backgroundColor: Colors.cardDark,
   },
   notificationIcon: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
+    width: 52,
+    height: 52,
+    borderRadius: 26,
     justifyContent: 'center',
     alignItems: 'center',
+    ...Shadows.sm,
   },
   notificationContent: {
     flex: 1,
-    paddingRight: 24,
+    paddingRight: Spacing.lg,
+    gap: Spacing.xs,
   },
   notificationHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
-    marginBottom: 4,
+    marginBottom: Spacing.xs,
+    gap: Spacing.sm,
   },
   notificationTitle: {
     fontFamily: FontFamily.bodyBold,
-    fontSize: 15,
+    fontSize: FontSize.body,
     color: Colors.textPrimary,
     flex: 1,
-    paddingRight: 8,
+    lineHeight: 20,
   },
   notificationTime: {
     fontFamily: FontFamily.bodyMedium,
-    fontSize: 12,
+    fontSize: FontSize.caption,
     color: Colors.textMuted,
+    marginTop: 2,
   },
   notificationDescription: {
     fontFamily: FontFamily.body,
@@ -431,14 +547,21 @@ const styles = StyleSheet.create({
     color: Colors.textMuted,
     lineHeight: 20,
   },
-  unreadDot: {
+  unreadIndicator: {
     position: 'absolute',
-    top: 20,
-    right: 16,
-    width: 10,
-    height: 10,
-    borderRadius: 5,
+    top: Spacing.md,
+    right: Spacing.base,
+    width: 12,
+    height: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  unreadDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
     backgroundColor: Colors.primary,
+    ...Shadows.sm,
   },
 
   // Empty State - Consistent with Cart/Orders

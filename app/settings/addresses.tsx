@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   View,
   Text,
@@ -6,6 +6,7 @@ import {
   ScrollView,
   TouchableOpacity,
   Alert,
+  ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -24,6 +25,10 @@ import { Colors } from '../../constants/colors';
 import { Spacing, BorderRadius } from '../../constants/spacing';
 import { FontSize, FontFamily, LetterSpacing } from '../../constants/typography';
 import { AlertMessages } from '../../constants';
+import { onboardingService, type Address as OnboardingAddress } from '../../services/onboardingService';
+import { useAuthStore } from '../../stores/authStore';
+import { isSupabaseConfigured, getSupabaseFrom } from '../../lib/supabase';
+import { realtimeService } from '../../services/realtimeService';
 
 // Available colors from Design System for randomized icons
 const DESIGN_SYSTEM_COLORS = [
@@ -55,6 +60,30 @@ interface Address {
   icon: React.ComponentType<any>;
   color: string;
 }
+
+// Map onboardingService Address to component Address format
+const mapOnboardingAddressToAddress = (addr: OnboardingAddress, index: number, colors: string[]): Address => {
+  // Infer type from label
+  const labelLower = addr.label.toLowerCase();
+  let type: 'home' | 'work' | 'other' = 'other';
+  if (labelLower.includes('home') || labelLower.includes('house')) {
+    type = 'home';
+  } else if (labelLower.includes('work') || labelLower.includes('office')) {
+    type = 'work';
+  }
+
+  return {
+    id: addr.id,
+    label: addr.label,
+    type,
+    street: addr.address_line1,
+    city: addr.city,
+    postcode: addr.postcode,
+    isDefault: addr.is_default,
+    icon: getAddressIcon(type),
+    color: colors[index % colors.length],
+  };
+};
 
 const ADDRESSES_BASE: Omit<Address, 'icon' | 'color'>[] = [
   {
@@ -99,23 +128,129 @@ const getAddressIcon = (type: string) => {
 
 export default function SavedAddressesScreen() {
   const router = useRouter();
-  const [addresses, setAddresses] = useState(ADDRESSES_BASE);
+  const { user } = useAuthStore();
+  const [addresses, setAddresses] = useState<Address[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // Assign icons and colors to addresses
+  // Fetch addresses from database
+  const fetchAddresses = async () => {
+    if (!user?.user_id) {
+      // Fallback to mock data if no user
+      setAddresses(ADDRESSES_BASE.map((addr, index) => ({
+        ...addr,
+        icon: getAddressIcon(addr.type),
+        color: shuffleArray(DESIGN_SYSTEM_COLORS)[index % DESIGN_SYSTEM_COLORS.length],
+      })));
+      setLoading(false);
+      return;
+    }
+
+    try {
+      setLoading(true);
+      let addressData: Address[];
+
+      if (isSupabaseConfigured()) {
+        const dbAddresses = await onboardingService.getUserAddresses(user.user_id);
+        const shuffledColors = shuffleArray(DESIGN_SYSTEM_COLORS);
+        addressData = dbAddresses.map((addr, index) =>
+          mapOnboardingAddressToAddress(addr, index, shuffledColors)
+        );
+      } else {
+        // Use mock data
+        const shuffledColors = shuffleArray(DESIGN_SYSTEM_COLORS);
+        addressData = ADDRESSES_BASE.map((addr, index) => ({
+          ...addr,
+          icon: getAddressIcon(addr.type),
+          color: shuffledColors[index % shuffledColors.length],
+        }));
+      }
+
+      setAddresses(addressData);
+    } catch (error) {
+      console.error('Error fetching addresses:', error);
+      // Fallback to mock data on error
+      const shuffledColors = shuffleArray(DESIGN_SYSTEM_COLORS);
+      setAddresses(ADDRESSES_BASE.map((addr, index) => ({
+        ...addr,
+        icon: getAddressIcon(addr.type),
+        color: shuffledColors[index % shuffledColors.length],
+      })));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Real-time subscriptions
+  useEffect(() => {
+    fetchAddresses();
+
+    if (!isSupabaseConfigured() || !user?.user_id) {
+      return;
+    }
+
+    const unsubscribers: (() => void)[] = [];
+
+    // Subscribe to addresses updates
+    realtimeService.subscribeToTable(
+      'addresses',
+      '*',
+      async () => {
+        // Refetch addresses when updated
+        const updatedAddresses = await onboardingService.getUserAddresses(user.user_id);
+        const shuffledColors = shuffleArray(DESIGN_SYSTEM_COLORS);
+        const mappedAddresses = updatedAddresses.map((addr, index) =>
+          mapOnboardingAddressToAddress(addr, index, shuffledColors)
+        );
+        setAddresses(mappedAddresses);
+      },
+      `user_id=eq.${user.user_id}`
+    ).then((unsub) => {
+      if (unsub) unsubscribers.push(unsub);
+    });
+
+    return () => {
+      unsubscribers.forEach((unsub) => {
+        if (typeof unsub === 'function') {
+          unsub();
+        }
+      });
+    };
+  }, [user?.user_id]);
+
+  // Assign icons and colors to addresses (for display)
   const addressesWithIcons = useMemo(() => {
-    const shuffledColors = shuffleArray(DESIGN_SYSTEM_COLORS);
-    return addresses.map((address, index) => ({
-      ...address,
-      icon: getAddressIcon(address.type),
-      color: shuffledColors[index % shuffledColors.length],
-    }));
+    return addresses;
   }, [addresses]);
 
-  const handleSetDefault = (id: string) => {
-    setAddresses(addresses.map(a => ({
-      ...a,
-      isDefault: a.id === id,
-    })));
+  const handleSetDefault = async (id: string) => {
+    if (!user?.user_id || !isSupabaseConfigured()) {
+      // Optimistic update for mock data
+      setAddresses(addresses.map(a => ({
+        ...a,
+        isDefault: a.id === id,
+      })));
+      return;
+    }
+
+    try {
+      // Update in database - the real-time subscription will handle the UI update
+      const fromMethod = await getSupabaseFrom();
+      if (fromMethod) {
+        // First, unset all defaults
+        await fromMethod('addresses')
+          .update({ is_default: false })
+          .eq('user_id', user.user_id);
+
+        // Then set the selected one as default
+        await fromMethod('addresses')
+          .update({ is_default: true })
+          .eq('id', id)
+          .eq('user_id', user.user_id);
+      }
+    } catch (error) {
+      console.error('Error setting default address:', error);
+      Alert.alert('Error', 'Failed to set default address. Please try again.');
+    }
   };
 
   const handleEdit = (id: string) => {
@@ -131,7 +266,27 @@ export default function SavedAddressesScreen() {
         {
           text: AlertMessages.titles.delete,
           style: 'destructive',
-          onPress: () => setAddresses(addresses.filter(a => a.id !== id)),
+          onPress: async () => {
+            if (!user?.user_id || !isSupabaseConfigured()) {
+              // Optimistic update for mock data
+              setAddresses(addresses.filter(a => a.id !== id));
+              return;
+            }
+
+            try {
+              // Delete from database - real-time subscription will handle UI update
+              const fromMethod = await getSupabaseFrom();
+              if (fromMethod) {
+                await fromMethod('addresses')
+                  .delete()
+                  .eq('id', id)
+                  .eq('user_id', user.user_id);
+              }
+            } catch (error) {
+              console.error('Error deleting address:', error);
+              Alert.alert('Error', 'Failed to delete address. Please try again.');
+            }
+          },
         },
       ]
     );
@@ -141,13 +296,42 @@ export default function SavedAddressesScreen() {
     Alert.alert('Add Address', AlertMessages.info.addressAddComingSoon);
   };
 
+  const handleBack = () => {
+    if (router.canGoBack()) {
+      router.back();
+    } else {
+      router.replace('/(tabs)');
+    }
+  };
+
+  if (loading) {
+    return (
+      <SafeAreaView style={styles.container} edges={['top']}>
+        <View style={styles.header}>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={handleBack}
+            activeOpacity={0.8}
+          >
+            <ArrowLeft size={24} color={Colors.textPrimary} weight="bold" />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>Saved Addresses</Text>
+          <View style={styles.headerRight} />
+        </View>
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color={Colors.primary} />
+        </View>
+      </SafeAreaView>
+    );
+  }
+
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity
           style={styles.backButton}
-          onPress={() => router.back()}
+          onPress={handleBack}
           activeOpacity={0.8}
         >
           <ArrowLeft size={24} color={Colors.textPrimary} weight="bold" />
@@ -265,6 +449,11 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.backgroundDark,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 
   // Header
