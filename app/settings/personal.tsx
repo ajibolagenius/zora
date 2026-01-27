@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -27,6 +27,8 @@ import { Spacing, BorderRadius } from '../../constants/spacing';
 import { FontSize, FontFamily, LetterSpacing } from '../../constants/typography';
 import { ErrorMessages, SuccessMessages, AlertMessages, CommonImages } from '../../constants';
 import { useAuthStore } from '../../stores/authStore';
+import { realtimeService } from '../../services/realtimeService';
+import { isSupabaseConfigured } from '../../lib/supabase';
 
 // Mock user data
 const USER_DATA = {
@@ -40,7 +42,7 @@ const USER_DATA = {
 
 export default function PersonalInformationScreen() {
   const router = useRouter();
-  const { user, updateProfile } = useAuthStore();
+  const { user, updateProfile, checkAuth } = useAuthStore();
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
     firstName: user?.name?.split(' ')[0] || USER_DATA.firstName,
@@ -49,6 +51,33 @@ export default function PersonalInformationScreen() {
     phone: user?.phone || USER_DATA.phone,
     dateOfBirth: USER_DATA.dateOfBirth,
   });
+
+  // Subscribe to real-time profile updates
+  useEffect(() => {
+    if (!isSupabaseConfigured() || !user?.user_id) return;
+
+    const unsubscribe = realtimeService.subscribeToTable(
+      'profiles',
+      'UPDATE',
+      async (payload) => {
+        if (payload.new?.id === user.user_id) {
+          // Profile was updated, refresh user data
+          await checkAuth();
+        }
+      },
+      `id=eq.${user.user_id}`
+    );
+
+    return () => {
+      if (unsubscribe) {
+        unsubscribe.then((unsub) => {
+          if (typeof unsub === 'function') {
+            unsub();
+          }
+        });
+      }
+    };
+  }, [user?.user_id]);
 
   const handleSave = async () => {
     try {
@@ -61,6 +90,8 @@ export default function PersonalInformationScreen() {
           name: updatedName,
           phone: formData.phone,
         });
+        // Refresh auth to get updated profile data
+        await checkAuth();
       } catch (updateError) {
         // If update fails (e.g., Supabase not configured), still update local state
         // This allows the UI to work in dev mode

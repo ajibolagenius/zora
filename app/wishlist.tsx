@@ -21,6 +21,8 @@ import { useAuthStore } from '../stores/authStore';
 import { useCartStore } from '../stores/cartStore';
 import { getProductRoute } from '../lib/navigationHelpers';
 import { wishlistService } from '../services/wishlistService';
+import { realtimeService } from '../services/realtimeService';
+import { isSupabaseConfigured } from '../lib/supabase';
 import { UiConfig } from '../constants';
 
 const PRODUCT_GAP = UiConfig.productGap;
@@ -40,6 +42,33 @@ export default function WishlistScreen() {
     if (user?.user_id) {
       loadWishlistFromDatabase();
     }
+  }, [user?.user_id]);
+
+  // Subscribe to real-time wishlist updates
+  useEffect(() => {
+    if (!isSupabaseConfigured() || !user?.user_id) return;
+
+    const unsubscribe = realtimeService.subscribeToTable(
+      'wishlist',
+      '*',
+      async (payload) => {
+        if (payload.new?.user_id === user.user_id || payload.old?.user_id === user.user_id) {
+          // Wishlist was updated, refresh data
+          await loadWishlistFromDatabase();
+        }
+      },
+      `user_id=eq.${user.user_id}`
+    );
+
+    return () => {
+      if (unsubscribe) {
+        unsubscribe.then((unsub) => {
+          if (typeof unsub === 'function') {
+            unsub();
+          }
+        });
+      }
+    };
   }, [user?.user_id]);
 
   const loadWishlistFromDatabase = async () => {

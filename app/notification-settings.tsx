@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   View,
   Text,
@@ -21,6 +21,9 @@ import { Colors } from '../constants/colors';
 import { Spacing, BorderRadius } from '../constants/spacing';
 import { FontSize, FontFamily, LetterSpacing } from '../constants/typography';
 import { Toggle } from '../components/ui/Toggle';
+import { useAuthStore } from '../stores/authStore';
+import { realtimeService } from '../services/realtimeService';
+import { isSupabaseConfigured, getSupabaseClient } from '../lib/supabase';
 
 // Available colors from Design System for randomized icons
 const DESIGN_SYSTEM_COLORS = [
@@ -58,7 +61,9 @@ const CATEGORIES_BASE: Omit<CategoryItem, 'color'>[] = [
 
 export default function NotificationPreferencesScreen() {
   const router = useRouter();
-  const [pushEnabled, setPushEnabled] = useState(true);
+  const { user, checkAuth } = useAuthStore();
+  const [pushEnabled, setPushEnabled] = useState(user?.push_notifications_enabled ?? true);
+  const [loading, setLoading] = useState(true);
   
   // Assign random colors to categories
   const categories = useMemo(() => {
@@ -81,11 +86,106 @@ export default function NotificationPreferencesScreen() {
     to: '07:00 AM',
   });
 
-  const toggleCategory = (id: string) => {
+  // Load notification preferences from database
+  const loadPreferences = async () => {
+    if (!user?.user_id || !isSupabaseConfigured()) {
+      setLoading(false);
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const client = await getSupabaseClient();
+      const { data: profile } = await client
+        .from('profiles')
+        .select('push_notifications_enabled')
+        .eq('id', user.user_id)
+        .single();
+
+      if (profile) {
+        setPushEnabled(profile.push_notifications_enabled ?? true);
+      }
+    } catch (error) {
+      console.error('Error loading notification preferences:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadPreferences();
+
+    // Subscribe to real-time profile updates
+    if (isSupabaseConfigured() && user?.user_id) {
+      const unsubscribe = realtimeService.subscribeToTable(
+        'profiles',
+        'UPDATE',
+        async (payload) => {
+          if (payload.new?.id === user.user_id) {
+            // Profile was updated, refresh preferences
+            await loadPreferences();
+            await checkAuth();
+          }
+        },
+        `id=eq.${user.user_id}`
+      );
+
+      return () => {
+        if (unsubscribe) {
+          unsubscribe.then((unsub) => {
+            if (typeof unsub === 'function') {
+              unsub();
+            }
+          });
+        }
+      };
+    }
+  }, [user?.user_id]);
+
+  const toggleCategory = async (id: string) => {
+    const newValue = !categorySettings[id];
     setCategorySettings((prev) => ({
       ...prev,
-      [id]: !prev[id],
+      [id]: newValue,
     }));
+
+    // Save to database if configured
+    if (isSupabaseConfigured() && user?.user_id) {
+      try {
+        // Note: This would require a notification_preferences JSONB column in profiles
+        // For now, we'll just update the push_notifications_enabled flag
+        // TODO: Implement full notification preferences storage when schema is updated
+      } catch (error) {
+        console.error('Error saving notification preference:', error);
+        // Revert on error
+        setCategorySettings((prev) => ({
+          ...prev,
+          [id]: !newValue,
+        }));
+      }
+    }
+  };
+
+  const handlePushToggle = async (value: boolean) => {
+    setPushEnabled(value);
+
+    // Save to database
+    if (isSupabaseConfigured() && user?.user_id) {
+      try {
+        const client = await getSupabaseClient();
+        await client
+          .from('profiles')
+          .update({ push_notifications_enabled: value })
+          .eq('id', user.user_id);
+        
+        // Refresh user data
+        await checkAuth();
+      } catch (error) {
+        console.error('Error saving push notification preference:', error);
+        // Revert on error
+        setPushEnabled(!value);
+      }
+    }
   };
 
   return (
@@ -125,7 +225,8 @@ export default function NotificationPreferencesScreen() {
           
           <Toggle
             value={pushEnabled}
-            onValueChange={setPushEnabled}
+            onValueChange={handlePushToggle}
+            disabled={loading}
           />
         </View>
 

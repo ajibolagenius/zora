@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   View,
   Text,
@@ -22,6 +22,8 @@ import { Colors } from '../../constants/colors';
 import { Spacing, BorderRadius } from '../../constants/spacing';
 import { FontSize, FontFamily, LetterSpacing } from '../../constants/typography';
 import { useAuthStore } from '../../stores/authStore';
+import { realtimeService } from '../../services/realtimeService';
+import { isSupabaseConfigured } from '../../lib/supabase';
 
 // Available colors from Design System for randomized icons
 const DESIGN_SYSTEM_COLORS = [
@@ -73,8 +75,35 @@ const getCardIcon = (type: string) => {
 
 export default function PaymentMethodsScreen() {
   const router = useRouter();
-  const { user } = useAuthStore();
+  const { user, checkAuth } = useAuthStore();
   const [methods, setMethods] = useState(PAYMENT_METHODS_BASE);
+
+  // Subscribe to real-time profile updates (for any payment-related preferences)
+  useEffect(() => {
+    if (!isSupabaseConfigured() || !user?.user_id) return;
+
+    const unsubscribe = realtimeService.subscribeToTable(
+      'profiles',
+      'UPDATE',
+      async (payload) => {
+        if (payload.new?.id === user.user_id) {
+          // Profile was updated, refresh user data
+          await checkAuth();
+        }
+      },
+      `id=eq.${user.user_id}`
+    );
+
+    return () => {
+      if (unsubscribe) {
+        unsubscribe.then((unsub) => {
+          if (typeof unsub === 'function') {
+            unsub();
+          }
+        });
+      }
+    };
+  }, [user?.user_id]);
 
   // Assign random colors to payment methods
   const paymentMethods = useMemo(() => {

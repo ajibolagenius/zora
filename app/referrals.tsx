@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   View,
   Text,
@@ -29,6 +29,8 @@ import { Spacing, BorderRadius } from '../constants/spacing';
 import { FontSize, FontFamily, LetterSpacing } from '../constants/typography';
 import { SuccessMessages, ReferralConstants } from '../constants';
 import { useAuthStore } from '../stores/authStore';
+import { realtimeService } from '../services/realtimeService';
+import { isSupabaseConfigured, getSupabaseClient } from '../lib/supabase';
 
 // Available colors from Design System for randomized icons
 const DESIGN_SYSTEM_COLORS = [
@@ -99,8 +101,63 @@ const HOW_IT_WORKS_BASE: Omit<HowItWorks, 'color'>[] = [
 
 export default function ReferralsScreen() {
   const router = useRouter();
-  const { user } = useAuthStore();
+  const { user, checkAuth } = useAuthStore();
   const [copied, setCopied] = useState(false);
+  const [referralStats, setReferralStats] = useState({
+    friendsJoined: 5,
+    totalEarned: 50,
+  });
+
+  // Fetch referral stats from database
+  const fetchReferralStats = async () => {
+    if (!user?.user_id || !isSupabaseConfigured()) {
+      return;
+    }
+
+    try {
+      const client = await getSupabaseClient();
+      
+      // Count users who signed up with this user's referral code
+      // This would require a referral_code_used field in profiles or a separate referrals table
+      // For now, we'll use mock data but set up the structure for future implementation
+      // TODO: Implement referral tracking when referral system is fully set up
+      
+      // For now, we can count based on orders that might have referral bonuses
+      // This is a placeholder - actual implementation would depend on referral system design
+    } catch (error) {
+      console.error('Error fetching referral stats:', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchReferralStats();
+
+    // Subscribe to real-time profile updates (for referral_code changes)
+    if (isSupabaseConfigured() && user?.user_id) {
+      const unsubscribe = realtimeService.subscribeToTable(
+        'profiles',
+        'UPDATE',
+        async (payload) => {
+          if (payload.new?.id === user.user_id) {
+            // Profile was updated, refresh user data
+            await checkAuth();
+            await fetchReferralStats();
+          }
+        },
+        `id=eq.${user.user_id}`
+      );
+
+      return () => {
+        if (unsubscribe) {
+          unsubscribe.then((unsub) => {
+            if (typeof unsub === 'function') {
+              unsub();
+            }
+          });
+        }
+      };
+    }
+  }, [user?.user_id]);
 
   // Assign random colors to share options
   const shareOptions = useMemo(() => {
@@ -269,13 +326,13 @@ export default function ReferralsScreen() {
             <Text style={styles.impactTitle}>Your Impact</Text>
             <View style={styles.statsRow}>
               <View style={styles.statItem}>
-                <Text style={styles.statValue}>{USER_REFERRAL.friendsJoined}</Text>
+                <Text style={styles.statValue}>{referralStats.friendsJoined}</Text>
                 <Text style={styles.statLabel}>Friends Joined</Text>
               </View>
               <View style={styles.statDivider} />
               <View style={styles.statItem}>
                 <Text style={[styles.statValue, styles.statValueYellow]}>
-                  £{USER_REFERRAL.totalEarned}
+                  £{referralStats.totalEarned}
                 </Text>
                 <Text style={styles.statLabel}>Total Earned</Text>
               </View>

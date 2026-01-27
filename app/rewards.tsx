@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useEffect } from 'react';
 import {
   View,
   Text,
@@ -25,6 +25,8 @@ import { Spacing, BorderRadius } from '../constants/spacing';
 import { FontSize, FontFamily, LetterSpacing } from '../constants/typography';
 import { PlaceholderImages } from '../constants';
 import { useAuthStore } from '../stores/authStore';
+import { realtimeService } from '../services/realtimeService';
+import { isSupabaseConfigured } from '../lib/supabase';
 
 // Available colors from Design System for randomized icons
 const DESIGN_SYSTEM_COLORS = [
@@ -132,7 +134,34 @@ const EARN_CARDS_BASE: Omit<EarnCard, 'icon' | 'color'>[] = [
 
 export default function RewardsScreen() {
   const router = useRouter();
-  const { user } = useAuthStore();
+  const { user, checkAuth } = useAuthStore();
+
+  // Subscribe to real-time profile updates for rewards data
+  useEffect(() => {
+    if (!isSupabaseConfigured() || !user?.user_id) return;
+
+    const unsubscribe = realtimeService.subscribeToTable(
+      'profiles',
+      'UPDATE',
+      async (payload) => {
+        if (payload.new?.id === user.user_id) {
+          // Profile was updated (credits/points/tier), refresh user data
+          await checkAuth();
+        }
+      },
+      `id=eq.${user.user_id}`
+    );
+
+    return () => {
+      if (unsubscribe) {
+        unsubscribe.then((unsub) => {
+          if (typeof unsub === 'function') {
+            unsub();
+          }
+        });
+      }
+    };
+  }, [user?.user_id]);
 
   // Assign icons and colors to activities
   const recentActivity = useMemo(() => {

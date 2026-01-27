@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -32,6 +32,10 @@ import { ImageUrlBuilders, OrderConfig, CommonImages } from '../../constants';
 import { Spacing, BorderRadius } from '../../constants/spacing';
 import { FontSize, FontFamily, LetterSpacing } from '../../constants/typography';
 import { useAuthStore } from '../../stores/authStore';
+import { orderService, reviewService } from '../../services/supabaseService';
+import { wishlistService } from '../../services/wishlistService';
+import { realtimeService } from '../../services/realtimeService';
+import { isSupabaseConfigured, getSupabaseClient } from '../../lib/supabase';
 import { LazyAvatar, LazyImage } from '../../components/ui';
 
 interface MenuItem {
@@ -75,16 +79,118 @@ const MENU_ITEMS: MenuItem[] = [
   { id: '10', icon: Info, label: 'About Zora', route: '/settings/about' },
 ];
 
-const STATS = [
-  { label: 'Orders', value: 24 },
-  { label: 'Reviews', value: 12 },
-  { label: 'Saved', value: 8 },
-];
-
 export default function ProfileTab() {
   const router = useRouter();
   const { user, logout } = useAuthStore();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [stats, setStats] = useState({
+    orders: 0,
+    reviews: 0,
+    saved: 0,
+  });
+  const [loadingStats, setLoadingStats] = useState(true);
+
+  // Fetch user stats from database
+  const fetchUserStats = async () => {
+    if (!user?.user_id) {
+      setLoadingStats(false);
+      return;
+    }
+
+    try {
+      setLoadingStats(true);
+      if (isSupabaseConfigured()) {
+        const client = await getSupabaseClient();
+        
+        // Fetch orders count
+        const { count: ordersCount } = await client
+          .from('orders')
+          .select('*', { count: 'exact', head: true })
+          .eq('user_id', user.user_id);
+        
+        // Fetch reviews count
+        const { count: reviewsCount } = await client
+          .from('reviews')
+          .select('*', { count: 'exact', head: true })
+          .eq('user_id', user.user_id);
+        
+        // Fetch wishlist count
+        const wishlistItems = await wishlistService.getUserWishlist(user.user_id);
+        
+        setStats({
+          orders: ordersCount || 0,
+          reviews: reviewsCount || 0,
+          saved: wishlistItems.length || 0,
+        });
+      } else {
+        // Fallback to mock stats
+        setStats({
+          orders: 24,
+          reviews: 12,
+          saved: 8,
+        });
+      }
+    } catch (error) {
+      console.error('Error fetching user stats:', error);
+      // Fallback to mock stats on error
+      setStats({
+        orders: 24,
+        reviews: 12,
+        saved: 8,
+      });
+    } finally {
+      setLoadingStats(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchUserStats();
+
+    // Subscribe to real-time updates
+    if (isSupabaseConfigured() && user?.user_id) {
+      const unsubscribers: (() => void)[] = [];
+
+      // Subscribe to orders updates
+      realtimeService.subscribeToTable('orders', '*', async () => {
+        await fetchUserStats();
+      }).then((unsub) => {
+        if (unsub) unsubscribers.push(unsub);
+      });
+
+      // Subscribe to reviews updates
+      realtimeService.subscribeToTable('reviews', '*', async () => {
+        await fetchUserStats();
+      }).then((unsub) => {
+        if (unsub) unsubscribers.push(unsub);
+      });
+
+      // Subscribe to wishlist updates
+      realtimeService.subscribeToTable('wishlist', '*', async () => {
+        await fetchUserStats();
+      }).then((unsub) => {
+        if (unsub) unsubscribers.push(unsub);
+      });
+
+      // Subscribe to profile updates
+      realtimeService.subscribeToTable('profiles', 'UPDATE', async (payload) => {
+        if (payload.new?.id === user.user_id) {
+          // Profile was updated, refresh user data
+          const { checkAuth } = useAuthStore.getState();
+          await checkAuth();
+        }
+      }, `id=eq.${user.user_id}`).then((unsub) => {
+        if (unsub) unsubscribers.push(unsub);
+      });
+
+      return () => {
+        unsubscribers.forEach((unsub) => {
+          if (typeof unsub === 'function') {
+            unsub();
+          }
+        });
+      };
+    }
+  }, [user?.user_id]);
 
   // Assign random colors to menu items (computed once on mount)
   const menuItemsWithColors = useMemo(() => {
@@ -196,15 +302,21 @@ export default function ProfileTab() {
 
         {/* Stats Row */}
         <View style={styles.statsRow}>
-          {STATS.map((stat, index) => (
+          {[
+            { label: 'Orders', value: stats.orders },
+            { label: 'Reviews', value: stats.reviews },
+            { label: 'Saved', value: stats.saved },
+          ].map((stat, index) => (
             <View 
               key={stat.label} 
               style={[
                 styles.statItem,
-                index < STATS.length - 1 && styles.statItemBorder,
+                index < 2 && styles.statItemBorder,
               ]}
             >
-              <Text style={styles.statValue}>{stat.value}</Text>
+              <Text style={styles.statValue}>
+                {loadingStats ? '...' : stat.value}
+              </Text>
               <Text style={styles.statLabel}>{stat.label}</Text>
             </View>
           ))}
