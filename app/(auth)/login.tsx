@@ -138,12 +138,24 @@ export default function LoginScreen() {
                 setLocalLoading(false);
                 useAuthStore.getState().setLoading(false);
                 
-                // Store email and show verification banner (don't redirect)
-                setRegisteredEmail(email);
-                setShowVerificationBanner(true);
-                setMode('signin'); // Switch to sign in mode
+                // Check if user is authenticated (email might be auto-verified)
+                const { isAuthenticated, emailVerified, hasCompletedOnboarding } = useAuthStore.getState();
                 
-                showToast('Please check your email for the confirmation link.', 'info');
+                if (isAuthenticated && emailVerified) {
+                    // Email is already verified, navigate based on onboarding status
+                    if (hasCompletedOnboarding) {
+                        router.replace('/(tabs)');
+                    } else {
+                        router.replace('/onboarding/heritage');
+                    }
+                } else {
+                    // Email not verified, show verification banner
+                    setRegisteredEmail(email);
+                    setShowVerificationBanner(true);
+                    setMode('signin'); // Switch to sign in mode
+                    
+                    showToast('Please check your email for the confirmation link.', 'info');
+                }
             }
         } catch (error: any) {
             console.error('Auth error:', error);

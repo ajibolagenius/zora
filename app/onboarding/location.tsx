@@ -79,6 +79,17 @@ export default function LocationScreen() {
     try {
       setIsLoadingLocation(true);
       
+      // Check if location services are available
+      const isLocationEnabled = await Location.hasServicesEnabledAsync();
+      if (!isLocationEnabled) {
+        Alert.alert(
+          'Location Services Disabled',
+          'Please enable location services in your device settings to use this feature.'
+        );
+        setIsLoadingLocation(false);
+        return;
+      }
+
       // Request location permissions
       const { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== 'granted') {
@@ -90,10 +101,15 @@ export default function LocationScreen() {
         return;
       }
 
-      // Get current location
-      const location = await Location.getCurrentPositionAsync({
-        accuracy: Location.Accuracy.Balanced,
-      });
+      // Get current location with timeout
+      const location = await Promise.race([
+        Location.getCurrentPositionAsync({
+          accuracy: Location.Accuracy.Balanced,
+        }),
+        new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Location request timed out')), 10000)
+        ),
+      ]) as Location.LocationObject;
 
       const coords = {
         latitude: location.coords.latitude,
@@ -105,9 +121,27 @@ export default function LocationScreen() {
 
       // Fetch nearby vendors
       await fetchNearbyVendors(coords.latitude, coords.longitude);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error getting location:', error);
-      Alert.alert('Error', 'Failed to get your location. Please try again.');
+      
+      // Provide user-friendly error messages
+      let errorMessage = 'Failed to get your location. Please try again.';
+      
+      if (error?.message?.includes('unavailable') || error?.message?.includes('timeout')) {
+        errorMessage = 'Location services are currently unavailable. You can still continue by entering a postcode.';
+      } else if (error?.code === 'E_LOCATION_SERVICES_DISABLED') {
+        errorMessage = 'Location services are disabled. Please enable them in your device settings.';
+      } else if (error?.code === 'E_LOCATION_UNAVAILABLE') {
+        errorMessage = 'Location is currently unavailable. You can continue by entering a postcode.';
+      }
+      
+      // Only show alert if not on web (web might not support location)
+      if (Platform.OS !== 'web') {
+        Alert.alert('Location Error', errorMessage);
+      } else {
+        // On web, silently fail and allow user to use postcode instead
+        console.warn('Location not available on web. User can use postcode instead.');
+      }
     } finally {
       setIsLoadingLocation(false);
     }
@@ -159,7 +193,10 @@ export default function LocationScreen() {
 
     // Validate that we have either location or search query
     if (!isLocationEnabled && !searchQuery.trim()) {
-      Alert.alert('Location Required', 'Please enable location or enter a postcode to continue.');
+      Alert.alert(
+        'Location Required', 
+        'Please enable location or enter a postcode to continue. You can enter a postcode in the search field above.'
+      );
       return;
     }
 
@@ -170,18 +207,35 @@ export default function LocationScreen() {
       if (currentLocation && isLocationEnabled) {
         // For now, we'll save a basic address with location
         // In a real app, you'd want to reverse geocode to get full address
-        await onboardingService.saveDeliveryAddress(user.user_id, {
-          label: 'Home',
-          full_name: user.name || 'User',
-          phone: user.phone || '',
-          address_line1: 'Current Location',
-          city: 'London', // Default city, should be reverse geocoded
-          postcode: searchQuery.trim() || 'SW9 7AB', // Use search query or default
-          country: 'United Kingdom',
-          latitude: currentLocation.latitude,
-          longitude: currentLocation.longitude,
-          is_default: true,
-        });
+        try {
+          await onboardingService.saveDeliveryAddress(user.user_id, {
+            label: 'Home',
+            full_name: user.name || 'User',
+            phone: user.phone || '',
+            address_line1: searchQuery.trim() || 'Current Location',
+            city: 'London', // Default city, should be reverse geocoded
+            postcode: searchQuery.trim() || 'SW9 7AB', // Use search query or default
+            country: 'United Kingdom',
+            latitude: currentLocation.latitude,
+            longitude: currentLocation.longitude,
+            is_default: true,
+          });
+        } catch (saveError) {
+          console.error('Error saving address with location:', saveError);
+          // Fallback to saving without coordinates
+          if (searchQuery.trim()) {
+            await onboardingService.saveDeliveryAddress(user.user_id, {
+              label: 'Home',
+              full_name: user.name || 'User',
+              phone: user.phone || '',
+              address_line1: 'Address',
+              city: 'London',
+              postcode: searchQuery.trim(),
+              country: 'United Kingdom',
+              is_default: true,
+            });
+          }
+        }
       } else if (searchQuery.trim()) {
         // Save address with postcode (without coordinates)
         await onboardingService.saveDeliveryAddress(user.user_id, {
@@ -200,7 +254,10 @@ export default function LocationScreen() {
       router.replace('/(tabs)');
     } catch (error) {
       console.error('Error saving delivery address:', error);
-      Alert.alert('Error', 'Failed to save delivery address. Please try again.');
+      Alert.alert(
+        'Error', 
+        'Failed to save delivery address. Please try again or contact support if the issue persists.'
+      );
     } finally {
       setIsSaving(false);
     }

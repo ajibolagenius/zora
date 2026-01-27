@@ -535,11 +535,15 @@ export const useAuthStore = create<AuthState>()(
                 isLoading: false,
               });
             } else {
+              // Email is verified, check onboarding status
+              const hasCompletedOnboarding = user.cultural_interests && user.cultural_interests.length > 0;
+              
               set({
                 user,
                 session: data.session,
                 isAuthenticated: !!data.session,
                 emailVerified,
+                hasCompletedOnboarding,
                 isLoading: false,
               });
             }
