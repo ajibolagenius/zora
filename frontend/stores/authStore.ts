@@ -910,6 +910,17 @@ export const useAuthStore = create<AuthState>()(
         // We don't persist session here as Supabase helper handles its own persistence
         // We don't persist isLoading, error, etc.
       }),
+      onRehydrateStorage: () => (state, error) => {
+        if (error) {
+          console.error('Error rehydrating auth store:', error);
+          return;
+        }
+        // If a user was persisted, set isLoading to true so ProtectedRoute
+        // waits for checkAuth() to complete before making routing decisions
+        if (state?.user) {
+          state.isLoading = true;
+        }
+      },
     }
   )
 );
