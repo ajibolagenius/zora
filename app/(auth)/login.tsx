@@ -104,8 +104,17 @@ export default function LoginScreen() {
 
             if (mode === 'signin') {
                 await signInWithEmail(email, password);
-                // Login → home screen
-                router.replace('/(tabs)');
+
+                // Check if user has completed onboarding
+                const { hasCompletedOnboarding } = useAuthStore.getState();
+
+                if (hasCompletedOnboarding) {
+                    // Login → home screen
+                    router.replace('/(tabs)');
+                } else {
+                    // Login → onboarding (if skipped/incomplete)
+                    router.replace('/onboarding/heritage');
+                }
             } else {
                 await signUpWithEmail(email, password, name);
                 showToast('Please check your email for the confirmation link.', 'info');

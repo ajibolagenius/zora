@@ -221,16 +221,24 @@ export { getSupabaseClient };
 
 /**
  * Helper to get the 'from' method safely, waiting for initialization
+ * Returns null if Supabase is not configured
  */
 export const getSupabaseFrom = async () => {
+  if (!isSupabaseConfigured()) {
+    return null;
+  }
   const client = await getSupabaseClient();
   return client.from.bind(client);
 };
 
 /**
  * Helper to get the 'rpc' method safely, waiting for initialization
+ * Returns null if Supabase is not configured
  */
 export const getSupabaseRpc = async () => {
+  if (!isSupabaseConfigured()) {
+    return null;
+  }
   const client = await getSupabaseClient();
   return client.rpc.bind(client);
 };

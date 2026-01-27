@@ -362,12 +362,15 @@ export const useAuthStore = create<AuthState>()(
             const user = mapSupabaseUser(data.user, profile);
             const emailVerified = data.user.email_confirmed_at !== null;
 
+            const hasCompletedOnboarding = user.cultural_interests && user.cultural_interests.length > 0;
+
             set({
               user,
               session: data.session,
               isAuthenticated: true,
               emailVerified,
               isLoading: false,
+              hasCompletedOnboarding,
             });
 
             // Log successful login
@@ -678,12 +681,15 @@ export const useAuthStore = create<AuthState>()(
               oauthTimeoutId = null;
             }
 
+            const hasCompletedOnboarding = user.cultural_interests && user.cultural_interests.length > 0;
+
             set({
               user,
               session,
               isAuthenticated: true,
               emailVerified,
               isLoading: false,
+              hasCompletedOnboarding,
             });
 
             // Refresh session timeout
