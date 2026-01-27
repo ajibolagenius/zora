@@ -120,15 +120,18 @@ export default function LoginScreen() {
             let action: { label: string; onPress: () => void } | undefined;
 
             // Check for email rate limit error (429 Too Many Requests)
+            // Note: Supabase rate limiting is typically IP-based, not email-based
             if (
                 error.message?.includes('email rate limit exceeded') ||
                 error.message?.includes('rate limit exceeded') ||
                 error.message?.includes('Too Many Requests') ||
                 error.status === 429
             ) {
-                errorMessage = mode === 'signup' 
-                    ? 'Too many signup attempts. Please wait a few minutes before trying again or use a different email address.'
-                    : 'Too many login attempts. Please wait a few minutes before trying again.';
+                if (mode === 'signup') {
+                    errorMessage = 'Too many signup attempts from this device or network. Please wait 15-30 minutes before trying again. If you need to sign up urgently, try using a different network connection.';
+                } else {
+                    errorMessage = 'Too many login attempts. Please wait a few minutes before trying again.';
+                }
                 errorType = 'warning';
             }
             // Check for email not confirmed error
