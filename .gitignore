@@ -99,3 +99,5 @@ assets/ui_images/
 data/docs/
 testsprite_tests/
 temp_cache/
+scripts/
+supabase/migrations/
