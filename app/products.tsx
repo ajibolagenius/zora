@@ -246,19 +246,21 @@ export default function ProductsScreen() {
           {/* Sort Filter */}
           <View style={styles.filterSection}>
             <Text style={styles.filterLabel}>Sort By</Text>
-            <View style={styles.filterChips}>
-              {SORT_OPTIONS.map((option) => (
-                <TouchableOpacity
-                  key={option.id}
-                  style={[styles.chip, sortBy === option.id && styles.chipActive]}
-                  onPress={() => setSortBy(option.id)}
-                >
-                  <Text style={[styles.chipText, sortBy === option.id && styles.chipTextActive]}>
-                    {option.label}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </View>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+              <View style={styles.filterChips}>
+                {SORT_OPTIONS.map((option) => (
+                  <TouchableOpacity
+                    key={option.id}
+                    style={[styles.chip, sortBy === option.id && styles.chipActive]}
+                    onPress={() => setSortBy(option.id)}
+                  >
+                    <Text style={[styles.chipText, sortBy === option.id && styles.chipTextActive]}>
+                      {option.label}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </ScrollView>
           </View>
         </View>
       )}
