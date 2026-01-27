@@ -7,7 +7,7 @@ import {
   TouchableOpacity,
   Dimensions,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { X, Warning, CheckCircle, Info, XCircle } from 'phosphor-react-native';
 import { Colors } from '../../constants/colors';
 import { Spacing, BorderRadius } from '../../constants/spacing';
@@ -35,11 +35,13 @@ export function Toast({
   onClose,
   action,
 }: ToastProps) {
-  const slideAnim = useRef(new Animated.Value(-100)).current;
+  // Start from bottom (positive value) and slide up to 0
+  const slideAnim = useRef(new Animated.Value(100)).current;
   const opacityAnim = useRef(new Animated.Value(0)).current;
+  const insets = useSafeAreaInsets();
 
   useEffect(() => {
-    // Slide in animation
+    // Slide in animation from bottom
     Animated.parallel([
       Animated.timing(slideAnim, {
         toValue: 0,
@@ -64,7 +66,7 @@ export function Toast({
   const dismiss = () => {
     Animated.parallel([
       Animated.timing(slideAnim, {
-        toValue: -100,
+        toValue: 100, // Slide down
         duration: 250,
         useNativeDriver: true,
       }),
@@ -116,6 +118,7 @@ export function Toast({
         {
           transform: [{ translateY: slideAnim }],
           opacity: opacityAnim,
+          paddingBottom: Math.max(insets.bottom, Spacing.base),
         },
       ]}
     >
@@ -156,12 +159,11 @@ export function Toast({
 const styles = StyleSheet.create({
   container: {
     position: 'absolute',
-    top: 0,
+    bottom: 0,
     left: 0,
     right: 0,
     zIndex: 9999,
     paddingHorizontal: Spacing.xl,
-    paddingTop: Spacing.base,
   },
   toast: {
     flexDirection: 'row',

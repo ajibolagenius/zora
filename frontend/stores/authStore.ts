@@ -5,11 +5,6 @@ import { Session, AuthError } from '@supabase/supabase-js';
 import { ApiConfig } from '../constants';
 import { Platform, AppState } from 'react-native';
 import {
-  checkLoginRateLimit,
-  recordLoginAttempt,
-  resetLoginRateLimit,
-} from '../lib/security/rateLimiter';
-import {
   logSecurityEvent,
   SecurityEventType,
   securityLogger,
@@ -325,17 +320,8 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
       return;
     }
 
-    // Check rate limiting
-    const rateLimitCheck = checkLoginRateLimit(sanitizedEmail);
-    if (!rateLimitCheck.allowed) {
-      recordLoginAttempt(sanitizedEmail);
-      logSecurityEvent.rateLimitExceeded(sanitizedEmail, 'login');
-      // Note: Don't create security alert for unauthenticated users
-      // The rate limit logging already tracks this by email
-      // Alert will be created after successful login if needed
-      const error = new Error(rateLimitCheck.errorMessage || 'Too many login attempts');
-      throw error;
-    }
+    // Client-side rate limiting removed - Supabase handles rate limiting server-side
+    // This prevents double rate limiting and allows Supabase's more sophisticated rate limiting to work
 
     // Check credentials before attempting auth
     if (!isSupabaseConfigured()) {
@@ -357,15 +343,11 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
       );
       
       if (error) {
-        recordLoginAttempt(sanitizedEmail);
         logSecurityEvent.loginFailed(sanitizedEmail, error.message);
         throw error;
       }
       
       if (data.user) {
-        // Reset rate limit on successful login
-        resetLoginRateLimit(sanitizedEmail);
-
         // Fetch user profile with timeout
         const { data: profile } = await withTimeout(
           client.from('profiles').select('*').eq('id', data.user.id).single(),
