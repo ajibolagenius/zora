@@ -99,3 +99,6 @@ assets/ui_images/
 data/docs/
 testsprite_tests/
 temp_cache/
+
+# Generated migration files (dynamically created with varying UUIDs)
+supabase/migrations/006_populate_vendors_products.sql
