@@ -679,6 +679,21 @@ export const useAuthStore = create<AuthState>()(
             const user = mapSupabaseUser(session.user, profile);
             const emailVerified = session.user.email_confirmed_at !== null;
 
+            // Enforce email verification requirement (consistent with signInWithEmail)
+            if (!emailVerified) {
+              await client.auth.signOut();
+              set({
+                user: null,
+                session: null,
+                isAuthenticated: false,
+                emailVerified: false,
+                isLoading: false,
+              });
+              // Don't throw error here - just clear session and return
+              // User will be redirected to login screen by ProtectedRoute
+              return;
+            }
+
             // Clear OAuth timeout if it exists (auth succeeded)
             if (oauthTimeoutId) {
               clearTimeout(oauthTimeoutId);
