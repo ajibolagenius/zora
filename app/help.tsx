@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   TextInput,
   Keyboard,
+  Linking,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -109,9 +110,11 @@ export default function HelpCenterScreen() {
 
   const handleQuickAction = (action: QuickAction) => {
     if (action.route) {
-      router.push(action.route);
+      router.push(action.route as any);
     } else if (action.id === 'chat') {
       router.push('/order-support/ord_001');
+    } else if (action.id === 'email') {
+      Linking.openURL('mailto:zoraafricanmarketapp@gmail.com');
     } else {
       console.log(`${action.label} pressed`);
     }
@@ -119,7 +122,7 @@ export default function HelpCenterScreen() {
 
   const handleTopicPress = (topic: TopicItem) => {
     if (topic.route) {
-      router.push(topic.route);
+      router.push(topic.route as any);
     } else {
       console.log(`${topic.label} pressed`);
     }
@@ -240,7 +243,7 @@ export default function HelpCenterScreen() {
           {/* Decorative circles */}
           <View style={styles.decorativeCircle1} />
           <View style={styles.decorativeCircle2} />
-          
+
           <View style={styles.contactContent}>
             <View style={styles.contactIconContainer}>
               <Headset size={24} color={Colors.primary} weight="duotone" />

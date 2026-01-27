@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -25,31 +25,32 @@ import {
 import { Colors } from '../../constants/colors';
 import { Spacing, BorderRadius, Shadows } from '../../constants/spacing';
 import { FontSize, FontFamily, LetterSpacing } from '../../constants/typography';
+import { getSupabaseClient } from '../../lib/supabase';
 
-const STATS = [
-  { icon: ShoppingBag, value: '500+', label: 'Products' },
-  { icon: Storefront, value: '50+', label: 'Vendors' },
-  { icon: Users, value: '10K+', label: 'Customers' },
+const INITIAL_STATS = [
+  { icon: ShoppingBag, value: '...', label: 'Products' },
+  { icon: Storefront, value: '...', label: 'Vendors' },
+  { icon: Users, value: '...', label: 'Customers' },
 ];
 
 const CONTACT_ITEMS = [
   {
     icon: Globe,
     label: 'Website',
-    value: 'www.zoramarket.co.uk',
-    url: 'https://www.zoramarket.co.uk',
+    value: 'www.zoraapp.co.uk',
+    url: 'https://www.zoraapp.co.uk',
   },
   {
     icon: Envelope,
     label: 'Email',
-    value: 'hello@zoramarket.co.uk',
-    url: 'mailto:hello@zoramarket.co.uk',
+    value: 'zoraafricanmarketapp@gmail.com',
+    url: 'mailto:zoraafricanmarketapp@gmail.com',
   },
   {
     icon: MapPin,
     label: 'Location',
-    value: 'London, United Kingdom',
-    url: 'https://maps.google.com/?q=London,UK',
+    value: 'United Kingdom',
+    url: 'https://maps.google.com/?q=United+Kingdom',
   },
 ];
 
@@ -61,6 +62,38 @@ const LEGAL_ITEMS = [
 
 export default function AboutScreen() {
   const router = useRouter();
+  const [stats, setStats] = useState(INITIAL_STATS);
+
+  useEffect(() => {
+    fetchStats();
+  }, []);
+
+  const fetchStats = async () => {
+    try {
+      const supabase = await getSupabaseClient();
+      const [products, vendors, users] = await Promise.all([
+        supabase.from('products').select('*', { count: 'exact', head: true }),
+        supabase.from('vendors').select('*', { count: 'exact', head: true }),
+        supabase.from('users').select('*', { count: 'exact', head: true }),
+      ]);
+
+      setStats([
+        { icon: ShoppingBag, value: formatCount(products.count || 0), label: 'Products' },
+        { icon: Storefront, value: formatCount(vendors.count || 0), label: 'Vendors' },
+        { icon: Users, value: formatCount(users.count || 0), label: 'Customers' },
+      ]);
+    } catch (error) {
+      console.error('Error fetching stats:', error);
+      // Fallback to initial stats or show error state if needed
+    }
+  };
+
+  const formatCount = (count: number) => {
+    if (count >= 1000) {
+      return (count / 1000).toFixed(1) + 'K+';
+    }
+    return count.toString();
+  };
 
   const handleBack = () => {
     if (router.canGoBack()) {
@@ -130,7 +163,7 @@ export default function AboutScreen() {
 
         {/* Stats Section */}
         <View style={styles.statsRow}>
-          {STATS.map((stat, index) => {
+          {stats.map((stat, index) => {
             const IconComponent = stat.icon;
             return (
               <View key={index} style={styles.statCard}>
@@ -197,7 +230,9 @@ export default function AboutScreen() {
 
         {/* Footer */}
         <View style={styles.footer}>
-          <Text style={styles.footerText}>Made with 💚 in Nigeria</Text>
+          <TouchableOpacity onPress={() => handleOpenLink('https://ajibolagenius.carrd.co/')} activeOpacity={0.8}>
+            <Text style={styles.footerText}>Made with 💚 in Nigeria</Text>
+          </TouchableOpacity>
           <Text style={styles.copyright}>© {new Date().getFullYear()} Zora African Market Ltd.</Text>
         </View>
 
