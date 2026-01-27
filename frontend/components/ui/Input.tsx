@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   ViewStyle,
   TextInputProps,
+  Keyboard,
 } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Colors } from '../../constants/colors';
@@ -79,7 +80,10 @@ export const Input: React.FC<InputProps> = ({
           style={[styles.input, leftIcon && styles.inputWithLeftIcon]}
           placeholderTextColor={Colors.textMuted}
           onFocus={() => setIsFocused(true)}
-          onBlur={() => setIsFocused(false)}
+          onBlur={() => {
+            setIsFocused(false);
+            Keyboard.dismiss();
+          }}
           secureTextEntry={isPasswordField && !shouldShowPassword}
           {...props}
         />

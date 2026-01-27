@@ -11,6 +11,8 @@ import {
     ActivityIndicator,
     Animated,
     Easing,
+    Keyboard,
+    TouchableWithoutFeedback,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -173,17 +175,22 @@ export default function LoginScreen() {
         }
     };
 
+    const dismissKeyboard = () => {
+        Keyboard.dismiss();
+    };
+
     return (
         <SafeAreaView style={styles.container}>
             <KeyboardAvoidingView
                 behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
                 style={styles.keyboardView}
             >
-                <ScrollView
-                    contentContainerStyle={styles.scrollContent}
-                    showsVerticalScrollIndicator={false}
-                    keyboardShouldPersistTaps="handled"
-                >
+                <TouchableWithoutFeedback onPress={dismissKeyboard}>
+                    <ScrollView
+                        contentContainerStyle={styles.scrollContent}
+                        showsVerticalScrollIndicator={false}
+                        keyboardShouldPersistTaps="handled"
+                    >
 
                     <Animated.View style={{ opacity: fadeAnim, transform: [{ translateY: slideAnim }] }}>
                         {/* Auth Mode Tabs */}
@@ -223,17 +230,18 @@ export default function LoginScreen() {
                         {/* Input Fields */}
                         <View style={styles.inputContainer}>
                             {mode === 'signup' && (
-                                <View style={styles.inputWrapper}>
-                                    <User size={20} color={Colors.textMuted} weight="duotone" />
-                                    <TextInput
-                                        style={styles.input}
-                                        placeholder={Placeholders.auth.fullName}
-                                        placeholderTextColor={Colors.textMuted}
-                                        value={name}
-                                        onChangeText={setName}
-                                        autoCapitalize="words"
-                                    />
-                                </View>
+                            <View style={styles.inputWrapper}>
+                                <User size={20} color={Colors.textMuted} weight="duotone" />
+                                <TextInput
+                                    style={styles.input}
+                                    placeholder={Placeholders.auth.fullName}
+                                    placeholderTextColor={Colors.textMuted}
+                                    value={name}
+                                    onChangeText={setName}
+                                    autoCapitalize="words"
+                                    onBlur={dismissKeyboard}
+                                />
+                            </View>
                             )}
 
                             <View style={styles.inputWrapper}>
@@ -246,6 +254,7 @@ export default function LoginScreen() {
                                     onChangeText={setEmail}
                                     keyboardType="email-address"
                                     autoCapitalize="none"
+                                    onBlur={dismissKeyboard}
                                 />
                             </View>
 
@@ -258,6 +267,7 @@ export default function LoginScreen() {
                                     value={password}
                                     onChangeText={setPassword}
                                     secureTextEntry={!showPassword}
+                                    onBlur={dismissKeyboard}
                                 />
                                 <TouchableOpacity 
                                     onPress={() => setShowPassword(!showPassword)}
@@ -338,7 +348,8 @@ export default function LoginScreen() {
                             <Text style={styles.termsLink}>Privacy Policy</Text>.
                         </Text>
                     </Animated.View>
-                </ScrollView>
+                    </ScrollView>
+                </TouchableWithoutFeedback>
             </KeyboardAvoidingView>
         </SafeAreaView>
     );
