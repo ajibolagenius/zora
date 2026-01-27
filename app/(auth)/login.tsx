@@ -46,13 +46,13 @@ export default function LoginScreen() {
     const [showPassword, setShowPassword] = useState(false);
     const [rememberMe, setRememberMe] = useState(false);
     const [localLoading, setLocalLoading] = useState(false);
-    
+
     // Animation values
     const fadeAnim = useRef(new Animated.Value(0)).current;
     const slideAnim = useRef(new Animated.Value(20)).current;
 
     const loading = isLoading || localLoading;
-    
+
     // Entrance animation
     useEffect(() => {
         Animated.parallel([
@@ -108,12 +108,13 @@ export default function LoginScreen() {
                 router.replace('/(tabs)');
             } else {
                 await signUpWithEmail(email, password, name);
+                showToast('Please check your email for the confirmation link.', 'info');
                 // Register → onboarding
                 router.replace('/onboarding/heritage');
             }
         } catch (error: any) {
             console.error('Auth error:', error);
-            
+
             // Handle specific error cases with user-friendly messages
             let errorMessage = error.message || ErrorMessages.auth.generic;
             let errorType: 'error' | 'warning' | 'info' = 'error';
@@ -151,7 +152,7 @@ export default function LoginScreen() {
                                 type: 'signup',
                                 email: email,
                                 options: {
-                                    emailRedirectTo: Platform.OS === 'web' 
+                                    emailRedirectTo: Platform.OS === 'web'
                                         ? (typeof window !== 'undefined' ? `${window.location.origin}/auth/callback` : 'http://localhost:3000/auth/callback')
                                         : 'zoramarket://auth/callback',
                                 },
@@ -195,162 +196,162 @@ export default function LoginScreen() {
                         keyboardShouldPersistTaps="handled"
                     >
 
-                    <Animated.View style={{ opacity: fadeAnim, transform: [{ translateY: slideAnim }] }}>
-                        {/* Auth Mode Tabs */}
-                        <View style={styles.tabContainer}>
-                            <TouchableOpacity
-                                style={[styles.tab, mode === 'signin' && styles.tabActive]}
-                                onPress={() => setMode('signin')}
-                                activeOpacity={0.8}
-                            >
-                                <Text style={[styles.tabText, mode === 'signin' && styles.tabTextActive]}>
-                                    Sign In
-                                </Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity
-                                style={[styles.tab, mode === 'signup' && styles.tabActive]}
-                                onPress={() => setMode('signup')}
-                                activeOpacity={0.8}
-                            >
-                                <Text style={[styles.tabText, mode === 'signup' && styles.tabTextActive]}>
-                                    Sign Up
-                                </Text>
-                            </TouchableOpacity>
-                        </View>
-
-                        {/* Welcome Text */}
-                        <View style={styles.welcomeContainer}>
-                            <Text style={styles.welcomeTitle}>
-                                {mode === 'signin' ? 'Welcome Back' : 'Create Account'}
-                            </Text>
-                            <Text style={styles.welcomeSubtitle}>
-                                {mode === 'signin'
-                                    ? 'Enter your details below to access your account and start shopping.'
-                                    : 'Join Zora to discover authentic African products and connect with vendors.'}
-                            </Text>
-                        </View>
-
-                        {/* Input Fields */}
-                        <View style={styles.inputContainer}>
-                            {mode === 'signup' && (
-                            <View style={styles.inputWrapper}>
-                                <User size={20} color={Colors.textMuted} weight="duotone" />
-                                <TextInput
-                                    style={styles.input}
-                                    placeholder={Placeholders.auth.fullName}
-                                    placeholderTextColor={Colors.textMuted}
-                                    value={name}
-                                    onChangeText={setName}
-                                    autoCapitalize="words"
-                                    onBlur={dismissKeyboard}
-                                />
-                            </View>
-                            )}
-
-                            <View style={styles.inputWrapper}>
-                                <Envelope size={20} color={Colors.textMuted} weight="duotone" />
-                                <TextInput
-                                    style={styles.input}
-                                    placeholder={Placeholders.auth.email}
-                                    placeholderTextColor={Colors.textMuted}
-                                    value={email}
-                                    onChangeText={setEmail}
-                                    keyboardType="email-address"
-                                    autoCapitalize="none"
-                                    onBlur={dismissKeyboard}
-                                />
-                            </View>
-
-                            <View style={styles.inputWrapper}>
-                                <Lock size={20} color={Colors.textMuted} weight="duotone" />
-                                <TextInput
-                                    style={styles.input}
-                                    placeholder={Placeholders.auth.password}
-                                    placeholderTextColor={Colors.textMuted}
-                                    value={password}
-                                    onChangeText={setPassword}
-                                    secureTextEntry={!showPassword}
-                                    onBlur={dismissKeyboard}
-                                />
-                                <TouchableOpacity 
-                                    onPress={() => setShowPassword(!showPassword)}
-                                    hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-                                >
-                                    {showPassword ? (
-                                        <Eye size={20} color={Colors.textMuted} weight="duotone" />
-                                    ) : (
-                                        <EyeSlash size={20} color={Colors.textMuted} weight="duotone" />
-                                    )}
-                                </TouchableOpacity>
-                            </View>
-                        </View>
-
-                        {/* Remember Me & Forgot Password */}
-                        {mode === 'signin' && (
-                            <View style={styles.optionsRow}>
+                        <Animated.View style={{ opacity: fadeAnim, transform: [{ translateY: slideAnim }] }}>
+                            {/* Auth Mode Tabs */}
+                            <View style={styles.tabContainer}>
                                 <TouchableOpacity
-                                    style={styles.checkboxContainer}
-                                    onPress={() => setRememberMe(!rememberMe)}
+                                    style={[styles.tab, mode === 'signin' && styles.tabActive]}
+                                    onPress={() => setMode('signin')}
                                     activeOpacity={0.8}
                                 >
-                                    <View style={[styles.checkbox, rememberMe && styles.checkboxChecked]}>
-                                        {rememberMe && (
-                                            <Check size={12} color={Colors.textPrimary} weight="bold" />
-                                        )}
-                                    </View>
-                                    <Text style={styles.checkboxLabel}>Remember me</Text>
+                                    <Text style={[styles.tabText, mode === 'signin' && styles.tabTextActive]}>
+                                        Sign In
+                                    </Text>
                                 </TouchableOpacity>
-                                <TouchableOpacity 
+                                <TouchableOpacity
+                                    style={[styles.tab, mode === 'signup' && styles.tabActive]}
+                                    onPress={() => setMode('signup')}
                                     activeOpacity={0.8}
-                                    onPress={() => router.push('/(auth)/forgot-password')}
                                 >
-                                    <Text style={styles.forgotPassword}>Forgot Password?</Text>
+                                    <Text style={[styles.tabText, mode === 'signup' && styles.tabTextActive]}>
+                                        Sign Up
+                                    </Text>
                                 </TouchableOpacity>
                             </View>
-                        )}
 
-                        {/* Sign In/Up Button */}
-                        <TouchableOpacity
-                            style={[styles.primaryButton, loading && styles.primaryButtonDisabled]}
-                            onPress={handleEmailAuth}
-                            disabled={loading}
-                            activeOpacity={0.8}
-                        >
-                            {loading ? (
-                                <ActivityIndicator color={Colors.textPrimary} />
-                            ) : (
-                                <Text style={styles.primaryButtonText}>
-                                    {mode === 'signin' ? 'Sign In' : 'Sign Up'}
+                            {/* Welcome Text */}
+                            <View style={styles.welcomeContainer}>
+                                <Text style={styles.welcomeTitle}>
+                                    {mode === 'signin' ? 'Welcome Back' : 'Create Account'}
                                 </Text>
+                                <Text style={styles.welcomeSubtitle}>
+                                    {mode === 'signin'
+                                        ? 'Enter your details below to access your account and start shopping.'
+                                        : 'Join Zora to discover authentic African products and connect with vendors.'}
+                                </Text>
+                            </View>
+
+                            {/* Input Fields */}
+                            <View style={styles.inputContainer}>
+                                {mode === 'signup' && (
+                                    <View style={styles.inputWrapper}>
+                                        <User size={20} color={Colors.textMuted} weight="duotone" />
+                                        <TextInput
+                                            style={styles.input}
+                                            placeholder={Placeholders.auth.fullName}
+                                            placeholderTextColor={Colors.textMuted}
+                                            value={name}
+                                            onChangeText={setName}
+                                            autoCapitalize="words"
+                                            onBlur={dismissKeyboard}
+                                        />
+                                    </View>
+                                )}
+
+                                <View style={styles.inputWrapper}>
+                                    <Envelope size={20} color={Colors.textMuted} weight="duotone" />
+                                    <TextInput
+                                        style={styles.input}
+                                        placeholder={Placeholders.auth.email}
+                                        placeholderTextColor={Colors.textMuted}
+                                        value={email}
+                                        onChangeText={setEmail}
+                                        keyboardType="email-address"
+                                        autoCapitalize="none"
+                                        onBlur={dismissKeyboard}
+                                    />
+                                </View>
+
+                                <View style={styles.inputWrapper}>
+                                    <Lock size={20} color={Colors.textMuted} weight="duotone" />
+                                    <TextInput
+                                        style={styles.input}
+                                        placeholder={Placeholders.auth.password}
+                                        placeholderTextColor={Colors.textMuted}
+                                        value={password}
+                                        onChangeText={setPassword}
+                                        secureTextEntry={!showPassword}
+                                        onBlur={dismissKeyboard}
+                                    />
+                                    <TouchableOpacity
+                                        onPress={() => setShowPassword(!showPassword)}
+                                        hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                                    >
+                                        {showPassword ? (
+                                            <Eye size={20} color={Colors.textMuted} weight="duotone" />
+                                        ) : (
+                                            <EyeSlash size={20} color={Colors.textMuted} weight="duotone" />
+                                        )}
+                                    </TouchableOpacity>
+                                </View>
+                            </View>
+
+                            {/* Remember Me & Forgot Password */}
+                            {mode === 'signin' && (
+                                <View style={styles.optionsRow}>
+                                    <TouchableOpacity
+                                        style={styles.checkboxContainer}
+                                        onPress={() => setRememberMe(!rememberMe)}
+                                        activeOpacity={0.8}
+                                    >
+                                        <View style={[styles.checkbox, rememberMe && styles.checkboxChecked]}>
+                                            {rememberMe && (
+                                                <Check size={12} color={Colors.textPrimary} weight="bold" />
+                                            )}
+                                        </View>
+                                        <Text style={styles.checkboxLabel}>Remember me</Text>
+                                    </TouchableOpacity>
+                                    <TouchableOpacity
+                                        activeOpacity={0.8}
+                                        onPress={() => router.push('/(auth)/forgot-password')}
+                                    >
+                                        <Text style={styles.forgotPassword}>Forgot Password?</Text>
+                                    </TouchableOpacity>
+                                </View>
                             )}
-                        </TouchableOpacity>
 
-                        {/* Divider */}
-                        <View style={styles.divider}>
-                            <View style={styles.dividerLine} />
-                            <Text style={styles.dividerText}>Or continue with</Text>
-                            <View style={styles.dividerLine} />
-                        </View>
+                            {/* Sign In/Up Button */}
+                            <TouchableOpacity
+                                style={[styles.primaryButton, loading && styles.primaryButtonDisabled]}
+                                onPress={handleEmailAuth}
+                                disabled={loading}
+                                activeOpacity={0.8}
+                            >
+                                {loading ? (
+                                    <ActivityIndicator color={Colors.textPrimary} />
+                                ) : (
+                                    <Text style={styles.primaryButtonText}>
+                                        {mode === 'signin' ? 'Sign In' : 'Sign Up'}
+                                    </Text>
+                                )}
+                            </TouchableOpacity>
 
-                        {/* Google Login Button */}
-                        <TouchableOpacity
-                            style={[styles.googleButton, loading && styles.googleButtonDisabled]}
-                            onPress={handleGoogleLogin}
-                            disabled={loading}
-                            activeOpacity={0.8}
-                        >
-                            <GoogleLogo size={24} color="#DB4437" weight="bold" />
-                            <Text style={styles.googleButtonText}>Continue with Google</Text>
-                        </TouchableOpacity>
+                            {/* Divider */}
+                            <View style={styles.divider}>
+                                <View style={styles.dividerLine} />
+                                <Text style={styles.dividerText}>Or continue with</Text>
+                                <View style={styles.dividerLine} />
+                            </View>
 
-                        {/* Terms */}
-                        <Text style={styles.terms}>
-                            By signing in, you agree to our{' '}
-                            <Text style={styles.termsLink}>Terms of Service</Text>
-                            {' '}and{' '}
-                            <Text style={styles.termsLink}>Privacy Policy</Text>.
-                        </Text>
-                    </Animated.View>
+                            {/* Google Login Button */}
+                            <TouchableOpacity
+                                style={[styles.googleButton, loading && styles.googleButtonDisabled]}
+                                onPress={handleGoogleLogin}
+                                disabled={loading}
+                                activeOpacity={0.8}
+                            >
+                                <GoogleLogo size={24} color="#DB4437" weight="bold" />
+                                <Text style={styles.googleButtonText}>Continue with Google</Text>
+                            </TouchableOpacity>
+
+                            {/* Terms */}
+                            <Text style={styles.terms}>
+                                By signing in, you agree to our{' '}
+                                <Text style={styles.termsLink}>Terms of Service</Text>
+                                {' '}and{' '}
+                                <Text style={styles.termsLink}>Privacy Policy</Text>.
+                            </Text>
+                        </Animated.View>
                     </ScrollView>
                 </TouchableWithoutFeedback>
             </KeyboardAvoidingView>
@@ -372,7 +373,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: Spacing.xl,
         paddingVertical: Spacing['2xl'],
     },
-    
+
     // Tab Container - Pill style
     tabContainer: {
         flexDirection: 'row',
@@ -397,7 +398,7 @@ const styles = StyleSheet.create({
     tabTextActive: {
         color: Colors.textPrimary,
     },
-    
+
     // Welcome Section
     welcomeContainer: {
         marginTop: Spacing['2xl'],
@@ -415,7 +416,7 @@ const styles = StyleSheet.create({
         color: Colors.textMuted,
         lineHeight: 22,
     },
-    
+
     // Input Fields - Per Design System (48px height, 8px radius)
     inputContainer: {
         gap: Spacing.base,
@@ -438,7 +439,7 @@ const styles = StyleSheet.create({
         fontSize: FontSize.body,
         height: '100%',
     },
-    
+
     // Options Row
     optionsRow: {
         flexDirection: 'row',
@@ -476,7 +477,7 @@ const styles = StyleSheet.create({
         color: Colors.primary,
         fontSize: FontSize.small,
     },
-    
+
     // Primary Button - Per Design System (48px height, 12px radius)
     primaryButton: {
         backgroundColor: Colors.primary,
@@ -494,7 +495,7 @@ const styles = StyleSheet.create({
         color: Colors.textPrimary,
         fontSize: FontSize.body,
     },
-    
+
     // Divider
     divider: {
         flexDirection: 'row',
@@ -512,7 +513,7 @@ const styles = StyleSheet.create({
         fontSize: FontSize.small,
         marginHorizontal: Spacing.md,
     },
-    
+
     // Google Button - Major/Primary social login
     googleButton: {
         flexDirection: 'row',
@@ -532,7 +533,7 @@ const styles = StyleSheet.create({
         color: Colors.backgroundDark,
         fontSize: FontSize.body,
     },
-    
+
     // Terms
     terms: {
         fontFamily: FontFamily.body,

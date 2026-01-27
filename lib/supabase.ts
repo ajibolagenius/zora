@@ -20,12 +20,12 @@ export const isSupabaseConfigured = (): boolean => {
   if (!supabaseUrl || supabaseUrl === PLACEHOLDER_URL) {
     return false;
   }
-  
+
   // Check if key is missing or is the placeholder
   if (!supabaseAnonKey || supabaseAnonKey === PLACEHOLDER_KEY) {
     return false;
   }
-  
+
   // Basic URL format validation
   try {
     const url = new URL(supabaseUrl);
@@ -35,7 +35,7 @@ export const isSupabaseConfigured = (): boolean => {
   } catch {
     return false;
   }
-  
+
   return true;
 };
 
@@ -178,14 +178,14 @@ export const supabase = {
     if (!supabaseInstance) {
       initializeClientSync();
     }
-    
+
     // If still not initialized (native platform), trigger async initialization
     // This is fire-and-forget - the getter returns undefined for now,
     // but initialization will complete in the background
     if (!supabaseInstance) {
       triggerAsyncInitialization();
     }
-    
+
     return supabaseInstance?.auth;
   },
   get from() {
@@ -193,12 +193,12 @@ export const supabase = {
     if (!supabaseInstance) {
       initializeClientSync();
     }
-    
+
     // If still not initialized (native platform), trigger async initialization
     if (!supabaseInstance) {
       triggerAsyncInitialization();
     }
-    
+
     return supabaseInstance?.from?.bind(supabaseInstance);
   },
   get rpc() {
@@ -206,18 +206,34 @@ export const supabase = {
     if (!supabaseInstance) {
       initializeClientSync();
     }
-    
+
     // If still not initialized (native platform), trigger async initialization
     if (!supabaseInstance) {
       triggerAsyncInitialization();
     }
-    
+
     return supabaseInstance?.rpc?.bind(supabaseInstance);
   },
 };
 
 // Export async client getter for full auth functionality
 export { getSupabaseClient };
+
+/**
+ * Helper to get the 'from' method safely, waiting for initialization
+ */
+export const getSupabaseFrom = async () => {
+  const client = await getSupabaseClient();
+  return client.from.bind(client);
+};
+
+/**
+ * Helper to get the 'rpc' method safely, waiting for initialization
+ */
+export const getSupabaseRpc = async () => {
+  const client = await getSupabaseClient();
+  return client.rpc.bind(client);
+};
 
 // Export types for convenience
 export type { Database };
