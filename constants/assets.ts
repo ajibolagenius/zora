@@ -98,6 +98,41 @@ export const ImageUrlBuilders = {
     unsplash: (photoId: string, width: number = 400): string => {
         return `https://images.unsplash.com/photo-${photoId}?w=${width}`;
     },
+
+    /**
+     * Generate vendor cover image URL using Unsplash
+     * @param vendorId - Vendor ID for deterministic image
+     * @param vendorName - Vendor name (optional)
+     * @param width - Image width (default: 800)
+     * @param theme - Image theme (default: 'foodMarket')
+     */
+    vendorCover: (
+        vendorId: string,
+        vendorName?: string,
+        width: number = 800,
+        theme: 'foodMarket' | 'storefront' | 'africanMarket' = 'foodMarket'
+    ): string => {
+        // Import dynamically to avoid circular dependencies
+        const { generateVendorCoverImage } = require('../lib/vendorImageUtils');
+        return generateVendorCoverImage(vendorId, vendorName, width, theme);
+    },
+
+    /**
+     * Generate vendor logo URL using DiceBear
+     * @param vendorId - Vendor ID for deterministic logo
+     * @param vendorName - Vendor name (optional)
+     * @param style - DiceBear style (default: 'identicon')
+     * @param size - Logo size (default: 200)
+     */
+    vendorLogo: (
+        vendorId: string,
+        vendorName?: string,
+        style: 'identicon' | 'avataaars' | 'bottts' | 'initials' = 'identicon',
+        size: number = 200
+    ): string => {
+        const { generateVendorLogo } = require('../lib/vendorImageUtils');
+        return generateVendorLogo(vendorId, vendorName, style, size);
+    },
 } as const;
 
 /**
