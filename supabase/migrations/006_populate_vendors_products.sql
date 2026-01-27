@@ -9,23 +9,50 @@ BEGIN;
 
 -- Cleanup: Delete existing vendors and their products to avoid conflicts
 -- This ensures a clean slate for population
+-- Delete by both ID and slug to catch all potential conflicts
 DELETE FROM public.products WHERE vendor_id IN (
-    SELECT id FROM public.vendors WHERE slug IN (
+    SELECT id FROM public.vendors WHERE 
+        id IN (
+            '2b0ad20a-ff81-471e-b1ba-e491c5e7ab09', '27204b60-8d78-4d0a-a5e7-b73716db979b',
+            'f1f9973c-10a7-4186-b9a1-08d42fc38ea2', '010d5834-6ba4-4aac-a1fc-c0296c31be86',
+            '286d503b-560f-46a3-b877-b6b5edae2038', 'c3cb8d2a-4fed-4c01-9a9b-4873aacdd17f',
+            '0e130aae-0e69-401c-a49b-eb79fcf1c1ea', '8c593b02-46ae-42ce-ac58-5ef220058850',
+            'fad19083-5fa8-4405-941c-3ac0c40aa4c9', 'f7b0c3c3-3a58-48c5-bfbd-6ba217702223',
+            '1c294684-d263-4ce8-a24a-0fa8b4f714a0', 'b153214c-ee9c-4014-823d-70a0ce7c00e7',
+            '7c7adf08-a2c9-4690-96f1-761731686b01', '2c17828d-b39f-4751-a0a4-52e215af0412',
+            '6e17ee6e-ae1a-44c1-96ed-12d81db1d145', '2a365e9a-dac9-4d89-996c-6279f0964db1',
+            '7310b1b9-459f-418c-b1ed-d7f90fc90b6d', '1c1ba3b9-cc67-4052-afcd-6aa276fd0c43',
+            'e4b8d916-257e-4aed-be00-9fe60cd8d87f', 'b90611e2-b35a-4c68-beb3-23962ab301af'
+        )
+        OR slug IN (
+            'east-africa-market', 'kenya-delights', 'authentic-south-africa', 'south-africa-groceries',
+            'taste-of-south-africa', 'south-africa-market', 'south-africa-delights', 'authentic-north-africa',
+            'south-africa-groceries-2', 'taste-of-north-africa', 'east-africa-market-2', 'nigeria-delights',
+            'authentic-east-africa', 'west-africa-groceries', 'taste-of-north-africa-2', 'north-africa-market',
+            'south-africa-delights-2', 'authentic-west-africa', 'east-africa-groceries', 'taste-of-east-africa'
+        )
+);
+
+DELETE FROM public.vendors WHERE 
+    id IN (
+        '2b0ad20a-ff81-471e-b1ba-e491c5e7ab09', '27204b60-8d78-4d0a-a5e7-b73716db979b',
+        'f1f9973c-10a7-4186-b9a1-08d42fc38ea2', '010d5834-6ba4-4aac-a1fc-c0296c31be86',
+        '286d503b-560f-46a3-b877-b6b5edae2038', 'c3cb8d2a-4fed-4c01-9a9b-4873aacdd17f',
+        '0e130aae-0e69-401c-a49b-eb79fcf1c1ea', '8c593b02-46ae-42ce-ac58-5ef220058850',
+        'fad19083-5fa8-4405-941c-3ac0c40aa4c9', 'f7b0c3c3-3a58-48c5-bfbd-6ba217702223',
+        '1c294684-d263-4ce8-a24a-0fa8b4f714a0', 'b153214c-ee9c-4014-823d-70a0ce7c00e7',
+        '7c7adf08-a2c9-4690-96f1-761731686b01', '2c17828d-b39f-4751-a0a4-52e215af0412',
+        '6e17ee6e-ae1a-44c1-96ed-12d81db1d145', '2a365e9a-dac9-4d89-996c-6279f0964db1',
+        '7310b1b9-459f-418c-b1ed-d7f90fc90b6d', '1c1ba3b9-cc67-4052-afcd-6aa276fd0c43',
+        'e4b8d916-257e-4aed-be00-9fe60cd8d87f', 'b90611e2-b35a-4c68-beb3-23962ab301af'
+    )
+    OR slug IN (
         'east-africa-market', 'kenya-delights', 'authentic-south-africa', 'south-africa-groceries',
         'taste-of-south-africa', 'south-africa-market', 'south-africa-delights', 'authentic-north-africa',
         'south-africa-groceries-2', 'taste-of-north-africa', 'east-africa-market-2', 'nigeria-delights',
         'authentic-east-africa', 'west-africa-groceries', 'taste-of-north-africa-2', 'north-africa-market',
         'south-africa-delights-2', 'authentic-west-africa', 'east-africa-groceries', 'taste-of-east-africa'
-    )
-);
-
-DELETE FROM public.vendors WHERE slug IN (
-    'east-africa-market', 'kenya-delights', 'authentic-south-africa', 'south-africa-groceries',
-    'taste-of-south-africa', 'south-africa-market', 'south-africa-delights', 'authentic-north-africa',
-    'south-africa-groceries-2', 'taste-of-north-africa', 'east-africa-market-2', 'nigeria-delights',
-    'authentic-east-africa', 'west-africa-groceries', 'taste-of-north-africa-2', 'north-africa-market',
-    'south-africa-delights-2', 'authentic-west-africa', 'east-africa-groceries', 'taste-of-east-africa'
-);
+    );
 
 -- Insert Vendors
 INSERT INTO public.vendors (
@@ -55,9 +82,8 @@ INSERT INTO public.vendors (
     ('1c1ba3b9-cc67-4052-afcd-6aa276fd0c43', '92333c7b-f7d4-4332-946e-8213f324e0d8', 'Authentic West Africa', 'authentic-west-africa', 'Your trusted source for authentic West Africa products. We bring the flavors and traditions of West Africa to your doorstep.', NULL, NULL, '107 Avenue, Camden, London', 51.548862, -0.13846299999999997, 8.11, TRUE, 4.3, 392, ARRAY['Nigeria', 'Ghana'], ARRAY['Spices', 'Grains', 'Vegetables', 'Meats'], 26, 67, 4.65, 15, FALSE, NULL, NOW(), NOW()),
     ('e4b8d916-257e-4aed-be00-9fe60cd8d87f', '776a5925-a1ff-488b-89f8-2a7ddbbf666a', 'East Africa Groceries', 'east-africa-groceries', 'Your trusted source for authentic East Africa products. We bring the flavors and traditions of East Africa to your doorstep.', NULL, NULL, '151 High Street, Tottenham, London', 51.558571, -0.058827, 13.68, TRUE, 4.8, 29, ARRAY['Kenya', 'Tanzania', 'Ethiopia'], ARRAY['Spices', 'Grains', 'Vegetables', 'Meats'], 24, 58, 3.19, 26.43, FALSE, NULL, NOW(), NOW()),
     ('b90611e2-b35a-4c68-beb3-23962ab301af', '46afdc7a-55f2-4324-8396-ad1478b597fc', 'Taste of East Africa', 'taste-of-east-africa', 'Your trusted source for authentic East Africa products. We bring the flavors and traditions of East Africa to your doorstep.', NULL, NULL, '28 Avenue, Brixton, London', 51.465726, -0.073126, 7.22, TRUE, 4.8, 70, ARRAY['Kenya'], ARRAY['Spices', 'Grains'], 38, 85, 5.32, 20.54, FALSE, NULL, NOW(), NOW())
-ON CONFLICT (id) DO UPDATE SET
+ON CONFLICT (slug) DO UPDATE SET
     shop_name = EXCLUDED.shop_name,
-    slug = EXCLUDED.slug,
     description = EXCLUDED.description,
     updated_at = NOW();
 
