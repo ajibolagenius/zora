@@ -529,10 +529,9 @@ export const useAuthStore = create<AuthState>()(
             createAuditLog(user.user_id, AuditAction.USER_SIGNUP, { success: true });
             logSecurityEvent.emailVerificationSent(user.user_id, user.email);
 
-            // Send verification email if not verified
-            if (!emailVerified && data.session) {
-              await get().resendVerificationEmail();
-            }
+            // Note: Supabase automatically sends verification email during signup,
+            // so we don't need to call resendVerificationEmail here.
+            // This prevents loading state issues when navigation happens immediately after signup.
           } else {
             set({ isLoading: false });
           }

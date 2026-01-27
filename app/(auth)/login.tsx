@@ -105,6 +105,10 @@ export default function LoginScreen() {
             if (mode === 'signin') {
                 await signInWithEmail(email, password);
 
+                // Ensure loading state is cleared before navigation
+                setLocalLoading(false);
+                useAuthStore.getState().setLoading(false);
+
                 // Check if user has completed onboarding
                 const { hasCompletedOnboarding } = useAuthStore.getState();
 
@@ -117,6 +121,11 @@ export default function LoginScreen() {
                 }
             } else {
                 await signUpWithEmail(email, password, name);
+                
+                // Ensure loading state is cleared before navigation
+                setLocalLoading(false);
+                useAuthStore.getState().setLoading(false);
+                
                 showToast('Please check your email for the confirmation link.', 'info');
                 // Register → onboarding
                 router.replace('/onboarding/heritage');
