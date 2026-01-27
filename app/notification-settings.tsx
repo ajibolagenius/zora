@@ -24,6 +24,7 @@ import { Toggle } from '../components/ui/Toggle';
 import { useAuthStore } from '../stores/authStore';
 import { realtimeService } from '../services/realtimeService';
 import { isSupabaseConfigured, getSupabaseClient } from '../lib/supabase';
+import { useToast } from '../components/ui/ToastProvider';
 
 // Available colors from Design System for randomized icons
 const DESIGN_SYSTEM_COLORS = [
@@ -62,6 +63,7 @@ const CATEGORIES_BASE: Omit<CategoryItem, 'color'>[] = [
 export default function NotificationPreferencesScreen() {
   const router = useRouter();
   const { user, checkAuth } = useAuthStore();
+  const { showToast } = useToast();
   const [pushEnabled, setPushEnabled] = useState(user?.push_notifications_enabled ?? true);
   const [loading, setLoading] = useState(true);
   
@@ -117,26 +119,35 @@ export default function NotificationPreferencesScreen() {
 
     // Subscribe to real-time profile updates
     if (isSupabaseConfigured() && user?.user_id) {
-      const unsubscribe = realtimeService.subscribeToTable(
+      let unsubscribeFn: (() => void) | undefined;
+      let isMounted = true;
+
+      realtimeService.subscribeToTable(
         'profiles',
         'UPDATE',
         async (payload) => {
-          if (payload.new?.id === user.user_id) {
+          if (isMounted && payload.new?.id === user.user_id) {
             // Profile was updated, refresh preferences
             await loadPreferences();
             await checkAuth();
           }
         },
         `id=eq.${user.user_id}`
-      );
+      ).then((unsub) => {
+        if (isMounted) {
+          unsubscribeFn = unsub;
+        } else if (unsub) {
+          // Component unmounted before subscription completed, clean up immediately
+          unsub();
+        }
+      }).catch((error) => {
+        console.error('Error setting up real-time subscription:', error);
+      });
 
       return () => {
-        if (unsubscribe) {
-          unsubscribe.then((unsub) => {
-            if (typeof unsub === 'function') {
-              unsub();
-            }
-          });
+        isMounted = false;
+        if (unsubscribeFn) {
+          unsubscribeFn();
         }
       };
     }
@@ -152,17 +163,49 @@ export default function NotificationPreferencesScreen() {
     // Save to database if configured
     if (isSupabaseConfigured() && user?.user_id) {
       try {
-        // Note: This would require a notification_preferences JSONB column in profiles
-        // For now, we'll just update the push_notifications_enabled flag
-        // TODO: Implement full notification preferences storage when schema is updated
-      } catch (error) {
+        const client = await getSupabaseClient();
+        
+        // Try to save to notification_preferences JSONB column if it exists
+        // If the column doesn't exist, this will fail gracefully
+        const { error } = await client
+          .from('profiles')
+          .update({
+            notification_preferences: {
+              ...categorySettings,
+              [id]: newValue,
+            },
+          })
+          .eq('id', user.user_id);
+
+        if (error) {
+          // Column doesn't exist or update failed - show info message
+          // Don't revert state, just inform user that preference isn't persisted
+          if (error.code === '42703' || error.message.includes('column') || error.message.includes('does not exist')) {
+            showToast(
+              'Category preferences are saved locally but will reset after app restart. Full persistence coming soon!',
+              'info',
+              5000
+            );
+          } else {
+            throw error;
+          }
+        }
+      } catch (error: any) {
         console.error('Error saving notification preference:', error);
-        // Revert on error
-        setCategorySettings((prev) => ({
-          ...prev,
-          [id]: !newValue,
-        }));
+        // Show info message that preference isn't persisted
+        showToast(
+          'Category preference saved locally. Full persistence coming soon!',
+          'info',
+          4000
+        );
       }
+    } else {
+      // Not configured - show info message
+      showToast(
+        'Category preference saved locally. Full persistence coming soon!',
+        'info',
+        4000
+      );
     }
   };
 

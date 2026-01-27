@@ -25,7 +25,8 @@ import {
 import { Colors } from '../../constants/colors';
 import { Spacing, BorderRadius, Shadows } from '../../constants/spacing';
 import { FontSize, FontFamily, LetterSpacing } from '../../constants/typography';
-import { getSupabaseClient } from '../../lib/supabase';
+import { getSupabaseClient, isSupabaseConfigured } from '../../lib/supabase';
+import { realtimeService } from '../../services/realtimeService';
 
 const INITIAL_STATS = [
   { icon: ShoppingBag, value: '...', label: 'Products' },
@@ -66,21 +67,70 @@ export default function AboutScreen() {
 
   useEffect(() => {
     fetchStats();
+
+    // Subscribe to real-time updates for stats
+    if (isSupabaseConfigured()) {
+      let unsubscribers: (() => void)[] = [];
+      let isMounted = true;
+
+      // Set up all subscriptions and wait for them to complete
+      Promise.all([
+        realtimeService.subscribeToTable('products', '*', async () => {
+          if (isMounted) {
+            await fetchStats();
+          }
+        }),
+        realtimeService.subscribeToTable('vendors', '*', async () => {
+          if (isMounted) {
+            await fetchStats();
+          }
+        }),
+        realtimeService.subscribeToTable('profiles', '*', async () => {
+          if (isMounted) {
+            await fetchStats();
+          }
+        }),
+      ]).then((unsubs) => {
+        // Only add unsubscribe functions if component is still mounted
+        if (isMounted) {
+          unsubscribers = unsubs.filter((unsub): unsub is (() => void) => typeof unsub === 'function');
+        } else {
+          // Component unmounted before subscriptions completed, clean up immediately
+          unsubs.forEach((unsub) => {
+            if (typeof unsub === 'function') {
+              unsub();
+            }
+          });
+        }
+      }).catch((error) => {
+        console.error('Error setting up real-time subscriptions:', error);
+      });
+
+      return () => {
+        isMounted = false;
+        // Clean up all subscriptions
+        unsubscribers.forEach((unsub) => {
+          if (typeof unsub === 'function') {
+            unsub();
+          }
+        });
+      };
+    }
   }, []);
 
   const fetchStats = async () => {
     try {
       const supabase = await getSupabaseClient();
-      const [products, vendors, users] = await Promise.all([
+      const [products, vendors, profiles] = await Promise.all([
         supabase.from('products').select('*', { count: 'exact', head: true }),
         supabase.from('vendors').select('*', { count: 'exact', head: true }),
-        supabase.from('users').select('*', { count: 'exact', head: true }),
+        supabase.from('profiles').select('*', { count: 'exact', head: true }),
       ]);
 
       setStats([
         { icon: ShoppingBag, value: formatCount(products.count || 0), label: 'Products' },
         { icon: Storefront, value: formatCount(vendors.count || 0), label: 'Vendors' },
-        { icon: Users, value: formatCount(users.count || 0), label: 'Customers' },
+        { icon: Users, value: formatCount(profiles.count || 0), label: 'Customers' },
       ]);
     } catch (error) {
       console.error('Error fetching stats:', error);

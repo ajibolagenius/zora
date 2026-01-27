@@ -6,7 +6,6 @@ import {
   ScrollView,
   TouchableOpacity,
   TextInput,
-  Image,
   Alert,
   Keyboard,
 } from 'react-native';
@@ -29,6 +28,8 @@ import { ErrorMessages, SuccessMessages, AlertMessages, CommonImages } from '../
 import { useAuthStore } from '../../stores/authStore';
 import { realtimeService } from '../../services/realtimeService';
 import { isSupabaseConfigured } from '../../lib/supabase';
+import { useToast } from '../../components/ui/ToastProvider';
+import { LazyAvatar } from '../../components/ui';
 
 // Mock user data
 const USER_DATA = {
@@ -43,6 +44,7 @@ const USER_DATA = {
 export default function PersonalInformationScreen() {
   const router = useRouter();
   const { user, updateProfile, checkAuth } = useAuthStore();
+  const { showToast } = useToast();
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
     firstName: user?.name?.split(' ')[0] || USER_DATA.firstName,
@@ -92,17 +94,23 @@ export default function PersonalInformationScreen() {
         });
         // Refresh auth to get updated profile data
         await checkAuth();
-      } catch (updateError) {
+        setIsEditing(false);
+        showToast(SuccessMessages.profile.updated, 'success');
+      } catch (updateError: any) {
         // If update fails (e.g., Supabase not configured), still update local state
         // This allows the UI to work in dev mode
         console.warn('Profile update failed, updating local state only:', updateError);
+        setIsEditing(false);
+        showToast(
+          isSupabaseConfigured() 
+            ? (updateError?.message || ErrorMessages.form.updateFailed)
+            : SuccessMessages.profile.updated,
+          isSupabaseConfigured() ? 'error' : 'success'
+        );
       }
-      
-      setIsEditing(false);
-      Alert.alert(AlertMessages.titles.success, SuccessMessages.profile.updated);
     } catch (error: any) {
       console.error('Save error:', error);
-      Alert.alert(AlertMessages.titles.error, error.message || ErrorMessages.form.updateFailed);
+      showToast(error.message || ErrorMessages.form.updateFailed, 'error');
     }
   };
 
@@ -143,9 +151,12 @@ export default function PersonalInformationScreen() {
         {/* Profile Photo Section */}
         <View style={styles.photoSection}>
           <View style={styles.avatarContainer}>
-            <Image 
-              source={{ uri: user?.picture || formData.avatar }} 
-              style={styles.avatar} 
+            <LazyAvatar
+              source={user?.picture || null}
+              name={user?.name || `${formData.firstName} ${formData.lastName}`}
+              userId={user?.user_id}
+              size={120}
+              style={styles.avatar}
             />
             <TouchableOpacity
               style={styles.cameraButton}

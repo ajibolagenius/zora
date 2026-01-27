@@ -148,41 +148,52 @@ export default function ProfileTab() {
 
     // Subscribe to real-time updates
     if (isSupabaseConfigured() && user?.user_id) {
-      const unsubscribers: (() => void)[] = [];
+      let unsubscribers: (() => void)[] = [];
+      let isMounted = true;
 
-      // Subscribe to orders updates
-      realtimeService.subscribeToTable('orders', '*', async () => {
-        await fetchUserStats();
-      }).then((unsub) => {
-        if (unsub) unsubscribers.push(unsub);
-      });
-
-      // Subscribe to reviews updates
-      realtimeService.subscribeToTable('reviews', '*', async () => {
-        await fetchUserStats();
-      }).then((unsub) => {
-        if (unsub) unsubscribers.push(unsub);
-      });
-
-      // Subscribe to wishlist updates
-      realtimeService.subscribeToTable('wishlist', '*', async () => {
-        await fetchUserStats();
-      }).then((unsub) => {
-        if (unsub) unsubscribers.push(unsub);
-      });
-
-      // Subscribe to profile updates
-      realtimeService.subscribeToTable('profiles', 'UPDATE', async (payload) => {
-        if (payload.new?.id === user.user_id) {
-          // Profile was updated, refresh user data
-          const { checkAuth } = useAuthStore.getState();
-          await checkAuth();
+      // Set up all subscriptions and wait for them to complete
+      Promise.all([
+        realtimeService.subscribeToTable('orders', '*', async () => {
+          if (isMounted) {
+            await fetchUserStats();
+          }
+        }),
+        realtimeService.subscribeToTable('reviews', '*', async () => {
+          if (isMounted) {
+            await fetchUserStats();
+          }
+        }),
+        realtimeService.subscribeToTable('wishlist', '*', async () => {
+          if (isMounted) {
+            await fetchUserStats();
+          }
+        }),
+        realtimeService.subscribeToTable('profiles', 'UPDATE', async (payload) => {
+          if (isMounted && payload.new?.id === user.user_id) {
+            // Profile was updated, refresh user data
+            const { checkAuth } = useAuthStore.getState();
+            await checkAuth();
+          }
+        }, `id=eq.${user.user_id}`),
+      ]).then((unsubs) => {
+        // Only add unsubscribe functions if component is still mounted
+        if (isMounted) {
+          unsubscribers = unsubs.filter((unsub): unsub is (() => void) => typeof unsub === 'function');
+        } else {
+          // Component unmounted before subscriptions completed, clean up immediately
+          unsubs.forEach((unsub) => {
+            if (typeof unsub === 'function') {
+              unsub();
+            }
+          });
         }
-      }, `id=eq.${user.user_id}`).then((unsub) => {
-        if (unsub) unsubscribers.push(unsub);
+      }).catch((error) => {
+        console.error('Error setting up real-time subscriptions:', error);
       });
 
       return () => {
+        isMounted = false;
+        // Clean up all subscriptions
         unsubscribers.forEach((unsub) => {
           if (typeof unsub === 'function') {
             unsub();
@@ -277,8 +288,8 @@ export default function ProfileTab() {
           {/* Avatar */}
           <View style={styles.avatarContainer}>
             <LazyAvatar
-              source={user?.picture || CommonImages.defaultUser}
-              name={user?.name}
+              source={user?.picture || null}
+              name={user?.name || 'User'}
               userId={user?.user_id}
               size={80}
               style={styles.avatar}
