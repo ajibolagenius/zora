@@ -117,8 +117,20 @@ export default function LoginScreen() {
             let errorType: 'error' | 'warning' | 'info' = 'error';
             let action: { label: string; onPress: () => void } | undefined;
 
+            // Check for email rate limit error (429 Too Many Requests)
+            if (
+                error.message?.includes('email rate limit exceeded') ||
+                error.message?.includes('rate limit exceeded') ||
+                error.message?.includes('Too Many Requests') ||
+                error.status === 429
+            ) {
+                errorMessage = mode === 'signup' 
+                    ? 'Too many signup attempts. Please wait a few minutes before trying again or use a different email address.'
+                    : 'Too many login attempts. Please wait a few minutes before trying again.';
+                errorType = 'warning';
+            }
             // Check for email not confirmed error
-            if (error.message?.includes('Email not confirmed') || error.message?.includes('email_not_confirmed')) {
+            else if (error.message?.includes('Email not confirmed') || error.message?.includes('email_not_confirmed')) {
                 errorMessage = 'Please verify your email address before signing in. Check your inbox for the confirmation link.';
                 errorType = 'warning';
                 action = {
