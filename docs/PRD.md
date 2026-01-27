@@ -121,25 +121,25 @@ Zora African Market is a premium mobile e-commerce marketplace connecting the Af
 - `carts` - Shopping cart data
 - `cart_items` - Individual cart items
 
-See `frontend/supabase/migrations/001_initial_schema.sql` for the complete schema.
+See `supabase/migrations/001_initial_schema.sql` for the complete schema.
 
 ## Configuration Required
 
 ### Supabase Setup
-Update `frontend/.env`:
+Update `.env`:
 ```
 EXPO_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
 EXPO_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
 ```
 
 ### Stripe (Payment Processing)
-Update `frontend/.env`:
+Update `.env`:
 ```
 EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_live_your_actual_key
 ```
 
 ### Google Maps
-Update `frontend/.env`:
+Update `.env`:
 ```
 EXPO_PUBLIC_GOOGLE_MAPS_API_KEY=your_google_maps_api_key
 ```
@@ -154,7 +154,6 @@ EXPO_PUBLIC_CLEARPAY_MERCHANT_ID=your_clearpay_merchant_id
 
 ### Development
 ```bash
-cd frontend
 npm install
 npx expo start
 ```
@@ -178,18 +177,17 @@ eas build --platform all
 ## Project Structure
 ```
 zora/
-├── frontend/              # React Native Expo app
-│   ├── app/              # Expo Router screens
-│   ├── components/       # Reusable UI components
-│   ├── constants/        # Design tokens & configuration
-│   ├── data/             # Mock data (development)
-│   ├── hooks/            # Custom React hooks
-│   ├── lib/              # Supabase client & utilities
-│   ├── providers/        # Context providers
-│   ├── services/         # API & business logic services
-│   ├── stores/           # Zustand state stores
-│   ├── supabase/         # Database migrations & seeds
-│   └── types/            # TypeScript type definitions
+├── app/                  # Expo Router screens
+├── components/           # Reusable UI components
+├── constants/            # Design tokens & configuration
+├── data/                 # Mock data (development)
+├── hooks/                # Custom React hooks
+├── lib/                  # Supabase client & utilities
+├── providers/            # Context providers
+├── services/             # API & business logic services
+├── stores/               # Zustand state stores
+├── supabase/             # Database migrations & seeds
+├── types/                # TypeScript type definitions
 ├── docs/                 # Documentation
 └── README.md
 ```

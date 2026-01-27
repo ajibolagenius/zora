@@ -30,7 +30,6 @@ cd zora
 
 2. Install dependencies:
 ```bash
-cd frontend
 npm install
 ```
 
@@ -63,30 +62,28 @@ npx expo start
 
 ```
 zora/
-├── frontend/                 # React Native Expo app
-│   ├── app/                 # Expo Router screens
-│   │   ├── (auth)/          # Authentication screens
-│   │   ├── (tabs)/          # Main tab navigation
-│   │   ├── onboarding/      # Onboarding flow
-│   │   ├── order/           # Order details
-│   │   ├── product/         # Product details
-│   │   ├── settings/        # Settings screens
-│   │   └── vendor/          # Vendor storefront
-│   ├── components/          # Reusable UI components
-│   │   ├── ui/              # Base UI components
-│   │   └── nativewind/      # NativeWind components
-│   ├── constants/           # Design tokens & configuration
-│   ├── data/                # Mock data (development)
-│   ├── hooks/               # Custom React hooks
-│   ├── lib/                 # Supabase client & utilities
-│   ├── providers/           # Context providers
-│   ├── services/            # API & business logic
-│   ├── stores/              # Zustand state stores
-│   ├── supabase/            # Database migrations
-│   └── types/               # TypeScript definitions
-├── docs/                    # Documentation
-│   └── PRD.md               # Product Requirements Document
-└── README.md
+├── app/                    # Expo Router screens
+│   ├── (auth)/            # Authentication screens
+│   ├── (tabs)/            # Main tab navigation
+│   ├── onboarding/        # Onboarding flow
+│   ├── order/             # Order details
+│   ├── product/           # Product details
+│   ├── settings/          # Settings screens
+│   └── vendor/            # Vendor storefront
+├── components/            # Reusable UI components
+│   ├── ui/                # Base UI components
+│   └── nativewind/        # NativeWind components
+├── constants/             # Design tokens & configuration
+├── data/                  # Mock data (development)
+├── hooks/                 # Custom React hooks
+├── lib/                   # Supabase client & utilities
+├── providers/             # Context providers
+├── services/              # API & business logic
+├── stores/                # Zustand state stores
+├── supabase/              # Database migrations
+├── types/                 # TypeScript definitions
+└── docs/                  # Documentation
+    └── PRD.md             # Product Requirements Document
 ```
 
 ## Features
@@ -114,7 +111,7 @@ zora/
 
 2. Run the initial migration:
 ```sql
--- Copy contents from frontend/supabase/migrations/001_initial_schema.sql
+-- Copy contents from supabase/migrations/001_initial_schema.sql
 ```
 
 3. Enable Google OAuth in Authentication settings

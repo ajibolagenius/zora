@@ -84,3 +84,18 @@ android/
 
 # Vercel
 .vercel
+
+# Expo TypeScript
+expo-env.d.ts
+
+# Native
+.kotlin/
+
+# Project specific
+app-example
+assets/brand/
+assets/documents/
+assets/ui_images/
+data/docs/
+testsprite_tests/
+temp_cache/
