@@ -26,8 +26,8 @@ export const ApiEndpoints = {
 export const ApiConfig = {
   // Request timeout in milliseconds
   timeout: 30000, // 30 seconds
-  // Auth timeout in milliseconds
-  authTimeout: 15000, // 15 seconds
+  // Auth timeout in milliseconds (increased for slower connections)
+  authTimeout: 30000, // 30 seconds
   // Retry attempts
   maxRetries: 3,
   // Retry delay in milliseconds

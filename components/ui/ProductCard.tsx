@@ -46,7 +46,7 @@ interface ProductCardProps {
   compact?: boolean;
 }
 
-export const ProductCard: React.FC<ProductCardProps> = ({
+export const ProductCard: React.FC<ProductCardProps> = React.memo(({
   product,
   onPress,
   onAddToCart,
@@ -100,6 +100,8 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           style={[styles.image, compact && styles.imageCompact]}
           contentFit="cover"
           showLoader={false}
+          priority={product.is_featured ? 'high' : 'normal'}
+          cachePolicy="memory-disk"
         />
         
         {/* Badges */}
@@ -176,7 +178,15 @@ export const ProductCard: React.FC<ProductCardProps> = ({
       </View>
     </TouchableOpacity>
   );
-};
+}, (prevProps, nextProps) => {
+  // Custom comparison for better performance
+  return (
+    prevProps.product.id === nextProps.product.id &&
+    prevProps.product.price === nextProps.product.price &&
+    prevProps.product.image_urls?.[0] === nextProps.product.image_urls?.[0] &&
+    prevProps.compact === nextProps.compact
+  );
+});
 
 const styles = StyleSheet.create({
   container: {

@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useMemo, useCallback } from 'react';
 import {
   View,
   Text,
@@ -31,7 +31,7 @@ import { FeaturedSlider, RegionCard, VendorCard, ProductCard } from '../../compo
 import MetaTags from '../../components/ui/MetaTags';
 import { homeService, type HomeData } from '../../services/homeService';
 import { messagingService } from '../../services/messagingService';
-import type { Vendor, Product } from '../../types/supabase';
+import type { Vendor, Product } from '../../types';
 import { useCartStore } from '../../stores/cartStore';
 import { useAuthStore } from '../../stores/authStore';
 import { useNotificationStore } from '../../stores/notificationStore';
@@ -55,7 +55,7 @@ export default function HomeScreen() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedRegion, setSelectedRegion] = useState<string | null>(null);
   const [userLocation, setUserLocation] = useState<{ city: string; postcode: string } | null>(null);
-  const [allProducts, setAllProducts] = useState<Product[]>([]);
+  const [allProducts, setAllProducts] = useState<any[]>([]);
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMoreProducts, setHasMoreProducts] = useState(true);
   const [productOffset, setProductOffset] = useState(0);
@@ -94,8 +94,11 @@ export default function HomeScreen() {
 
   const fetchHomeData = async () => {
     try {
-      // Fetch all home data from database
-      const data = await homeService.getHomeData(userRegion);
+      // Fetch home data and user location in parallel for faster loading
+      const [data, location] = await Promise.all([
+        homeService.getHomeData(userRegion),
+        user?.user_id ? homeService.getUserLocation(user.user_id) : Promise.resolve(null),
+      ]);
       
       // Randomize featured vendors
       const randomizedVendors = shuffleArray(data.featured_vendors);
@@ -117,11 +120,8 @@ export default function HomeScreen() {
       setProductOffset(uniqueProducts.length);
       setHasMoreProducts(uniqueProducts.length >= 20); // Assume more if we got full batch
 
-      // Fetch user location for display
-      if (user?.user_id) {
-        const location = await homeService.getUserLocation(user.user_id);
-        setUserLocation(location);
-      }
+      // Set user location
+      setUserLocation(location);
     } catch (error) {
       console.error('Error fetching home data:', error);
     } finally {
@@ -243,34 +243,29 @@ export default function HomeScreen() {
     fetchHomeData();
   };
 
-  const handleProductPress = (product: Product) => {
+  const handleProductPress = useCallback((product: Product) => {
     router.push(getProductRoute(product.id) as any);
-  };
+  }, [router]);
 
-  const handleVendorPress = (vendor: Vendor) => {
+  const handleVendorPress = useCallback((vendor: Vendor) => {
     router.push(getVendorRoute(vendor as any, vendor.id) as any);
-  };
+  }, [router]);
 
-  const handleAddToCart = (product: Product) => {
-    // Map Supabase Product to cart Product format
-    const imageUrls = Array.isArray(product.image_urls) 
-      ? product.image_urls 
-      : product.image_urls 
-        ? [product.image_urls] 
-        : [];
+  const handleAddToCart = useCallback((product: Product) => {
+    // Map Product to cart Product format
+    const imageUrls = product.images || (product.image_url ? [product.image_url] : []);
     
     const cartProduct = {
       ...product,
-      currency: 'GBP',
-      image_url: imageUrls[0] || '',
+      currency: product.currency || 'GBP',
+      image_url: product.image_url || imageUrls[0] || '',
       images: imageUrls,
-      region: product.cultural_region || '',
-      in_stock: (product.stock_quantity || 0) > 0,
-      attributes: {},
-      unit_price_label: product.unit_price_label || '',
+      region: product.region || '',
+      in_stock: product.in_stock ?? ((product.stock_quantity || 0) > 0),
+      attributes: product.attributes || {},
     };
     addToCart(cartProduct as any, 1);
-  };
+  }, [addToCart]);
 
   const handleRegionPress = (region: { name: string }) => {
     setSelectedRegion(selectedRegion === region.name ? null : region.name);
@@ -323,19 +318,46 @@ export default function HomeScreen() {
     );
   }
 
-  const filteredProducts = selectedRegion
-    ? allProducts.filter((p) => p.cultural_region?.toLowerCase().includes(selectedRegion.toLowerCase()))
-    : allProducts;
+  // Memoize filtered products to prevent unnecessary re-renders
+  const filteredProducts = useMemo(() => {
+    return selectedRegion
+      ? allProducts.filter((p) => (p.region || '').toLowerCase().includes(selectedRegion.toLowerCase()))
+      : allProducts;
+  }, [allProducts, selectedRegion]);
+
+  // Memoize product card render to prevent unnecessary re-renders
+  const renderProductCard = useCallback((product: Product, index: number) => {
+    return (
+      <View 
+        key={`product-${product.id}`}
+        style={{
+          width: productCardWidth,
+          marginRight: index % 2 === 0 ? PRODUCT_GAP : 0,
+          marginBottom: PRODUCT_GAP,
+        }}
+      >
+        <ProductCard
+          product={{
+            ...product,
+            description: product.description || undefined,
+          } as any}
+          onPress={() => handleProductPress(product)}
+          onAddToCart={() => handleAddToCart(product)}
+        />
+      </View>
+    );
+  }, [productCardWidth, handleProductPress, handleAddToCart]);
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <MetaTags
-        data={generatePageMetaTags(
-          'Zora African Market - Authentic African Groceries & Products',
-          'Discover authentic African groceries, products, and vendors. Shop from the best African markets in the UK. Fast delivery, verified vendors, and premium quality.',
-          '/assets/images/app-image.png',
-          '/'
-        )}
+        data={{
+          title: 'Zora African Market - Authentic African Groceries & Products',
+          description: 'Discover authentic African groceries, products, and vendors. Shop from the best African markets in the UK. Fast delivery, verified vendors, and premium quality.',
+          image: '/assets/images/app-image.png',
+          url: '/',
+          type: 'website',
+        }}
       />
       {/* Sticky Header Section */}
       <View style={styles.stickyHeader}>
@@ -525,25 +547,7 @@ export default function HomeScreen() {
               </TouchableOpacity>
             </View>
             <View style={styles.productsGrid}>
-              {filteredProducts?.map((product, index) => (
-                <View 
-                  key={`product-${product.id}-${index}`} 
-                  style={{
-                    width: productCardWidth,
-                    marginRight: index % 2 === 0 ? PRODUCT_GAP : 0,
-                    marginBottom: PRODUCT_GAP,
-                  }}
-                >
-                  <ProductCard
-                    product={{
-                      ...product,
-                      description: product.description || undefined,
-                    } as any}
-                    onPress={() => handleProductPress(product)}
-                    onAddToCart={() => handleAddToCart(product)}
-                  />
-                </View>
-              ))}
+              {filteredProducts.map((product, index) => renderProductCard(product, index))}
             </View>
             
             {/* Loading More Footer */}

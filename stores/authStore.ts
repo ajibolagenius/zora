@@ -48,11 +48,46 @@ export const DEV_MOCK_CREDENTIALS = {
 };
 
 // Helper to add timeout to promises
+// Properly cleans up timeout to prevent memory leaks
 const withTimeout = <T>(promise: Promise<T>, ms: number, errorMessage: string): Promise<T> => {
+  let timeoutId: NodeJS.Timeout | null = null;
+  let isResolved = false;
+  
   const timeout = new Promise<never>((_, reject) => {
-    setTimeout(() => reject(new Error(errorMessage)), ms);
+    timeoutId = setTimeout(() => {
+      if (!isResolved) {
+        isResolved = true;
+        reject(new Error(errorMessage));
+      }
+    }, ms);
   });
-  return Promise.race([promise, timeout]);
+  
+  return Promise.race([
+    promise.then((result) => {
+      // Clear timeout if promise resolves before timeout
+      if (timeoutId && !isResolved) {
+        isResolved = true;
+        clearTimeout(timeoutId);
+        timeoutId = null;
+      }
+      return result;
+    }).catch((error) => {
+      // Clear timeout if promise rejects before timeout
+      if (timeoutId && !isResolved) {
+        isResolved = true;
+        clearTimeout(timeoutId);
+        timeoutId = null;
+      }
+      throw error;
+    }),
+    timeout,
+  ]).finally(() => {
+    // Ensure timeout is cleared
+    if (timeoutId) {
+      clearTimeout(timeoutId);
+      timeoutId = null;
+    }
+  });
 };
 
 const AUTH_TIMEOUT_MS = ApiConfig.authTimeout;
@@ -417,7 +452,10 @@ export const useAuthStore = create<AuthState>()(
               throw new Error('Invalid email or password. Please try again.');
             } else if (error.message?.includes('Email not confirmed')) {
               throw new Error('Please verify your email address before signing in.');
-            } else if (error.message?.includes('network') || error.message?.includes('fetch')) {
+            } else if (error.message?.includes('timed out') || error.message?.includes('timeout')) {
+              // Timeout errors - provide helpful message
+              throw new Error('Sign-in timed out. This may be due to a slow connection. Please check your internet and try again.');
+            } else if (error.message?.includes('network') || error.message?.includes('fetch') || error.message?.includes('Failed to fetch')) {
               throw new Error('Network error. Please check your connection and try again.');
             } else if (error.message?.includes('signal is aborted') || error.message?.includes('navigatorLock')) {
               // Ignore navigator lock timeout errors - they're usually harmless
@@ -977,7 +1015,33 @@ export const useAuthStore = create<AuthState>()(
           const client = await getSupabaseClient();
           const { data, error } = await client.auth.refreshSession();
 
-          if (error) throw error;
+          if (error) {
+            // Handle specific refresh token errors
+            if (error.message?.includes('Invalid Refresh Token') || 
+                error.message?.includes('Refresh Token Not Found') ||
+                error.message?.includes('refresh_token_not_found')) {
+              console.warn('Refresh token invalid or expired, clearing session');
+              
+              // Clear the invalid session from Supabase storage
+              try {
+                await client.auth.signOut();
+              } catch (signOutError) {
+                // Ignore sign out errors - we're already handling the invalid token
+                console.warn('Error during sign out after invalid refresh token:', signOutError);
+              }
+              
+              // Log the event
+              if (user) {
+                logSecurityEvent.sessionExpired(user.user_id, user.email);
+              }
+              
+              // Clear local state
+              get().logout();
+              return;
+            }
+            
+            throw error;
+          }
 
           if (data.session) {
             // Reset sessionExpiringSoon flag when session is refreshed
@@ -995,10 +1059,23 @@ export const useAuthStore = create<AuthState>()(
             }
 
             sessionTimeoutManager.refreshSession();
+          } else {
+            // No session returned, user needs to log in again
+            console.warn('Session refresh returned no session');
+            get().logout();
           }
-        } catch (error) {
+        } catch (error: any) {
+          // Handle other refresh errors
+          if (error?.message?.includes('Invalid Refresh Token') || 
+              error?.message?.includes('Refresh Token Not Found') ||
+              error?.message?.includes('refresh_token_not_found')) {
+            console.warn('Refresh token invalid, clearing session');
+            get().logout();
+            return;
+          }
+          
           console.error('Session refresh error:', error);
-          // If refresh fails, logout user
+          // If refresh fails with other errors, logout user
           get().logout();
         }
       },

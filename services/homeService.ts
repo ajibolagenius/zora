@@ -34,6 +34,7 @@ export interface HomeData {
 export const homeService = {
   /**
    * Fetch all home screen data
+   * Optimized to fetch in parallel for faster loading
    */
   getHomeData: async (userRegion?: string): Promise<HomeData> => {
     // Fetch banners (using mock data for now - can be moved to DB later)
@@ -41,14 +42,12 @@ export const homeService = {
       ?.filter((b: any) => b.is_active)
       .sort((a: any, b: any) => a.order - b.order) || [];
 
-    // Fetch regions from database
-    const regions = await onboardingService.getRegions();
-
-    // Fetch featured vendors
-    const featured_vendors = await vendorService.getFeatured(userRegion, 10);
-
-    // Fetch popular products (initial batch)
-    const popular_products = await productService.getFeatured(userRegion, 20);
+    // Fetch all data in parallel for faster loading
+    const [regions, featured_vendors, popular_products] = await Promise.all([
+      onboardingService.getRegions(),
+      vendorService.getFeatured(userRegion, 10),
+      productService.getFeatured(userRegion, 20),
+    ]);
 
     return {
       banners,

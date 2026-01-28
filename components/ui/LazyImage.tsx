@@ -79,6 +79,9 @@ export const LazyImage: React.FC<LazyImageProps> = ({
   // - Memory cache: Fast access for recently viewed images
   // - Disk cache: Persists across app restarts, larger capacity
   const cachePolicy = props.cachePolicy || 'memory-disk';
+  
+  // Optimize image loading based on priority
+  const imagePriority = props.priority || 'normal';
 
   return (
     <View style={[styles.container, style]}>
@@ -89,9 +92,10 @@ export const LazyImage: React.FC<LazyImageProps> = ({
         placeholder={finalPlaceholder}
         transition={200}
         cachePolicy={cachePolicy}
-        priority={props.priority || 'normal'}
+        priority={imagePriority}
         onLoadEnd={handleLoadEnd}
         onError={handleError}
+        recyclingKey={imageUri || undefined}
         {...props}
       />
       

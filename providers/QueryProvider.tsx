@@ -22,8 +22,8 @@ const persister = createAsyncStoragePersister({
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      // Cache data for 10 minutes
-      staleTime: 10 * 60 * 1000,
+      // Cache data for 15 minutes (increased for better performance)
+      staleTime: 15 * 60 * 1000,
       // Keep unused data in cache for 24 hours (for offline usage)
       gcTime: 24 * 60 * 60 * 1000,
       // Retry failed requests 2 times
@@ -32,6 +32,10 @@ const queryClient = new QueryClient({
       refetchOnWindowFocus: false,
       // Refetch on reconnect
       refetchOnReconnect: true,
+      // Don't refetch on mount if data is fresh
+      refetchOnMount: false,
+      // Enable structural sharing for better performance
+      structuralSharing: true,
     },
     mutations: {
       // Retry mutations once

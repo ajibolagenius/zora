@@ -57,7 +57,7 @@ export default function RootLayout() {
         console.warn('Font loading timeout - proceeding with system fonts');
         setFontTimeout(true);
       }
-    }, 5000); // Reduced to 5 seconds for debugging
+    }, 2000); // Reduced to 2 seconds for faster app startup
 
     return () => clearTimeout(timeout);
   }, [fontsLoaded, fontError]);
@@ -148,24 +148,54 @@ export default function RootLayout() {
 
             const { checkAuth, setSession, setUser, logout } = useAuthStore.getState();
 
-            switch (event) {
-              case 'SIGNED_IN':
-              case 'TOKEN_REFRESHED':
-                // Refresh auth state when session changes
-                await checkAuth();
-                break;
-              case 'SIGNED_OUT':
-                // Clear auth state on logout
-                setUser(null);
-                setSession(null);
-                break;
-              case 'USER_UPDATED':
-                // Refresh user data when profile is updated
-                await checkAuth();
-                break;
-              default:
-                // For other events, just refresh auth state
-                await checkAuth();
+            try {
+              switch (event) {
+                case 'SIGNED_IN':
+                  // Refresh auth state when user signs in
+                  if (session) {
+                    await checkAuth();
+                  }
+                  break;
+                case 'TOKEN_REFRESHED':
+                  // Handle token refresh - session should be valid
+                  if (session) {
+                    setSession(session);
+                    // Also refresh auth state to ensure everything is in sync
+                    await checkAuth();
+                  } else {
+                    // Token refresh failed, clear session
+                    console.warn('Token refresh returned no session');
+                    logout();
+                  }
+                  break;
+                case 'SIGNED_OUT':
+                  // Clear auth state on logout
+                  setUser(null);
+                  setSession(null);
+                  break;
+                case 'USER_UPDATED':
+                  // Refresh user data when profile is updated
+                  if (session) {
+                    await checkAuth();
+                  }
+                  break;
+                default:
+                  // For other events, just refresh auth state if we have a session
+                  if (session) {
+                    await checkAuth();
+                  }
+              }
+            } catch (error: any) {
+              // Handle auth state change errors, especially invalid refresh tokens
+              if (error?.message?.includes('Invalid Refresh Token') || 
+                  error?.message?.includes('Refresh Token Not Found') ||
+                  error?.message?.includes('refresh_token_not_found')) {
+                console.warn('Invalid refresh token detected in auth state change, clearing session');
+                logout();
+              } else {
+                console.error('Error in auth state change handler:', error);
+                // Don't logout on other errors - they might be transient
+              }
             }
           }
         );
