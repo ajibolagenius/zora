@@ -9,6 +9,8 @@ import {
   useWindowDimensions,
   FlatList,
   Animated,
+  Share,
+  Platform,
 } from 'react-native';
 import { LazyImage, LazyAvatar } from '../../components/ui';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -39,10 +41,14 @@ import { productService, vendorService, reviewService } from '../../services/sup
 import { realtimeService } from '../../services/realtimeService';
 import type { Product, Vendor, Review } from '../../types/supabase';
 import { useCartStore } from '../../stores/cartStore';
+import { useWishlistStore } from '../../stores/wishlistStore';
+import { useAuthStore } from '../../stores/authStore';
+import { useToast } from '../../components/ui/ToastProvider';
 import FloatingTabBar from '../../components/ui/FloatingTabBar';
 import { decodeProductSlug, isValidProductSlug } from '../../lib/slugUtils';
 import { getVendorRoute, isValidRouteParam, safeGoBack } from '../../lib/navigationHelpers';
 import NotFoundScreen from '../../components/errors/NotFoundScreen';
+import { isSupabaseConfigured } from '../../lib/supabase';
 
 type SectionType = 'description' | 'nutrition' | 'heritage';
 
@@ -52,6 +58,9 @@ export default function ProductScreen() {
   const { productSlug } = useLocalSearchParams<{ productSlug: string }>();
   const { height: screenHeight } = useWindowDimensions();
   const addToCart = useCartStore((state) => state.addItem);
+  const { isInWishlist, toggleWishlist } = useWishlistStore();
+  const { user } = useAuthStore();
+  const showToast = useToast();
 
   const [product, setProduct] = useState<Product | null>(null);
   const [vendor, setVendor] = useState<Vendor | null>(null);
@@ -59,7 +68,6 @@ export default function ProductScreen() {
   const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState<SectionType>('description');
-  const [isFavorite, setIsFavorite] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const scrollX = useRef(new Animated.Value(0)).current;
   const flatListRef = useRef<FlatList>(null);
@@ -86,6 +94,17 @@ export default function ProductScreen() {
         // Fetch reviews for this product
         const productReviews = await reviewService.getByProduct(productData.id);
         setReviews(productReviews);
+        
+        // Update product review count and rating from actual reviews if available
+        // Otherwise use the product's stored values
+        if (productReviews.length > 0) {
+          const avgRating = productReviews.reduce((sum, r) => sum + r.rating, 0) / productReviews.length;
+          setProduct((prev) => prev ? { 
+            ...prev, 
+            review_count: productReviews.length,
+            rating: Math.round(avgRating * 10) / 10 // Round to 1 decimal
+          } : null);
+        }
       }
     } catch (error) {
       console.error('Error fetching product:', error);
@@ -94,71 +113,114 @@ export default function ProductScreen() {
     }
   }, [productSlug]);
 
+  // Set up real-time subscriptions after product is loaded
   useEffect(() => {
-    fetchData();
+    if (!product?.id || !isSupabaseConfigured()) return;
 
-    // Subscribe to real-time updates
     const unsubscribers: (() => void)[] = [];
+    let isMounted = true;
 
-    if (product?.id) {
-      // Subscribe to product updates
-      realtimeService.subscribeToTable(
-        'products',
-        'UPDATE',
-        async (payload) => {
-          if (payload.new?.id === product.id) {
+    // Subscribe to product updates
+    realtimeService.subscribeToTable(
+      'products',
+      '*',
+      async (payload) => {
+        if (!isMounted || !product?.id) return;
+        
+        if (payload.new?.id === product.id || payload.old?.id === product.id) {
+          try {
             const updatedProduct = await productService.getById(product.id);
-            if (updatedProduct) {
+            if (updatedProduct && isMounted) {
               setProduct(updatedProduct);
             }
+          } catch (error) {
+            console.error('Error fetching updated product:', error);
           }
-        },
-        `id=eq.${product.id}`
-      ).then((unsub) => {
-        if (unsub) unsubscribers.push(unsub);
-      });
+        }
+      },
+      `id=eq.${product.id}`
+    ).then((unsub) => {
+      if (isMounted && unsub) unsubscribers.push(unsub);
+    }).catch((error) => {
+      console.error('Error setting up product subscription:', error);
+    });
 
-      // Subscribe to reviews updates for this product
-      realtimeService.subscribeToTable(
-        'reviews',
-        '*',
-        async () => {
-          const updatedReviews = await reviewService.getByProduct(product.id);
-          setReviews(updatedReviews);
-        },
-        `product_id=eq.${product.id}`
-      ).then((unsub) => {
-        if (unsub) unsubscribers.push(unsub);
-      });
-    }
+    // Subscribe to reviews updates for this product
+    realtimeService.subscribeToTable(
+      'reviews',
+      '*',
+      async (payload) => {
+        if (!isMounted || !product?.id) return;
+        
+        if (payload.new?.product_id === product.id || payload.old?.product_id === product.id) {
+          try {
+            const updatedReviews = await reviewService.getByProduct(product.id);
+            if (isMounted) {
+              setReviews(updatedReviews);
+              // Update product review count and rating from actual reviews
+              if (updatedReviews.length > 0) {
+                const avgRating = updatedReviews.reduce((sum, r) => sum + r.rating, 0) / updatedReviews.length;
+                setProduct((prev) => prev ? { 
+                  ...prev, 
+                  review_count: updatedReviews.length,
+                  rating: Math.round(avgRating * 10) / 10 // Round to 1 decimal
+                } : null);
+              } else {
+                setProduct((prev) => prev ? { 
+                  ...prev, 
+                  review_count: 0,
+                  rating: 0 
+                } : null);
+              }
+            }
+          } catch (error) {
+            console.error('Error fetching updated reviews:', error);
+          }
+        }
+      },
+      `product_id=eq.${product.id}`
+    ).then((unsub) => {
+      if (isMounted && unsub) unsubscribers.push(unsub);
+    }).catch((error) => {
+      console.error('Error setting up reviews subscription:', error);
+    });
 
-    if (product?.vendor_id) {
-      // Subscribe to vendor updates
+    // Subscribe to vendor updates
+    if (product.vendor_id) {
       realtimeService.subscribeToTable(
         'vendors',
-        'UPDATE',
+        '*',
         async (payload) => {
-          if (payload.new?.id === product.vendor_id) {
-            const updatedVendor = await vendorService.getById(product.vendor_id);
-            if (updatedVendor) {
-              setVendor(updatedVendor);
+          if (!isMounted || !product?.vendor_id) return;
+          
+          if (payload.new?.id === product.vendor_id || payload.old?.id === product.vendor_id) {
+            try {
+              const updatedVendor = await vendorService.getById(product.vendor_id);
+              if (updatedVendor && isMounted) {
+                setVendor(updatedVendor);
+              }
+            } catch (error) {
+              console.error('Error fetching updated vendor:', error);
             }
           }
         },
         `id=eq.${product.vendor_id}`
       ).then((unsub) => {
-        if (unsub) unsubscribers.push(unsub);
+        if (isMounted && unsub) unsubscribers.push(unsub);
+      }).catch((error) => {
+        console.error('Error setting up vendor subscription:', error);
       });
     }
 
     return () => {
+      isMounted = false;
       unsubscribers.forEach((unsub) => {
         if (typeof unsub === 'function') {
           unsub();
         }
       });
     };
-  }, [fetchData, product?.id, product?.vendor_id]);
+  }, [product?.id, product?.vendor_id]);
 
   const productImages = product?.image_urls || [];
   const { width: screenWidth } = useWindowDimensions();
@@ -182,6 +244,71 @@ export default function ProductScreen() {
       safeGoBack(router, '/(tabs)/explore');
     }
   };
+
+  const handleToggleFavorite = () => {
+    if (!product) return;
+    
+    if (!user?.user_id) {
+      showToast('Please log in to add items to your wishlist', 'info');
+      return;
+    }
+
+    toggleWishlist(product);
+    const isFavorite = isInWishlist(product.id);
+    if (isFavorite) {
+      showToast('Added to wishlist', 'success');
+    } else {
+      showToast('Removed from wishlist', 'info');
+    }
+  };
+
+  const handleShare = async () => {
+    if (!product) return;
+
+    const productUrl = Platform.select({
+      web: typeof window !== 'undefined' 
+        ? `${window.location.origin}/product/${productSlug}` 
+        : `https://zora.app/product/${productSlug}`,
+      default: `https://zora.app/product/${productSlug}`,
+    });
+
+    try {
+      await Share.share({
+        message: `Check out ${product.name} on Zora African Market! ${productUrl}`,
+        title: `Share ${product.name}`,
+        ...(Platform.OS !== 'web' && { url: productUrl }),
+      });
+    } catch (error: any) {
+      // User cancelled or error occurred
+      if (error.message !== 'User did not share') {
+        console.error('Error sharing:', error);
+      }
+    }
+  };
+
+  // Check if nutrition data is available
+  const hasNutritionData = product?.nutrition && 
+    typeof product.nutrition === 'object' && 
+    Object.keys(product.nutrition).length > 0;
+
+  // Get available tabs based on data
+  const availableTabs: SectionType[] = React.useMemo(() => {
+    const tabs: SectionType[] = ['description'];
+    if (hasNutritionData) {
+      tabs.push('nutrition');
+    }
+    if (product?.heritage_story) {
+      tabs.push('heritage');
+    }
+    return tabs;
+  }, [product?.nutrition, product?.heritage_story, hasNutritionData]);
+
+  // Ensure active tab is valid when product or tabs change
+  useEffect(() => {
+    if (product && !availableTabs.includes(activeTab)) {
+      setActiveTab('description');
+    }
+  }, [product, availableTabs, activeTab]);
 
   if (loading) {
     return (
@@ -311,20 +438,17 @@ export default function ProductScreen() {
             <View style={styles.heroHeaderRight}>
               <TouchableOpacity
                 style={styles.heroButton}
-                onPress={() => setIsFavorite(!isFavorite)}
+                onPress={handleToggleFavorite}
               >
                 <Heart 
                   size={20} 
-                  color="#FFFFFF" 
-                  weight={isFavorite ? 'fill' : 'regular'} 
+                  color={product && isInWishlist(product.id) ? Colors.primary : "#FFFFFF"} 
+                  weight={product && isInWishlist(product.id) ? 'fill' : 'regular'} 
                 />
               </TouchableOpacity>
               <TouchableOpacity
                 style={styles.heroButton}
-                onPress={() => {
-                  // Share functionality
-                  console.log('Share product');
-                }}
+                onPress={handleShare}
               >
                 <ShareNetwork size={20} color="#FFFFFF" weight="duotone" />
               </TouchableOpacity>
@@ -401,37 +525,50 @@ export default function ProductScreen() {
             </TouchableOpacity>
           )}
 
-          {/* Tabs for Sections */}
-          <View style={styles.tabsContainer}>
-            <TouchableOpacity
-              style={[styles.tab, activeTab === 'description' && styles.tabActive]}
-              onPress={() => setActiveTab('description')}
-            >
-              <Text style={[styles.tabText, activeTab === 'description' && styles.tabTextActive]}>
-                Description
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.tab, activeTab === 'nutrition' && styles.tabActive]}
-              onPress={() => setActiveTab('nutrition')}
-            >
-              <Text style={[styles.tabText, activeTab === 'nutrition' && styles.tabTextActive]}>
-                Nutrition
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.tab, activeTab === 'heritage' && styles.tabActive]}
-              onPress={() => setActiveTab('heritage')}
-            >
-              <Text style={[styles.tabText, activeTab === 'heritage' && styles.tabTextActive]}>
-                Heritage Story
-              </Text>
-            </TouchableOpacity>
-          </View>
+          {/* Tabs for Sections - Only show if more than one tab available */}
+          {availableTabs.length > 1 && (
+            <View style={styles.tabsContainer}>
+              <TouchableOpacity
+                style={[styles.tab, activeTab === 'description' && styles.tabActive]}
+                onPress={() => setActiveTab('description')}
+              >
+                <Text style={[styles.tabText, activeTab === 'description' && styles.tabTextActive]}>
+                  Description
+                </Text>
+              </TouchableOpacity>
+              {hasNutritionData && (
+                <TouchableOpacity
+                  style={[styles.tab, activeTab === 'nutrition' && styles.tabActive]}
+                  onPress={() => setActiveTab('nutrition')}
+                >
+                  <Text style={[styles.tabText, activeTab === 'nutrition' && styles.tabTextActive]}>
+                    Nutrition
+                  </Text>
+                </TouchableOpacity>
+              )}
+              {product?.heritage_story && (
+                <TouchableOpacity
+                  style={[styles.tab, activeTab === 'heritage' && styles.tabActive]}
+                  onPress={() => setActiveTab('heritage')}
+                >
+                  <Text style={[styles.tabText, activeTab === 'heritage' && styles.tabTextActive]}>
+                    Heritage Story
+                  </Text>
+                </TouchableOpacity>
+              )}
+            </View>
+          )}
+
+          {/* Show description directly if only one section available */}
+          {availableTabs.length === 1 && (
+            <View style={styles.singleSectionContainer}>
+              <Text style={styles.sectionTitle}>Description</Text>
+            </View>
+          )}
 
           {/* Tab Content */}
           <View style={styles.tabContent}>
-            {activeTab === 'description' && (
+            {(activeTab === 'description' || availableTabs.length === 1) && (
               <View style={styles.sectionContent}>
                 <Text style={styles.sectionText}>
                   {product.description || 'Premium quality product sourced from the finest ingredients. Perfect for traditional African dishes and modern fusion cuisine.'}
@@ -439,33 +576,81 @@ export default function ProductScreen() {
               </View>
             )}
 
-            {activeTab === 'nutrition' && (
+            {activeTab === 'nutrition' && hasNutritionData && (
               <View style={styles.sectionContent}>
                 <View style={styles.nutritionGrid}>
-                  <View style={styles.nutritionItem}>
-                    <Text style={styles.nutritionLabel}>Calories</Text>
-                    <Text style={styles.nutritionValue}>{product.nutrition?.calories || '350 kcal / 100g'}</Text>
-                  </View>
-                  <View style={styles.nutritionItem}>
-                    <Text style={styles.nutritionLabel}>Protein</Text>
-                    <Text style={styles.nutritionValue}>{product.nutrition?.protein || '8.5g'}</Text>
-                  </View>
-                  <View style={styles.nutritionItem}>
-                    <Text style={styles.nutritionLabel}>Carbs</Text>
-                    <Text style={styles.nutritionValue}>{product.nutrition?.carbs || '78g'}</Text>
-                  </View>
-                  <View style={styles.nutritionItem}>
-                    <Text style={styles.nutritionLabel}>Fat</Text>
-                    <Text style={styles.nutritionValue}>{product.nutrition?.fat || '0.5g'}</Text>
-                  </View>
+                  {product.nutrition && typeof product.nutrition === 'object' && (
+                    <>
+                      {product.nutrition.calories && (
+                        <View style={styles.nutritionItem}>
+                          <Text style={styles.nutritionLabel}>Calories</Text>
+                          <Text style={styles.nutritionValue}>
+                            {typeof product.nutrition.calories === 'string' 
+                              ? product.nutrition.calories 
+                              : `${product.nutrition.calories} kcal / 100g`}
+                          </Text>
+                        </View>
+                      )}
+                      {product.nutrition.protein && (
+                        <View style={styles.nutritionItem}>
+                          <Text style={styles.nutritionLabel}>Protein</Text>
+                          <Text style={styles.nutritionValue}>
+                            {typeof product.nutrition.protein === 'string' 
+                              ? product.nutrition.protein 
+                              : `${product.nutrition.protein}g`}
+                          </Text>
+                        </View>
+                      )}
+                      {product.nutrition.carbs && (
+                        <View style={styles.nutritionItem}>
+                          <Text style={styles.nutritionLabel}>Carbs</Text>
+                          <Text style={styles.nutritionValue}>
+                            {typeof product.nutrition.carbs === 'string' 
+                              ? product.nutrition.carbs 
+                              : `${product.nutrition.carbs}g`}
+                          </Text>
+                        </View>
+                      )}
+                      {product.nutrition.fat && (
+                        <View style={styles.nutritionItem}>
+                          <Text style={styles.nutritionLabel}>Fat</Text>
+                          <Text style={styles.nutritionValue}>
+                            {typeof product.nutrition.fat === 'string' 
+                              ? product.nutrition.fat 
+                              : `${product.nutrition.fat}g`}
+                          </Text>
+                        </View>
+                      )}
+                      {product.nutrition.fiber && (
+                        <View style={styles.nutritionItem}>
+                          <Text style={styles.nutritionLabel}>Fiber</Text>
+                          <Text style={styles.nutritionValue}>
+                            {typeof product.nutrition.fiber === 'string' 
+                              ? product.nutrition.fiber 
+                              : `${product.nutrition.fiber}g`}
+                          </Text>
+                        </View>
+                      )}
+                      {product.nutrition.sugar && (
+                        <View style={styles.nutritionItem}>
+                          <Text style={styles.nutritionLabel}>Sugar</Text>
+                          <Text style={styles.nutritionValue}>
+                            {typeof product.nutrition.sugar === 'string' 
+                              ? product.nutrition.sugar 
+                              : `${product.nutrition.sugar}g`}
+                          </Text>
+                        </View>
+                      )}
+                    </>
+                  )}
                 </View>
               </View>
             )}
 
-            {activeTab === 'heritage' && (
+            {activeTab === 'heritage' && product?.heritage_story && (
               <View style={styles.sectionContent}>
                 <Text style={styles.sectionText}>
-                  {product.heritage_story || 'Sourced directly from family-owned farms that have practiced sustainable cultivation for generations. Every product tells a story of tradition and respect for the land.'}
+                  {product.heritage_story}
                 </Text>
               </View>
             )}
@@ -495,9 +680,9 @@ export default function ProductScreen() {
               <View>
                 <Text style={styles.reviewsTitle}>Customer Reviews</Text>
                 <View style={styles.reviewsRating}>
-                  <Star size={16} color="#FFCC00" weight="fill" />
+                  <Star size={16} color={Colors.secondary} weight="fill" />
                   <Text style={styles.reviewsRatingText}>
-                    {product.rating || 4.5} ({product.review_count || reviews.length} reviews)
+                    {product.rating?.toFixed(1) || '0.0'} ({product.review_count || reviews.length} {reviews.length === 1 ? 'review' : 'reviews'})
                   </Text>
                 </View>
               </View>
@@ -530,7 +715,7 @@ export default function ProductScreen() {
                             <Star
                               key={star}
                               size={12}
-                              color={star <= review.rating ? '#FFCC00' : '#3D3D3D'}
+                              color={star <= review.rating ? Colors.secondary : Colors.textMuted}
                               weight={star <= review.rating ? 'fill' : 'regular'}
                             />
                           ))}
@@ -697,13 +882,16 @@ const styles = StyleSheet.create({
   // Content Card
   contentCard: {
     backgroundColor: Colors.cardDark,
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
+    borderTopLeftRadius: BorderRadius.xl,
+    borderTopRightRadius: BorderRadius.xl,
     marginTop: -48,
     paddingHorizontal: Spacing.lg,
     paddingTop: 32,
     minHeight: 500,
     paddingBottom: Spacing.xl,
+    borderWidth: 1,
+    borderColor: Colors.borderDark,
+    borderBottomWidth: 0,
   },
   dragHandle: {
     width: 48,
@@ -759,16 +947,16 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   badgeOrganic: {
-    backgroundColor: Colors.success10,
-    borderColor: Colors.success20,
+    backgroundColor: Colors.success15,
+    borderColor: Colors.success,
   },
   badgeTopRated: {
-    backgroundColor: Colors.secondary10,
-    borderColor: Colors.secondary20,
+    backgroundColor: Colors.secondary15,
+    borderColor: Colors.secondary,
   },
   badgeEco: {
     backgroundColor: Colors.info10,
-    borderColor: Colors.info20,
+    borderColor: Colors.info,
   },
   badgeText: {
     fontFamily: FontFamily.bodySemiBold,
@@ -777,13 +965,13 @@ const styles = StyleSheet.create({
     letterSpacing: LetterSpacing.wide,
   },
   badgeTextOrganic: {
-    color: '#86EFAC',
+    color: Colors.success,
   },
   badgeTextTopRated: {
-    color: '#FDE047',
+    color: Colors.secondary,
   },
   badgeTextEco: {
-    color: '#5EEAD4',
+    color: Colors.info,
   },
 
   // Vendor Card
@@ -868,6 +1056,16 @@ const styles = StyleSheet.create({
     paddingTop: Spacing.base,
     paddingBottom: Spacing.base,
   },
+  singleSectionContainer: {
+    marginTop: Spacing.lg,
+    marginBottom: Spacing.base,
+  },
+  sectionTitle: {
+    fontFamily: FontFamily.displaySemiBold,
+    fontSize: FontSize.h4,
+    color: Colors.textPrimary,
+    marginBottom: Spacing.sm,
+  },
   sectionContent: {
     paddingBottom: Spacing.base,
   },
@@ -907,7 +1105,7 @@ const styles = StyleSheet.create({
   },
   infoCard: {
     flex: 1,
-    backgroundColor: Colors.white05,
+    backgroundColor: Colors.white08,
     borderWidth: 1,
     borderColor: Colors.borderDark,
     borderRadius: BorderRadius.lg,
@@ -1032,7 +1230,7 @@ const styles = StyleSheet.create({
     gap: Spacing.md,
   },
   reviewCard: {
-    backgroundColor: Colors.white03,
+    backgroundColor: Colors.white08,
     borderRadius: BorderRadius.lg,
     padding: Spacing.base,
     borderWidth: 1,
@@ -1073,15 +1271,17 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 2,
-    backgroundColor: Colors.success10,
+    backgroundColor: Colors.success15,
     paddingHorizontal: Spacing.sm,
     paddingVertical: 2,
     borderRadius: BorderRadius.full,
+    borderWidth: 1,
+    borderColor: Colors.success,
   },
   verifiedText: {
     fontFamily: FontFamily.body,
     fontSize: FontSize.caption,
-    color: '#10B981',
+    color: Colors.success,
   },
   reviewTitle: {
     fontFamily: FontFamily.bodySemiBold,
