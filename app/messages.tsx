@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import {
   View,
   Text,
@@ -11,6 +11,7 @@ import {
   Alert,
   Modal,
   ScrollView,
+  TextInput,
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -26,6 +27,7 @@ import {
   CheckCircle,
   Headset,
   Package,
+  MagnifyingGlass,
 } from 'phosphor-react-native';
 import { Colors } from '../constants/colors';
 import { Spacing, BorderRadius } from '../constants/spacing';
@@ -67,8 +69,11 @@ export default function MessagesScreen() {
   const [unreadCount, setUnreadCount] = useState(0);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [showHelpModal, setShowHelpModal] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [showSearch, setShowSearch] = useState(false);
 
   const fadeAnim = useRef(new Animated.Value(0)).current;
+  const offsetRef = useRef(0); // Use ref to track offset for pagination
   const PAGE_SIZE = 20;
 
   const fetchConversations = useCallback(async (reset: boolean = false) => {
@@ -79,7 +84,8 @@ export default function MessagesScreen() {
 
     try {
       if (isSupabaseConfigured()) {
-        const currentOffset = reset ? 0 : offset;
+        const currentOffset = reset ? 0 : offsetRef.current;
+        
         const fetchedConversations = await messagingService.getUserConversations(
           user.user_id,
           PAGE_SIZE,
@@ -92,7 +98,8 @@ export default function MessagesScreen() {
             new Map(fetchedConversations.map(conv => [conv.id, conv])).values()
           );
           setConversations(uniqueConversations);
-          setOffset(PAGE_SIZE);
+          offsetRef.current = uniqueConversations.length;
+          setOffset(uniqueConversations.length);
           // Calculate unread count for reset
           const totalUnread = uniqueConversations.reduce((sum, conv) => sum + (conv.unread_count_user || 0), 0);
           setUnreadCount(totalUnread);
@@ -109,12 +116,15 @@ export default function MessagesScreen() {
             
             const updated = Array.from(conversationMap.values());
             
+            // Update offset ref and state based on actual number of conversations
+            offsetRef.current = updated.length;
+            setOffset(updated.length);
+            
             // Calculate unread count for pagination
             const totalUnread = updated.reduce((sum, conv) => sum + (conv.unread_count_user || 0), 0);
             setUnreadCount(totalUnread);
             return updated;
           });
-          setOffset((prev) => prev + fetchedConversations.length);
         }
 
         // Check if there are more conversations
@@ -123,15 +133,19 @@ export default function MessagesScreen() {
         // Mock mode - show empty state
         setConversations([]);
         setUnreadCount(0);
+        setHasMore(false);
+        offsetRef.current = 0;
+        setOffset(0);
       }
     } catch (error) {
       console.error('Error fetching conversations:', error);
+      setHasMore(false);
     } finally {
       setLoading(false);
       setRefreshing(false);
       setLoadingMore(false);
     }
-  }, [user?.user_id, offset]);
+  }, [user?.user_id]);
 
   useEffect(() => {
     fetchConversations(true);
@@ -208,6 +222,7 @@ export default function MessagesScreen() {
 
   const onRefresh = useCallback(() => {
     setRefreshing(true);
+    offsetRef.current = 0;
     setOffset(0);
     setHasMore(true);
     fetchConversations(true);
@@ -274,6 +289,51 @@ export default function MessagesScreen() {
     return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
   };
 
+  // Filter conversations based on search query
+  const filteredConversations = useMemo(() => {
+    if (!searchQuery.trim()) {
+      return conversations;
+    }
+
+    const query = searchQuery.toLowerCase().trim();
+    
+    return conversations.filter((conversation) => {
+      const isSupport = conversation.conversation_type === 'support';
+      const vendor = conversation.vendor as any;
+      const order = conversation.order;
+      
+      // Search in vendor name
+      if (!isSupport && vendor?.shop_name) {
+        if (vendor.shop_name.toLowerCase().includes(query)) {
+          return true;
+        }
+      }
+      
+      // Search in order ID/number for support conversations
+      if (isSupport && order?.id) {
+        if (order.id.toLowerCase().includes(query)) {
+          return true;
+        }
+      }
+      
+      // Search in last message text
+      if (conversation.last_message_text) {
+        if (conversation.last_message_text.toLowerCase().includes(query)) {
+          return true;
+        }
+      }
+      
+      // Search in order status for support conversations
+      if (isSupport && order?.status) {
+        if (order.status.toLowerCase().includes(query)) {
+          return true;
+        }
+      }
+      
+      return false;
+    });
+  }, [conversations, searchQuery]);
+
   const handleConversationPress = (conversation: Conversation) => {
     if (conversation.conversation_type === 'support' && conversation.order_id) {
       // Navigate to order support screen
@@ -305,29 +365,90 @@ export default function MessagesScreen() {
         >
           <ArrowLeft size={24} color={Colors.textPrimary} weight="bold" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Messages</Text>
-        <TouchableOpacity
-          style={styles.helpButton}
-          onPress={() => setShowHelpModal(true)}
-          activeOpacity={0.8}
-        >
-          <Question size={24} color={Colors.secondary} weight="fill" />
-        </TouchableOpacity>
+        {!showSearch ? (
+          <>
+            <Text style={styles.headerTitle}>Messages</Text>
+            <View style={styles.headerRight}>
+              <TouchableOpacity
+                style={styles.searchButton}
+                onPress={() => setShowSearch(true)}
+                activeOpacity={0.8}
+              >
+                <MagnifyingGlass size={24} color={Colors.textPrimary} weight="regular" />
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.helpButton}
+                onPress={() => setShowHelpModal(true)}
+                activeOpacity={0.8}
+              >
+                <Question size={24} color={Colors.secondary} weight="fill" />
+              </TouchableOpacity>
+            </View>
+          </>
+        ) : (
+          <>
+            <View style={styles.searchBarContainer}>
+              <MagnifyingGlass size={20} color={Colors.textMuted} weight="regular" />
+              <TextInput
+                style={styles.searchInput}
+                placeholder="Search conversations..."
+                placeholderTextColor={Colors.textMuted}
+                value={searchQuery}
+                onChangeText={setSearchQuery}
+                autoFocus
+                returnKeyType="search"
+              />
+              {searchQuery.length > 0 && (
+                <TouchableOpacity
+                  onPress={() => {
+                    setSearchQuery('');
+                    setShowSearch(false);
+                  }}
+                  hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                >
+                  <X size={18} color={Colors.textMuted} weight="bold" />
+                </TouchableOpacity>
+              )}
+            </View>
+            <TouchableOpacity
+              style={styles.cancelSearchButton}
+              onPress={() => {
+                setSearchQuery('');
+                setShowSearch(false);
+              }}
+              activeOpacity={0.8}
+            >
+              <Text style={styles.cancelSearchText}>Cancel</Text>
+            </TouchableOpacity>
+          </>
+        )}
       </View>
 
       {/* Conversations List */}
       <Animated.View style={[styles.content, { opacity: fadeAnim }]}>
-        {conversations.length === 0 && !loading ? (
+        {filteredConversations.length === 0 && !loading ? (
           <View style={styles.emptyState}>
-            <ChatCircleDots size={64} color={Colors.textMuted} weight="duotone" />
-            <Text style={styles.emptyTitle}>No messages yet</Text>
-            <Text style={styles.emptyText}>
-              Start a conversation with a vendor or get help with an order to see your messages here
-            </Text>
+            {searchQuery.trim() ? (
+              <>
+                <MagnifyingGlass size={64} color={Colors.textMuted} weight="duotone" />
+                <Text style={styles.emptyTitle}>No conversations found</Text>
+                <Text style={styles.emptyText}>
+                  No conversations match "{searchQuery}". Try a different search term.
+                </Text>
+              </>
+            ) : (
+              <>
+                <ChatCircleDots size={64} color={Colors.textMuted} weight="duotone" />
+                <Text style={styles.emptyTitle}>No messages yet</Text>
+                <Text style={styles.emptyText}>
+                  Start a conversation with a vendor or get help with an order to see your messages here
+                </Text>
+              </>
+            )}
           </View>
         ) : (
           <FlatList
-            data={conversations}
+            data={filteredConversations}
             keyExtractor={(item) => item.id}
             renderItem={({ item: conversation }) => {
               const isSupport = conversation.conversation_type === 'support';
@@ -426,7 +547,7 @@ export default function MessagesScreen() {
                 tintColor={Colors.primary}
               />
             }
-            onEndReached={loadMoreConversations}
+            onEndReached={searchQuery.trim() ? undefined : loadMoreConversations}
             onEndReachedThreshold={0.5}
             ListFooterComponent={
               loadingMore && hasMore ? (
@@ -582,12 +703,51 @@ const styles = StyleSheet.create({
     fontFamily: FontFamily.displaySemiBold,
     fontSize: FontSize.h2,
     color: Colors.textPrimary,
+    flex: 1,
+    textAlign: 'center',
+  },
+  headerRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.sm,
+  },
+  searchButton: {
+    width: 40,
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   helpButton: {
     width: 40,
     height: 40,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  searchBarContainer: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: Colors.cardDark,
+    borderRadius: BorderRadius.full,
+    paddingHorizontal: Spacing.base,
+    height: 40,
+    marginRight: Spacing.sm,
+    gap: Spacing.sm,
+  },
+  searchInput: {
+    flex: 1,
+    fontFamily: FontFamily.body,
+    fontSize: FontSize.body,
+    color: Colors.textPrimary,
+  },
+  cancelSearchButton: {
+    paddingHorizontal: Spacing.sm,
+    justifyContent: 'center',
+  },
+  cancelSearchText: {
+    fontFamily: FontFamily.bodySemiBold,
+    fontSize: FontSize.body,
+    color: Colors.primary,
   },
   content: {
     flex: 1,
