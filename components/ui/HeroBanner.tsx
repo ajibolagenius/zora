@@ -23,6 +23,7 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({ banner, onPress }) => {
         style={styles.image}
         contentFit="cover"
         showLoader={false}
+        loading="eager"
       />
       {/* Gradient overlay for text readability */}
       <LinearGradient

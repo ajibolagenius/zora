@@ -10,6 +10,11 @@ interface LazyImageProps extends Omit<ImageProps, 'source'> {
   fallback?: string;
   showLoader?: boolean;
   blurhash?: string;
+  /**
+   * Loading strategy: 'eager' for above-the-fold content (headers, hero images),
+   * 'lazy' for below-the-fold content. Maps to expo-image priority prop.
+   */
+  loading?: 'eager' | 'lazy';
 }
 
 /**
@@ -28,6 +33,7 @@ export const LazyImage: React.FC<LazyImageProps> = ({
   fallback,
   showLoader = true,
   blurhash,
+  loading,
   style,
   ...props
 }) => {
@@ -81,7 +87,9 @@ export const LazyImage: React.FC<LazyImageProps> = ({
   const cachePolicy = props.cachePolicy || 'memory-disk';
   
   // Optimize image loading based on priority
-  const imagePriority = props.priority || 'normal';
+  // Map loading prop to expo-image priority: eager -> high, lazy -> low, default -> normal
+  const imagePriority = props.priority || 
+    (loading === 'eager' ? 'high' : loading === 'lazy' ? 'low' : 'normal');
 
   return (
     <View style={[styles.container, style]}>

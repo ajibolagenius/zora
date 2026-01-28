@@ -294,6 +294,7 @@ export default function VendorScreen() {
                         style={styles.headerImage}
                         contentFit="cover"
                         showLoader={false}
+                        loading="eager"
                     />
                     <View style={styles.headerOverlay} />
 
@@ -332,6 +333,7 @@ export default function VendorScreen() {
                                 source={vendor.logo_url}
                                 size={80}
                                 style={styles.avatar}
+                                loading="eager"
                             />
                         </View>
                     </View>

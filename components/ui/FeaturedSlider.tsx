@@ -89,6 +89,7 @@ export const FeaturedSlider: React.FC<FeaturedSliderProps> = ({
           style={styles.bannerImage}
           contentFit="cover"
           showLoader={false}
+          loading="eager"
         />
         <LinearGradient
           colors={['transparent', 'rgba(34, 23, 16, 0.4)', 'rgba(34, 23, 16, 0.95)']}

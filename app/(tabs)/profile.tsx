@@ -293,6 +293,7 @@ export default function ProfileTab() {
               userId={user?.user_id}
               size={80}
               style={styles.avatar}
+              loading="eager"
             />
             <TouchableOpacity 
               style={styles.cameraButton}

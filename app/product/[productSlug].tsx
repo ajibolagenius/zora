@@ -389,6 +389,7 @@ export default function ProductScreen() {
                         style={StyleSheet.absoluteFill}
                         contentFit="cover"
                         showLoader={false}
+                        loading="eager"
                       />
                       <LinearGradient
                         colors={[Colors.black40, 'transparent', 'rgba(0, 0, 0, 0.6)']} // 60% opacity
@@ -442,6 +443,7 @@ export default function ProductScreen() {
                   style={StyleSheet.absoluteFill}
                   contentFit="cover"
                   showLoader={false}
+                  loading="eager"
                 />
                 <LinearGradient
                   colors={[Colors.black40, 'transparent', 'rgba(0, 0, 0, 0.6)']} // 60% opacity

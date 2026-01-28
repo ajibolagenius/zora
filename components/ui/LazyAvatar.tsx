@@ -11,6 +11,11 @@ interface LazyAvatarProps extends Omit<ImageProps, 'source'> {
   userId?: string;
   size?: number;
   fallback?: string;
+  /**
+   * Loading strategy: 'eager' for above-the-fold avatars (headers, profile sections),
+   * 'lazy' for below-the-fold avatars. Maps to expo-image priority prop.
+   */
+  loading?: 'eager' | 'lazy';
 }
 
 /**
@@ -23,6 +28,7 @@ export const LazyAvatar: React.FC<LazyAvatarProps> = ({
   userId,
   size = 40,
   fallback,
+  loading,
   style,
   ...props
 }) => {
@@ -36,6 +42,10 @@ export const LazyAvatar: React.FC<LazyAvatarProps> = ({
     (name ? generateAvatarDataUrl(name, userId, size) : null) ||
     PlaceholderImages.userAvatar;
 
+  // Map loading prop to expo-image priority: eager -> high, lazy -> low, default -> normal
+  const imagePriority = props.priority || 
+    (loading === 'eager' ? 'high' : loading === 'lazy' ? 'low' : 'normal');
+
   return (
     <View style={[styles.container, { width: size, height: size, borderRadius: size / 2 }, style]}>
       <Image
@@ -45,6 +55,7 @@ export const LazyAvatar: React.FC<LazyAvatarProps> = ({
         placeholder={fallbackUri}
         transition={200}
         cachePolicy="memory-disk"
+        priority={imagePriority}
         {...props}
       />
     </View>
