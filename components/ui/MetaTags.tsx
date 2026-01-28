@@ -5,7 +5,7 @@
  */
 
 import { Platform } from 'react-native';
-import { Head } from 'expo-router';
+import Head from 'expo-router/head';
 import { generateMetaTags, type MetaTagData } from '../../lib/metaTags';
 
 interface MetaTagsProps {

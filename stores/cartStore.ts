@@ -156,7 +156,7 @@ export const useCartStore = create<CartState>()(
                 const total = subtotal + deliveryFee + serviceFee - discount;
 
                 // Group items by vendor and lookup vendor data
-                const vendorMap = new Map<string, { id: string; name: string; logo_url: string; delivery_time: string; delivery_fee: number; subtotal: number; items: CartItem[] }>();
+                const vendorMap = new Map<string, { id: string; name: string; logo_url: string; location?: string; delivery_time: string; delivery_fee: number; subtotal: number; items: CartItem[] }>();
 
                 // Get unique vendor IDs
                 const vendorIds = [...new Set(items.map(item => item.vendor_id || item.product?.vendor_id).filter(Boolean) as string[])];
@@ -202,11 +202,19 @@ export const useCartStore = create<CartState>()(
                         const vendorLogo = vendorData?.logo_url || item.product?.vendor?.logo_url || PlaceholderImages.vendorLogo;
                         const deliveryMin = vendorData?.delivery_time_min || 2;
                         const deliveryMax = vendorData?.delivery_time_max || 3;
+                        // Derive a human-readable shipping origin from vendor address when available
+                        const rawAddress: string | undefined =
+                            vendorData?.address ||
+                            (item.product?.vendor as any)?.address;
+                        const location = rawAddress
+                            ? rawAddress.split(',')[0]?.trim()
+                            : undefined;
 
                         vendorMap.set(vendorId, {
                             id: vendorId,
                             name: vendorName,
                             logo_url: vendorLogo,
+                            location,
                             delivery_time: `${deliveryMin}-${deliveryMax} days`,
                             delivery_fee: 0, // Delivery fee is now order-based, not vendor-based
                             subtotal: 0,

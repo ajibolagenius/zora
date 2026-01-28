@@ -110,6 +110,11 @@ export interface CartVendor {
   id: string;
   name: string;
   logo_url: string;
+  /**
+   * Human-readable shipping origin, typically derived from vendor.address
+   * e.g. "Brixton" or "Lagos"
+   */
+  location?: string;
   delivery_time: string;
   delivery_fee: number;
   items: CartItem[];

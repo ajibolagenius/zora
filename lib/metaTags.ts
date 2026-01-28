@@ -165,7 +165,7 @@ export function generateMetaTags(data: MetaTagData) {
 }
 
 /**
- * Generate meta tags for a product page
+ * Generate meta tag data for a product page
  */
 export function generateProductMetaTags(
   productName: string,
@@ -175,11 +175,11 @@ export function generateProductMetaTags(
   productUrl?: string,
   vendorName?: string,
   inStock: boolean = true,
-) {
+): MetaTagData {
   const currency = 'GBP';
   const priceString = productPrice.toFixed(2);
   
-  return generateMetaTags({
+  return {
     title: productName,
     description: productDescription || `Buy ${productName} from ${vendorName || 'Zora African Market'}. Authentic African products delivered to your door.`,
     image: productImage,
@@ -197,11 +197,11 @@ export function generateProductMetaTags(
       currency,
     },
     vendor: vendorName ? { name: vendorName } : undefined,
-  });
+  };
 }
 
 /**
- * Generate meta tags for a vendor/store page
+ * Generate meta tag data for a vendor/store page
  */
 export function generateVendorMetaTags(
   vendorName: string,
@@ -210,11 +210,11 @@ export function generateVendorMetaTags(
   vendorUrl?: string,
   vendorRating?: number,
   productCount?: number,
-) {
+): MetaTagData {
   const description = vendorDescription || 
     `${vendorName} on Zora African Market. ${productCount ? `${productCount}+ products available. ` : ''}${vendorRating ? `Rated ${vendorRating.toFixed(1)}/5. ` : ''}Authentic African groceries and products.`;
   
-  return generateMetaTags({
+  return {
     title: vendorName,
     description: truncateText(description, 160),
     image: vendorImage,
@@ -224,23 +224,23 @@ export function generateVendorMetaTags(
       name: vendorName,
       rating: vendorRating,
     },
-  });
+  };
 }
 
 /**
- * Generate meta tags for a general page
+ * Generate meta tag data for a general page
  */
 export function generatePageMetaTags(
   pageTitle: string,
   pageDescription: string,
   pageImage?: string,
   pageUrl?: string,
-) {
-  return generateMetaTags({
+): MetaTagData {
+  return {
     title: pageTitle,
     description: pageDescription,
     image: pageImage,
     url: pageUrl,
     type: 'website',
-  });
+  };
 }

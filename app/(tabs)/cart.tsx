@@ -202,7 +202,11 @@ export default function CartTab() {
               </View>
               <View style={styles.vendorInfo}>
                 <Text style={styles.vendorName}>{vendor.name}</Text>
-                <Text style={styles.vendorLocation}>Shipping from New York</Text>
+                <Text style={styles.vendorLocation}>
+                  {vendor.location
+                    ? `Shipping from ${vendor.location}`
+                    : 'Shipping from New York'}
+                </Text>
               </View>
               <TouchableOpacity onPress={() => {
                 router.push(getVendorRoute(vendor as any, vendor.id) as any);

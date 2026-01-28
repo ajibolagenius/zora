@@ -301,23 +301,6 @@ export default function HomeScreen() {
     router.push('/messages');
   };
 
-  // Fetch unread messages count
-  useEffect(() => {
-    if (user?.user_id && isSupabaseConfigured()) {
-      messagingService.getUnreadCount(user.user_id).then(setUnreadMessagesCount);
-    }
-  }, [user?.user_id]);
-
-  if (loading) {
-    return (
-      <SafeAreaView style={styles.container}>
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={Colors.primary} />
-        </View>
-      </SafeAreaView>
-    );
-  }
-
   // Memoize filtered products to prevent unnecessary re-renders
   const filteredProducts = useMemo(() => {
     return selectedRegion
@@ -347,6 +330,23 @@ export default function HomeScreen() {
       </View>
     );
   }, [productCardWidth, handleProductPress, handleAddToCart]);
+
+  // Fetch unread messages count
+  useEffect(() => {
+    if (user?.user_id && isSupabaseConfigured()) {
+      messagingService.getUnreadCount(user.user_id).then(setUnreadMessagesCount);
+    }
+  }, [user?.user_id]);
+
+  if (loading) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color={Colors.primary} />
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
