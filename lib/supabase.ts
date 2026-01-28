@@ -84,6 +84,8 @@ const getSupabaseClient = async (): Promise<SupabaseClient<Database>> => {
           autoRefreshToken: true,
           persistSession: true,
           detectSessionInUrl: true,
+          // Use PKCE flow for better security and to avoid some lock issues
+          flowType: 'pkce',
         },
       });
     } else {

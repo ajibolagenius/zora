@@ -41,7 +41,7 @@ import type { Product, Vendor, Review } from '../../types/supabase';
 import { useCartStore } from '../../stores/cartStore';
 import FloatingTabBar from '../../components/ui/FloatingTabBar';
 import { decodeProductSlug, isValidProductSlug } from '../../lib/slugUtils';
-import { getVendorRoute, isValidRouteParam } from '../../lib/navigationHelpers';
+import { getVendorRoute, isValidRouteParam, safeGoBack } from '../../lib/navigationHelpers';
 import NotFoundScreen from '../../components/errors/NotFoundScreen';
 
 type SectionType = 'description' | 'nutrition' | 'heritage';
@@ -179,7 +179,7 @@ export default function ProductScreen() {
   const handleAddToCart = () => {
     if (product) {
       addToCart(product as any, quantity);
-      router.back();
+      safeGoBack(router, '/(tabs)/explore');
     }
   };
 
@@ -198,7 +198,7 @@ export default function ProductScreen() {
       <NotFoundScreen
         title="Product Not Found"
         message="This product doesn't exist or may have been removed. It might have been deleted or the link is incorrect."
-        onBack={() => router.back()}
+        onBack={() => safeGoBack(router, '/(tabs)/explore')}
       />
     );
   }
@@ -304,7 +304,7 @@ export default function ProductScreen() {
           <View style={[styles.heroHeader, { paddingTop: insets.top + 12 }]}>
             <TouchableOpacity
               style={styles.heroButton}
-              onPress={() => router.back()}
+              onPress={() => safeGoBack(router, '/(tabs)/explore')}
             >
               <ArrowLeft size={20} color={Colors.textPrimary} weight="bold" />
             </TouchableOpacity>

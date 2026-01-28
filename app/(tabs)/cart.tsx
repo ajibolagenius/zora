@@ -44,7 +44,7 @@ export default function CartTab() {
   useEffect(() => {
     const syncProductData = async () => {
       if (!isSupabaseConfigured() || items.length === 0) {
-        calculateTotals();
+        await calculateTotals();
         return;
       }
 
@@ -78,10 +78,10 @@ export default function CartTab() {
         // Update cart store with synced data
         // Note: This is a workaround since we can't directly update items in the store
         // In production, you'd want to add a syncCartItems method to the store
-        calculateTotals();
+        await calculateTotals();
       } catch (error) {
         console.error('Error syncing cart product data:', error);
-        calculateTotals();
+        await calculateTotals();
       }
     };
 
@@ -119,7 +119,9 @@ export default function CartTab() {
   // Calculate totals on mount and whenever items change
   useEffect(() => {
     if (items.length > 0) {
-      calculateTotals();
+      calculateTotals().catch(error => {
+        console.error('Error calculating totals:', error);
+      });
     }
 
     Animated.parallel([

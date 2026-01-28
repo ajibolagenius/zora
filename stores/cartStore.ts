@@ -4,7 +4,9 @@ import { zustandStorage } from '../lib/storage';
 import { CartItem, Cart, Product, Vendor } from '../types';
 import { api } from '../services/api';
 import { useAuthStore } from './authStore';
-import { vendorService } from '../services/mockDataService';
+import { vendorService as mockVendorService } from '../services/mockDataService';
+import { vendorService as supabaseVendorService } from '../services/supabaseService';
+import { isSupabaseConfigured } from '../lib/supabase';
 import { PricingConstants, PlaceholderImages } from '../constants';
 
 interface CartState {
@@ -26,7 +28,7 @@ interface CartState {
     fetchCart: () => Promise<void>;
     applyPromoCode: (code: string) => Promise<void>;
     getItemCount: () => number;
-    calculateTotals: () => void;
+    calculateTotals: () => Promise<void>;
 }
 
 export const useCartStore = create<CartState>()(
@@ -135,7 +137,7 @@ export const useCartStore = create<CartState>()(
                 return items.reduce((sum, item) => sum + item.quantity, 0);
             },
 
-            calculateTotals: () => {
+            calculateTotals: async () => {
                 const { items, serviceFee, discount } = get();
 
                 // Calculate subtotal
@@ -150,16 +152,50 @@ export const useCartStore = create<CartState>()(
 
                 const total = subtotal + deliveryFee + serviceFee - discount;
 
-                // Group items by vendor and lookup vendor data from mock service
+                // Group items by vendor and lookup vendor data
                 const vendorMap = new Map<string, { id: string; name: string; logo_url: string; delivery_time: string; delivery_fee: number; subtotal: number; items: CartItem[] }>();
+
+                // Get unique vendor IDs
+                const vendorIds = [...new Set(items.map(item => item.vendor_id || item.product?.vendor_id).filter(Boolean) as string[])];
+
+                // Fetch vendor data for all unique vendors
+                const vendorDataMap = new Map<string, any>();
+                if (vendorIds.length > 0) {
+                    if (isSupabaseConfigured()) {
+                        // Use Supabase vendor service
+                        const vendorPromises = vendorIds.map(async (vendorId) => {
+                            try {
+                                const vendor = await supabaseVendorService.getById(vendorId);
+                                return { vendorId, vendor };
+                            } catch (error) {
+                                console.error(`Error fetching vendor ${vendorId}:`, error);
+                                return { vendorId, vendor: null };
+                            }
+                        });
+                        const vendorResults = await Promise.all(vendorPromises);
+                        vendorResults.forEach(({ vendorId, vendor }) => {
+                            if (vendor) {
+                                vendorDataMap.set(vendorId, vendor);
+                            }
+                        });
+                    } else {
+                        // Use mock vendor service
+                        vendorIds.forEach(vendorId => {
+                            const vendor = mockVendorService.getById(vendorId);
+                            if (vendor) {
+                                vendorDataMap.set(vendorId, vendor);
+                            }
+                        });
+                    }
+                }
 
                 items.forEach(item => {
                     const vendorId = item.vendor_id || item.product?.vendor_id || 'unknown';
 
                     if (!vendorMap.has(vendorId)) {
-                        // Look up vendor data from mock service
-                        const vendorData = vendorService.getById(vendorId);
-                        const vendorName = vendorData?.shop_name || item.product?.vendor?.name || 'Unknown Vendor';
+                        // Look up vendor data
+                        const vendorData = vendorDataMap.get(vendorId);
+                        const vendorName = vendorData?.shop_name || vendorData?.name || item.product?.vendor?.name || item.product?.vendor?.shop_name || 'Unknown Vendor';
                         const vendorLogo = vendorData?.logo_url || item.product?.vendor?.logo_url || PlaceholderImages.vendorLogo;
                         const deliveryMin = vendorData?.delivery_time_min || 2;
                         const deliveryMax = vendorData?.delivery_time_max || 3;

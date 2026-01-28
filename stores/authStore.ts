@@ -61,6 +61,10 @@ const AUTH_TIMEOUT_MS = ApiConfig.authTimeout;
 let oauthTimeoutId: NodeJS.Timeout | null = null;
 const OAUTH_TIMEOUT_MS = 60 * 1000; // 60 seconds
 
+// Prevent concurrent auth operations to avoid navigator lock conflicts
+let authOperationInProgress = false;
+let authOperationPromise: Promise<void> | null = null;
+
 interface AuthState {
   user: User | null;
   session: Session | null;
@@ -307,6 +311,12 @@ export const useAuthStore = create<AuthState>()(
       },
 
       signInWithEmail: async (email: string, password: string) => {
+        // Prevent concurrent auth operations
+        if (authOperationInProgress && authOperationPromise) {
+          await authOperationPromise;
+          return;
+        }
+
         // Sanitize email input
         const sanitizedEmail = sanitizeEmail(email);
         if (!sanitizedEmail) {
@@ -335,9 +345,11 @@ export const useAuthStore = create<AuthState>()(
           throw error;
         }
 
-        try {
-          set({ isLoading: true });
-          const client = await getSupabaseClient();
+        authOperationInProgress = true;
+        authOperationPromise = (async () => {
+          try {
+            set({ isLoading: true });
+            const client = await getSupabaseClient();
 
           // Add timeout to prevent infinite loading
           const { data, error } = await withTimeout(
@@ -389,11 +401,38 @@ export const useAuthStore = create<AuthState>()(
           } else {
             set({ isLoading: false });
           }
-        } catch (error: any) {
-          console.error('Email sign in error:', error);
-          set({ isLoading: false });
-          throw error;
-        }
+          } catch (error: any) {
+            console.error('Email sign in error:', error);
+            set({ isLoading: false });
+
+            // Log failed login attempt
+            logSecurityEvent.loginFailed(sanitizedEmail, error.message || 'Unknown error');
+            createAuditLog('', AuditAction.USER_LOGIN, {
+              success: false,
+              errorMessage: error.message,
+            });
+
+            // Provide user-friendly error messages
+            if (error.message?.includes('Invalid login credentials')) {
+              throw new Error('Invalid email or password. Please try again.');
+            } else if (error.message?.includes('Email not confirmed')) {
+              throw new Error('Please verify your email address before signing in.');
+            } else if (error.message?.includes('network') || error.message?.includes('fetch')) {
+              throw new Error('Network error. Please check your connection and try again.');
+            } else if (error.message?.includes('signal is aborted') || error.message?.includes('navigatorLock')) {
+              // Ignore navigator lock timeout errors - they're usually harmless
+              console.warn('Navigator lock timeout (non-critical):', error.message);
+              throw new Error('Sign-in timed out. Please try again.');
+            }
+
+            throw error;
+          } finally {
+            authOperationInProgress = false;
+            authOperationPromise = null;
+          }
+        })();
+
+        await authOperationPromise;
       },
 
       // Mock user login for development testing
@@ -637,10 +676,18 @@ export const useAuthStore = create<AuthState>()(
           return;
         }
 
-        try {
-          set({ isLoading: true });
-          const client = await getSupabaseClient();
-          const { data: { session } } = await client.auth.getSession();
+        // Prevent concurrent auth operations
+        if (authOperationInProgress && authOperationPromise) {
+          await authOperationPromise;
+          return;
+        }
+
+        authOperationInProgress = true;
+        authOperationPromise = (async () => {
+          try {
+            set({ isLoading: true });
+            const client = await getSupabaseClient();
+            const { data: { session } } = await client.auth.getSession();
 
           if (session?.user) {
             // Fetch user profile
@@ -745,16 +792,22 @@ export const useAuthStore = create<AuthState>()(
               isLoading: false,
             });
           }
-        } catch (error) {
-          console.error('Check auth error:', error);
-          set({
-            user: null,
-            session: null,
-            isAuthenticated: false,
-            hasCompletedOnboarding: false, // Explicitly reset onboarding flag
-            isLoading: false,
-          });
-        }
+          } catch (error) {
+            console.error('Check auth error:', error);
+            set({
+              user: null,
+              session: null,
+              isAuthenticated: false,
+              hasCompletedOnboarding: false, // Explicitly reset onboarding flag
+              isLoading: false,
+            });
+          } finally {
+            authOperationInProgress = false;
+            authOperationPromise = null;
+          }
+        })();
+
+        await authOperationPromise;
       },
 
       updateProfile: async (updates: Partial<User>) => {

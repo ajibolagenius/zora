@@ -117,7 +117,11 @@ export default function WriteReviewScreen() {
             // Wait a moment for the database to update, then navigate back
             // The query invalidation will trigger a refetch on the previous screen
             setTimeout(() => {
-                router.back();
+                if (router.canGoBack()) {
+                    router.back();
+                } else {
+                    router.replace('/(tabs)');
+                }
             }, 1000);
         } catch (error: any) {
             console.error('Error submitting review:', error);
@@ -139,7 +143,13 @@ export default function WriteReviewScreen() {
                     {/* Header */}
                     <View style={[styles.header, { paddingTop: insets.top + Spacing.sm }]}>
                         <TouchableOpacity
-                            onPress={() => router.back()}
+                            onPress={() => {
+                                if (router.canGoBack()) {
+                                    router.back();
+                                } else {
+                                    router.replace('/(tabs)');
+                                }
+                            }}
                             style={styles.backButton}
                             activeOpacity={0.8}
                         >

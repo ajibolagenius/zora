@@ -299,21 +299,49 @@ export default function VendorChatScreen() {
             }
 
             // Send vendor response (in production, this would come from vendor's interface)
-            messagingService.sendMessage(
-              conversation.id,
-              vendor.id,
-              'vendor',
-              responseText
-            ).then((vendorMsg) => {
-              if (vendorMsg) {
-                setMessages((prev) => [...prev, vendorMsg].sort(
-                  (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
-                ));
-                setTimeout(() => {
-                  scrollViewRef.current?.scrollToEnd({ animated: true });
-                }, 100);
+            // Only send if the authenticated user owns the vendor (for demo purposes)
+            // In production, vendors would respond through their own interface
+            const checkAndSendVendorMessage = async () => {
+              try {
+                // Check if the current user owns this vendor
+                if (isSupabaseConfigured() && user?.user_id) {
+                  const { getSupabaseFrom } = await import('../../../lib/supabase');
+                  const fromMethod = await getSupabaseFrom();
+                  if (fromMethod) {
+                    const { data: vendorCheck } = await fromMethod('vendors')
+                      .select('user_id')
+                      .eq('id', vendor.id)
+                      .eq('user_id', user.user_id)
+                      .maybeSingle();
+                    
+                    // Only send vendor message if user owns the vendor
+                    if (vendorCheck) {
+                      const vendorMsg = await messagingService.sendMessage(
+                        conversation.id,
+                        vendor.id,
+                        'vendor',
+                        responseText
+                      );
+                      
+                      if (vendorMsg) {
+                        setMessages((prev) => [...prev, vendorMsg].sort(
+                          (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+                        ));
+                        setTimeout(() => {
+                          scrollViewRef.current?.scrollToEnd({ animated: true });
+                        }, 100);
+                      }
+                    }
+                    // Silently skip if user doesn't own vendor (this is just a demo feature)
+                  }
+                }
+              } catch (error) {
+                // Silently ignore errors for auto-responses (demo feature)
+                // In production, vendors respond through their own interface
               }
-            });
+            };
+            
+            checkAndSendVendorMessage();
           }, 1500 + Math.random() * 1000);
         }
       } catch (error) {
@@ -525,7 +553,7 @@ export default function VendorChatScreen() {
             <NotFoundScreen
                 title="Vendor Not Found"
                 message="This vendor doesn't exist or may have been removed. It might have been deleted or the link is incorrect."
-                onBack={() => router.back()}
+                onBack={() => handleBack()}
             />
         );
     }

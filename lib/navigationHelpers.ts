@@ -90,6 +90,19 @@ export function handleNotFoundRedirect(
 }
 
 /**
+ * Safely navigates back, with fallback to a default route if no history exists
+ * @param router - Expo Router instance
+ * @param fallbackRoute - Route to navigate to if back navigation isn't available (defaults to home)
+ */
+export function safeGoBack(router: any, fallbackRoute: string = '/(tabs)'): void {
+  if (router.canGoBack()) {
+    router.back();
+  } else {
+    router.replace(fallbackRoute);
+  }
+}
+
+/**
  * Validates if a route parameter is valid
  * @param param - Route parameter value
  * @param type - Type of parameter (uuid, slug, id)

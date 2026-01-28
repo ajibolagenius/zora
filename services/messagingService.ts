@@ -3,7 +3,7 @@
  * Handles database operations for conversations and messages with Supabase Realtime
  */
 
-import { getSupabaseFrom, isSupabaseConfigured } from '../lib/supabase';
+import { getSupabaseFrom, getSupabaseClient, isSupabaseConfigured } from '../lib/supabase';
 import type { Vendor } from '../types/supabase';
 
 export interface Conversation {
@@ -191,57 +191,126 @@ export const messagingService = {
       return null;
     }
 
-    const fromMethod = await getSupabaseFrom();
-    if (!fromMethod) {
+    // Get the authenticated client to ensure RLS policies work correctly
+    const client = await getSupabaseClient();
+    const { data: { user: authUser } } = await client.auth.getUser();
+    
+    if (!authUser) {
+      console.error('User not authenticated');
       return null;
     }
 
-    try {
-      const { data, error } = await fromMethod('messages')
-        .insert({
-          conversation_id: conversationId,
-          sender_id: senderId,
-          sender_type: senderType,
-          text: text.trim(),
-        })
-        .select()
-        .single();
-
-      if (error) {
-        console.error('Error sending message:', error);
+    // For user messages, verify the conversation exists and use authenticated user ID
+    if (senderType === 'user') {
+      // Verify conversation exists and belongs to the authenticated user
+      const { data: conv, error: convError } = await client
+        .from('conversations')
+        .select('user_id')
+        .eq('id', conversationId)
+        .eq('user_id', authUser.id)
+        .maybeSingle();
+      
+      if (convError || !conv) {
+        console.error('Conversation not found or does not belong to user:', convError);
         return null;
       }
+      
+      // Use the authenticated user's ID to ensure it matches auth.uid()
+      const actualSenderId = authUser.id;
+      
+      try {
+        const { data, error } = await client
+          .from('messages')
+          .insert({
+            conversation_id: conversationId,
+            sender_id: actualSenderId,
+            sender_type: senderType,
+            text: text.trim(),
+          })
+          .select()
+          .single();
 
-      // Enrich with sender info
-      let senderName = 'Unknown';
-      let senderAvatar: string | null = null;
+        if (error) {
+          console.error('Error sending message:', error);
+          return null;
+        }
 
-      if (senderType === 'user') {
-        const { data: profile } = await fromMethod('profiles')
+        // Enrich with sender info
+        let senderName = 'Unknown';
+        let senderAvatar: string | null = null;
+
+        const { data: profile } = await client
+          .from('profiles')
           .select('full_name, avatar_url')
-          .eq('id', senderId)
+          .eq('id', actualSenderId)
           .maybeSingle();
         
         senderName = profile?.full_name || 'User';
         senderAvatar = profile?.avatar_url || null;
-      } else {
-        const { data: vendor } = await fromMethod('vendors')
-          .select('shop_name, logo_url')
-          .eq('id', senderId)
-          .maybeSingle();
-        
-        senderName = vendor?.shop_name || 'Vendor';
-        senderAvatar = vendor?.logo_url || null;
+
+        return {
+          ...data,
+          sender_name: senderName,
+          sender_avatar: senderAvatar,
+        } as Message;
+      } catch (error) {
+        console.error('Error sending message:', error);
+        return null;
+      }
+    } else {
+      // Vendor messages - verify vendor belongs to authenticated user
+      const { data: vendor, error: vendorError } = await client
+        .from('vendors')
+        .select('id, user_id, shop_name, logo_url')
+        .eq('id', senderId)
+        .eq('user_id', authUser.id)
+        .maybeSingle();
+
+      if (vendorError || !vendor) {
+        console.error('Vendor not found or does not belong to user:', vendorError);
+        return null;
       }
 
-      return {
-        ...data,
-        sender_name: senderName,
-        sender_avatar: senderAvatar,
-      } as Message;
-    } catch (error) {
-      console.error('Error sending message:', error);
-      return null;
+      // Verify conversation exists and belongs to this vendor
+      const { data: conv, error: convError } = await client
+        .from('conversations')
+        .select('vendor_id')
+        .eq('id', conversationId)
+        .eq('vendor_id', senderId)
+        .maybeSingle();
+
+      if (convError || !conv) {
+        console.error('Conversation not found or does not belong to vendor:', convError);
+        return null;
+      }
+
+      try {
+        const { data, error } = await client
+          .from('messages')
+          .insert({
+            conversation_id: conversationId,
+            sender_id: senderId,
+            sender_type: senderType,
+            text: text.trim(),
+          })
+          .select()
+          .single();
+
+        if (error) {
+          console.error('Error sending message:', error);
+          return null;
+        }
+
+        // Enrich with sender info
+        return {
+          ...data,
+          sender_name: vendor.shop_name || 'Vendor',
+          sender_avatar: vendor.logo_url || null,
+        } as Message;
+      } catch (error) {
+        console.error('Error sending message:', error);
+        return null;
+      }
     }
   },
 

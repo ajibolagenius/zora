@@ -25,6 +25,7 @@ import { realtimeService } from '../services/realtimeService';
 import { useAuthStore } from '../stores/authStore';
 import { isSupabaseConfigured } from '../lib/supabase';
 import { ImageUrlBuilders } from '../constants';
+import { safeGoBack } from '../lib/navigationHelpers';
 
 export default function MessagesScreen() {
   const router = useRouter();
@@ -180,7 +181,7 @@ export default function MessagesScreen() {
       <View style={styles.header}>
         <TouchableOpacity
           style={styles.backButton}
-          onPress={() => router.back()}
+          onPress={() => safeGoBack(router, '/(tabs)')}
           activeOpacity={0.8}
         >
           <ArrowLeft size={24} color={Colors.textPrimary} weight="bold" />
