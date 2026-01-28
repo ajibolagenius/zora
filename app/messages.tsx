@@ -105,53 +105,56 @@ export default function MessagesScreen() {
           setOffset(offsetRef.current);
         }
 
-        // Calculate updated conversations list for unread count calculation
-        // This is done BEFORE state updates to avoid side effects in callbacks
-        let updatedConversations: Conversation[];
-        
+        // Update conversations state and calculate unread count
+        // Bug Fix: Use functional updates to avoid stale closure issues
         if (reset) {
-          // Deduplicate conversations by ID (in case query returns duplicates)
-          updatedConversations = Array.from(
+          // For reset, deduplicate and set conversations
+          const uniqueConversations = Array.from(
             new Map(fetchedConversations.map(conv => [conv.id, conv])).values()
           );
-        } else {
-          // For pagination, merge with existing conversations
-          // Calculate what the merged list will be (for unread count)
-          const conversationMap = new Map<string, Conversation>();
           
-          // Merge existing conversations with new ones
-          conversations.forEach(conv => conversationMap.set(conv.id, conv));
-          fetchedConversations.forEach(conv => conversationMap.set(conv.id, conv));
+          setConversations(uniqueConversations);
           
-          updatedConversations = Array.from(conversationMap.values());
-        }
-
-        // Update conversations state (pure function, no side effects)
-        // Bug 2 Fix: No state updates inside callbacks
-        if (reset) {
-          setConversations(updatedConversations);
+          // Calculate unread count from the updated conversations
+          const totalUnread = uniqueConversations.reduce(
+            (sum, conv) => sum + (conv.unread_count_user || 0), 
+            0
+          );
+          setUnreadCount(totalUnread);
         } else {
+          // For pagination, calculate updated list using functional update pattern
+          // Store the result to use for unread count calculation
+          let updatedConversationsForUnread: Conversation[] | null = null;
+          
           setConversations((prev) => {
             // Deduplicate by ID - both existing and new
+            // Use prev (latest state) instead of conversations (stale closure)
             const conversationMap = new Map<string, Conversation>();
             
-            // Add existing conversations
+            // Add existing conversations (using latest prev state, not stale closure)
             prev.forEach(conv => conversationMap.set(conv.id, conv));
             
             // Add new conversations (will overwrite duplicates with latest data)
             fetchedConversations.forEach(conv => conversationMap.set(conv.id, conv));
             
-            return Array.from(conversationMap.values());
+            const updated = Array.from(conversationMap.values());
+            
+            // Store for unread count calculation outside callback
+            updatedConversationsForUnread = updated;
+            
+            return updated;
           });
+          
+          // Calculate unread count from the updated list
+          // Use the calculated value from the functional update
+          if (updatedConversationsForUnread) {
+            const totalUnread = updatedConversationsForUnread.reduce(
+              (sum, conv) => sum + (conv.unread_count_user || 0), 
+              0
+            );
+            setUnreadCount(totalUnread);
+          }
         }
-
-        // Calculate unread count AFTER state updates (outside callbacks to avoid side effects)
-        // Bug 2 Fix: State updates happen outside callbacks
-        const totalUnread = updatedConversations.reduce(
-          (sum, conv) => sum + (conv.unread_count_user || 0), 
-          0
-        );
-        setUnreadCount(totalUnread);
 
         // Check if there are more conversations
         setHasMore(fetchedConversations.length === PAGE_SIZE);
