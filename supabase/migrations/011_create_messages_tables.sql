@@ -98,24 +98,26 @@ CREATE POLICY "Vendors can view own messages" ON public.messages
 -- Users can create messages in their conversations
 CREATE POLICY "Users can create messages" ON public.messages
     FOR INSERT WITH CHECK (
-        EXISTS (
+        messages.sender_type = 'user'
+        AND messages.sender_id = auth.uid()
+        AND EXISTS (
             SELECT 1 FROM public.conversations 
             WHERE conversations.id = messages.conversation_id 
             AND conversations.user_id = auth.uid()
         )
-        AND messages.sender_type = 'user'
     );
 
 -- Vendors can create messages in their conversations
 CREATE POLICY "Vendors can create messages" ON public.messages
     FOR INSERT WITH CHECK (
-        EXISTS (
+        messages.sender_type = 'vendor'
+        AND EXISTS (
             SELECT 1 FROM public.conversations 
             JOIN public.vendors ON vendors.id = conversations.vendor_id
             WHERE conversations.id = messages.conversation_id 
             AND vendors.user_id = auth.uid()
+            AND conversations.vendor_id = messages.sender_id
         )
-        AND messages.sender_type = 'vendor'
     );
 
 -- Users can update messages they sent
