@@ -9,6 +9,7 @@ import {
   Animated,
   Easing,
   Platform,
+  ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
@@ -20,6 +21,10 @@ import { Colors } from '../constants/colors';
 import { Spacing, BorderRadius, Heights } from '../constants/spacing';
 import { FontSize, FontFamily } from '../constants/typography';
 import { AnimationDuration, AnimationEasing, PlaceholderImages } from '../constants';
+import { orderService } from '../services/supabaseService';
+import { isSupabaseConfigured } from '../lib/supabase';
+import { useAuthStore } from '../stores/authStore';
+import { safeGoBack } from '../lib/navigationHelpers';
 
 interface IssueType {
   id: string;
@@ -39,47 +44,17 @@ interface OrderItem {
   name: string;
   price: number;
   image: string;
+  quantity?: number;
 }
-
-// Mock order items
-const ORDER_ITEMS: OrderItem[] = [
-  {
-    id: '1',
-    name: 'Plantain Chips',
-    price: 4.99,
-    image: PlaceholderImages.image200,
-  },
-  {
-    id: '2',
-    name: 'Jollof Rice Spice Mix',
-    price: 3.50,
-    image: 'https://images.unsplash.com/photo-1596040033229-a9821ebd058d?w=200',
-  },
-  {
-    id: '3',
-    name: 'Fufu Flour',
-    price: 8.99,
-    image: 'https://images.unsplash.com/photo-1574894709920-11b28e7367e3?w=200',
-  },
-  {
-    id: '4',
-    name: 'Egusi Soup Base',
-    price: 12.50,
-    image: 'https://images.unsplash.com/photo-1604329760661-e71dc83f8f26?w=200',
-  },
-  {
-    id: '5',
-    name: 'Palm Oil (1L)',
-    price: 6.99,
-    image: 'https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=200',
-  },
-];
 
 export default function ReportIssueScreen() {
   const router = useRouter();
-  const params = useLocalSearchParams();
+  const params = useLocalSearchParams<{ orderId?: string }>();
+  const { user } = useAuthStore();
   const [selectedIssueType, setSelectedIssueType] = useState<string | null>(null);
-  const [selectedItems, setSelectedItems] = useState<string[]>(['2']);
+  const [selectedItems, setSelectedItems] = useState<string[]>([]);
+  const [orderItems, setOrderItems] = useState<OrderItem[]>([]);
+  const [loading, setLoading] = useState(true);
 
   // Animation values
   const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -102,6 +77,43 @@ export default function ReportIssueScreen() {
     ]).start();
   }, []);
 
+  useEffect(() => {
+    const fetchOrderItems = async () => {
+      if (!params.orderId) {
+        setLoading(false);
+        return;
+      }
+
+      try {
+        setLoading(true);
+        const order = await orderService.getById(params.orderId);
+        if (order && order.items) {
+          const items = Array.isArray(order.items) 
+            ? order.items 
+            : typeof order.items === 'object' 
+              ? Object.values(order.items) 
+              : [];
+          
+          const formattedItems: OrderItem[] = items.map((item: any, index: number) => ({
+            id: item.product_id || item.id || `item-${index}`,
+            name: item.name || 'Unknown Product',
+            price: item.price || 0,
+            image: item.image_url || item.image || PlaceholderImages.image200,
+            quantity: item.quantity || 1,
+          }));
+          
+          setOrderItems(formattedItems);
+        }
+      } catch (error) {
+        console.error('Error fetching order items:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchOrderItems();
+  }, [params.orderId]);
+
   const toggleItemSelection = (itemId: string) => {
     setSelectedItems((prev) =>
       prev.includes(itemId)
@@ -111,9 +123,16 @@ export default function ReportIssueScreen() {
   };
 
   const handleContinue = () => {
-    console.log('Continue with issue:', selectedIssueType);
-    console.log('Selected items:', selectedItems);
-    router.push('/dispute-details');
+    if (!selectedIssueType || selectedItems.length === 0) return;
+    
+    router.push({
+      pathname: '/dispute-details',
+      params: {
+        orderId: params.orderId,
+        issueType: selectedIssueType,
+        selectedItems: selectedItems.join(','),
+      },
+    });
   };
 
   return (
@@ -122,7 +141,7 @@ export default function ReportIssueScreen() {
       <View style={styles.header}>
         <TouchableOpacity
           style={styles.backButton}
-          onPress={() => router.back()}
+          onPress={() => safeGoBack(router, '/(tabs)/orders')}
         >
           <ArrowLeft size={24} color={Colors.textPrimary} weight="bold" />
         </TouchableOpacity>
@@ -180,41 +199,51 @@ export default function ReportIssueScreen() {
         {/* Item Selection Section */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Select affected items</Text>
-          <View style={styles.itemsList}>
-            {ORDER_ITEMS.map((item) => {
-              const isSelected = selectedItems.includes(item.id);
+          {loading ? (
+            <View style={styles.loadingContainer}>
+              <ActivityIndicator size="small" color={Colors.primary} />
+            </View>
+          ) : orderItems.length > 0 ? (
+            <View style={styles.itemsList}>
+              {orderItems.map((item) => {
+                const isSelected = selectedItems.includes(item.id);
 
-              return (
-                <TouchableOpacity
-                  key={item.id}
-                  style={styles.itemRow}
-                  onPress={() => toggleItemSelection(item.id)}
-                  activeOpacity={0.8}
-                >
-                  <View style={styles.itemLeft}>
-                    <Image
-                      source={{ uri: item.image }}
-                      style={styles.itemImage}
-                    />
-                    <View style={styles.itemInfo}>
-                      <Text style={styles.itemName}>{item.name}</Text>
-                      <Text style={styles.itemPrice}>${item.price.toFixed(2)}</Text>
-                    </View>
-                  </View>
-                  <View
-                    style={[
-                      styles.checkbox,
-                      isSelected && styles.checkboxSelected,
-                    ]}
+                return (
+                  <TouchableOpacity
+                    key={item.id}
+                    style={styles.itemRow}
+                    onPress={() => toggleItemSelection(item.id)}
+                    activeOpacity={0.8}
                   >
-                    {isSelected && (
-                      <Check size={16} color={Colors.textPrimary} weight="bold" />
-                    )}
-                  </View>
-                </TouchableOpacity>
-              );
-            })}
-          </View>
+                    <View style={styles.itemLeft}>
+                      <Image
+                        source={{ uri: item.image }}
+                        style={styles.itemImage}
+                      />
+                      <View style={styles.itemInfo}>
+                        <Text style={styles.itemName}>{item.name}</Text>
+                        <Text style={styles.itemPrice}>£{item.price.toFixed(2)} {item.quantity && item.quantity > 1 ? `(x${item.quantity})` : ''}</Text>
+                      </View>
+                    </View>
+                    <View
+                      style={[
+                        styles.checkbox,
+                        isSelected && styles.checkboxSelected,
+                      ]}
+                    >
+                      {isSelected && (
+                        <Check size={16} color={Colors.textPrimary} weight="bold" />
+                      )}
+                    </View>
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+          ) : (
+            <View style={styles.emptyContainer}>
+              <Text style={styles.emptyText}>No items found for this order</Text>
+            </View>
+          )}
         </View>
 
         {/* Bottom padding for button */}
@@ -280,6 +309,19 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingHorizontal: Spacing.base,
     paddingTop: Spacing.lg,
+  },
+  loadingContainer: {
+    paddingVertical: Spacing.xl,
+    alignItems: 'center',
+  },
+  emptyContainer: {
+    paddingVertical: Spacing.xl,
+    alignItems: 'center',
+  },
+  emptyText: {
+    fontFamily: FontFamily.body,
+    fontSize: FontSize.body,
+    color: Colors.textMuted,
   },
 
   // Sections

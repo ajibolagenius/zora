@@ -13,6 +13,7 @@ import {
   Platform,
 } from 'react-native';
 import { LazyImage, LazyAvatar } from '../../components/ui';
+import MetaTags from '../../components/ui/MetaTags';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams, Link } from 'expo-router';
@@ -49,6 +50,7 @@ import { decodeProductSlug, isValidProductSlug } from '../../lib/slugUtils';
 import { getVendorRoute, isValidRouteParam, safeGoBack } from '../../lib/navigationHelpers';
 import NotFoundScreen from '../../components/errors/NotFoundScreen';
 import { isSupabaseConfigured } from '../../lib/supabase';
+import { generateProductMetaTags } from '../../lib/metaTags';
 
 type SectionType = 'description' | 'nutrition' | 'heritage';
 
@@ -332,8 +334,30 @@ export default function ProductScreen() {
 
   const totalPrice = (product.price * quantity).toFixed(2);
 
+  // Get product image URL
+  const productImageUrl = Array.isArray(product.image_urls) 
+    ? product.image_urls[0] 
+    : (product.image_urls || '');
+  
+  // Get vendor name
+  const vendorName = vendor ? ((vendor as any).shop_name || (vendor as any).name || '') : '';
+  
+  // Generate product URL
+  const productUrl = `/product/${productSlug}`;
+
   return (
     <View style={styles.container}>
+      <MetaTags
+        data={generateProductMetaTags(
+          product.name,
+          product.description || '',
+          Number(product.price),
+          productImageUrl,
+          productUrl,
+          vendorName,
+          (product.stock_quantity || 0) > 0
+        )}
+      />
       <ScrollView
         style={styles.scrollView}
         showsVerticalScrollIndicator={false}

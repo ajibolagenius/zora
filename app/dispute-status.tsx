@@ -24,6 +24,11 @@ import { Colors } from '../constants/colors';
 import { Spacing, BorderRadius, Heights } from '../constants/spacing';
 import { FontSize, FontFamily } from '../constants/typography';
 import { PlaceholderImages } from '../constants';
+import { orderService } from '../services/supabaseService';
+import { realtimeService } from '../services/realtimeService';
+import { isSupabaseConfigured } from '../lib/supabase';
+import { useAuthStore } from '../stores/authStore';
+import { safeGoBack } from '../lib/navigationHelpers';
 
 interface TimelineStep {
   id: string;
@@ -76,6 +81,10 @@ const EVIDENCE_IMAGES = [
 
 export default function DisputeStatusScreen() {
   const router = useRouter();
+  const params = useLocalSearchParams<{ orderId?: string; disputeId?: string }>();
+  const { user } = useAuthStore();
+  const [order, setOrder] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
 
   // Animation values
   const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -97,6 +106,69 @@ export default function DisputeStatusScreen() {
       }),
     ]).start();
   }, []);
+
+  // Fetch order data if orderId is provided
+  useEffect(() => {
+    const fetchOrder = async () => {
+      if (!params.orderId || !isSupabaseConfigured()) {
+        setLoading(false);
+        return;
+      }
+
+      try {
+        setLoading(true);
+        const orderData = await orderService.getById(params.orderId);
+        if (orderData) {
+          setOrder(orderData);
+        }
+      } catch (error) {
+        console.error('Error fetching order:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchOrder();
+
+    // Subscribe to real-time order updates
+    if (isSupabaseConfigured() && params.orderId) {
+      let isMounted = true;
+      const unsubscribers: (() => void)[] = [];
+
+      realtimeService.subscribeToTable(
+        'orders',
+        '*',
+        async (payload) => {
+          if (!isMounted) return;
+          
+          if (payload.new?.id === params.orderId) {
+            try {
+              const orderData = await orderService.getById(params.orderId);
+              if (orderData) {
+                setOrder(orderData);
+              }
+            } catch (error) {
+              console.error('Error refreshing order:', error);
+            }
+          }
+        },
+        `id=eq.${params.orderId}`
+      ).then((unsub) => {
+        if (isMounted && unsub) unsubscribers.push(unsub);
+      }).catch((error) => {
+        console.error('Error setting up order subscription:', error);
+      });
+
+      return () => {
+        isMounted = false;
+        unsubscribers.forEach((unsub) => {
+          if (typeof unsub === 'function') {
+            unsub();
+          }
+        });
+      };
+    }
+  }, [params.orderId]);
 
   const renderTimelineStep = (step: TimelineStep, index: number) => {
     const isLast = index === TIMELINE_STEPS.length - 1;
@@ -155,7 +227,7 @@ export default function DisputeStatusScreen() {
       <View style={styles.header}>
         <TouchableOpacity
           style={styles.backButton}
-          onPress={() => router.back()}
+          onPress={() => safeGoBack(router, '/(tabs)/orders')}
         >
           <ArrowLeft size={24} color={Colors.textPrimary} weight="bold" />
         </TouchableOpacity>
@@ -173,7 +245,7 @@ export default function DisputeStatusScreen() {
           <View style={styles.headerCardTop}>
             <View>
               <Text style={styles.disputeIdLabel}>DISPUTE ID</Text>
-              <Text style={styles.disputeIdValue}>#92831</Text>
+              <Text style={styles.disputeIdValue}>#{params.disputeId?.substring(0, 8) || '92831'}</Text>
             </View>
             {/* Status Badge */}
             <View style={styles.statusBadge}>
@@ -189,11 +261,11 @@ export default function DisputeStatusScreen() {
           <View style={styles.headerCardBottom}>
             <View>
               <Text style={styles.headerCardLabel}>Order ID</Text>
-              <Text style={styles.headerCardValue}>#ZN-4421</Text>
+              <Text style={styles.headerCardValue}>#{order?.id?.substring(0, 8) || params.orderId?.substring(0, 8) || 'ZN-4421'}</Text>
             </View>
             <View style={styles.headerCardRight}>
               <Text style={styles.headerCardLabel}>Amount</Text>
-              <Text style={styles.headerCardValue}>$84.50</Text>
+              <Text style={styles.headerCardValue}>£{order?.total?.toFixed(2) || '84.50'}</Text>
             </View>
           </View>
         </View>

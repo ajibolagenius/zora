@@ -26,6 +26,10 @@ import { Colors } from '../constants/colors';
 import { Spacing, BorderRadius, Heights } from '../constants/spacing';
 import { FontSize, FontFamily } from '../constants/typography';
 import { ResolutionOptions, ValidationLimits, CommonImages, Placeholders, AnimationDuration, AnimationEasing } from '../constants';
+import { orderService } from '../services/supabaseService';
+import { isSupabaseConfigured } from '../lib/supabase';
+import { useAuthStore } from '../stores/authStore';
+import { safeGoBack } from '../lib/navigationHelpers';
 
 // Mock selected items from previous screen
 const SELECTED_ITEMS = [
@@ -35,13 +39,13 @@ const SELECTED_ITEMS = [
 
 export default function DisputeDetailsScreen() {
     const router = useRouter();
+    const params = useLocalSearchParams<{ orderId?: string; issueType?: string; selectedItems?: string }>();
+    const { user } = useAuthStore();
     const [description, setDescription] = useState('');
     const [selectedResolution, setSelectedResolution] = useState('refund');
-    const [uploadedImages, setUploadedImages] = useState<string[]>([
-        'https://images.unsplash.com/photo-1596040033229-a9821ebd058d?w=200',
-        'https://images.unsplash.com/photo-1532336414038-cf19250c5757?w=200',
-    ]);
+    const [uploadedImages, setUploadedImages] = useState<string[]>([]);
     const [isAccordionOpen, setIsAccordionOpen] = useState(false);
+    const [submitting, setSubmitting] = useState(false);
 
     // Animation values
     const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -92,13 +96,54 @@ export default function DisputeDetailsScreen() {
         setUploadedImages(uploadedImages.filter((_, i) => i !== index));
     };
 
-    const handleSubmit = () => {
-        console.log('Submitting dispute:', {
-            description,
-            selectedResolution,
-            uploadedImages,
+    const handleSubmit = async () => {
+        if (!description.trim() || !params.orderId) {
+            return;
+        }
+
+        setSubmitting(true);
+
+        try {
+            // In production, this would create a dispute record in a disputes table
+            // For now, we'll store dispute info in order metadata or create a simple record
+            if (isSupabaseConfigured() && user?.user_id) {
+                // Note: A disputes table would need to be created for full functionality
+                // This is a placeholder for the integration
+                console.log('Submitting dispute:', {
+                    orderId: params.orderId,
+                    issueType: params.issueType,
+                    selectedItems: params.selectedItems?.split(','),
+                    description,
+                    selectedResolution,
+                    uploadedImages,
+                    userId: user.user_id,
+                });
+
+                // In production, you would:
+                // await disputeService.create({
+                //   order_id: params.orderId,
+                //   user_id: user.user_id,
+                //   issue_type: params.issueType,
+                //   affected_items: params.selectedItems?.split(','),
+                //   description,
+                //   preferred_resolution: selectedResolution,
+                //   evidence_images: uploadedImages,
+                //   status: 'pending',
+                // });
+            }
+        } catch (error) {
+            console.error('Error submitting dispute:', error);
+        } finally {
+            setSubmitting(false);
+        }
+
+        router.push({
+            pathname: '/dispute-status',
+            params: {
+                orderId: params.orderId,
+                disputeId: `DISPUTE-${Date.now()}`,
+            },
         });
-        router.push('/dispute-status');
     };
 
     return (
@@ -107,7 +152,7 @@ export default function DisputeDetailsScreen() {
             <View style={styles.header}>
                 <TouchableOpacity
                     style={styles.backButton}
-                    onPress={() => router.back()}
+                    onPress={() => safeGoBack(router, '/(tabs)/orders')}
                 >
                     <ArrowLeft size={24} color={Colors.textPrimary} weight="bold" />
                 </TouchableOpacity>
@@ -256,11 +301,14 @@ export default function DisputeDetailsScreen() {
             {/* Footer Button */}
             <View style={styles.footer}>
                 <TouchableOpacity
-                    style={styles.submitButton}
+                    style={[styles.submitButton, submitting && styles.submitButtonDisabled]}
                     onPress={handleSubmit}
                     activeOpacity={0.9}
+                    disabled={submitting || !description.trim()}
                 >
-                    <Text style={styles.submitButtonText}>Submit Dispute</Text>
+                    <Text style={styles.submitButtonText}>
+                        {submitting ? 'Submitting...' : 'Submit Dispute'}
+                    </Text>
                 </TouchableOpacity>
             </View>
         </SafeAreaView>
@@ -561,5 +609,8 @@ const styles = StyleSheet.create({
         fontFamily: FontFamily.displaySemiBold,
         fontSize: FontSize.body,
         color: Colors.textPrimary,
+    },
+    submitButtonDisabled: {
+        opacity: 0.6,
     },
 });

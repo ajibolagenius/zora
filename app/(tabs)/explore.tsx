@@ -12,6 +12,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { LazyImage } from '../../components/ui';
+import MetaTags from '../../components/ui/MetaTags';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import {
@@ -32,6 +33,7 @@ import { vendorService as supabaseVendorService, type Vendor } from '../../servi
 import { realtimeService } from '../../services/realtimeService';
 import { isSupabaseConfigured } from '../../lib/supabase';
 import { getVendorRoute } from '../../lib/navigationHelpers';
+import { generatePageMetaTags } from '../../lib/metaTags';
 
 type FilterType = 'open' | 'delivery' | 'pickup' | 'topRated';
 
@@ -155,6 +157,14 @@ export default function ExploreScreen() {
 
   return (
     <View style={styles.container}>
+      <MetaTags
+        data={generatePageMetaTags(
+          'Explore Vendors - Zora African Market',
+          'Browse and discover authentic African vendors and products. Filter by category, delivery options, and ratings. Find your favorite African market vendors.',
+          '/assets/images/app-image.png',
+          '/explore'
+        )}
+      />
       {/* Map Background */}
       <View style={styles.mapContainer}>
         {/* Map Pattern Background */}

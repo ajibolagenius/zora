@@ -24,6 +24,10 @@ import { Colors } from '../../constants/colors';
 import { Spacing, BorderRadius, Shadows } from '../../constants/spacing';
 import { FontSize, FontFamily } from '../../constants/typography';
 import { QuickReplies, Placeholders, AnimationDuration, AnimationEasing } from '../../constants';
+import { messagingService } from '../../services/messagingService';
+import { realtimeService } from '../../services/realtimeService';
+import { isSupabaseConfigured } from '../../lib/supabase';
+import { useAuthStore } from '../../stores/authStore';
 
 interface Message {
     id: string;
@@ -60,11 +64,13 @@ export default function OrderSupportScreen() {
     const router = useRouter();
     const insets = useSafeAreaInsets();
     const { id } = useLocalSearchParams<{ id: string }>();
+    const { user } = useAuthStore();
     const orderNumber = id || '29384';
 
-    const [messages, setMessages] = useState<Message[]>(INITIAL_MESSAGES);
+    const [messages, setMessages] = useState<Message[]>([]);
     const [inputText, setInputText] = useState('');
     const [isTyping, setIsTyping] = useState(false);
+    const [loading, setLoading] = useState(true);
     const scrollViewRef = useRef<ScrollView>(null);
 
     // Animation values
@@ -88,6 +94,71 @@ export default function OrderSupportScreen() {
         ]).start();
     }, []);
 
+    // Fetch messages and set up real-time subscription
+    useEffect(() => {
+        const fetchMessages = async () => {
+            if (!isSupabaseConfigured() || !user?.user_id || !id) {
+                // Fallback to initial messages if not configured
+                setMessages(INITIAL_MESSAGES);
+                setLoading(false);
+                return;
+            }
+
+            try {
+                setLoading(true);
+                // For now, use initial messages as fallback
+                // In production, fetch from a support conversations table
+                setMessages(INITIAL_MESSAGES);
+            } catch (error) {
+                console.error('Error fetching messages:', error);
+                setMessages(INITIAL_MESSAGES);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchMessages();
+
+        // Set up real-time subscription for new messages
+        if (isSupabaseConfigured() && user?.user_id && id) {
+            const unsubscribe = realtimeService.subscribeToTable(
+                'messages',
+                '*',
+                async (payload) => {
+                    // Handle new messages in real-time
+                    if (payload.new) {
+                        const newMessage: Message = {
+                            id: payload.new.id,
+                            text: payload.new.content || '',
+                            sender: payload.new.sender_type === 'user' ? 'user' : 'bot',
+                            timestamp: new Date(payload.new.created_at).toLocaleTimeString('en-US', {
+                                hour: 'numeric',
+                                minute: '2-digit',
+                                hour12: true
+                            }),
+                            senderName: payload.new.sender_type === 'user' ? undefined : 'Zora Support',
+                        };
+                        setMessages(prev => [...prev, newMessage]);
+                        setTimeout(() => {
+                            scrollViewRef.current?.scrollToEnd({ animated: true });
+                        }, 100);
+                    }
+                },
+                `conversation_id=eq.${id}`
+            );
+
+            return () => {
+                if (unsubscribe) {
+                    unsubscribe.then((unsub) => {
+                        if (typeof unsub === 'function') {
+                            unsub();
+                        }
+                    });
+                }
+            };
+        }
+    }, [id, user?.user_id]);
+
     const handleBack = () => {
         if (router.canGoBack()) {
             router.back();
@@ -96,12 +167,17 @@ export default function OrderSupportScreen() {
         }
     };
 
-    const handleSend = () => {
-        if (!inputText.trim()) return;
+    const handleSend = async () => {
+        if (!inputText.trim() || !user?.user_id) return;
 
+        const messageText = inputText.trim();
+        setInputText('');
+        setIsTyping(true);
+
+        // Optimistically add user message
         const newMessage: Message = {
             id: Date.now().toString(),
-            text: inputText.trim(),
+            text: messageText,
             sender: 'user',
             timestamp: new Date().toLocaleTimeString('en-US', {
                 hour: 'numeric',
@@ -111,15 +187,27 @@ export default function OrderSupportScreen() {
         };
 
         setMessages(prev => [...prev, newMessage]);
-        setInputText('');
-        setIsTyping(true);
-
-        // Scroll to bottom
         setTimeout(() => {
             scrollViewRef.current?.scrollToEnd({ animated: true });
         }, 100);
 
-        // Simulate bot response
+        // Send message to database if configured
+        if (isSupabaseConfigured() && user?.user_id) {
+            try {
+                // For order support, we'd need a conversation ID
+                // For now, create or get a support conversation
+                // This is a simplified version - in production, you'd have a support conversations table
+                await messagingService.sendMessage({
+                    conversationId: id, // Using order ID as conversation identifier
+                    content: messageText,
+                    senderType: 'user',
+                });
+            } catch (error) {
+                console.error('Error sending message:', error);
+            }
+        }
+
+        // Simulate bot response (in production, this would come from support team or AI)
         setTimeout(() => {
             setIsTyping(false);
             const botResponse: Message = {
@@ -262,7 +350,13 @@ export default function OrderSupportScreen() {
                     </View>
 
                     {/* Messages */}
-                    {messages.map((message, index) => renderMessage(message, index))}
+                    {loading ? (
+                        <View style={styles.loadingContainer}>
+                            <Text style={styles.loadingText}>Loading messages...</Text>
+                        </View>
+                    ) : (
+                        messages.map((message, index) => renderMessage(message, index))
+                    )}
 
                     {/* Typing Indicator */}
                     {isTyping && (
@@ -572,5 +666,14 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderColor: Colors.borderDark,
         ...Shadows.sm,
+    },
+    loadingContainer: {
+        paddingVertical: Spacing.xl,
+        alignItems: 'center',
+    },
+    loadingText: {
+        fontFamily: FontFamily.body,
+        fontSize: FontSize.body,
+        color: Colors.textMuted,
     },
 });

@@ -14,6 +14,7 @@ import {
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams, useFocusEffect } from 'expo-router';
 import { LazyImage, LazyAvatar } from '../../components/ui';
+import MetaTags from '../../components/ui/MetaTags';
 import {
     ArrowLeft,
     MagnifyingGlass,
@@ -45,6 +46,7 @@ import FloatingTabBar from '../../components/ui/FloatingTabBar';
 import { encodeProductSlug, isValidVendorSlug } from '../../lib/slugUtils';
 import { isValidRouteParam } from '../../lib/navigationHelpers';
 import NotFoundScreen from '../../components/errors/NotFoundScreen';
+import { generateVendorMetaTags } from '../../lib/metaTags';
 
 type TabType = 'products' | 'reviews' | 'about';
 
@@ -348,9 +350,25 @@ export default function StoreScreen() {
 
     const vendorId = vendor.id;
     const shopName = (vendor as any).shop_name || (vendor as any).name || 'Store';
+    
+    // Get vendor image URL
+    const vendorImageUrl = (vendor as any).cover_image_url || (vendor as any).cover_image || (vendor as any).logo_url || '';
+    
+    // Generate vendor URL
+    const vendorUrl = `/store/${vendorSlug}`;
 
     return (
         <View style={styles.container}>
+            <MetaTags
+                data={generateVendorMetaTags(
+                    shopName,
+                    (vendor as any).description || '',
+                    vendorImageUrl,
+                    vendorUrl,
+                    Number((vendor as any).rating || 0),
+                    products.length
+                )}
+            />
             <ScrollView
                 style={styles.scrollView}
                 showsVerticalScrollIndicator={false}

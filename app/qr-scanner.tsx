@@ -18,6 +18,8 @@ import { Spacing, BorderRadius, Shadows } from '../constants/spacing';
 import { FontSize, FontFamily } from '../constants/typography';
 import { qrCodeScanner, promoQRService } from '../services/qrCodeService';
 import { getProductRoute, getVendorRoute } from '../lib/navigationHelpers';
+import { orderService } from '../services/supabaseService';
+import { isSupabaseConfigured } from '../lib/supabase';
 
 type ScannerState = 'checking' | 'unavailable' | 'loading' | 'denied' | 'ready';
 
@@ -98,24 +100,69 @@ export default function QRScannerScreen() {
       if (result.success) {
         switch (result.type) {
           case 'order':
-            Alert.alert(
-              'Order Found',
-              `Order #${result.data.orderId}`,
-              [
-                { 
-                  text: 'View Order', 
-                  onPress: () => {
-                    router.push(`/order-tracking/${result.data.orderId}`);
-                    setScanned(false);
-                  }
-                },
-                { 
-                  text: 'Scan Again', 
-                  style: 'cancel',
-                  onPress: () => setScanned(false) 
-                },
-              ]
-            );
+            // Verify order exists in database
+            if (isSupabaseConfigured()) {
+              try {
+                const order = await orderService.verifyQRCode(data);
+                if (order) {
+                  Alert.alert(
+                    'Order Found',
+                    `Order #${order.id.substring(0, 8)} - ${order.status}`,
+                    [
+                      { 
+                        text: 'View Order', 
+                        onPress: () => {
+                          router.push(`/order-tracking/${order.id}`);
+                          setScanned(false);
+                        }
+                      },
+                      { 
+                        text: 'Scan Again', 
+                        style: 'cancel',
+                        onPress: () => setScanned(false) 
+                      },
+                    ]
+                  );
+                } else {
+                  Alert.alert(
+                    'Order Not Found',
+                    'This QR code does not match any order in our system.',
+                    [
+                      { text: 'OK', onPress: () => setScanned(false) },
+                    ]
+                  );
+                }
+              } catch (error) {
+                console.error('Error verifying order:', error);
+                Alert.alert(
+                  'Error',
+                  'Could not verify order. Please try again.',
+                  [
+                    { text: 'OK', onPress: () => setScanned(false) },
+                  ]
+                );
+              }
+            } else {
+              // Fallback for non-Supabase mode
+              Alert.alert(
+                'Order Found',
+                `Order #${result.data.orderId}`,
+                [
+                  { 
+                    text: 'View Order', 
+                    onPress: () => {
+                      router.push(`/order-tracking/${result.data.orderId}`);
+                      setScanned(false);
+                    }
+                  },
+                  { 
+                    text: 'Scan Again', 
+                    style: 'cancel',
+                    onPress: () => setScanned(false) 
+                  },
+                ]
+              );
+            }
             break;
             
           case 'promo':

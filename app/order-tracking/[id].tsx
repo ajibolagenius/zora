@@ -99,26 +99,39 @@ export default function OrderTrackingScreen() {
 
     // Subscribe to real-time order updates
     if (isSupabaseConfigured() && id) {
-      const unsubscribe = realtimeService.subscribeToTable(
+      let isMounted = true;
+      const unsubscribers: (() => void)[] = [];
+
+      // Subscribe to order updates
+      realtimeService.subscribeToTable(
         'orders',
-        'UPDATE',
+        '*',
         async (payload) => {
-          if (payload.new?.id === id) {
+          if (!isMounted) return;
+          
+          if (payload.new?.id === id || payload.old?.id === id) {
             // Order was updated, refresh the order data
-            await fetchOrder();
+            try {
+              await fetchOrder();
+            } catch (error) {
+              console.error('Error refreshing order:', error);
+            }
           }
         },
         `id=eq.${id}`
-      );
+      ).then((unsub) => {
+        if (isMounted && unsub) unsubscribers.push(unsub);
+      }).catch((error) => {
+        console.error('Error setting up order subscription:', error);
+      });
 
       return () => {
-        if (unsubscribe) {
-          unsubscribe.then((unsub) => {
-            if (typeof unsub === 'function') {
-              unsub();
-            }
-          });
-        }
+        isMounted = false;
+        unsubscribers.forEach((unsub) => {
+          if (typeof unsub === 'function') {
+            unsub();
+          }
+        });
       };
     }
   }, [id]);

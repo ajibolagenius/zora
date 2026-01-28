@@ -28,6 +28,7 @@ import { Spacing, BorderRadius, Heights } from '../../constants/spacing';
 import { FontSize, FontFamily } from '../../constants/typography';
 import { AnimationDuration, AnimationEasing } from '../../constants';
 import { FeaturedSlider, RegionCard, VendorCard, ProductCard } from '../../components/ui';
+import MetaTags from '../../components/ui/MetaTags';
 import { homeService, type HomeData } from '../../services/homeService';
 import { messagingService } from '../../services/messagingService';
 import type { Vendor, Product } from '../../types/supabase';
@@ -37,6 +38,7 @@ import { useNotificationStore } from '../../stores/notificationStore';
 import { isSupabaseConfigured } from '../../lib/supabase';
 import { getProductRoute, getVendorRoute } from '../../lib/navigationHelpers';
 import { CommonImages } from '../../constants';
+import { generatePageMetaTags } from '../../lib/metaTags';
 
 import { UiConfig } from '../../constants';
 
@@ -327,6 +329,14 @@ export default function HomeScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
+      <MetaTags
+        data={generatePageMetaTags(
+          'Zora African Market - Authentic African Groceries & Products',
+          'Discover authentic African groceries, products, and vendors. Shop from the best African markets in the UK. Fast delivery, verified vendors, and premium quality.',
+          '/assets/images/app-image.png',
+          '/'
+        )}
+      />
       {/* Sticky Header Section */}
       <View style={styles.stickyHeader}>
         {/* Header Row */}

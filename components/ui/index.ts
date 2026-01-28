@@ -21,3 +21,4 @@ export { RegionCard } from './RegionCard';
 export { SearchBar } from './SearchBar';
 export { HeroBanner } from './HeroBanner';
 export { FeaturedSlider } from './FeaturedSlider';
+export { default as MetaTags } from './MetaTags';

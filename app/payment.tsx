@@ -29,6 +29,7 @@ import { AnimationDuration, AnimationEasing } from '../constants';
 import { useCartStore } from '../stores/cartStore';
 import { useAuthStore } from '../stores/authStore';
 import { orderService } from '../services/supabaseService';
+import { realtimeService } from '../services/realtimeService';
 import { isSupabaseConfigured } from '../lib/supabase';
 import { 
   paymentService, 
@@ -155,7 +156,7 @@ export default function PaymentScreen() {
         serviceMethod === 'card' ? mockCardDetails : { category: 'pay_in_3' }
       );
       
-      if (result.success) {
+        if (result.success) {
         setProcessingStep('Creating order...');
         
         // Create order in database
@@ -164,13 +165,14 @@ export default function PaymentScreen() {
           try {
             const orderData = {
               user_id: user.user_id,
+              vendor_id: items[0]?.vendor_id || '', // Get vendor from first item
               status: 'pending' as const,
               payment_status: 'paid' as const,
               items: items.map(item => ({
                 product_id: item.product_id,
                 vendor_id: item.vendor_id,
                 name: item.product?.name || item.name || 'Unknown Product',
-                image_url: item.product?.image_url || '',
+                image_url: item.product?.image_url || item.product?.image_urls?.[0] || '',
                 quantity: item.quantity,
                 price: item.product?.price || item.price || 0,
               })),
@@ -179,14 +181,36 @@ export default function PaymentScreen() {
               service_fee: serviceFee || 0.50,
               discount: discount || (useZoraCredit ? zoraCredit : 0),
               total: finalTotal,
-              currency: 'GBP',
-              delivery_option: 'delivery' as const,
               payment_method: selectedMethod === 'card' ? 'card' : selectedMethod,
+              delivery_address: {
+                // Default address - in production, get from user's saved addresses
+                line1: '123 Zora Lane',
+                city: 'London',
+                postalCode: 'SE1 7PB',
+                country: 'GB',
+              },
             };
 
             const createdOrder = await orderService.create(orderData);
             if (createdOrder) {
               createdOrderId = createdOrder.id;
+              
+              // Subscribe to order status updates in real-time
+              if (isSupabaseConfigured()) {
+                realtimeService.subscribeToTable(
+                  'orders',
+                  'UPDATE',
+                  async (payload) => {
+                    if (payload.new?.id === createdOrderId) {
+                      // Order status updated, could show notification
+                      console.log('Order status updated:', payload.new.status);
+                    }
+                  },
+                  `id=eq.${createdOrderId}`
+                ).catch((error) => {
+                  console.error('Error setting up order subscription:', error);
+                });
+              }
             }
           } catch (error) {
             console.error('Error creating order:', error);

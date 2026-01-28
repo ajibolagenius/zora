@@ -12,6 +12,7 @@ import {
     Easing,
 } from 'react-native';
 import { LazyImage, LazyAvatar } from '../../../components/ui';
+import MetaTags from '../../../components/ui/MetaTags';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams, useFocusEffect } from 'expo-router';
 import {
@@ -42,6 +43,7 @@ import { useWishlistStore } from '../../../stores/wishlistStore';
 import FloatingTabBar from '../../../components/ui/FloatingTabBar';
 import { getProductRoute } from '../../../lib/navigationHelpers';
 import NotFoundScreen from '../../../components/errors/NotFoundScreen';
+import { generateVendorMetaTags } from '../../../lib/metaTags';
 
 type TabType = 'products' | 'reviews' | 'about';
 
@@ -263,9 +265,24 @@ export default function VendorScreen() {
         );
     }
 
+    // Get vendor image URL
+    const vendorImageUrl = vendor.cover_image_url || vendor.logo_url || '';
+    
+    // Generate vendor URL
+    const vendorUrl = `/vendor/${id}`;
 
     return (
         <View style={styles.container}>
+            <MetaTags
+                data={generateVendorMetaTags(
+                    vendor.shop_name,
+                    vendor.description || '',
+                    vendorImageUrl,
+                    vendorUrl,
+                    vendor.rating,
+                    products.length
+                )}
+            />
             <ScrollView
                 style={styles.scrollView}
                 showsVerticalScrollIndicator={false}

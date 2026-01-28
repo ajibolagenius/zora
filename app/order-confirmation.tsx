@@ -66,26 +66,39 @@ export default function OrderConfirmationScreen() {
 
     // Subscribe to real-time order updates
     if (isSupabaseConfigured() && orderId) {
-      const unsubscribe = realtimeService.subscribeToTable(
+      let isMounted = true;
+      const unsubscribers: (() => void)[] = [];
+
+      // Subscribe to order updates
+      realtimeService.subscribeToTable(
         'orders',
-        'UPDATE',
+        '*',
         async (payload) => {
-          if (payload.new?.id === orderId) {
+          if (!isMounted) return;
+          
+          if (payload.new?.id === orderId || payload.old?.id === orderId) {
             // Order was updated, refresh the order data
-            await fetchOrder();
+            try {
+              await fetchOrder();
+            } catch (error) {
+              console.error('Error refreshing order:', error);
+            }
           }
         },
         `id=eq.${orderId}`
-      );
+      ).then((unsub) => {
+        if (isMounted && unsub) unsubscribers.push(unsub);
+      }).catch((error) => {
+        console.error('Error setting up order subscription:', error);
+      });
 
       return () => {
-        if (unsubscribe) {
-          unsubscribe.then((unsub) => {
-            if (typeof unsub === 'function') {
-              unsub();
-            }
-          });
-        }
+        isMounted = false;
+        unsubscribers.forEach((unsub) => {
+          if (typeof unsub === 'function') {
+            unsub();
+          }
+        });
       };
     }
   }, [orderId]);
