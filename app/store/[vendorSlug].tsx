@@ -8,6 +8,8 @@ import {
     ActivityIndicator,
     useWindowDimensions,
     Animated,
+    Share,
+    Platform,
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams, useFocusEffect } from 'expo-router';
@@ -31,11 +33,14 @@ import { Spacing, BorderRadius, TouchTarget } from '../../constants/spacing';
 import { FontSize, FontFamily } from '../../constants/typography';
 import { AnimationDuration, AnimationEasing, ImageUrlBuilders, ValidationLimits } from '../../constants';
 import { vendorService, productService, reviewService } from '../../services/supabaseService';
+import { followService } from '../../services/followService';
 import { realtimeService } from '../../services/realtimeService';
 import type { Vendor, Product, Review } from '../../types/supabase';
 import { Link } from 'expo-router';
 import { useCartStore } from '../../stores/cartStore';
 import { useWishlistStore } from '../../stores/wishlistStore';
+import { useAuthStore } from '../../stores/authStore';
+import { useToast } from '../../components/ui/ToastProvider';
 import FloatingTabBar from '../../components/ui/FloatingTabBar';
 import { encodeProductSlug, isValidVendorSlug } from '../../lib/slugUtils';
 import { isValidRouteParam } from '../../lib/navigationHelpers';
@@ -76,6 +81,8 @@ export default function StoreScreen() {
     const productCardWidth = (screenWidth - 48) / 2;
     const addToCart = useCartStore((state) => state.addItem);
     const cartItemCount = useCartStore((state) => state.getItemCount());
+    const { user } = useAuthStore();
+    const { showToast } = useToast();
 
     const [vendor, setVendor] = useState<Vendor | null>(null);
     const [products, setProducts] = useState<Product[]>([]);
@@ -115,13 +122,23 @@ export default function StoreScreen() {
                     console.error('Error fetching vendor reviews:', error);
                     setReviews([]);
                 }
+
+                // Check if user is following this vendor
+                if (user?.user_id) {
+                    try {
+                        const following = await followService.isFollowing(user.user_id, vendorData.id);
+                        setIsFollowing(following);
+                    } catch (error) {
+                        console.error('Error checking follow status:', error);
+                    }
+                }
             }
         } catch (error) {
             console.error('Error fetching vendor:', error);
         } finally {
             setLoading(false);
         }
-    }, [vendorSlug]);
+    }, [vendorSlug, user?.user_id]);
 
     // Refetch data when screen comes into focus (e.g., after submitting a review)
     useFocusEffect(
@@ -250,6 +267,65 @@ export default function StoreScreen() {
         } as any, 1);
     };
 
+    const handleFollow = async () => {
+        if (!user?.user_id) {
+            showToast('Please log in to follow vendors', 'error');
+            return;
+        }
+
+        if (!vendor?.id) return;
+
+        try {
+            if (isFollowing) {
+                const success = await followService.unfollow(user.user_id, vendor.id);
+                if (success) {
+                    setIsFollowing(false);
+                    showToast('Unfollowed vendor', 'success');
+                } else {
+                    showToast('Failed to unfollow vendor', 'error');
+                }
+            } else {
+                const success = await followService.follow(user.user_id, vendor.id);
+                if (success) {
+                    setIsFollowing(true);
+                    showToast('Following vendor', 'success');
+                } else {
+                    showToast('Failed to follow vendor', 'error');
+                }
+            }
+        } catch (error) {
+            console.error('Error toggling follow:', error);
+            showToast('An error occurred', 'error');
+        }
+    };
+
+    const handleShare = async () => {
+        if (!vendor) return;
+
+        const shopName = (vendor as any).shop_name || 'Store';
+        const vendorUrl = Platform.select({
+            web: typeof window !== 'undefined' ? `${window.location.origin}/store/${vendorSlug}` : `https://zora.app/store/${vendorSlug}`,
+            default: `https://zora.app/store/${vendorSlug}`,
+        });
+
+        try {
+            await Share.share({
+                message: `Check out ${shopName} on Zora African Market! ${vendorUrl}`,
+                title: `Share ${shopName}`,
+                ...(Platform.OS !== 'web' && { url: vendorUrl }),
+            });
+        } catch (error: any) {
+            // User cancelled or error occurred
+            if (error.message !== 'User did not share') {
+                console.error('Error sharing:', error);
+            }
+        }
+    };
+
+    const handleSearch = () => {
+        router.push('/search');
+    };
+
     if (loading) {
         return (
             <View style={styles.container}>
@@ -298,12 +374,17 @@ export default function StoreScreen() {
                             <ArrowLeft size={22} color={Colors.textPrimary} weight="bold" />
                         </TouchableOpacity>
                         <View style={styles.headerActions}>
-                            <TouchableOpacity style={styles.headerButton}>
+                            <TouchableOpacity 
+                                style={styles.headerButton}
+                                onPress={handleSearch}
+                                activeOpacity={0.8}
+                            >
                                 <MagnifyingGlass size={20} color={Colors.textPrimary} weight="bold" />
                             </TouchableOpacity>
                             <TouchableOpacity
                                 style={styles.headerButton}
                                 onPress={() => router.push('/(tabs)/cart')}
+                                activeOpacity={0.8}
                             >
                                 <ShoppingCart size={20} color={Colors.textPrimary} weight="bold" />
                                 {cartItemCount > 0 && <View style={styles.cartBadge} />}
@@ -379,7 +460,7 @@ export default function StoreScreen() {
                     <View style={styles.actionButtons}>
                         <TouchableOpacity
                             style={[styles.followButton, isFollowing && styles.followButtonActive]}
-                            onPress={() => setIsFollowing(!isFollowing)}
+                            onPress={handleFollow}
                             activeOpacity={0.8}
                         >
                             <Text style={[styles.followButtonText, isFollowing && styles.followButtonTextActive]}>
@@ -388,12 +469,20 @@ export default function StoreScreen() {
                         </TouchableOpacity>
                         <TouchableOpacity
                             style={styles.iconButton}
-                            onPress={() => router.push(`/vendor/${vendorId}/chat`)}
+                            onPress={() => {
+                                if (vendor?.id) {
+                                    router.push(`/vendor/${vendor.id}/chat`);
+                                }
+                            }}
                             activeOpacity={0.8}
                         >
                             <ChatCircle size={20} color={Colors.textPrimary} weight="duotone" />
                         </TouchableOpacity>
-                        <TouchableOpacity style={styles.iconButton} activeOpacity={0.8}>
+                        <TouchableOpacity 
+                            style={styles.iconButton} 
+                            onPress={handleShare}
+                            activeOpacity={0.8}
+                        >
                             <ShareNetwork size={20} color={Colors.textPrimary} weight="duotone" />
                         </TouchableOpacity>
                     </View>

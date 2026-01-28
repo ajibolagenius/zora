@@ -19,6 +19,7 @@ import {
   MapPin,
   CaretDown,
   Bell,
+  ChatCircle,
   MagnifyingGlass,
   Sliders,
 } from 'phosphor-react-native';
@@ -28,10 +29,12 @@ import { FontSize, FontFamily } from '../../constants/typography';
 import { AnimationDuration, AnimationEasing } from '../../constants';
 import { FeaturedSlider, RegionCard, VendorCard, ProductCard } from '../../components/ui';
 import { homeService, type HomeData } from '../../services/homeService';
+import { messagingService } from '../../services/messagingService';
 import type { Vendor, Product } from '../../types/supabase';
 import { useCartStore } from '../../stores/cartStore';
 import { useAuthStore } from '../../stores/authStore';
 import { useNotificationStore } from '../../stores/notificationStore';
+import { isSupabaseConfigured } from '../../lib/supabase';
 import { getProductRoute, getVendorRoute } from '../../lib/navigationHelpers';
 import { CommonImages } from '../../constants';
 
@@ -68,6 +71,7 @@ export default function HomeScreen() {
   const addToCart = useCartStore((state) => state.addItem);
   const { user } = useAuthStore();
   const unreadCount = useNotificationStore((state) => state.unreadCount);
+  const [unreadMessagesCount, setUnreadMessagesCount] = useState(0);
   
   // Get user's primary cultural region for personalized ranking
   const userRegion = user?.cultural_interests?.[0] || undefined;
@@ -296,6 +300,17 @@ export default function HomeScreen() {
     router.push('/notifications');
   };
 
+  const handleMessagesPress = () => {
+    router.push('/messages');
+  };
+
+  // Fetch unread messages count
+  useEffect(() => {
+    if (user?.user_id && isSupabaseConfigured()) {
+      messagingService.getUnreadCount(user.user_id).then(setUnreadMessagesCount);
+    }
+  }, [user?.user_id]);
+
   if (loading) {
     return (
       <SafeAreaView style={styles.container}>
@@ -330,20 +345,36 @@ export default function HomeScreen() {
             </Text>
             <CaretDown size={16} color={Colors.textMuted} weight="bold" />
           </TouchableOpacity>
-          <TouchableOpacity 
-            style={styles.notificationButton}
-            onPress={handleNotificationsPress}
-            activeOpacity={0.8}
-          >
-            <Bell size={24} color={Colors.textPrimary} weight="duotone" />
-            {unreadCount > 0 && (
-              <View style={styles.notificationBadge}>
-                <Text style={styles.notificationBadgeText}>
-                  {unreadCount > 9 ? '9+' : unreadCount}
-                </Text>
-              </View>
-            )}
-          </TouchableOpacity>
+          <View style={styles.headerIcons}>
+            <TouchableOpacity 
+              style={styles.headerIconButton}
+              onPress={handleMessagesPress}
+              activeOpacity={0.8}
+            >
+              <ChatCircle size={24} color={Colors.textPrimary} weight="duotone" />
+              {unreadMessagesCount > 0 && (
+                <View style={styles.headerIconBadge}>
+                  <Text style={styles.headerIconBadgeText}>
+                    {unreadMessagesCount > 9 ? '9+' : unreadMessagesCount}
+                  </Text>
+                </View>
+              )}
+            </TouchableOpacity>
+            <TouchableOpacity 
+              style={styles.headerIconButton}
+              onPress={handleNotificationsPress}
+              activeOpacity={0.8}
+            >
+              <Bell size={24} color={Colors.textPrimary} weight="duotone" />
+              {unreadCount > 0 && (
+                <View style={styles.headerIconBadge}>
+                  <Text style={styles.headerIconBadgeText}>
+                    {unreadCount > 9 ? '9+' : unreadCount}
+                  </Text>
+                </View>
+              )}
+            </TouchableOpacity>
+          </View>
         </View>
 
         {/* Search Bar */}
@@ -561,14 +592,19 @@ const styles = StyleSheet.create({
     color: Colors.textPrimary,
     fontSize: FontSize.small,
   },
-  notificationButton: {
+  headerIcons: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.sm,
+  },
+  headerIconButton: {
     position: 'relative',
     width: 44,
     height: 44,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  notificationBadge: {
+  headerIconBadge: {
     position: 'absolute',
     top: 8,
     right: 8,
@@ -582,7 +618,7 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: Colors.backgroundDark,
   },
-  notificationBadgeText: {
+  headerIconBadgeText: {
     fontFamily: FontFamily.bodyBold,
     fontSize: 10,
     color: Colors.textPrimary,

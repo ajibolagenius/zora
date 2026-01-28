@@ -25,7 +25,13 @@ import {
 import { Colors } from '../../../constants/colors';
 import { Spacing, BorderRadius, Shadows } from '../../../constants/spacing';
 import { FontSize, FontFamily } from '../../../constants/typography';
-import { vendorService, messageService, type Vendor, type Message } from '../../../services/mockDataService';
+import { vendorService as mockVendorService, messageService as mockMessageService, type Vendor as MockVendor, type Message as MockMessage } from '../../../services/mockDataService';
+import { vendorService as supabaseVendorService } from '../../../services/supabaseService';
+import { messagingService, type Message, type Conversation } from '../../../services/messagingService';
+import { realtimeService } from '../../../services/realtimeService';
+import type { Vendor } from '../../../types/supabase';
+import { isSupabaseConfigured, getSupabaseFrom } from '../../../lib/supabase';
+import { useAuthStore } from '../../../stores/authStore';
 import { QuickReplies, Placeholders, AnimationDuration, AnimationEasing } from '../../../constants';
 import NotFoundScreen from '../../../components/errors/NotFoundScreen';
 
@@ -34,8 +40,10 @@ export default function VendorChatScreen() {
     const insets = useSafeAreaInsets();
     const { id } = useLocalSearchParams<{ id: string }>();
 
-    const [vendor, setVendor] = useState<Vendor | null>(null);
-    const [messages, setMessages] = useState<Message[]>([]);
+    const { user } = useAuthStore();
+    const [vendor, setVendor] = useState<Vendor | MockVendor | null>(null);
+    const [conversation, setConversation] = useState<Conversation | null>(null);
+    const [messages, setMessages] = useState<(Message | MockMessage)[]>([]);
     const [inputText, setInputText] = useState('');
     const [isTyping, setIsTyping] = useState(false);
     const [loading, setLoading] = useState(true);
@@ -45,38 +53,160 @@ export default function VendorChatScreen() {
     const fadeAnim = useRef(new Animated.Value(0)).current;
     const slideAnim = useRef(new Animated.Value(20)).current;
 
-    // Fetch vendor and messages
+    // Fetch vendor, conversation, and messages
     useEffect(() => {
-        if (!id) return;
+        if (!id || !user?.user_id) return;
 
-        const vendorData = vendorService.getById(id);
-        if (vendorData) {
-            setVendor(vendorData);
+        const fetchData = async () => {
+            try {
+                setLoading(true);
+                let vendorData: Vendor | MockVendor | null = null;
 
-            // Get conversation ID
-            const conversationId = messageService.getConversationId(id, 'current_user');
+                if (isSupabaseConfigured()) {
+                    const fetchedVendor = await supabaseVendorService.getById(id);
+                    vendorData = fetchedVendor;
+                    
+                    if (vendorData) {
+                        setVendor(vendorData as Vendor | MockVendor);
 
-            // Get existing messages
-            const existingMessages = messageService.getByConversation(conversationId);
+                        // Get or create conversation
+                        const conv = await messagingService.getOrCreateConversation(user.user_id, vendorData.id);
+                        if (conv) {
+                            setConversation(conv);
 
-            // If no messages, add a welcome message
-            if (existingMessages.length === 0) {
-                const welcomeMessage = messageService.send({
-                    conversation_id: conversationId,
-                    sender_id: vendorData.id,
-                    sender_type: 'vendor',
-                    sender_name: vendorData.shop_name,
-                    sender_avatar: vendorData.logo_url,
-                    text: `Hello! Welcome to ${vendorData.shop_name}. How can I help you today?`,
-                });
-                setMessages([welcomeMessage]);
-            } else {
-                setMessages(existingMessages);
+                            // Fetch messages
+                            const fetchedMessages = await messagingService.getMessages(conv.id);
+                            setMessages(fetchedMessages);
+
+                            // Mark messages as read
+                            await messagingService.markAsRead(conv.id, user.user_id, 'user');
+                        }
+                    }
+                } else {
+                    // Mock mode
+                    const mockVendor = mockVendorService.getById(id);
+                    vendorData = mockVendor || null;
+                    if (vendorData) {
+                        setVendor(vendorData);
+                        const conversationId = mockMessageService.getConversationId(id, user.user_id);
+                        const existingMessages = mockMessageService.getByConversation(conversationId);
+                        
+                        if (existingMessages.length === 0) {
+                            const welcomeMessage = mockMessageService.send({
+                                conversation_id: conversationId,
+                                sender_id: vendorData.id,
+                                sender_type: 'vendor',
+                                sender_name: (vendorData as any).shop_name || (vendorData as any).name || 'Vendor',
+                                sender_avatar: (vendorData as any).logo_url || (vendorData as any).avatar_url || '',
+                                text: `Hello! Welcome to ${(vendorData as any).shop_name || (vendorData as any).name || 'our store'}. How can I help you today?`,
+                            });
+                            setMessages([welcomeMessage]);
+                        } else {
+                            // Convert mock messages to Message format
+                            const convertedMessages = existingMessages.map((msg: MockMessage) => ({
+                                ...msg,
+                                read_at: msg.read_at || null,
+                            }));
+                            setMessages(convertedMessages);
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error('Error fetching data:', error);
+            } finally {
+                setLoading(false);
             }
-        }
+        };
 
-        setLoading(false);
-    }, [id]);
+        fetchData();
+    }, [id, user?.user_id]);
+
+    // Subscribe to real-time message updates
+    useEffect(() => {
+        if (!isSupabaseConfigured() || !conversation?.id) return;
+
+        let unsubscriber: (() => void) | null = null;
+        let isMounted = true;
+
+        realtimeService.subscribeToTable(
+            'messages',
+            '*',
+            async (payload) => {
+                if (!isMounted || !conversation) return;
+
+                if (payload.new?.conversation_id === conversation.id) {
+                    // New message received
+                    const newMessage = payload.new as any;
+                    
+                    // Enrich with sender info
+                    let senderName = 'Unknown';
+                    let senderAvatar: string | null = null;
+
+                    if (newMessage.sender_type === 'user') {
+                        const fromMethod = await getSupabaseFrom();
+                        if (fromMethod) {
+                            const { data: profile } = await fromMethod('profiles')
+                                .select('full_name, avatar_url')
+                                .eq('id', newMessage.sender_id)
+                                .maybeSingle();
+                            senderName = (profile as any)?.full_name || 'User';
+                            senderAvatar = (profile as any)?.avatar_url || null;
+                        }
+                    } else {
+                        const fromMethod = await getSupabaseFrom();
+                        if (fromMethod) {
+                            const { data: vendorData } = await fromMethod('vendors')
+                                .select('shop_name, logo_url')
+                                .eq('id', newMessage.sender_id)
+                                .maybeSingle();
+                            senderName = (vendorData as any)?.shop_name || 'Vendor';
+                            senderAvatar = (vendorData as any)?.logo_url || null;
+                        }
+                    }
+
+                    const enrichedMessage: Message = {
+                        ...newMessage,
+                        sender_name: senderName,
+                        sender_avatar: senderAvatar,
+                    };
+
+                    setMessages((prev) => {
+                        // Avoid duplicates
+                        if (prev.some((m) => m.id === enrichedMessage.id)) {
+                            return prev;
+                        }
+                        return [...prev, enrichedMessage].sort(
+                            (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+                        );
+                    });
+
+                    // Mark as read if it's from vendor and user is viewing
+                    if (newMessage.sender_type === 'vendor' && user?.user_id) {
+                        await messagingService.markAsRead(conversation.id, user.user_id, 'user');
+                    }
+
+                    // Scroll to bottom
+                    setTimeout(() => {
+                        scrollViewRef.current?.scrollToEnd({ animated: true });
+                    }, 100);
+                }
+            },
+            `conversation_id=eq.${conversation.id}`
+        ).then((unsub) => {
+            if (isMounted && unsub) {
+                unsubscriber = unsub;
+            }
+        }).catch((error) => {
+            console.error('Error setting up real-time subscription:', error);
+        });
+
+        return () => {
+            isMounted = false;
+            if (unsubscriber) {
+                unsubscriber();
+            }
+        };
+    }, [conversation?.id, user?.user_id]);
 
     useEffect(() => {
         if (!loading) {
@@ -112,71 +242,146 @@ export default function VendorChatScreen() {
         }
     };
 
-  const handleSend = useCallback(() => {
-    if (!inputText.trim() || !vendor || !id) return;
+  const handleSend = useCallback(async () => {
+    if (!inputText.trim() || !vendor || !user?.user_id) return;
+    if (!conversation && isSupabaseConfigured()) return; // Wait for conversation to be created
 
-    const conversationId = messageService.getConversationId(id, 'current_user');
-    
-    // Capture message text before clearing input
     const messageText = inputText.trim();
-    
-    // Send user message
-    const userMessage = messageService.send({
-      conversation_id: conversationId,
-      sender_id: 'current_user',
-      sender_type: 'user',
-      sender_name: 'You',
-      text: messageText,
-    });
-
-    setMessages(prev => [...prev, userMessage]);
     setInputText('');
-    setIsTyping(true);
 
-    // Scroll to bottom
-    setTimeout(() => {
-      scrollViewRef.current?.scrollToEnd({ animated: true });
-    }, 100);
+    if (isSupabaseConfigured() && conversation) {
+      // Real-time messaging
+      try {
+        const newMessage = await messagingService.sendMessage(
+          conversation.id,
+          user.user_id,
+          'user',
+          messageText
+        );
 
-    // Simulate vendor response (with realistic delay)
-    setTimeout(() => {
-      setIsTyping(false);
-      
-      // Generate contextual response based on message content
-      const userText = messageText.toLowerCase();
+        if (newMessage) {
+          setMessages((prev) => [...prev, newMessage].sort(
+            (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+          ));
+          
+          // Scroll to bottom
+          setTimeout(() => {
+            scrollViewRef.current?.scrollToEnd({ animated: true });
+          }, 100);
+
+          // Simulate vendor response (in real app, vendor would respond via their interface)
+          setIsTyping(true);
+          setTimeout(() => {
+            setIsTyping(false);
+            
+            // Generate contextual response
+            const userText = messageText.toLowerCase();
             let responseText = '';
 
             if (userText.includes('delivery') || userText.includes('deliver')) {
-                responseText = `Our delivery time is typically ${vendor.delivery_time_min}-${vendor.delivery_time_max} minutes. We deliver within ${vendor.coverage_radius_km}km of our location. The delivery fee is £${vendor.delivery_fee.toFixed(2)}.`;
+              const deliveryMin = (vendor as any).delivery_time_min || 30;
+              const deliveryMax = (vendor as any).delivery_time_max || 45;
+              const coverage = (vendor as any).coverage_radius_km || 5;
+              const fee = (vendor as any).delivery_fee || 2.99;
+              responseText = `Our delivery time is typically ${deliveryMin}-${deliveryMax} minutes. We deliver within ${coverage}km of our location. The delivery fee is £${Number(fee).toFixed(2)}.`;
             } else if (userText.includes('stock') || userText.includes('available') || userText.includes('have')) {
-                responseText = 'Let me check our current inventory for you. Which product are you interested in?';
+              responseText = 'Let me check our current inventory for you. Which product are you interested in?';
             } else if (userText.includes('price') || userText.includes('cost') || userText.includes('how much')) {
-                responseText = 'I\'d be happy to help with pricing! Could you let me know which product you\'re asking about?';
+              responseText = 'I\'d be happy to help with pricing! Could you let me know which product you\'re asking about?';
             } else if (userText.includes('order') || userText.includes('customize') || userText.includes('special')) {
-                responseText = 'We\'re happy to accommodate special requests when possible! Please let me know what you have in mind.';
+              responseText = 'We\'re happy to accommodate special requests when possible! Please let me know what you have in mind.';
             } else if (userText.includes('return') || userText.includes('refund') || userText.includes('exchange')) {
-                responseText = 'We want you to be completely satisfied with your purchase. Please let me know what the issue is, and I\'ll help you resolve it.';
+              responseText = 'We want you to be completely satisfied with your purchase. Please let me know what the issue is, and I\'ll help you resolve it.';
             } else if (userText.includes('hours') || userText.includes('open') || userText.includes('close')) {
-                responseText = 'We\'re here to help! Our store hours may vary. Is there a specific time you\'d like to visit or receive a delivery?';
+              responseText = 'We\'re here to help! Our store hours may vary. Is there a specific time you\'d like to visit or receive a delivery?';
             } else {
-                responseText = 'Thank you for your message! I\'m here to help. How can I assist you today?';
+              responseText = 'Thank you for your message! I\'m here to help. How can I assist you today?';
             }
 
-            const vendorMessage = messageService.send({
-                conversation_id: conversationId,
-                sender_id: vendor.id,
-                sender_type: 'vendor',
-                sender_name: vendor.shop_name,
-                sender_avatar: vendor.logo_url,
-                text: responseText,
+            // Send vendor response (in production, this would come from vendor's interface)
+            messagingService.sendMessage(
+              conversation.id,
+              vendor.id,
+              'vendor',
+              responseText
+            ).then((vendorMsg) => {
+              if (vendorMsg) {
+                setMessages((prev) => [...prev, vendorMsg].sort(
+                  (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+                ));
+                setTimeout(() => {
+                  scrollViewRef.current?.scrollToEnd({ animated: true });
+                }, 100);
+              }
             });
+          }, 1500 + Math.random() * 1000);
+        }
+      } catch (error) {
+        console.error('Error sending message:', error);
+      }
+    } else {
+      // Mock mode
+      const conversationId = mockMessageService.getConversationId(id, user.user_id);
+      
+      const userMessage = mockMessageService.send({
+        conversation_id: conversationId,
+        sender_id: user.user_id,
+        sender_type: 'user',
+        sender_name: 'You',
+        text: messageText,
+      });
 
-            setMessages(prev => [...prev, vendorMessage]);
-            setTimeout(() => {
-                scrollViewRef.current?.scrollToEnd({ animated: true });
-            }, 100);
-        }, 1500 + Math.random() * 1000); // Random delay between 1.5-2.5 seconds
-    }, [inputText, vendor, id]);
+      setMessages(prev => [...prev, userMessage as any]);
+      setInputText('');
+      setIsTyping(true);
+
+      setTimeout(() => {
+        scrollViewRef.current?.scrollToEnd({ animated: true });
+      }, 100);
+
+      // Simulate vendor response
+      setTimeout(() => {
+        setIsTyping(false);
+        
+        const userText = messageText.toLowerCase();
+        let responseText = '';
+
+        if (userText.includes('delivery') || userText.includes('deliver')) {
+          const deliveryMin = (vendor as any).delivery_time_min || 30;
+          const deliveryMax = (vendor as any).delivery_time_max || 45;
+          const coverage = (vendor as any).coverage_radius_km || 5;
+          const fee = (vendor as any).delivery_fee || 2.99;
+          responseText = `Our delivery time is typically ${deliveryMin}-${deliveryMax} minutes. We deliver within ${coverage}km of our location. The delivery fee is £${Number(fee).toFixed(2)}.`;
+        } else if (userText.includes('stock') || userText.includes('available') || userText.includes('have')) {
+          responseText = 'Let me check our current inventory for you. Which product are you interested in?';
+        } else if (userText.includes('price') || userText.includes('cost') || userText.includes('how much')) {
+          responseText = 'I\'d be happy to help with pricing! Could you let me know which product you\'re asking about?';
+        } else if (userText.includes('order') || userText.includes('customize') || userText.includes('special')) {
+          responseText = 'We\'re happy to accommodate special requests when possible! Please let me know what you have in mind.';
+        } else if (userText.includes('return') || userText.includes('refund') || userText.includes('exchange')) {
+          responseText = 'We want you to be completely satisfied with your purchase. Please let me know what the issue is, and I\'ll help you resolve it.';
+        } else if (userText.includes('hours') || userText.includes('open') || userText.includes('close')) {
+          responseText = 'We\'re here to help! Our store hours may vary. Is there a specific time you\'d like to visit or receive a delivery?';
+        } else {
+          responseText = 'Thank you for your message! I\'m here to help. How can I assist you today?';
+        }
+
+        const vendorMessage = mockMessageService.send({
+          conversation_id: conversationId,
+          sender_id: vendor.id,
+          sender_type: 'vendor',
+          sender_name: (vendor as any).shop_name || (vendor as any).name || 'Vendor',
+          sender_avatar: (vendor as any).logo_url || (vendor as any).avatar_url || '',
+          text: responseText,
+        });
+
+        setMessages(prev => [...prev, vendorMessage as any]);
+        setTimeout(() => {
+          scrollViewRef.current?.scrollToEnd({ animated: true });
+        }, 100);
+      }, 1500 + Math.random() * 1000);
+    }
+  }, [inputText, vendor, user?.user_id, conversation]);
 
     const handleQuickReply = (reply: string) => {
         setInputText(reply);
@@ -237,7 +442,7 @@ export default function VendorChatScreen() {
         }
     };
 
-    const renderMessage = (message: Message, index: number) => {
+    const renderMessage = (message: Message | MockMessage, index: number) => {
         const isUser = message.sender_type === 'user';
         const prevMessage = index > 0 ? messages[index - 1] : null;
         const dateHeader = formatDateHeader(message.created_at, prevMessage?.created_at);
@@ -375,7 +580,14 @@ export default function VendorChatScreen() {
                     showsVerticalScrollIndicator={false}
                 >
                     {/* Messages */}
-                    {messages.map((message, index) => renderMessage(message, index))}
+                    {messages.map((message, index) => {
+                        // Normalize message type for renderMessage
+                        const normalizedMessage: Message = {
+                            ...message,
+                            read_at: message.read_at ?? null,
+                        };
+                        return renderMessage(normalizedMessage, index);
+                    })}
 
                     {/* Typing Indicator */}
                     {isTyping && (
