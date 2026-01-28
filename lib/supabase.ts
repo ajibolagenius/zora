@@ -2,6 +2,55 @@ import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { Platform } from 'react-native';
 import { Database } from '../types/supabase';
 
+/**
+ * Supabase Auth lock wrapper (Web only)
+ *
+ * Supabase Auth uses the Web Locks API (`navigator.locks`) to coordinate session
+ * updates across tabs. In some environments this lock acquisition can hang
+ * indefinitely, which in turn causes auth operations like `signInWithPassword`
+ * to never resolve.
+ *
+ * This wrapper ensures lock acquisition cannot block forever: if the lock can't
+ * be acquired within a bounded time, we proceed without the lock.
+ *
+ * Note: proceeding without a lock may re-introduce rare multi-tab race
+ * conditions, but it's preferable to completely broken auth flows.
+ */
+const webAuthLock: any = async (
+  name: string,
+  acquireTimeout: number,
+  fn: () => Promise<any>
+) => {
+  let ran = false;
+  const runOnce = async () => {
+    if (ran) return;
+    ran = true;
+    return await fn();
+  };
+
+  // If the Web Locks API isn't available, just run.
+  if (typeof navigator === 'undefined' || !(navigator as any).locks?.request) {
+    return await runOnce();
+  }
+
+  const boundedMs =
+    typeof acquireTimeout === 'number' && acquireTimeout > 0
+      ? Math.min(acquireTimeout, 30_000)
+      : 30_000;
+
+  // Race lock acquisition against a bounded timeout to avoid deadlocks.
+  return await Promise.race([
+    (navigator as any).locks.request(name, { mode: 'exclusive' }, async () => {
+      return await runOnce();
+    }),
+    new Promise((resolve) => {
+      setTimeout(() => {
+        resolve(runOnce());
+      }, boundedMs);
+    }),
+  ]);
+};
+
 // Supabase configuration
 // Replace these with your actual Supabase project URL and anon key
 const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL || '';
@@ -86,6 +135,8 @@ const getSupabaseClient = async (): Promise<SupabaseClient<Database>> => {
           detectSessionInUrl: true,
           // Use PKCE flow for better security and to avoid some lock issues
           flowType: 'pkce',
+          // Prevent rare Web Locks deadlocks from stalling auth forever
+          lock: webAuthLock,
         },
       });
     } else {
@@ -135,6 +186,8 @@ function initializeClientSync(): SupabaseClient<Database> | null {
           autoRefreshToken: true,
           persistSession: true,
           detectSessionInUrl: true,
+          // Prevent rare Web Locks deadlocks from stalling auth forever
+          lock: webAuthLock,
         },
       });
       return supabaseInstance;

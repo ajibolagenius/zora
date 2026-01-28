@@ -33,13 +33,11 @@ import { realtimeService } from '../services/realtimeService';
 import { isSupabaseConfigured } from '../lib/supabase';
 import { 
   paymentService, 
-  klarnaService, 
-  clearpayService,
   type PaymentMethod,
   type PaymentResult,
 } from '../services/paymentService';
 
-type PaymentMethodType = 'card' | 'klarna' | 'clearpay';
+type PaymentMethodType = 'card' | 'apple_pay' | 'google_pay';
 
 export default function PaymentScreen() {
   const router = useRouter();
@@ -79,13 +77,6 @@ export default function PaymentScreen() {
   
   // Get available payment methods based on order total
   const availablePaymentMethods = paymentService.getAvailablePaymentMethods(finalTotal);
-  
-  // Get Klarna payment options
-  const klarnaOptions = klarnaService.getPaymentOptions(finalTotal);
-  const klarnaPayIn3 = klarnaOptions.find(opt => opt.id === 'pay_in_3');
-  
-  // Get Clearpay installment info
-  const clearpayInfo = clearpayService.getInstallmentInfo(finalTotal);
 
   const handlePay = async () => {
     setIsProcessing(true);
@@ -114,7 +105,6 @@ export default function PaymentScreen() {
       // Map UI payment method to service payment method
       let serviceMethod: PaymentMethod;
       switch (selectedMethod) {
-        case 'saved':
         case 'card':
           serviceMethod = 'card';
           setProcessingStep('Creating payment intent...');
@@ -126,14 +116,6 @@ export default function PaymentScreen() {
         case 'google_pay':
           serviceMethod = 'google_pay';
           setProcessingStep('Launching Google Pay...');
-          break;
-        case 'klarna':
-          serviceMethod = 'klarna';
-          setProcessingStep('Connecting to Klarna...');
-          break;
-        case 'clearpay':
-          serviceMethod = 'clearpay';
-          setProcessingStep('Connecting to Clearpay...');
           break;
         default:
           serviceMethod = 'card';
@@ -220,7 +202,7 @@ export default function PaymentScreen() {
         
         setProcessingStep('Payment successful!');
         
-        // If requires action (e.g., Klarna/Clearpay redirect)
+        // If requires action (e.g., redirect)
         if (result.requiresAction && result.actionUrl) {
           Alert.alert(
             'Redirect Required',
@@ -268,6 +250,9 @@ export default function PaymentScreen() {
   };
 
   // Build payment methods list
+  const applePayMethod = availablePaymentMethods.find(m => m.id === 'apple_pay');
+  const googlePayMethod = availablePaymentMethods.find(m => m.id === 'google_pay');
+
   const paymentMethods = [
     { 
       id: 'card' as PaymentMethodType, 
@@ -275,22 +260,26 @@ export default function PaymentScreen() {
       subtitle: undefined,
       available: true,
     },
-    { 
-      id: 'klarna' as PaymentMethodType, 
-      name: 'Klarna.', 
-      subtitle: klarnaPayIn3 ? klarnaPayIn3.description : 'Pay in 3 interest-free installments', 
-      bgColor: '#FFB3C7', 
-      textColor: '#000',
-      available: klarnaPayIn3?.available ?? true,
-    },
-    { 
-      id: 'clearpay' as PaymentMethodType, 
-      name: 'Clearpay', 
-      subtitle: clearpayInfo?.description || '4 interest-free payments', 
-      bgColor: '#B2FCE4', 
-      textColor: '#000',
-      available: clearpayInfo?.available ?? true,
-    },
+    ...(applePayMethod
+      ? [
+          {
+            id: 'apple_pay' as PaymentMethodType,
+            name: 'Apple Pay',
+            subtitle: undefined,
+            available: applePayMethod.available,
+          },
+        ]
+      : []),
+    ...(googlePayMethod
+      ? [
+          {
+            id: 'google_pay' as PaymentMethodType,
+            name: 'Google Pay',
+            subtitle: undefined,
+            available: googlePayMethod.available,
+          },
+        ]
+      : []),
   ];
 
   return (
@@ -369,12 +358,6 @@ export default function PaymentScreen() {
                       {method.id === 'card' && (
                         <CreditCard size={20} color={Colors.textPrimary} weight="duotone" />
                       )}
-                      {method.id === 'klarna' && (
-                        <Text style={styles.klarnaText}>Kl.</Text>
-                      )}
-                      {method.id === 'clearpay' && (
-                        <Text style={styles.clearpayText}>cp</Text>
-                      )}
                     </View>
                     
                     {/* Method Name */}
@@ -414,7 +397,7 @@ export default function PaymentScreen() {
             
             <View style={styles.summaryRowDashed}>
               <Text style={styles.summaryLabel}>Delivery Fee</Text>
-              <Text style={styles.summaryValue}>£4.99</Text>
+              <Text style={styles.summaryValue}>£{(deliveryFee || 0).toFixed(2)}</Text>
             </View>
             
             {useZoraCredit && (
@@ -662,16 +645,6 @@ const styles = StyleSheet.create({
   },
   methodSubtitleDisabled: {
     color: Colors.textMuted,
-  },
-  klarnaText: {
-    fontFamily: FontFamily.bodySemiBold,
-    fontSize: FontSize.body,
-    color: '#000',
-  },
-  clearpayText: {
-    fontFamily: FontFamily.bodySemiBold,
-    fontSize: FontSize.body,
-    color: '#000',
   },
   
   // Order Summary Card

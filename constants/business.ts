@@ -70,7 +70,8 @@ export const QualityThresholds = {
  */
 export const PricingConstants = {
     // Delivery fees
-    deliveryFeePerVendor: 2.99,  // Delivery fee per unique vendor in cart
+    freeDeliveryThreshold: 29.99,  // Orders £29.99 or more get free delivery
+    deliveryFee: 2.50,              // Delivery fee for orders under £29.99
 
     // Service fees (if applicable)
     serviceFeePercentage: 0,     // Service fee as percentage (0 = no service fee)

@@ -146,9 +146,12 @@ export const useCartStore = create<CartState>()(
                     return sum + (price * item.quantity);
                 }, 0);
 
-                // Calculate delivery fee (simplified - would be per vendor in production)
-                const uniqueVendors = new Set(items.map(item => item.vendor_id));
-                const deliveryFee = uniqueVendors.size * PricingConstants.deliveryFeePerVendor;
+                // Calculate delivery fee based on order total
+                // Orders £29.99 or more = free delivery
+                // Orders under £29.99 = £2.50 delivery fee
+                const deliveryFee = subtotal >= PricingConstants.freeDeliveryThreshold 
+                    ? 0 
+                    : PricingConstants.deliveryFee;
 
                 const total = subtotal + deliveryFee + serviceFee - discount;
 
@@ -205,7 +208,7 @@ export const useCartStore = create<CartState>()(
                             name: vendorName,
                             logo_url: vendorLogo,
                             delivery_time: `${deliveryMin}-${deliveryMax} days`,
-                            delivery_fee: vendorData?.delivery_fee || PricingConstants.deliveryFeePerVendor,
+                            delivery_fee: 0, // Delivery fee is now order-based, not vendor-based
                             subtotal: 0,
                             items: [],
                         });
