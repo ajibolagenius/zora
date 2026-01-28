@@ -19,6 +19,11 @@ export interface Conversation {
   created_at: string;
   updated_at: string;
   vendor?: Vendor; // Joined vendor data
+  order?: { // Joined order data for support conversations
+    id: string;
+    order_number?: string;
+    status: string;
+  };
 }
 
 export interface Message {
@@ -145,10 +150,10 @@ export const messagingService = {
     }
 
     try {
+      // Fetch all conversation types (vendor and support)
       let query = fromMethod('conversations')
-        .select('*, vendors(id, shop_name, logo_url, slug)')
+        .select('*, vendors(id, shop_name, logo_url, slug), orders(id, order_number, status)')
         .eq('user_id', userId)
-        .or('conversation_type.is.null,conversation_type.eq.vendor')
         .order('last_message_at', { ascending: false });
 
       if (limit !== undefined && offset !== undefined) {
@@ -165,6 +170,7 @@ export const messagingService = {
       return (data || []).map((conv: any) => ({
         ...conv,
         vendor: conv.vendors,
+        order: conv.orders, // Include order data for support conversations
       })) as Conversation[];
     } catch (error) {
       console.error('Error fetching conversations:', error);

@@ -24,6 +24,8 @@ import {
   ChatCircleText,
   X,
   CheckCircle,
+  Headset,
+  Package,
 } from 'phosphor-react-native';
 import { Colors } from '../constants/colors';
 import { Spacing, BorderRadius } from '../constants/spacing';
@@ -35,6 +37,21 @@ import { useAuthStore } from '../stores/authStore';
 import { isSupabaseConfigured } from '../lib/supabase';
 import { ImageUrlBuilders } from '../constants';
 import { safeGoBack } from '../lib/navigationHelpers';
+
+const getOrderStatusColor = (status: string) => {
+  switch (status) {
+    case 'delivered':
+    case 'completed':
+      return Colors.success;
+    case 'cancelled':
+    case 'refunded':
+      return Colors.error;
+    case 'out_for_delivery':
+      return Colors.secondary;
+    default:
+      return Colors.primary;
+  }
+};
 
 export default function MessagesScreen() {
   const router = useRouter();
@@ -247,7 +264,11 @@ export default function MessagesScreen() {
   };
 
   const handleConversationPress = (conversation: Conversation) => {
-    if (conversation.vendor_id) {
+    if (conversation.conversation_type === 'support' && conversation.order_id) {
+      // Navigate to order support screen
+      router.push(`/order-support/${conversation.order_id}`);
+    } else if (conversation.vendor_id) {
+      // Navigate to vendor chat screen
       router.push(`/vendor/${conversation.vendor_id}/chat`);
     }
   };
@@ -290,7 +311,7 @@ export default function MessagesScreen() {
             <ChatCircleDots size={64} color={Colors.textMuted} weight="duotone" />
             <Text style={styles.emptyTitle}>No messages yet</Text>
             <Text style={styles.emptyText}>
-              Start a conversation with a vendor to see your messages here
+              Start a conversation with a vendor or get help with an order to see your messages here
             </Text>
           </View>
         ) : (
@@ -298,9 +319,28 @@ export default function MessagesScreen() {
             data={conversations}
             keyExtractor={(item) => item.id}
             renderItem={({ item: conversation }) => {
+              const isSupport = conversation.conversation_type === 'support';
               const vendor = conversation.vendor as any;
-              const shopName = vendor?.shop_name || 'Vendor';
-              const logoUrl = vendor?.logo_url || '';
+              const order = conversation.order;
+              
+              // Determine display name and avatar
+              let displayName = 'Support';
+              let logoUrl = '';
+              let avatarIcon = null;
+              
+              if (isSupport) {
+                displayName = 'Order Support';
+                if (order?.order_number) {
+                  displayName = `Order #${order.order_number}`;
+                } else if (order?.id) {
+                  displayName = `Order ${order.id.slice(0, 8)}`;
+                }
+                avatarIcon = <Headset size={28} color={Colors.primary} weight="duotone" />;
+              } else {
+                displayName = vendor?.shop_name || 'Vendor';
+                logoUrl = vendor?.logo_url || '';
+              }
+              
               const unread = conversation.unread_count_user || 0;
               const isDeleting = deletingId === conversation.id;
 
@@ -312,17 +352,35 @@ export default function MessagesScreen() {
                   activeOpacity={0.8}
                   disabled={isDeleting}
                 >
-                  <LazyAvatar
-                    source={logoUrl || ImageUrlBuilders.dicebearAvatar(shopName)}
-                    name={shopName}
-                    size={56}
-                    style={styles.avatar}
-                  />
+                  {isSupport ? (
+                    <View style={styles.supportAvatarContainer}>
+                      <View style={styles.supportAvatar}>
+                        {avatarIcon}
+                      </View>
+                      {order?.status && (
+                        <View style={[styles.orderStatusBadge, { backgroundColor: `${getOrderStatusColor(order.status)}20` }]}>
+                          <Text style={[styles.orderStatusText, { color: getOrderStatusColor(order.status) }]}>
+                            {order.status.charAt(0).toUpperCase() + order.status.slice(1).replace('_', ' ')}
+                          </Text>
+                        </View>
+                      )}
+                    </View>
+                  ) : (
+                    <LazyAvatar
+                      source={logoUrl || ImageUrlBuilders.dicebearAvatar(displayName)}
+                      name={displayName}
+                      size={56}
+                      style={styles.avatar}
+                    />
+                  )}
                   <View style={styles.conversationContent}>
                     <View style={styles.conversationHeader}>
-                      <Text style={styles.vendorName} numberOfLines={1}>
-                        {shopName}
-                      </Text>
+                      <View style={styles.conversationTitleRow}>
+                        {isSupport && <Package size={14} color={Colors.textMuted} weight="duotone" style={styles.supportIcon} />}
+                        <Text style={styles.vendorName} numberOfLines={1}>
+                          {displayName}
+                        </Text>
+                      </View>
                       <Text style={styles.timeText}>
                         {formatTime(conversation.last_message_at)}
                       </Text>
@@ -701,11 +759,46 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: Spacing.xs,
   },
+  conversationTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+    gap: Spacing.xs,
+  },
+  supportIcon: {
+    marginRight: 2,
+  },
   vendorName: {
     fontFamily: FontFamily.bodySemiBold,
     fontSize: FontSize.body,
     color: Colors.textPrimary,
     flex: 1,
+  },
+  supportAvatarContainer: {
+    position: 'relative',
+  },
+  supportAvatar: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: Colors.primary20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: Colors.primary,
+  },
+  orderStatusBadge: {
+    position: 'absolute',
+    bottom: -4,
+    right: -4,
+    paddingHorizontal: Spacing.xs,
+    paddingVertical: 2,
+    borderRadius: BorderRadius.sm,
+    borderWidth: 1,
+  },
+  orderStatusText: {
+    fontFamily: FontFamily.bodySemiBold,
+    fontSize: FontSize.tiny,
   },
   timeText: {
     fontFamily: FontFamily.body,

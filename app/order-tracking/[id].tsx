@@ -33,6 +33,7 @@ import { FontSize, FontFamily } from '../../constants/typography';
 import { AnimationDuration, AnimationEasing, ImageUrlBuilders } from '../../constants';
 import { orderService } from '../../services/supabaseService';
 import { realtimeService } from '../../services/realtimeService';
+import { messagingService } from '../../services/messagingService';
 import { isSupabaseConfigured } from '../../lib/supabase';
 import { Order } from '../../types';
 import { useAuthStore } from '../../stores/authStore';
@@ -68,9 +69,10 @@ const TIMELINE_STEPS: TimelineStep[] = [
 export default function OrderTrackingScreen() {
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { session } = useAuthStore();
+  const { session, user } = useAuthStore();
   const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(true);
+  const [hasUnreadMessages, setHasUnreadMessages] = useState(false);
 
   // Animation values
   const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -96,6 +98,24 @@ export default function OrderTrackingScreen() {
 
   useEffect(() => {
     fetchOrder();
+
+    // Check for unread support messages
+    const checkUnreadMessages = async () => {
+      if (!isSupabaseConfigured() || !user?.user_id || !id) {
+        return;
+      }
+
+      try {
+        const conversation = await messagingService.getOrCreateSupportConversation(user.user_id, id);
+        if (conversation && conversation.unread_count_user > 0) {
+          setHasUnreadMessages(true);
+        }
+      } catch (error) {
+        console.error('Error checking unread messages:', error);
+      }
+    };
+
+    checkUnreadMessages();
 
     // Subscribe to real-time order updates
     if (isSupabaseConfigured() && id) {
@@ -125,6 +145,30 @@ export default function OrderTrackingScreen() {
         console.error('Error setting up order subscription:', error);
       });
 
+      // Subscribe to conversation updates for unread count
+      if (user?.user_id) {
+        messagingService.getOrCreateSupportConversation(user.user_id, id).then((conversation) => {
+          if (!conversation || !isMounted) return;
+
+          realtimeService.subscribeToTable(
+            'conversations',
+            'UPDATE',
+            async (payload) => {
+              if (!isMounted) return;
+              
+              if (payload.new?.id === conversation.id) {
+                setHasUnreadMessages((payload.new.unread_count_user || 0) > 0);
+              }
+            },
+            `id=eq.${conversation.id}`
+          ).then((unsub) => {
+            if (isMounted && unsub) unsubscribers.push(unsub);
+          }).catch((error) => {
+            console.error('Error setting up conversation subscription:', error);
+          });
+        });
+      }
+
       return () => {
         isMounted = false;
         unsubscribers.forEach((unsub) => {
@@ -134,7 +178,7 @@ export default function OrderTrackingScreen() {
         });
       };
     }
-  }, [id]);
+  }, [id, user?.user_id]);
 
   useEffect(() => {
     if (!loading) {
@@ -392,16 +436,27 @@ export default function OrderTrackingScreen() {
           <View style={styles.actionButtonsContainer}>
             <TouchableOpacity
               style={styles.needHelpButton}
-              onPress={() => router.push(`/order-support/${orderNumber}`)}
+              onPress={() => {
+                // Use order ID to ensure unique chat session per order
+                const orderId = order?.id || id;
+                router.push(`/order-support/${orderId}`);
+              }}
               activeOpacity={0.8}
             >
-              <Headset size={18} color={Colors.primary} weight="duotone" />
-              <Text style={styles.needHelpText}>Need Help?</Text>
+              <View style={styles.needHelpButtonContent}>
+                <Headset size={18} color={Colors.primary} weight="duotone" />
+                <Text style={styles.needHelpText}>Need Help?</Text>
+                {hasUnreadMessages && <View style={styles.unreadBadge} />}
+              </View>
             </TouchableOpacity>
             
             <TouchableOpacity
               style={styles.reportIssueButton}
-              onPress={() => router.push(`/report-issue?orderId=${orderNumber}`)}
+              onPress={() => {
+                // Use order ID for consistency
+                const orderId = order?.id || id;
+                router.push(`/report-issue?orderId=${orderId}`);
+              }}
               activeOpacity={0.8}
             >
               <Warning size={18} color="#EF4444" weight="fill" />
@@ -894,20 +949,34 @@ const styles = StyleSheet.create({
   },
   needHelpButton: {
     flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: Spacing.sm,
     paddingVertical: Spacing.md,
     backgroundColor: 'transparent',
     borderRadius: BorderRadius.lg,
     borderWidth: 1,
     borderColor: Colors.primary,
   },
+  needHelpButtonContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: Spacing.sm,
+    position: 'relative',
+  },
   needHelpText: {
     fontFamily: FontFamily.bodySemiBold,
     fontSize: FontSize.small,
     color: Colors.primary,
+  },
+  unreadBadge: {
+    position: 'absolute',
+    top: -4,
+    right: -4,
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: Colors.primary,
+    borderWidth: 1.5,
+    borderColor: Colors.cardDark,
   },
   reportIssueButton: {
     flex: 1,

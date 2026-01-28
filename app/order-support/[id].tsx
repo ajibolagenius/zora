@@ -26,8 +26,11 @@ import { FontSize, FontFamily } from '../../constants/typography';
 import { QuickReplies, Placeholders, AnimationDuration, AnimationEasing } from '../../constants';
 import { messagingService } from '../../services/messagingService';
 import { realtimeService } from '../../services/realtimeService';
+import { orderService } from '../../services/supabaseService';
 import { isSupabaseConfigured } from '../../lib/supabase';
 import { useAuthStore } from '../../stores/authStore';
+import { Order } from '../../types';
+import { Package } from 'phosphor-react-native';
 
 interface Message {
     id: string;
@@ -36,29 +39,6 @@ interface Message {
     timestamp: string;
     senderName?: string;
 }
-
-const INITIAL_MESSAGES: Message[] = [
-    {
-        id: '1',
-        text: 'Hello! I see you have a question about your recent order. How can I help you today?',
-        sender: 'bot',
-        timestamp: '10:23 AM',
-        senderName: 'Zora Support',
-    },
-    {
-        id: '2',
-        text: "My package says delivered but I don't see it on my porch.",
-        sender: 'user',
-        timestamp: '10:25 AM',
-    },
-    {
-        id: '3',
-        text: "I'm sorry to hear that. Sometimes carriers mark packages as delivered a few hours early. Would you like me to open an investigation with the carrier?",
-        sender: 'bot',
-        timestamp: '10:25 AM',
-        senderName: 'Zora Support',
-    },
-];
 
 export default function OrderSupportScreen() {
     const router = useRouter();
@@ -71,6 +51,8 @@ export default function OrderSupportScreen() {
     const [inputText, setInputText] = useState('');
     const [isTyping, setIsTyping] = useState(false);
     const [loading, setLoading] = useState(true);
+    const [order, setOrder] = useState<Order | null>(null);
+    const [orderLoading, setOrderLoading] = useState(true);
     const scrollViewRef = useRef<ScrollView>(null);
 
     // Animation values
@@ -94,12 +76,73 @@ export default function OrderSupportScreen() {
         ]).start();
     }, []);
 
+    // Fetch order data
+    useEffect(() => {
+        const fetchOrder = async () => {
+            if (!id) {
+                setOrderLoading(false);
+                return;
+            }
+
+            try {
+                setOrderLoading(true);
+                const orderData = await orderService.getById(id);
+                setOrder(orderData);
+            } catch (error) {
+                console.error('Error fetching order:', error);
+            } finally {
+                setOrderLoading(false);
+            }
+        };
+
+        fetchOrder();
+
+        // Subscribe to real-time order updates
+        if (isSupabaseConfigured() && id) {
+            let isMounted = true;
+            const unsubscribers: (() => void)[] = [];
+
+            realtimeService.subscribeToTable(
+                'orders',
+                '*',
+                async (payload) => {
+                    if (!isMounted) return;
+                    
+                    if (payload.new?.id === id || payload.old?.id === id) {
+                        // Order was updated, refresh the order data
+                        try {
+                            const orderData = await orderService.getById(id);
+                            if (orderData) {
+                                setOrder(orderData);
+                            }
+                        } catch (error) {
+                            console.error('Error refreshing order:', error);
+                        }
+                    }
+                },
+                `id=eq.${id}`
+            ).then((unsub) => {
+                if (isMounted && unsub) unsubscribers.push(unsub);
+            }).catch((error) => {
+                console.error('Error setting up order subscription:', error);
+            });
+
+            return () => {
+                isMounted = false;
+                unsubscribers.forEach((unsub) => {
+                    if (typeof unsub === 'function') {
+                        unsub();
+                    }
+                });
+            };
+        }
+    }, [id]);
+
     // Fetch messages and set up real-time subscription
     useEffect(() => {
         const fetchMessages = async () => {
             if (!isSupabaseConfigured() || !user?.user_id || !id) {
-                // Fallback to initial messages if not configured
-                setMessages(INITIAL_MESSAGES);
+                setMessages([]);
                 setLoading(false);
                 return;
             }
@@ -114,10 +157,13 @@ export default function OrderSupportScreen() {
                     // Fetch messages for this conversation
                     const conversationMessages = await messagingService.getMessages(conversation.id);
                     
+                    // Mark messages as read when opening the support screen
+                    await messagingService.markAsRead(conversation.id, user.user_id, 'user');
+                    
                     const formattedMessages: Message[] = conversationMessages.map((msg: any) => ({
                         id: msg.id,
                         text: msg.text || msg.content || '',
-                        sender: msg.sender_type === 'user' ? 'user' : 'bot',
+                        sender: msg.sender_type === 'user' ? 'user' : (msg.sender_type === 'support' ? 'bot' : 'bot'),
                         timestamp: new Date(msg.created_at).toLocaleTimeString('en-US', {
                             hour: 'numeric',
                             minute: '2-digit',
@@ -126,13 +172,13 @@ export default function OrderSupportScreen() {
                         senderName: msg.sender_type === 'user' ? undefined : (msg.sender_name || 'Zora Support'),
                     }));
                     
-                    setMessages(formattedMessages.length > 0 ? formattedMessages : INITIAL_MESSAGES);
+                    setMessages(formattedMessages);
                 } else {
-                    setMessages(INITIAL_MESSAGES);
+                    setMessages([]);
                 }
             } catch (error) {
                 console.error('Error fetching messages:', error);
-                setMessages(INITIAL_MESSAGES);
+                setMessages([]);
             } finally {
                 setLoading(false);
             }
@@ -149,29 +195,45 @@ export default function OrderSupportScreen() {
             messagingService.getOrCreateSupportConversation(user.user_id, id).then((conversation) => {
                 if (!conversation || !isMounted) return;
 
+                // Subscribe to INSERT events for new messages
                 realtimeService.subscribeToTable(
                     'messages',
-                    '*',
+                    'INSERT',
                     async (payload) => {
                         if (!isMounted) return;
                         
                         // Handle new messages in real-time
                         if (payload.new && payload.new.conversation_id === conversation.id) {
-                            const newMessage: Message = {
-                                id: payload.new.id,
-                                text: payload.new.text || payload.new.content || '',
-                                sender: payload.new.sender_type === 'user' ? 'user' : 'bot',
-                                timestamp: new Date(payload.new.created_at).toLocaleTimeString('en-US', {
-                                    hour: 'numeric',
-                                    minute: '2-digit',
-                                    hour12: true
-                                }),
-                                senderName: payload.new.sender_type === 'user' ? undefined : (payload.new.sender_name || 'Zora Support'),
-                            };
-                            setMessages(prev => [...prev, newMessage]);
+                            // Check if message already exists to avoid duplicates
+                            setMessages(prev => {
+                                const exists = prev.some(msg => msg.id === payload.new.id);
+                                if (exists) return prev;
+                                
+                                const newMessage: Message = {
+                                    id: payload.new.id,
+                                    text: payload.new.text || payload.new.content || '',
+                                    sender: payload.new.sender_type === 'user' ? 'user' : (payload.new.sender_type === 'support' ? 'bot' : 'bot'),
+                                    timestamp: new Date(payload.new.created_at).toLocaleTimeString('en-US', {
+                                        hour: 'numeric',
+                                        minute: '2-digit',
+                                        hour12: true
+                                    }),
+                                    senderName: payload.new.sender_type === 'user' ? undefined : (payload.new.sender_name || 'Zora Support'),
+                                };
+                                
+                                return [...prev, newMessage];
+                            });
+                            
                             setTimeout(() => {
                                 scrollViewRef.current?.scrollToEnd({ animated: true });
                             }, 100);
+                            
+                            // Mark as read if it's a support message
+                            if (payload.new.sender_type !== 'user' && user?.user_id) {
+                                messagingService.markAsRead(conversation.id, user.user_id, 'user').catch(err => {
+                                    console.error('Error marking message as read:', err);
+                                });
+                            }
                         }
                     },
                     `conversation_id=eq.${conversation.id}`
@@ -225,88 +287,120 @@ export default function OrderSupportScreen() {
             scrollViewRef.current?.scrollToEnd({ animated: true });
         }, 100);
 
-        // Send message to database if configured
+        // Send message to database
         if (isSupabaseConfigured() && user?.user_id) {
             try {
                 // Get or create support conversation for this order
                 const conversation = await messagingService.getOrCreateSupportConversation(user.user_id, id);
                 
                 if (conversation) {
-                    await messagingService.sendMessage({
-                        conversationId: conversation.id,
-                        content: messageText,
-                        senderType: 'user',
-                    });
+                    const savedMessage = await messagingService.sendMessage(
+                        conversation.id,
+                        user.user_id,
+                        'user',
+                        messageText
+                    );
+                    
+                    if (savedMessage) {
+                        // Replace optimistic message with saved message from database
+                        setMessages(prev => {
+                            const filtered = prev.filter(msg => msg.id !== newMessage.id);
+                            return [...filtered, {
+                                id: savedMessage.id,
+                                text: savedMessage.text,
+                                sender: 'user',
+                                timestamp: new Date(savedMessage.created_at).toLocaleTimeString('en-US', {
+                                    hour: 'numeric',
+                                    minute: '2-digit',
+                                    hour12: true
+                                }),
+                            }];
+                        });
+                    }
                 } else {
                     console.error('Failed to get or create support conversation');
+                    // Remove optimistic message if conversation creation failed
+                    setMessages(prev => prev.filter(msg => msg.id !== newMessage.id));
                 }
             } catch (error) {
                 console.error('Error sending message:', error);
+                // Remove optimistic message on error
+                setMessages(prev => prev.filter(msg => msg.id !== newMessage.id));
+            } finally {
+                setIsTyping(false);
             }
-        }
-
-        // Simulate bot response (in production, this would come from support team or AI)
-        setTimeout(() => {
+        } else {
             setIsTyping(false);
-            const botResponse: Message = {
-                id: (Date.now() + 1).toString(),
-                text: "Thank you for your message. I'm looking into this for you. Is there anything else I can help with?",
-                sender: 'bot',
-                timestamp: new Date().toLocaleTimeString('en-US', {
-                    hour: 'numeric',
-                    minute: '2-digit',
-                    hour12: true
-                }),
-                senderName: 'Zora Support',
-            };
-            setMessages(prev => [...prev, botResponse]);
-            setTimeout(() => {
-                scrollViewRef.current?.scrollToEnd({ animated: true });
-            }, 100);
-        }, 2000);
+        }
     };
 
-    const handleQuickReply = (reply: string) => {
-        setInputText(reply);
-        // Auto-send quick reply
-        setTimeout(() => {
-            const newMessage: Message = {
-                id: Date.now().toString(),
-                text: reply,
-                sender: 'user',
-                timestamp: new Date().toLocaleTimeString('en-US', {
-                    hour: 'numeric',
-                    minute: '2-digit',
-                    hour12: true
-                }),
-            };
-            setMessages(prev => [...prev, newMessage]);
-            setInputText(''); // Clear input after sending, consistent with handleSend
-            setIsTyping(true);
-            setTimeout(() => {
-                scrollViewRef.current?.scrollToEnd({ animated: true });
-            }, 100);
+    const handleQuickReply = async (reply: string) => {
+        if (!user?.user_id) return;
 
-            // Bot response
-            setTimeout(() => {
+        const messageText = reply.trim();
+        setInputText('');
+
+        // Optimistically add user message
+        const newMessage: Message = {
+            id: Date.now().toString(),
+            text: messageText,
+            sender: 'user',
+            timestamp: new Date().toLocaleTimeString('en-US', {
+                hour: 'numeric',
+                minute: '2-digit',
+                hour12: true
+            }),
+        };
+        setMessages(prev => [...prev, newMessage]);
+        setTimeout(() => {
+            scrollViewRef.current?.scrollToEnd({ animated: true });
+        }, 100);
+
+        setIsTyping(true);
+
+        // Send message to database
+        if (isSupabaseConfigured() && user?.user_id) {
+            try {
+                const conversation = await messagingService.getOrCreateSupportConversation(user.user_id, id);
+                
+                if (conversation) {
+                    const savedMessage = await messagingService.sendMessage(
+                        conversation.id,
+                        user.user_id,
+                        'user',
+                        messageText
+                    );
+                    
+                    if (savedMessage) {
+                        // Replace optimistic message with saved message from database
+                        setMessages(prev => {
+                            const filtered = prev.filter(msg => msg.id !== newMessage.id);
+                            return [...filtered, {
+                                id: savedMessage.id,
+                                text: savedMessage.text,
+                                sender: 'user',
+                                timestamp: new Date(savedMessage.created_at).toLocaleTimeString('en-US', {
+                                    hour: 'numeric',
+                                    minute: '2-digit',
+                                    hour12: true
+                                }),
+                            }];
+                        });
+                    }
+                } else {
+                    // Remove optimistic message if conversation creation failed
+                    setMessages(prev => prev.filter(msg => msg.id !== newMessage.id));
+                }
+            } catch (error) {
+                console.error('Error sending quick reply:', error);
+                // Remove optimistic message on error
+                setMessages(prev => prev.filter(msg => msg.id !== newMessage.id));
+            } finally {
                 setIsTyping(false);
-                const botResponse: Message = {
-                    id: (Date.now() + 1).toString(),
-                    text: "I understand. Let me help you with that right away.",
-                    sender: 'bot',
-                    timestamp: new Date().toLocaleTimeString('en-US', {
-                        hour: 'numeric',
-                        minute: '2-digit',
-                        hour12: true
-                    }),
-                    senderName: 'Zora Support',
-                };
-                setMessages(prev => [...prev, botResponse]);
-                setTimeout(() => {
-                    scrollViewRef.current?.scrollToEnd({ animated: true });
-                }, 100);
-            }, 1500);
-        }, 300);
+            }
+        } else {
+            setIsTyping(false);
+        }
     };
 
     const renderMessage = (message: Message, index: number) => {
@@ -365,7 +459,16 @@ export default function OrderSupportScreen() {
                 </TouchableOpacity>
                 <View style={styles.headerCenter}>
                     <Text style={styles.headerTitle}>Order Support</Text>
-                    <Text style={styles.headerSubtitle}>Order #{orderNumber}</Text>
+                    <Text style={styles.headerSubtitle}>
+                        {order?.order_number ? `Order #${order.order_number}` : order?.id ? `Order ${order.id.slice(0, 8)}` : `Order #${orderNumber}`}
+                    </Text>
+                    {order && (
+                        <View style={[styles.statusBadge, { backgroundColor: `${getStatusColor(order.status)}20` }]}>
+                            <Text style={[styles.statusBadgeText, { color: getStatusColor(order.status) }]}>
+                                {order.status.replace('_', ' ').toUpperCase()}
+                            </Text>
+                        </View>
+                    )}
                 </View>
                 <View style={styles.headerRight} />
             </View>
@@ -382,15 +485,61 @@ export default function OrderSupportScreen() {
                     contentContainerStyle={styles.chatContent}
                     showsVerticalScrollIndicator={false}
                 >
+                    {/* Order Info Card */}
+                    {order && (
+                        <View style={styles.orderInfoCard}>
+                            <View style={styles.orderInfoHeader}>
+                                <Package size={20} color={Colors.primary} weight="duotone" />
+                                <Text style={styles.orderInfoTitle}>Order Details</Text>
+                            </View>
+                            <View style={styles.orderInfoRow}>
+                                <Text style={styles.orderInfoLabel}>Status:</Text>
+                                <View style={[styles.statusBadgeInline, { backgroundColor: `${getStatusColor(order.status)}20` }]}>
+                                    <Text style={[styles.statusBadgeTextInline, { color: getStatusColor(order.status) }]}>
+                                        {order.status.replace('_', ' ').toUpperCase()}
+                                    </Text>
+                                </View>
+                            </View>
+                            <View style={styles.orderInfoRow}>
+                                <Text style={styles.orderInfoLabel}>Items:</Text>
+                                <Text style={styles.orderInfoValue}>
+                                    {Array.isArray(order.items) ? order.items.length : (typeof order.items === 'object' && order.items !== null ? Object.keys(order.items).length : 0)} item(s)
+                                </Text>
+                            </View>
+                            <View style={styles.orderInfoRow}>
+                                <Text style={styles.orderInfoLabel}>Total:</Text>
+                                <Text style={styles.orderInfoValue}>£{(order.total || 0).toFixed(2)}</Text>
+                            </View>
+                            {order.estimated_delivery && (
+                                <View style={styles.orderInfoRow}>
+                                    <Text style={styles.orderInfoLabel}>Estimated Delivery:</Text>
+                                    <Text style={styles.orderInfoValue}>
+                                        {new Date(order.estimated_delivery).toLocaleDateString()}
+                                    </Text>
+                                </View>
+                            )}
+                        </View>
+                    )}
+
                     {/* Timestamp */}
                     <View style={styles.timestampContainer}>
-                        <Text style={styles.timestampText}>Today, 10:23 AM</Text>
+                        <Text style={styles.timestampText}>
+                            {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
+                        </Text>
                     </View>
 
                     {/* Messages */}
                     {loading ? (
                         <View style={styles.loadingContainer}>
                             <Text style={styles.loadingText}>Loading messages...</Text>
+                        </View>
+                    ) : messages.length === 0 ? (
+                        <View style={styles.emptyStateContainer}>
+                            <Robot size={48} color={Colors.textMuted} weight="duotone" />
+                            <Text style={styles.emptyStateTitle}>No messages yet</Text>
+                            <Text style={styles.emptyStateText}>
+                                Start a conversation with our support team about your order.
+                            </Text>
                         </View>
                     ) : (
                         messages.map((message, index) => renderMessage(message, index))
@@ -714,4 +863,92 @@ const styles = StyleSheet.create({
         fontSize: FontSize.body,
         color: Colors.textMuted,
     },
+    emptyStateContainer: {
+        paddingVertical: Spacing.xl * 2,
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: Spacing.md,
+    },
+    emptyStateTitle: {
+        fontFamily: FontFamily.displaySemiBold,
+        fontSize: FontSize.h4,
+        color: Colors.textPrimary,
+        marginTop: Spacing.md,
+    },
+    emptyStateText: {
+        fontFamily: FontFamily.body,
+        fontSize: FontSize.body,
+        color: Colors.textMuted,
+        textAlign: 'center',
+        paddingHorizontal: Spacing.xl,
+    },
+    statusBadge: {
+        paddingHorizontal: Spacing.sm,
+        paddingVertical: 4,
+        borderRadius: BorderRadius.sm,
+        marginTop: 4,
+    },
+    statusBadgeText: {
+        fontFamily: FontFamily.bodySemiBold,
+        fontSize: FontSize.tiny,
+    },
+    orderInfoCard: {
+        backgroundColor: Colors.cardDark,
+        borderRadius: BorderRadius.lg,
+        padding: Spacing.base,
+        marginBottom: Spacing.md,
+        borderWidth: 1,
+        borderColor: Colors.borderDark,
+    },
+    orderInfoHeader: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: Spacing.sm,
+        marginBottom: Spacing.md,
+    },
+    orderInfoTitle: {
+        fontFamily: FontFamily.displaySemiBold,
+        fontSize: FontSize.h4,
+        color: Colors.textPrimary,
+    },
+    orderInfoRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: Spacing.sm,
+    },
+    orderInfoLabel: {
+        fontFamily: FontFamily.body,
+        fontSize: FontSize.body,
+        color: Colors.textMuted,
+    },
+    orderInfoValue: {
+        fontFamily: FontFamily.bodySemiBold,
+        fontSize: FontSize.body,
+        color: Colors.textPrimary,
+    },
+    statusBadgeInline: {
+        paddingHorizontal: Spacing.sm,
+        paddingVertical: 2,
+        borderRadius: BorderRadius.sm,
+    },
+    statusBadgeTextInline: {
+        fontFamily: FontFamily.bodySemiBold,
+        fontSize: FontSize.caption,
+    },
 });
+
+const getStatusColor = (status: string) => {
+    switch (status) {
+        case 'delivered':
+        case 'completed':
+            return Colors.success;
+        case 'cancelled':
+        case 'refunded':
+            return Colors.error;
+        case 'out_for_delivery':
+            return Colors.secondary;
+        default:
+            return Colors.primary;
+    }
+};
