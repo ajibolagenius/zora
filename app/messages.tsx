@@ -87,17 +87,28 @@ export default function MessagesScreen() {
         );
 
         if (reset) {
-          setConversations(fetchedConversations);
+          // Deduplicate conversations by ID (in case query returns duplicates)
+          const uniqueConversations = Array.from(
+            new Map(fetchedConversations.map(conv => [conv.id, conv])).values()
+          );
+          setConversations(uniqueConversations);
           setOffset(PAGE_SIZE);
           // Calculate unread count for reset
-          const totalUnread = fetchedConversations.reduce((sum, conv) => sum + (conv.unread_count_user || 0), 0);
+          const totalUnread = uniqueConversations.reduce((sum, conv) => sum + (conv.unread_count_user || 0), 0);
           setUnreadCount(totalUnread);
         } else {
           setConversations((prev) => {
-            // Deduplicate by ID
-            const existingIds = new Set(prev.map(c => c.id));
-            const newConversations = fetchedConversations.filter(c => !existingIds.has(c.id));
-            const updated = [...prev, ...newConversations];
+            // Deduplicate by ID - both existing and new
+            const conversationMap = new Map<string, Conversation>();
+            
+            // Add existing conversations
+            prev.forEach(conv => conversationMap.set(conv.id, conv));
+            
+            // Add new conversations (will overwrite duplicates with latest data)
+            fetchedConversations.forEach(conv => conversationMap.set(conv.id, conv));
+            
+            const updated = Array.from(conversationMap.values());
+            
             // Calculate unread count for pagination
             const totalUnread = updated.reduce((sum, conv) => sum + (conv.unread_count_user || 0), 0);
             setUnreadCount(totalUnread);
@@ -330,12 +341,10 @@ export default function MessagesScreen() {
               
               if (isSupport) {
                 displayName = 'Order Support';
-                if (order?.order_number) {
-                  displayName = `Order #${order.order_number}`;
-                } else if (order?.id) {
+                if (order?.id) {
                   displayName = `Order ${order.id.slice(0, 8)}`;
                 }
-                avatarIcon = <Headset size={28} color={Colors.primary} weight="duotone" />;
+                avatarIcon = <Headset size={22} color={Colors.primary} weight="duotone" />;
               } else {
                 displayName = vendor?.shop_name || 'Vendor';
                 logoUrl = vendor?.logo_url || '';
@@ -359,7 +368,7 @@ export default function MessagesScreen() {
                       </View>
                       {order?.status && (
                         <View style={[styles.orderStatusBadge, { backgroundColor: `${getOrderStatusColor(order.status)}20` }]}>
-                          <Text style={[styles.orderStatusText, { color: getOrderStatusColor(order.status) }]}>
+                          <Text style={[styles.orderStatusText, { color: getOrderStatusColor(order.status) }]} numberOfLines={1}>
                             {order.status.charAt(0).toUpperCase() + order.status.slice(1).replace('_', ' ')}
                           </Text>
                         </View>
@@ -369,7 +378,7 @@ export default function MessagesScreen() {
                     <LazyAvatar
                       source={logoUrl || ImageUrlBuilders.dicebearAvatar(displayName)}
                       name={displayName}
-                      size={56}
+                      size={44}
                       style={styles.avatar}
                     />
                   )}
@@ -594,6 +603,7 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.md,
     borderWidth: 1,
     borderColor: Colors.borderDark,
+    overflow: 'hidden', // Prevent badge from extending beyond card
   },
   conversationCardDeleting: {
     opacity: 0.5,
@@ -776,29 +786,37 @@ const styles = StyleSheet.create({
   },
   supportAvatarContainer: {
     position: 'relative',
+    marginRight: Spacing.md,
+    width: 44,
+    alignItems: 'center',
+    marginBottom: Spacing.xs, // Add space at bottom for badge
   },
   supportAvatar: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
     backgroundColor: Colors.primary20,
     justifyContent: 'center',
     alignItems: 'center',
-    borderWidth: 2,
+    borderWidth: 1.5,
     borderColor: Colors.primary,
   },
   orderStatusBadge: {
-    position: 'absolute',
-    bottom: -4,
-    right: -4,
-    paddingHorizontal: Spacing.xs,
+    marginTop: Spacing.xs,
+    paddingHorizontal: 6,
     paddingVertical: 2,
     borderRadius: BorderRadius.sm,
     borderWidth: 1,
+    minWidth: 36,
+    maxWidth: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   orderStatusText: {
     fontFamily: FontFamily.bodySemiBold,
     fontSize: FontSize.tiny,
+    textAlign: 'center',
+    lineHeight: 10,
   },
   timeText: {
     fontFamily: FontFamily.body,

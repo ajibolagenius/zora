@@ -21,7 +21,6 @@ export interface Conversation {
   vendor?: Vendor; // Joined vendor data
   order?: { // Joined order data for support conversations
     id: string;
-    order_number?: string;
     status: string;
   };
 }
@@ -56,11 +55,14 @@ export const messagingService = {
 
     try {
       // Try to get existing support conversation for this order
+      // Use order by created_at to get the oldest one if duplicates exist
       const { data: existing, error: fetchError } = await fromMethod('conversations')
         .select('*')
         .eq('user_id', userId)
         .eq('order_id', orderId)
         .eq('conversation_type', 'support')
+        .order('created_at', { ascending: true })
+        .limit(1)
         .maybeSingle();
 
       if (existing) {
@@ -68,6 +70,7 @@ export const messagingService = {
       }
 
       // Create new support conversation if it doesn't exist
+      // Use upsert with conflict handling to prevent duplicates
       const { data: newConversation, error: createError } = await fromMethod('conversations')
         .insert({
           user_id: userId,
@@ -78,6 +81,21 @@ export const messagingService = {
         .single();
 
       if (createError) {
+        // If error is due to unique constraint violation, try fetching again
+        if (createError.code === '23505' || createError.message?.includes('unique')) {
+          const { data: retryExisting } = await fromMethod('conversations')
+            .select('*')
+            .eq('user_id', userId)
+            .eq('order_id', orderId)
+            .eq('conversation_type', 'support')
+            .order('created_at', { ascending: true })
+            .limit(1)
+            .maybeSingle();
+          
+          if (retryExisting) {
+            return retryExisting as Conversation;
+          }
+        }
         console.error('Error creating support conversation:', createError);
         return null;
       }
@@ -151,8 +169,9 @@ export const messagingService = {
 
     try {
       // Fetch all conversation types (vendor and support)
+      // Use distinct to prevent duplicates from joins
       let query = fromMethod('conversations')
-        .select('*, vendors(id, shop_name, logo_url, slug), orders(id, order_number, status)')
+        .select('*, vendors!left(id, shop_name, logo_url, slug), orders!left(id, status)', { count: 'exact' })
         .eq('user_id', userId)
         .order('last_message_at', { ascending: false });
 
@@ -167,11 +186,28 @@ export const messagingService = {
         return [];
       }
 
-      return (data || []).map((conv: any) => ({
-        ...conv,
-        vendor: conv.vendors,
-        order: conv.orders, // Include order data for support conversations
-      })) as Conversation[];
+      // Map and deduplicate conversations by ID
+      // This handles cases where joins might create duplicates
+      const conversationMap = new Map<string, Conversation>();
+      
+      (data || []).forEach((conv: any) => {
+        // Skip if we've already seen this conversation ID
+        if (conversationMap.has(conv.id)) {
+          return;
+        }
+        
+        // Handle array results from joins (Supabase sometimes returns arrays)
+        const vendor = Array.isArray(conv.vendors) ? conv.vendors[0] : conv.vendors;
+        const order = Array.isArray(conv.orders) ? conv.orders[0] : conv.orders;
+        
+        conversationMap.set(conv.id, {
+          ...conv,
+          vendor: vendor || null,
+          order: order || null, // Include order data for support conversations
+        } as Conversation);
+      });
+
+      return Array.from(conversationMap.values());
     } catch (error) {
       console.error('Error fetching conversations:', error);
       return [];
