@@ -1010,6 +1010,159 @@ const getMockPromoCodes = (): Record<string, PromoCode> => ({
   },
 });
 
+// ============== DISPUTE SERVICE ==============
+export interface Dispute {
+  id: string;
+  order_id: string;
+  user_id: string;
+  issue_type: 'missing' | 'wrong' | 'damaged' | 'quality' | 'other';
+  affected_items: any; // JSONB array
+  description: string;
+  preferred_resolution: 'refund' | 'replacement' | 'partial_refund' | 'store_credit' | 'other';
+  evidence_images: string[];
+  status: 'pending' | 'under_review' | 'resolved' | 'rejected' | 'closed';
+  resolution?: string;
+  resolution_notes?: string;
+  resolved_at?: string;
+  resolved_by?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export const disputeService = {
+  create: async (disputeData: Partial<Dispute>): Promise<Dispute | null> => {
+    if (!isSupabaseConfigured()) {
+      return {
+        id: 'dispute_' + Date.now(),
+        ...disputeData,
+        status: 'pending',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      } as Dispute;
+    }
+    
+    const fromMethod = await getSupabaseFrom();
+    if (!fromMethod) {
+      return {
+        id: 'dispute_' + Date.now(),
+        ...disputeData,
+        status: 'pending',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      } as Dispute;
+    }
+    
+    const { data, error } = await fromMethod('disputes')
+      .insert(disputeData)
+      .select()
+      .single();
+    
+    if (error) {
+      console.error('Error creating dispute:', error);
+      return null;
+    }
+    
+    return data;
+  },
+  
+  getById: async (disputeId: string): Promise<Dispute | null> => {
+    if (!isSupabaseConfigured()) {
+      return null;
+    }
+    
+    const fromMethod = await getSupabaseFrom();
+    if (!fromMethod) {
+      return null;
+    }
+    
+    const { data } = await fromMethod('disputes')
+      .select('*')
+      .eq('id', disputeId)
+      .single();
+    
+    return data;
+  },
+  
+  getByOrder: async (orderId: string): Promise<Dispute | null> => {
+    if (!isSupabaseConfigured()) {
+      return null;
+    }
+    
+    const fromMethod = await getSupabaseFrom();
+    if (!fromMethod) {
+      return null;
+    }
+    
+    const { data } = await fromMethod('disputes')
+      .select('*')
+      .eq('order_id', orderId)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .single();
+    
+    return data;
+  },
+  
+  getByUser: async (userId: string): Promise<Dispute[]> => {
+    if (!isSupabaseConfigured()) {
+      return [];
+    }
+    
+    const fromMethod = await getSupabaseFrom();
+    if (!fromMethod) {
+      return [];
+    }
+    
+    const { data } = await fromMethod('disputes')
+      .select('*')
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false });
+    
+    return data || [];
+  },
+  
+  updateStatus: async (
+    disputeId: string, 
+    status: Dispute['status'],
+    resolution?: string,
+    resolutionNotes?: string
+  ): Promise<Dispute | null> => {
+    if (!isSupabaseConfigured()) {
+      return null;
+    }
+    
+    const fromMethod = await getSupabaseFrom();
+    if (!fromMethod) {
+      return null;
+    }
+    
+    const updateData: any = { 
+      status,
+      updated_at: new Date().toISOString() 
+    };
+    
+    if (resolution) {
+      updateData.resolution = resolution;
+    }
+    
+    if (resolutionNotes) {
+      updateData.resolution_notes = resolutionNotes;
+    }
+    
+    if (status === 'resolved' || status === 'closed') {
+      updateData.resolved_at = new Date().toISOString();
+    }
+    
+    const { data } = await fromMethod('disputes')
+      .update(updateData)
+      .eq('id', disputeId)
+      .select()
+      .single();
+    
+    return data;
+  },
+};
+
 // ============== PROMO CODE SERVICE ==============
 export const promoCodeService = {
   validate: async (code: string): Promise<PromoCode | null> => {
@@ -1080,4 +1233,5 @@ export default {
   orders: orderService,
   reviews: reviewService,
   promoCodes: promoCodeService,
+  disputes: disputeService,
 };

@@ -26,10 +26,11 @@ import { Colors } from '../constants/colors';
 import { Spacing, BorderRadius, Heights } from '../constants/spacing';
 import { FontSize, FontFamily } from '../constants/typography';
 import { ResolutionOptions, ValidationLimits, CommonImages, Placeholders, AnimationDuration, AnimationEasing } from '../constants';
-import { orderService } from '../services/supabaseService';
+import { orderService, disputeService } from '../services/supabaseService';
 import { isSupabaseConfigured } from '../lib/supabase';
 import { useAuthStore } from '../stores/authStore';
 import { safeGoBack } from '../lib/navigationHelpers';
+import { useToast } from '../components/ui/ToastProvider';
 
 // Mock selected items from previous screen
 const SELECTED_ITEMS = [
@@ -41,6 +42,7 @@ export default function DisputeDetailsScreen() {
     const router = useRouter();
     const params = useLocalSearchParams<{ orderId?: string; issueType?: string; selectedItems?: string }>();
     const { user } = useAuthStore();
+    const showToast = useToast();
     const [description, setDescription] = useState('');
     const [selectedResolution, setSelectedResolution] = useState('refund');
     const [uploadedImages, setUploadedImages] = useState<string[]>([]);
@@ -97,53 +99,59 @@ export default function DisputeDetailsScreen() {
     };
 
     const handleSubmit = async () => {
-        if (!description.trim() || !params.orderId) {
+        if (!description.trim() || !params.orderId || !params.issueType) {
+            showToast('Please fill in all required fields', 'error');
+            return;
+        }
+
+        if (!user?.user_id) {
+            showToast('Please log in to submit a dispute', 'error');
             return;
         }
 
         setSubmitting(true);
 
         try {
-            // In production, this would create a dispute record in a disputes table
-            // For now, we'll store dispute info in order metadata or create a simple record
             if (isSupabaseConfigured() && user?.user_id) {
-                // Note: A disputes table would need to be created for full functionality
-                // This is a placeholder for the integration
-                console.log('Submitting dispute:', {
-                    orderId: params.orderId,
-                    issueType: params.issueType,
-                    selectedItems: params.selectedItems?.split(','),
-                    description,
-                    selectedResolution,
-                    uploadedImages,
-                    userId: user.user_id,
+                const dispute = await disputeService.create({
+                    order_id: params.orderId,
+                    user_id: user.user_id,
+                    issue_type: params.issueType as any,
+                    affected_items: params.selectedItems?.split(',') || [],
+                    description: description.trim(),
+                    preferred_resolution: selectedResolution as any,
+                    evidence_images: uploadedImages,
+                    status: 'pending',
                 });
 
-                // In production, you would:
-                // await disputeService.create({
-                //   order_id: params.orderId,
-                //   user_id: user.user_id,
-                //   issue_type: params.issueType,
-                //   affected_items: params.selectedItems?.split(','),
-                //   description,
-                //   preferred_resolution: selectedResolution,
-                //   evidence_images: uploadedImages,
-                //   status: 'pending',
-                // });
+                if (dispute) {
+                    showToast('Dispute submitted successfully', 'success');
+                    router.push({
+                        pathname: '/dispute-status',
+                        params: {
+                            orderId: params.orderId,
+                            disputeId: dispute.id,
+                        },
+                    });
+                } else {
+                    showToast('Failed to submit dispute. Please try again.', 'error');
+                    setSubmitting(false);
+                }
+            } else {
+                // Fallback for non-Supabase mode
+                router.push({
+                    pathname: '/dispute-status',
+                    params: {
+                        orderId: params.orderId,
+                        disputeId: `DISPUTE-${Date.now()}`,
+                    },
+                });
             }
         } catch (error) {
             console.error('Error submitting dispute:', error);
-        } finally {
+            showToast('An error occurred. Please try again.', 'error');
             setSubmitting(false);
         }
-
-        router.push({
-            pathname: '/dispute-status',
-            params: {
-                orderId: params.orderId,
-                disputeId: `DISPUTE-${Date.now()}`,
-            },
-        });
     };
 
     return (

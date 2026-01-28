@@ -24,7 +24,7 @@ import { Colors } from '../constants/colors';
 import { Spacing, BorderRadius, Heights } from '../constants/spacing';
 import { FontSize, FontFamily } from '../constants/typography';
 import { PlaceholderImages } from '../constants';
-import { orderService } from '../services/supabaseService';
+import { orderService, disputeService } from '../services/supabaseService';
 import { realtimeService } from '../services/realtimeService';
 import { isSupabaseConfigured } from '../lib/supabase';
 import { useAuthStore } from '../stores/authStore';
@@ -84,6 +84,7 @@ export default function DisputeStatusScreen() {
   const params = useLocalSearchParams<{ orderId?: string; disputeId?: string }>();
   const { user } = useAuthStore();
   const [order, setOrder] = useState<any>(null);
+  const [dispute, setDispute] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
   // Animation values
@@ -107,57 +108,110 @@ export default function DisputeStatusScreen() {
     ]).start();
   }, []);
 
-  // Fetch order data if orderId is provided
+  // Fetch order and dispute data
   useEffect(() => {
-    const fetchOrder = async () => {
-      if (!params.orderId || !isSupabaseConfigured()) {
+    const fetchData = async () => {
+      if (!isSupabaseConfigured()) {
         setLoading(false);
         return;
       }
 
       try {
         setLoading(true);
-        const orderData = await orderService.getById(params.orderId);
-        if (orderData) {
-          setOrder(orderData);
+        
+        // Fetch dispute if disputeId is provided
+        if (params.disputeId) {
+          const disputeData = await disputeService.getById(params.disputeId);
+          if (disputeData) {
+            setDispute(disputeData);
+            // Fetch order from dispute
+            if (disputeData.order_id) {
+              const orderData = await orderService.getById(disputeData.order_id);
+              if (orderData) {
+                setOrder(orderData);
+              }
+            }
+          }
+        } else if (params.orderId) {
+          // Fetch order and check for existing dispute
+          const orderData = await orderService.getById(params.orderId);
+          if (orderData) {
+            setOrder(orderData);
+            // Check for existing dispute for this order
+            const disputeData = await disputeService.getByOrder(params.orderId);
+            if (disputeData) {
+              setDispute(disputeData);
+            }
+          }
         }
       } catch (error) {
-        console.error('Error fetching order:', error);
+        console.error('Error fetching data:', error);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchOrder();
+    fetchData();
 
-    // Subscribe to real-time order updates
-    if (isSupabaseConfigured() && params.orderId) {
+    // Subscribe to real-time updates
+    if (isSupabaseConfigured()) {
       let isMounted = true;
       const unsubscribers: (() => void)[] = [];
 
-      realtimeService.subscribeToTable(
-        'orders',
-        '*',
-        async (payload) => {
-          if (!isMounted) return;
-          
-          if (payload.new?.id === params.orderId) {
-            try {
-              const orderData = await orderService.getById(params.orderId);
-              if (orderData) {
-                setOrder(orderData);
+      // Subscribe to dispute updates
+      if (params.disputeId) {
+        realtimeService.subscribeToTable(
+          'disputes',
+          '*',
+          async (payload) => {
+            if (!isMounted) return;
+            
+            if (payload.new?.id === params.disputeId) {
+              try {
+                const disputeData = await disputeService.getById(params.disputeId);
+                if (disputeData) {
+                  setDispute(disputeData);
+                }
+              } catch (error) {
+                console.error('Error refreshing dispute:', error);
               }
-            } catch (error) {
-              console.error('Error refreshing order:', error);
             }
-          }
-        },
-        `id=eq.${params.orderId}`
-      ).then((unsub) => {
-        if (isMounted && unsub) unsubscribers.push(unsub);
-      }).catch((error) => {
-        console.error('Error setting up order subscription:', error);
-      });
+          },
+          `id=eq.${params.disputeId}`
+        ).then((unsub) => {
+          if (isMounted && unsub) unsubscribers.push(unsub);
+        }).catch((error) => {
+          console.error('Error setting up dispute subscription:', error);
+        });
+      }
+
+      // Subscribe to order updates
+      if (params.orderId || dispute?.order_id) {
+        const orderId = params.orderId || dispute?.order_id;
+        realtimeService.subscribeToTable(
+          'orders',
+          '*',
+          async (payload) => {
+            if (!isMounted) return;
+            
+            if (payload.new?.id === orderId) {
+              try {
+                const orderData = await orderService.getById(orderId);
+                if (orderData) {
+                  setOrder(orderData);
+                }
+              } catch (error) {
+                console.error('Error refreshing order:', error);
+              }
+            }
+          },
+          `id=eq.${orderId}`
+        ).then((unsub) => {
+          if (isMounted && unsub) unsubscribers.push(unsub);
+        }).catch((error) => {
+          console.error('Error setting up order subscription:', error);
+        });
+      }
 
       return () => {
         isMounted = false;
@@ -168,7 +222,7 @@ export default function DisputeStatusScreen() {
         });
       };
     }
-  }, [params.orderId]);
+  }, [params.orderId, params.disputeId]);
 
   const renderTimelineStep = (step: TimelineStep, index: number) => {
     const isLast = index === TIMELINE_STEPS.length - 1;
@@ -245,14 +299,16 @@ export default function DisputeStatusScreen() {
           <View style={styles.headerCardTop}>
             <View>
               <Text style={styles.disputeIdLabel}>DISPUTE ID</Text>
-              <Text style={styles.disputeIdValue}>#{params.disputeId?.substring(0, 8) || '92831'}</Text>
+              <Text style={styles.disputeIdValue}>#{dispute?.id?.substring(0, 8) || params.disputeId?.substring(0, 8) || '92831'}</Text>
             </View>
             {/* Status Badge */}
             <View style={styles.statusBadge}>
               <View style={styles.statusDotOuter}>
                 <View style={styles.statusDotInner} />
               </View>
-              <Text style={styles.statusBadgeText}>UNDER REVIEW</Text>
+              <Text style={styles.statusBadgeText}>
+                {dispute?.status ? dispute.status.toUpperCase().replace('_', ' ') : 'UNDER REVIEW'}
+              </Text>
             </View>
           </View>
 

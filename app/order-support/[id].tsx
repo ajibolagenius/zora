@@ -106,9 +106,30 @@ export default function OrderSupportScreen() {
 
             try {
                 setLoading(true);
-                // For now, use initial messages as fallback
-                // In production, fetch from a support conversations table
-                setMessages(INITIAL_MESSAGES);
+                
+                // Get or create support conversation for this order
+                const conversation = await messagingService.getOrCreateSupportConversation(user.user_id, id);
+                
+                if (conversation) {
+                    // Fetch messages for this conversation
+                    const conversationMessages = await messagingService.getMessages(conversation.id);
+                    
+                    const formattedMessages: Message[] = conversationMessages.map((msg: any) => ({
+                        id: msg.id,
+                        text: msg.text || msg.content || '',
+                        sender: msg.sender_type === 'user' ? 'user' : 'bot',
+                        timestamp: new Date(msg.created_at).toLocaleTimeString('en-US', {
+                            hour: 'numeric',
+                            minute: '2-digit',
+                            hour12: true
+                        }),
+                        senderName: msg.sender_type === 'user' ? undefined : (msg.sender_name || 'Zora Support'),
+                    }));
+                    
+                    setMessages(formattedMessages.length > 0 ? formattedMessages : INITIAL_MESSAGES);
+                } else {
+                    setMessages(INITIAL_MESSAGES);
+                }
             } catch (error) {
                 console.error('Error fetching messages:', error);
                 setMessages(INITIAL_MESSAGES);
@@ -121,40 +142,53 @@ export default function OrderSupportScreen() {
 
         // Set up real-time subscription for new messages
         if (isSupabaseConfigured() && user?.user_id && id) {
-            const unsubscribe = realtimeService.subscribeToTable(
-                'messages',
-                '*',
-                async (payload) => {
-                    // Handle new messages in real-time
-                    if (payload.new) {
-                        const newMessage: Message = {
-                            id: payload.new.id,
-                            text: payload.new.content || '',
-                            sender: payload.new.sender_type === 'user' ? 'user' : 'bot',
-                            timestamp: new Date(payload.new.created_at).toLocaleTimeString('en-US', {
-                                hour: 'numeric',
-                                minute: '2-digit',
-                                hour12: true
-                            }),
-                            senderName: payload.new.sender_type === 'user' ? undefined : 'Zora Support',
-                        };
-                        setMessages(prev => [...prev, newMessage]);
-                        setTimeout(() => {
-                            scrollViewRef.current?.scrollToEnd({ animated: true });
-                        }, 100);
-                    }
-                },
-                `conversation_id=eq.${id}`
-            );
+            let isMounted = true;
+            const unsubscribers: (() => void)[] = [];
+
+            // First, get the conversation ID
+            messagingService.getOrCreateSupportConversation(user.user_id, id).then((conversation) => {
+                if (!conversation || !isMounted) return;
+
+                realtimeService.subscribeToTable(
+                    'messages',
+                    '*',
+                    async (payload) => {
+                        if (!isMounted) return;
+                        
+                        // Handle new messages in real-time
+                        if (payload.new && payload.new.conversation_id === conversation.id) {
+                            const newMessage: Message = {
+                                id: payload.new.id,
+                                text: payload.new.text || payload.new.content || '',
+                                sender: payload.new.sender_type === 'user' ? 'user' : 'bot',
+                                timestamp: new Date(payload.new.created_at).toLocaleTimeString('en-US', {
+                                    hour: 'numeric',
+                                    minute: '2-digit',
+                                    hour12: true
+                                }),
+                                senderName: payload.new.sender_type === 'user' ? undefined : (payload.new.sender_name || 'Zora Support'),
+                            };
+                            setMessages(prev => [...prev, newMessage]);
+                            setTimeout(() => {
+                                scrollViewRef.current?.scrollToEnd({ animated: true });
+                            }, 100);
+                        }
+                    },
+                    `conversation_id=eq.${conversation.id}`
+                ).then((unsub) => {
+                    if (isMounted && unsub) unsubscribers.push(unsub);
+                }).catch((error) => {
+                    console.error('Error setting up message subscription:', error);
+                });
+            });
 
             return () => {
-                if (unsubscribe) {
-                    unsubscribe.then((unsub) => {
-                        if (typeof unsub === 'function') {
-                            unsub();
-                        }
-                    });
-                }
+                isMounted = false;
+                unsubscribers.forEach((unsub) => {
+                    if (typeof unsub === 'function') {
+                        unsub();
+                    }
+                });
             };
         }
     }, [id, user?.user_id]);
@@ -194,14 +228,18 @@ export default function OrderSupportScreen() {
         // Send message to database if configured
         if (isSupabaseConfigured() && user?.user_id) {
             try {
-                // For order support, we'd need a conversation ID
-                // For now, create or get a support conversation
-                // This is a simplified version - in production, you'd have a support conversations table
-                await messagingService.sendMessage({
-                    conversationId: id, // Using order ID as conversation identifier
-                    content: messageText,
-                    senderType: 'user',
-                });
+                // Get or create support conversation for this order
+                const conversation = await messagingService.getOrCreateSupportConversation(user.user_id, id);
+                
+                if (conversation) {
+                    await messagingService.sendMessage({
+                        conversationId: conversation.id,
+                        content: messageText,
+                        senderType: 'user',
+                    });
+                } else {
+                    console.error('Failed to get or create support conversation');
+                }
             } catch (error) {
                 console.error('Error sending message:', error);
             }

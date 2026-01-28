@@ -9,7 +9,9 @@ import type { Vendor } from '../types/supabase';
 export interface Conversation {
   id: string;
   user_id: string;
-  vendor_id: string;
+  vendor_id?: string | null;
+  order_id?: string | null;
+  conversation_type?: 'vendor' | 'support';
   last_message_at: string;
   last_message_text: string | null;
   unread_count_user: number;
@@ -23,16 +25,65 @@ export interface Message {
   id: string;
   conversation_id: string;
   sender_id: string;
-  sender_type: 'user' | 'vendor';
+  sender_type: 'user' | 'vendor' | 'support';
   text: string;
   read_at: string | null;
   created_at: string;
+  sender_name?: string; // For support agents
+  is_system?: boolean;
   // Joined data (not in DB)
-  sender_name?: string;
   sender_avatar?: string;
 }
 
 export const messagingService = {
+  /**
+   * Get or create a support conversation for an order
+   */
+  getOrCreateSupportConversation: async (userId: string, orderId: string): Promise<Conversation | null> => {
+    if (!isSupabaseConfigured()) {
+      return null;
+    }
+
+    const fromMethod = await getSupabaseFrom();
+    if (!fromMethod) {
+      return null;
+    }
+
+    try {
+      // Try to get existing support conversation for this order
+      const { data: existing, error: fetchError } = await fromMethod('conversations')
+        .select('*')
+        .eq('user_id', userId)
+        .eq('order_id', orderId)
+        .eq('conversation_type', 'support')
+        .maybeSingle();
+
+      if (existing) {
+        return existing as Conversation;
+      }
+
+      // Create new support conversation if it doesn't exist
+      const { data: newConversation, error: createError } = await fromMethod('conversations')
+        .insert({
+          user_id: userId,
+          order_id: orderId,
+          conversation_type: 'support',
+        })
+        .select()
+        .single();
+
+      if (createError) {
+        console.error('Error creating support conversation:', createError);
+        return null;
+      }
+
+      return newConversation as Conversation;
+    } catch (error) {
+      console.error('Error getting/creating support conversation:', error);
+      return null;
+    }
+  },
+
   /**
    * Get or create a conversation between user and vendor
    */
@@ -63,6 +114,7 @@ export const messagingService = {
         .insert({
           user_id: userId,
           vendor_id: vendorId,
+          conversation_type: 'vendor',
         })
         .select()
         .single();
@@ -96,6 +148,7 @@ export const messagingService = {
       let query = fromMethod('conversations')
         .select('*, vendors(id, shop_name, logo_url, slug)')
         .eq('user_id', userId)
+        .or('conversation_type.is.null,conversation_type.eq.vendor')
         .order('last_message_at', { ascending: false });
 
       if (limit !== undefined && offset !== undefined) {
