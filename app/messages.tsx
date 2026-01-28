@@ -92,17 +92,44 @@ export default function MessagesScreen() {
           currentOffset
         );
 
+        // Update offset based on database position, not displayed count
+        // Bug 1 Fix: Increment offset by fetched count, not displayed count
+        if (reset) {
+          // For reset, offset should be the number of items fetched from database
+          offsetRef.current = fetchedConversations.length;
+          setOffset(fetchedConversations.length);
+        } else {
+          // For pagination, increment by the number of items fetched from database
+          // NOT by the deduplicated count, to maintain correct database position
+          offsetRef.current = currentOffset + fetchedConversations.length;
+          setOffset(offsetRef.current);
+        }
+
+        // Calculate updated conversations list for unread count calculation
+        // This is done BEFORE state updates to avoid side effects in callbacks
+        let updatedConversations: Conversation[];
+        
         if (reset) {
           // Deduplicate conversations by ID (in case query returns duplicates)
-          const uniqueConversations = Array.from(
+          updatedConversations = Array.from(
             new Map(fetchedConversations.map(conv => [conv.id, conv])).values()
           );
-          setConversations(uniqueConversations);
-          offsetRef.current = uniqueConversations.length;
-          setOffset(uniqueConversations.length);
-          // Calculate unread count for reset
-          const totalUnread = uniqueConversations.reduce((sum, conv) => sum + (conv.unread_count_user || 0), 0);
-          setUnreadCount(totalUnread);
+        } else {
+          // For pagination, merge with existing conversations
+          // Calculate what the merged list will be (for unread count)
+          const conversationMap = new Map<string, Conversation>();
+          
+          // Merge existing conversations with new ones
+          conversations.forEach(conv => conversationMap.set(conv.id, conv));
+          fetchedConversations.forEach(conv => conversationMap.set(conv.id, conv));
+          
+          updatedConversations = Array.from(conversationMap.values());
+        }
+
+        // Update conversations state (pure function, no side effects)
+        // Bug 2 Fix: No state updates inside callbacks
+        if (reset) {
+          setConversations(updatedConversations);
         } else {
           setConversations((prev) => {
             // Deduplicate by ID - both existing and new
@@ -114,18 +141,17 @@ export default function MessagesScreen() {
             // Add new conversations (will overwrite duplicates with latest data)
             fetchedConversations.forEach(conv => conversationMap.set(conv.id, conv));
             
-            const updated = Array.from(conversationMap.values());
-            
-            // Update offset ref and state based on actual number of conversations
-            offsetRef.current = updated.length;
-            setOffset(updated.length);
-            
-            // Calculate unread count for pagination
-            const totalUnread = updated.reduce((sum, conv) => sum + (conv.unread_count_user || 0), 0);
-            setUnreadCount(totalUnread);
-            return updated;
+            return Array.from(conversationMap.values());
           });
         }
+
+        // Calculate unread count AFTER state updates (outside callbacks to avoid side effects)
+        // Bug 2 Fix: State updates happen outside callbacks
+        const totalUnread = updatedConversations.reduce(
+          (sum, conv) => sum + (conv.unread_count_user || 0), 
+          0
+        );
+        setUnreadCount(totalUnread);
 
         // Check if there are more conversations
         setHasMore(fetchedConversations.length === PAGE_SIZE);
