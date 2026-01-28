@@ -59,7 +59,7 @@ export default function MessagesScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { user } = useAuthStore();
-  
+
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -85,7 +85,7 @@ export default function MessagesScreen() {
     try {
       if (isSupabaseConfigured()) {
         const currentOffset = reset ? 0 : offsetRef.current;
-        
+
         const fetchedConversations = await messagingService.getUserConversations(
           user.user_id,
           PAGE_SIZE,
@@ -112,12 +112,12 @@ export default function MessagesScreen() {
           const uniqueConversations = Array.from(
             new Map(fetchedConversations.map(conv => [conv.id, conv])).values()
           );
-          
+
           setConversations(uniqueConversations);
-          
+
           // Calculate unread count from the updated conversations
           const totalUnread = uniqueConversations.reduce(
-            (sum, conv) => sum + (conv.unread_count_user || 0), 
+            (sum, conv) => sum + (conv.unread_count_user || 0),
             0
           );
           setUnreadCount(totalUnread);
@@ -125,32 +125,31 @@ export default function MessagesScreen() {
           // For pagination, calculate updated list using functional update pattern
           // Store the result to use for unread count calculation
           let updatedConversationsForUnread: Conversation[] | null = null;
-          
+
           setConversations((prev) => {
             // Deduplicate by ID - both existing and new
             // Use prev (latest state) instead of conversations (stale closure)
             const conversationMap = new Map<string, Conversation>();
-            
+
             // Add existing conversations (using latest prev state, not stale closure)
             prev.forEach(conv => conversationMap.set(conv.id, conv));
-            
+
             // Add new conversations (will overwrite duplicates with latest data)
             fetchedConversations.forEach(conv => conversationMap.set(conv.id, conv));
-            
+
             const updated = Array.from(conversationMap.values());
-            
+
             // Store for unread count calculation outside callback
             updatedConversationsForUnread = updated;
-            
+
             return updated;
           });
-          
+
           // Calculate unread count from the updated list
-          // Bug Fix 1: Always update unread count (consistent with reset branch)
-          // Bug Fix 2: Use explicit null check instead of truthiness
-          if (updatedConversationsForUnread !== null) {
+          // Use the calculated value from the functional update
+          if (updatedConversationsForUnread) {
             const totalUnread = updatedConversationsForUnread.reduce(
-              (sum, conv) => sum + (conv.unread_count_user || 0), 
+              (sum, conv) => sum + (conv.unread_count_user || 0),
               0
             );
             setUnreadCount(totalUnread);
@@ -260,7 +259,7 @@ export default function MessagesScreen() {
 
   const loadMoreConversations = useCallback(() => {
     if (loadingMore || !hasMore || !user?.user_id) return;
-    
+
     setLoadingMore(true);
     fetchConversations(false);
   }, [loadingMore, hasMore, user?.user_id, fetchConversations]);
@@ -279,7 +278,7 @@ export default function MessagesScreen() {
           style: 'destructive',
           onPress: async () => {
             if (!user?.user_id) return;
-            
+
             setDeletingId(conversationId);
             try {
               const success = await messagingService.deleteConversation(conversationId, user.user_id);
@@ -326,40 +325,40 @@ export default function MessagesScreen() {
     }
 
     const query = searchQuery.toLowerCase().trim();
-    
+
     return conversations.filter((conversation) => {
       const isSupport = conversation.conversation_type === 'support';
       const vendor = conversation.vendor as any;
       const order = conversation.order;
-      
+
       // Search in vendor name
       if (!isSupport && vendor?.shop_name) {
         if (vendor.shop_name.toLowerCase().includes(query)) {
           return true;
         }
       }
-      
+
       // Search in order ID/number for support conversations
       if (isSupport && order?.id) {
         if (order.id.toLowerCase().includes(query)) {
           return true;
         }
       }
-      
+
       // Search in last message text
       if (conversation.last_message_text) {
         if (conversation.last_message_text.toLowerCase().includes(query)) {
           return true;
         }
       }
-      
+
       // Search in order status for support conversations
       if (isSupport && order?.status) {
         if (order.status.toLowerCase().includes(query)) {
           return true;
         }
       }
-      
+
       return false;
     });
   }, [conversations, searchQuery]);
@@ -484,12 +483,12 @@ export default function MessagesScreen() {
               const isSupport = conversation.conversation_type === 'support';
               const vendor = conversation.vendor as any;
               const order = conversation.order;
-              
+
               // Determine display name and avatar
               let displayName = 'Support';
               let logoUrl = '';
               let avatarIcon = null;
-              
+
               if (isSupport) {
                 displayName = 'Order Support';
                 if (order?.id) {
@@ -500,7 +499,7 @@ export default function MessagesScreen() {
                 displayName = vendor?.shop_name || 'Vendor';
                 logoUrl = vendor?.logo_url || '';
               }
-              
+
               const unread = conversation.unread_count_user || 0;
               const isDeleting = deletingId === conversation.id;
 
