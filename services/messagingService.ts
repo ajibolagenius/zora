@@ -82,7 +82,7 @@ export const messagingService = {
   /**
    * Get all conversations for a user
    */
-  getUserConversations: async (userId: string): Promise<Conversation[]> => {
+  getUserConversations: async (userId: string, limit?: number, offset?: number): Promise<Conversation[]> => {
     if (!isSupabaseConfigured()) {
       return [];
     }
@@ -93,10 +93,16 @@ export const messagingService = {
     }
 
     try {
-      const { data, error } = await fromMethod('conversations')
+      let query = fromMethod('conversations')
         .select('*, vendors(id, shop_name, logo_url, slug)')
         .eq('user_id', userId)
         .order('last_message_at', { ascending: false });
+
+      if (limit !== undefined && offset !== undefined) {
+        query = query.range(offset, offset + limit - 1);
+      }
+
+      const { data, error } = await query;
 
       if (error) {
         console.error('Error fetching conversations:', error);
@@ -376,6 +382,55 @@ export const messagingService = {
     } catch (error) {
       console.error('Error fetching unread count:', error);
       return 0;
+    }
+  },
+
+  /**
+   * Delete a conversation
+   */
+  deleteConversation: async (conversationId: string, userId: string): Promise<boolean> => {
+    if (!isSupabaseConfigured()) {
+      return false;
+    }
+
+    const client = await getSupabaseClient();
+    const { data: { user: authUser } } = await client.auth.getUser();
+    
+    if (!authUser || authUser.id !== userId) {
+      console.error('User not authenticated or unauthorized');
+      return false;
+    }
+
+    try {
+      // Verify conversation belongs to user
+      const { data: conv, error: convError } = await client
+        .from('conversations')
+        .select('user_id')
+        .eq('id', conversationId)
+        .eq('user_id', authUser.id)
+        .maybeSingle();
+
+      if (convError || !conv) {
+        console.error('Conversation not found or does not belong to user:', convError);
+        return false;
+      }
+
+      // Delete conversation (messages will be cascade deleted)
+      const { error } = await client
+        .from('conversations')
+        .delete()
+        .eq('id', conversationId)
+        .eq('user_id', authUser.id);
+
+      if (error) {
+        console.error('Error deleting conversation:', error);
+        return false;
+      }
+
+      return true;
+    } catch (error) {
+      console.error('Error deleting conversation:', error);
+      return false;
     }
   },
 };

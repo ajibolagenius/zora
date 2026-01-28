@@ -3,11 +3,14 @@ import {
   View,
   Text,
   StyleSheet,
-  ScrollView,
+  FlatList,
   TouchableOpacity,
   RefreshControl,
   ActivityIndicator,
   Animated,
+  Alert,
+  Modal,
+  ScrollView,
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -15,6 +18,12 @@ import {
   ArrowLeft,
   ChatCircle,
   ChatCircleDots,
+  Question,
+  Trash,
+  Hand,
+  ChatCircleText,
+  X,
+  CheckCircle,
 } from 'phosphor-react-native';
 import { Colors } from '../constants/colors';
 import { Spacing, BorderRadius } from '../constants/spacing';
@@ -35,11 +44,17 @@ export default function MessagesScreen() {
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+  const [offset, setOffset] = useState(0);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [showHelpModal, setShowHelpModal] = useState(false);
 
   const fadeAnim = useRef(new Animated.Value(0)).current;
+  const PAGE_SIZE = 20;
 
-  const fetchConversations = useCallback(async () => {
+  const fetchConversations = useCallback(async (reset: boolean = false) => {
     if (!user?.user_id) {
       setLoading(false);
       return;
@@ -47,12 +62,35 @@ export default function MessagesScreen() {
 
     try {
       if (isSupabaseConfigured()) {
-        const fetchedConversations = await messagingService.getUserConversations(user.user_id);
-        setConversations(fetchedConversations);
-        
-        // Calculate total unread count
-        const totalUnread = fetchedConversations.reduce((sum, conv) => sum + (conv.unread_count_user || 0), 0);
-        setUnreadCount(totalUnread);
+        const currentOffset = reset ? 0 : offset;
+        const fetchedConversations = await messagingService.getUserConversations(
+          user.user_id,
+          PAGE_SIZE,
+          currentOffset
+        );
+
+        if (reset) {
+          setConversations(fetchedConversations);
+          setOffset(PAGE_SIZE);
+          // Calculate unread count for reset
+          const totalUnread = fetchedConversations.reduce((sum, conv) => sum + (conv.unread_count_user || 0), 0);
+          setUnreadCount(totalUnread);
+        } else {
+          setConversations((prev) => {
+            // Deduplicate by ID
+            const existingIds = new Set(prev.map(c => c.id));
+            const newConversations = fetchedConversations.filter(c => !existingIds.has(c.id));
+            const updated = [...prev, ...newConversations];
+            // Calculate unread count for pagination
+            const totalUnread = updated.reduce((sum, conv) => sum + (conv.unread_count_user || 0), 0);
+            setUnreadCount(totalUnread);
+            return updated;
+          });
+          setOffset((prev) => prev + fetchedConversations.length);
+        }
+
+        // Check if there are more conversations
+        setHasMore(fetchedConversations.length === PAGE_SIZE);
       } else {
         // Mock mode - show empty state
         setConversations([]);
@@ -63,11 +101,12 @@ export default function MessagesScreen() {
     } finally {
       setLoading(false);
       setRefreshing(false);
+      setLoadingMore(false);
     }
-  }, [user?.user_id]);
+  }, [user?.user_id, offset]);
 
   useEffect(() => {
-    fetchConversations();
+    fetchConversations(true);
 
     // Animate in
     Animated.timing(fadeAnim, {
@@ -75,7 +114,7 @@ export default function MessagesScreen() {
       duration: 300,
       useNativeDriver: true,
     }).start();
-  }, [fetchConversations]);
+  }, [user?.user_id]);
 
   // Subscribe to real-time updates
   useEffect(() => {
@@ -141,8 +180,56 @@ export default function MessagesScreen() {
 
   const onRefresh = useCallback(() => {
     setRefreshing(true);
-    fetchConversations();
+    setOffset(0);
+    setHasMore(true);
+    fetchConversations(true);
   }, [fetchConversations]);
+
+  const loadMoreConversations = useCallback(() => {
+    if (loadingMore || !hasMore || !user?.user_id) return;
+    
+    setLoadingMore(true);
+    fetchConversations(false);
+  }, [loadingMore, hasMore, user?.user_id, fetchConversations]);
+
+  const handleDeleteConversation = useCallback((conversationId: string) => {
+    Alert.alert(
+      'Delete Conversation',
+      'Are you sure you want to delete this conversation? This action cannot be undone.',
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: async () => {
+            if (!user?.user_id) return;
+            
+            setDeletingId(conversationId);
+            try {
+              const success = await messagingService.deleteConversation(conversationId, user.user_id);
+              if (success) {
+                setConversations((prev) => prev.filter((c) => c.id !== conversationId));
+                // Recalculate unread count
+                const remainingConversations = conversations.filter((c) => c.id !== conversationId);
+                const totalUnread = remainingConversations.reduce((sum, conv) => sum + (conv.unread_count_user || 0), 0);
+                setUnreadCount(totalUnread);
+              } else {
+                Alert.alert('Error', 'Failed to delete conversation. Please try again.');
+              }
+            } catch (error) {
+              console.error('Error deleting conversation:', error);
+              Alert.alert('Error', 'Failed to delete conversation. Please try again.');
+            } finally {
+              setDeletingId(null);
+            }
+          },
+        },
+      ]
+    );
+  }, [user?.user_id, conversations]);
 
   const formatTime = (dateString: string) => {
     const date = new Date(dateString);
@@ -187,12 +274,18 @@ export default function MessagesScreen() {
           <ArrowLeft size={24} color={Colors.textPrimary} weight="bold" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Messages</Text>
-        <View style={styles.headerRight} />
+        <TouchableOpacity
+          style={styles.helpButton}
+          onPress={() => setShowHelpModal(true)}
+          activeOpacity={0.8}
+        >
+          <Question size={24} color={Colors.secondary} weight="fill" />
+        </TouchableOpacity>
       </View>
 
       {/* Conversations List */}
       <Animated.View style={[styles.content, { opacity: fadeAnim }]}>
-        {conversations.length === 0 ? (
+        {conversations.length === 0 && !loading ? (
           <View style={styles.emptyState}>
             <ChatCircleDots size={64} color={Colors.textMuted} weight="duotone" />
             <Text style={styles.emptyTitle}>No messages yet</Text>
@@ -201,29 +294,23 @@ export default function MessagesScreen() {
             </Text>
           </View>
         ) : (
-          <ScrollView
-            style={styles.scrollView}
-            contentContainerStyle={styles.scrollContent}
-            refreshControl={
-              <RefreshControl
-                refreshing={refreshing}
-                onRefresh={onRefresh}
-                tintColor={Colors.primary}
-              />
-            }
-          >
-            {conversations.map((conversation) => {
+          <FlatList
+            data={conversations}
+            keyExtractor={(item) => item.id}
+            renderItem={({ item: conversation }) => {
               const vendor = conversation.vendor as any;
               const shopName = vendor?.shop_name || 'Vendor';
               const logoUrl = vendor?.logo_url || '';
               const unread = conversation.unread_count_user || 0;
+              const isDeleting = deletingId === conversation.id;
 
               return (
                 <TouchableOpacity
-                  key={conversation.id}
-                  style={styles.conversationCard}
+                  style={[styles.conversationCard, isDeleting && styles.conversationCardDeleting]}
                   onPress={() => handleConversationPress(conversation)}
+                  onLongPress={() => handleDeleteConversation(conversation.id)}
                   activeOpacity={0.8}
+                  disabled={isDeleting}
                 >
                   <LazyAvatar
                     source={logoUrl || ImageUrlBuilders.dicebearAvatar(shopName)}
@@ -256,12 +343,145 @@ export default function MessagesScreen() {
                       )}
                     </View>
                   </View>
+                  {isDeleting && (
+                    <View style={styles.deletingOverlay}>
+                      <ActivityIndicator size="small" color={Colors.textPrimary} />
+                    </View>
+                  )}
                 </TouchableOpacity>
               );
-            })}
-          </ScrollView>
+            }}
+            contentContainerStyle={styles.scrollContent}
+            refreshControl={
+              <RefreshControl
+                refreshing={refreshing}
+                onRefresh={onRefresh}
+                tintColor={Colors.primary}
+              />
+            }
+            onEndReached={loadMoreConversations}
+            onEndReachedThreshold={0.5}
+            ListFooterComponent={
+              loadingMore && hasMore ? (
+                <View style={styles.loadingFooter}>
+                  <ActivityIndicator size="small" color={Colors.primary} />
+                  <Text style={styles.loadingFooterText}>Loading more...</Text>
+                </View>
+              ) : null
+            }
+            ListEmptyComponent={
+              loading ? (
+                <View style={styles.loadingContainer}>
+                  <ActivityIndicator size="large" color={Colors.primary} />
+                </View>
+              ) : null
+            }
+          />
         )}
       </Animated.View>
+
+      {/* Help Modal */}
+      <Modal
+        visible={showHelpModal}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowHelpModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            {/* Header */}
+            <View style={styles.modalHeader}>
+              <View style={styles.modalHeaderLeft}>
+                <View style={[styles.modalIconContainer, { backgroundColor: Colors.secondary15 }]}>
+                  <Question size={24} color={Colors.secondary} weight="fill" />
+                </View>
+                <Text style={styles.modalTitle}>Messages Help</Text>
+              </View>
+              <TouchableOpacity
+                style={styles.modalCloseButton}
+                onPress={() => setShowHelpModal(false)}
+                activeOpacity={0.8}
+              >
+                <X size={24} color={Colors.textPrimary} weight="bold" />
+              </TouchableOpacity>
+            </View>
+
+            <ScrollView style={styles.modalScrollView} showsVerticalScrollIndicator={false}>
+              {/* Delete Section */}
+              <View style={styles.helpSection}>
+                <View style={styles.helpSectionHeader}>
+                  <View style={[styles.helpIconContainer, { backgroundColor: Colors.error + '20' }]}>
+                    <Trash size={20} color={Colors.error} weight="fill" />
+                  </View>
+                  <Text style={styles.helpSectionTitle}>Deleting Conversations</Text>
+                </View>
+                <View style={styles.helpSectionContent}>
+                  <View style={styles.helpItem}>
+                    <View style={[styles.helpBulletIcon, { backgroundColor: Colors.primary15 }]}>
+                      <Hand size={16} color={Colors.primary} weight="fill" />
+                    </View>
+                    <Text style={styles.helpText}>
+                      <Text style={styles.helpTextBold}>Long press</Text> on any conversation to delete it
+                    </Text>
+                  </View>
+                  <View style={styles.helpItem}>
+                    <View style={[styles.helpBulletIcon, { backgroundColor: Colors.info + '20' }]}>
+                      <CheckCircle size={16} color={Colors.info} weight="fill" />
+                    </View>
+                    <Text style={styles.helpText}>
+                      You'll be asked to confirm before deleting
+                    </Text>
+                  </View>
+                </View>
+              </View>
+
+              {/* Messaging Details Section */}
+              <View style={styles.helpSection}>
+                <View style={styles.helpSectionHeader}>
+                  <View style={[styles.helpIconContainer, { backgroundColor: Colors.secondary15 }]}>
+                    <ChatCircleText size={20} color={Colors.secondary} weight="fill" />
+                  </View>
+                  <Text style={styles.helpSectionTitle}>Messaging Details</Text>
+                </View>
+                <View style={styles.helpSectionContent}>
+                  <View style={styles.helpItem}>
+                    <View style={[styles.helpBulletIcon, { backgroundColor: Colors.success + '20' }]}>
+                      <ChatCircle size={16} color={Colors.success} weight="fill" />
+                    </View>
+                    <Text style={styles.helpText}>
+                      Tap any conversation to open and chat with the vendor
+                    </Text>
+                  </View>
+                  <View style={styles.helpItem}>
+                    <View style={[styles.helpBulletIcon, { backgroundColor: Colors.info + '20' }]}>
+                      <CheckCircle size={16} color={Colors.info} weight="fill" />
+                    </View>
+                    <Text style={styles.helpText}>
+                      Messages update in real-time as you chat
+                    </Text>
+                  </View>
+                  <View style={styles.helpItem}>
+                    <View style={[styles.helpBulletIcon, { backgroundColor: Colors.secondary15 }]}>
+                      <ChatCircleDots size={16} color={Colors.secondary} weight="fill" />
+                    </View>
+                    <Text style={styles.helpText}>
+                      Unread message counts are shown with a badge
+                    </Text>
+                  </View>
+                  <View style={styles.helpItem}>
+                    <View style={[styles.helpBulletIcon, { backgroundColor: Colors.primary15 }]}>
+                      <Hand size={16} color={Colors.primary} weight="fill" />
+                    </View>
+                    <Text style={styles.helpText}>
+                      Pull down to refresh your conversations
+                    </Text>
+                  </View>
+                </View>
+              </View>
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -296,17 +516,157 @@ const styles = StyleSheet.create({
     fontSize: FontSize.h2,
     color: Colors.textPrimary,
   },
-  headerRight: {
+  helpButton: {
     width: 40,
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   content: {
     flex: 1,
   },
-  scrollView: {
-    flex: 1,
-  },
   scrollContent: {
     padding: Spacing.base,
+  },
+  conversationCard: {
+    flexDirection: 'row',
+    backgroundColor: Colors.cardDark,
+    borderRadius: BorderRadius.lg,
+    padding: Spacing.base,
+    marginBottom: Spacing.md,
+    borderWidth: 1,
+    borderColor: Colors.borderDark,
+  },
+  conversationCardDeleting: {
+    opacity: 0.5,
+  },
+  deletingOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: Colors.backgroundDark + '80',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: BorderRadius.lg,
+  },
+  loadingFooter: {
+    paddingVertical: Spacing.lg,
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexDirection: 'row',
+    gap: Spacing.sm,
+  },
+  loadingFooterText: {
+    fontFamily: FontFamily.body,
+    fontSize: FontSize.small,
+    color: Colors.textMuted,
+    marginLeft: Spacing.sm,
+  },
+  // Help Modal Styles
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: Colors.overlay,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: Spacing.base,
+  },
+  modalContent: {
+    backgroundColor: Colors.cardDark,
+    borderRadius: BorderRadius.xl,
+    width: '100%',
+    maxWidth: 500,
+    maxHeight: '80%',
+    borderWidth: 1,
+    borderColor: Colors.borderDark,
+    overflow: 'hidden',
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: Spacing.base,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.borderDark,
+  },
+  modalHeaderLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.sm,
+  },
+  modalIconContainer: {
+    width: 40,
+    height: 40,
+    borderRadius: BorderRadius.md,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalTitle: {
+    fontFamily: FontFamily.displaySemiBold,
+    fontSize: FontSize.h3,
+    color: Colors.textPrimary,
+  },
+  modalCloseButton: {
+    width: 36,
+    height: 36,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: BorderRadius.md,
+    backgroundColor: Colors.white10,
+  },
+  modalScrollView: {
+    flex: 1,
+  },
+  helpSection: {
+    padding: Spacing.base,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.borderDark,
+  },
+  helpSectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.sm,
+    marginBottom: Spacing.md,
+  },
+  helpIconContainer: {
+    width: 36,
+    height: 36,
+    borderRadius: BorderRadius.md,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  helpSectionTitle: {
+    fontFamily: FontFamily.displaySemiBold,
+    fontSize: FontSize.h4,
+    color: Colors.textPrimary,
+  },
+  helpSectionContent: {
+    gap: Spacing.md,
+  },
+  helpItem: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: Spacing.sm,
+  },
+  helpBulletIcon: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 2,
+  },
+  helpText: {
+    flex: 1,
+    fontFamily: FontFamily.body,
+    fontSize: FontSize.body,
+    color: Colors.textSecondary,
+    lineHeight: 22,
+  },
+  helpTextBold: {
+    fontFamily: FontFamily.bodySemiBold,
+    color: Colors.textPrimary,
   },
   emptyState: {
     flex: 1,
@@ -327,15 +687,6 @@ const styles = StyleSheet.create({
     color: Colors.textMuted,
     textAlign: 'center',
     lineHeight: 22,
-  },
-  conversationCard: {
-    flexDirection: 'row',
-    backgroundColor: Colors.cardDark,
-    borderRadius: BorderRadius.lg,
-    padding: Spacing.base,
-    marginBottom: Spacing.md,
-    borderWidth: 1,
-    borderColor: Colors.borderDark,
   },
   avatar: {
     marginRight: Spacing.md,
