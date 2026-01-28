@@ -147,7 +147,7 @@ export default function MessagesScreen() {
 
           // Calculate unread count from the updated list
           // Use the calculated value from the functional update
-          if (updatedConversationsForUnread) {
+          if (updatedConversationsForUnread !== null) {
             const totalUnread = updatedConversationsForUnread.reduce(
               (sum, conv) => sum + (conv.unread_count_user || 0),
               0
