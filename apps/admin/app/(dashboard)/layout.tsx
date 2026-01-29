@@ -1,14 +1,56 @@
 "use client";
 
 import { useState } from "react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Sidebar } from "../../components/Sidebar";
-import { Menu } from "lucide-react";
+import { Menu, Wifi, WifiOff, Bell } from "lucide-react";
+import { AdminRealtimeProvider, useAdminRealtime } from "../../providers";
+import { useAuth } from "../../hooks";
 
-export default function DashboardLayout({
-    children,
-}: {
-    children: React.ReactNode;
-}) {
+// Create a client
+const queryClient = new QueryClient({
+    defaultOptions: {
+        queries: {
+            staleTime: 1000 * 60 * 5, // 5 minutes
+            retry: 1,
+        },
+    },
+});
+
+// Connection status indicator component
+function ConnectionIndicator() {
+    const { isConnected, stats } = useAdminRealtime();
+
+    const totalPending =
+        stats.pendingOrders +
+        stats.pendingVendorApplications +
+        stats.unreadEmailThreads;
+
+    return (
+        <div className="flex items-center gap-3">
+            {totalPending > 0 && (
+                <div className="flex items-center gap-1 bg-amber-100 text-amber-700 text-xs px-2 py-1 rounded-full">
+                    <Bell className="w-3 h-3" />
+                    <span>{totalPending}</span>
+                </div>
+            )}
+            <div
+                className={`flex items-center gap-1 text-xs ${isConnected ? "text-green-600" : "text-slate-400"
+                    }`}
+                title={isConnected ? "Connected" : "Disconnected"}
+            >
+                {isConnected ? (
+                    <Wifi className="w-3.5 h-3.5" />
+                ) : (
+                    <WifiOff className="w-3.5 h-3.5" />
+                )}
+            </div>
+        </div>
+    );
+}
+
+// Inner layout with realtime context
+function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
     return (
@@ -30,9 +72,47 @@ export default function DashboardLayout({
                     </button>
                     <span className="text-xl font-bold text-primary">ZORA</span>
                     <span className="text-xs bg-slate-700 px-2 py-0.5 rounded text-slate-300">Admin</span>
+                    <div className="ml-auto">
+                        <ConnectionIndicator />
+                    </div>
                 </div>
                 {children}
             </main>
         </div>
+    );
+}
+
+export default function DashboardLayout({
+    children,
+}: {
+    children: React.ReactNode;
+}) {
+    const { user, isLoading, isAdmin } = useAuth();
+
+    if (isLoading) {
+        return (
+            <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+            </div>
+        );
+    }
+
+    return (
+        <QueryClientProvider client={queryClient}>
+            <AdminRealtimeProvider
+                adminId={user?.id ?? null}
+                enabled={!!user?.id && isAdmin}
+                onNewOrder={(order) => {
+                    console.log("[Admin] New order received:", order.id);
+                    // You can show a toast notification here
+                }}
+                onNewApplication={(application) => {
+                    console.log("[Admin] New vendor application:", application.id);
+                    // You can show a toast notification here
+                }}
+            >
+                <DashboardLayoutInner>{children}</DashboardLayoutInner>
+            </AdminRealtimeProvider>
+        </QueryClientProvider>
     );
 }

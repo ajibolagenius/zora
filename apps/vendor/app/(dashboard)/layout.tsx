@@ -1,14 +1,50 @@
 "use client";
 
 import { useState } from "react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Sidebar } from "../../components/Sidebar";
-import { Menu } from "lucide-react";
+import { Menu, Wifi, WifiOff } from "lucide-react";
+import { VendorRealtimeProvider, useVendorRealtime } from "../../providers";
+import { useAuth } from "../../hooks";
 
-export default function DashboardLayout({
-    children,
-}: {
-    children: React.ReactNode;
-}) {
+// Create a client
+const queryClient = new QueryClient({
+    defaultOptions: {
+        queries: {
+            staleTime: 1000 * 60 * 5, // 5 minutes
+            retry: 1,
+        },
+    },
+});
+
+// Connection status indicator component
+function ConnectionIndicator() {
+    const { isConnected, newOrdersCount } = useVendorRealtime();
+
+    return (
+        <div className="flex items-center gap-2">
+            {newOrdersCount > 0 && (
+                <span className="bg-red-500 text-white text-xs px-2 py-0.5 rounded-full animate-pulse">
+                    {newOrdersCount} new
+                </span>
+            )}
+            <div
+                className={`flex items-center gap-1 text-xs ${isConnected ? "text-green-600" : "text-gray-400"
+                    }`}
+                title={isConnected ? "Connected" : "Disconnected"}
+            >
+                {isConnected ? (
+                    <Wifi className="w-3.5 h-3.5" />
+                ) : (
+                    <WifiOff className="w-3.5 h-3.5" />
+                )}
+            </div>
+        </div>
+    );
+}
+
+// Inner layout with realtime context
+function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
     return (
@@ -30,9 +66,43 @@ export default function DashboardLayout({
                     </button>
                     <span className="text-xl font-bold text-primary">ZORA</span>
                     <span className="text-xs bg-[#342418] px-2 py-0.5 rounded text-[#CBA990]">Vendor</span>
+                    <div className="ml-auto">
+                        <ConnectionIndicator />
+                    </div>
                 </div>
                 {children}
             </main>
         </div>
+    );
+}
+
+export default function DashboardLayout({
+    children,
+}: {
+    children: React.ReactNode;
+}) {
+    const { vendor, isLoading } = useAuth();
+
+    if (isLoading) {
+        return (
+            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+            </div>
+        );
+    }
+
+    return (
+        <QueryClientProvider client={queryClient}>
+            <VendorRealtimeProvider
+                vendorId={vendor?.id ?? null}
+                enabled={!!vendor?.id}
+                onNewOrder={(order) => {
+                    console.log("[Vendor] New order received:", order.id);
+                    // You can show a toast notification here
+                }}
+            >
+                <DashboardLayoutInner>{children}</DashboardLayoutInner>
+            </VendorRealtimeProvider>
+        </QueryClientProvider>
     );
 }
