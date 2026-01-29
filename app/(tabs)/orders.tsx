@@ -7,7 +7,6 @@ import {
     TouchableOpacity,
     Animated,
     Easing,
-    Platform,
     TextInput,
     Keyboard,
 } from 'react-native';
@@ -31,7 +30,7 @@ import {
     CaretDown,
 } from 'phosphor-react-native';
 import { Colors } from '../../constants/colors';
-import { Spacing, BorderRadius, Heights } from '../../constants/spacing';
+import { Spacing, BorderRadius, Heights, Shadows } from '../../constants/spacing';
 import { FontSize, FontFamily } from '../../constants/typography';
 import { PlaceholderImages } from '../../constants';
 import { Button, LazyImage } from '../../components/ui';
@@ -817,17 +816,7 @@ const styles = StyleSheet.create({
         borderRadius: BorderRadius.lg,
         padding: Spacing.base,
         gap: Spacing.md,
-        ...Platform.select({
-            ios: {
-                shadowColor: '#000',
-                shadowOffset: { width: 0, height: 2 },
-                shadowOpacity: 0.08,
-                shadowRadius: 4,
-            },
-            android: {
-                elevation: 2,
-            },
-        }),
+        ...Shadows.md,
     },
     orderHeader: {
         flexDirection: 'row',

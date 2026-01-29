@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 import { IconProps } from 'phosphor-react-native';
 import { Colors } from '../../constants/colors';
-import { BorderRadius, Spacing, Heights } from '../../constants/spacing';
+import { BorderRadius, Spacing, Heights, IconSize } from '../../constants/spacing';
 import { FontSize, FontWeight, FontFamily } from '../../constants/typography';
 
 interface ButtonProps extends TouchableOpacityProps {
@@ -53,9 +53,9 @@ export const Button: React.FC<ButtonProps> = ({
     if (disabled) {
       switch (variant) {
         case 'primary':
-          return 'rgba(204, 0, 0, 0.5)';
+          return Colors.primary50;
         case 'secondary':
-          return 'rgba(255, 204, 0, 0.5)';
+          return Colors.secondary50;
         default:
           return 'transparent';
       }
@@ -75,7 +75,7 @@ export const Button: React.FC<ButtonProps> = ({
 
   const getTextColor = (): string => {
     if (disabled && (variant === 'outline' || variant === 'ghost')) {
-      return 'rgba(204, 0, 0, 0.5)';
+      return Colors.primary50;
     }
     switch (variant) {
       case 'primary':
@@ -115,11 +115,11 @@ export const Button: React.FC<ButtonProps> = ({
   const getIconSize = (): number => {
     switch (size) {
       case 'sm':
-        return 16;
+        return IconSize.tiny;
       case 'lg':
-        return 22;
+        return IconSize.input;
       default:
-        return 20;
+        return IconSize.small;
     }
   };
 
@@ -139,7 +139,7 @@ export const Button: React.FC<ButtonProps> = ({
     height: getHeight(),
     width: fullWidth ? '100%' : undefined,
     borderWidth: variant === 'outline' ? 2 : 0,
-    borderColor: disabled ? 'rgba(204, 0, 0, 0.5)' : Colors.primary,
+    borderColor: disabled ? Colors.primary50 : Colors.primary,
     paddingHorizontal: getPadding(),
     borderRadius: BorderRadius.lg, // 12px for consistency
   };

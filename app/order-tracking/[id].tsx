@@ -9,7 +9,6 @@ import {
   Dimensions,
   Animated,
   Easing,
-  Platform,
   ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -28,7 +27,7 @@ import {
   Warning,
 } from 'phosphor-react-native';
 import { Colors } from '../../constants/colors';
-import { Spacing, BorderRadius } from '../../constants/spacing';
+import { Spacing, BorderRadius, Shadows } from '../../constants/spacing';
 import { FontSize, FontFamily } from '../../constants/typography';
 import { AnimationDuration, AnimationEasing, ImageUrlBuilders } from '../../constants';
 import { orderService } from '../../services/supabaseService';
@@ -519,14 +518,7 @@ const styles = StyleSheet.create({
     height: '100%',
     backgroundColor: Colors.primary,
     borderRadius: 2,
-    ...Platform.select({
-      ios: {
-        shadowColor: Colors.primary,
-        shadowOffset: { width: 0, height: 0 },
-        shadowOpacity: 0.5,
-        shadowRadius: 8,
-      },
-    }),
+    ...Shadows.glowPrimary,
   },
   
   // Pins - Balloon Style
@@ -540,17 +532,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.primary,
     padding: Spacing.sm,
     borderRadius: BorderRadius.lg,
-    ...Platform.select({
-      ios: {
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 3 },
-        shadowOpacity: 0.3,
-        shadowRadius: 6,
-      },
-      android: {
-        elevation: 6,
-      },
-    }),
+    ...Shadows.md,
   },
   markerTail: {
     width: 0,
@@ -581,17 +563,7 @@ const styles = StyleSheet.create({
     padding: Spacing.sm,
     borderRadius: BorderRadius.full,
     backgroundColor: '#FFFFFF',
-    ...Platform.select({
-      ios: {
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.3,
-        shadowRadius: 4,
-      },
-      android: {
-        elevation: 4,
-      },
-    }),
+    ...Shadows.sm,
   },
   destinationPinContainer: {
     position: 'absolute',
@@ -603,17 +575,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.success || '#22C55E',
     padding: Spacing.sm,
     borderRadius: BorderRadius.lg,
-    ...Platform.select({
-      ios: {
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 3 },
-        shadowOpacity: 0.3,
-        shadowRadius: 6,
-      },
-      android: {
-        elevation: 6,
-      },
-    }),
+    ...Shadows.md,
   },
   destinationTail: {
     width: 0,
@@ -695,17 +657,7 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     zIndex: 40,
-    ...Platform.select({
-      ios: {
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: -4 },
-        shadowOpacity: 0.2,
-        shadowRadius: 8,
-      },
-      android: {
-        elevation: 16,
-      },
-    }),
+    ...Shadows.modal,
   },
   dragHandle: {
     width: 40,

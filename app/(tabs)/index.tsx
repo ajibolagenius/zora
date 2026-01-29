@@ -24,7 +24,7 @@ import {
   Sliders,
 } from 'phosphor-react-native';
 import { Colors } from '../../constants/colors';
-import { Spacing, BorderRadius, Heights } from '../../constants/spacing';
+import { Spacing, BorderRadius, Heights, Gaps, TouchTarget, ComponentDimensions } from '../../constants/spacing';
 import { FontSize, FontFamily } from '../../constants/typography';
 import { AnimationDuration, AnimationEasing } from '../../constants';
 import { FeaturedSlider, RegionCard, VendorCard, ProductCard } from '../../components/ui';
@@ -441,7 +441,7 @@ export default function HomeScreen() {
         }
         onScroll={(event) => {
           const { layoutMeasurement, contentOffset, contentSize } = event.nativeEvent;
-          const paddingToBottom = 100;
+          const paddingToBottom = Heights.section;
           if (layoutMeasurement.height + contentOffset.y >= contentSize.height - paddingToBottom) {
             loadMoreProducts();
           }
@@ -564,7 +564,7 @@ export default function HomeScreen() {
           </View>
 
           {/* Bottom padding for tab bar */}
-          <View style={{ height: 100 }} />
+          <View style={{ height: Heights.section }} />
         </Animated.View>
       </ScrollView>
     </SafeAreaView>
@@ -599,7 +599,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.sm,
     borderRadius: BorderRadius.full,
-    gap: 6,
+    gap: Gaps.md,
   },
   locationText: {
     fontFamily: FontFamily.bodySemiBold,
@@ -613,8 +613,8 @@ const styles = StyleSheet.create({
   },
   headerIconButton: {
     position: 'relative',
-    width: 44,
-    height: 44,
+    width: TouchTarget.min,
+    height: TouchTarget.min,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -622,8 +622,8 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 8,
     right: 8,
-    minWidth: 18,
-    height: 18,
+    minWidth: ComponentDimensions.badge.height - 2,
+    height: ComponentDimensions.badge.height - 2,
     borderRadius: 9,
     backgroundColor: Colors.primary,
     justifyContent: 'center',
@@ -634,7 +634,7 @@ const styles = StyleSheet.create({
   },
   headerIconBadgeText: {
     fontFamily: FontFamily.bodyBold,
-    fontSize: 10,
+    fontSize: FontSize.tiny,
     color: Colors.textPrimary,
     lineHeight: 12,
   },
@@ -659,9 +659,9 @@ const styles = StyleSheet.create({
     fontSize: FontSize.small,
   },
   filterButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+    width: Heights.buttonSmall,
+    height: Heights.buttonSmall,
+    borderRadius: Heights.buttonSmall / 2,
     backgroundColor: Colors.backgroundDark,
     justifyContent: 'center',
     alignItems: 'center',

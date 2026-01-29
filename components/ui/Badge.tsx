@@ -47,7 +47,7 @@ export const Badge: React.FC<BadgeProps> = ({
       case 'info':
         return Colors.info;
       case 'category':
-        return 'rgba(204, 0, 0, 0.1)';
+        return Colors.primary10;
       default:
         return Colors.primary;
     }

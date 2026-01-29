@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, Keyboard } from 'react-native';
 import { Colors } from '../../constants/colors';
-import { BorderRadius, Spacing } from '../../constants/spacing';
+import { BorderRadius, Spacing, Heights } from '../../constants/spacing';
 import { FontSize, FontFamily } from '../../constants/typography';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
@@ -52,7 +52,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.cardDark,
     borderRadius: BorderRadius.lg,
     paddingHorizontal: Spacing.base,
-    height: 48,
+    height: Heights.input,
   },
   input: {
     flex: 1,

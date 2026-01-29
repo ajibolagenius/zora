@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Colors } from '../../constants/colors';
-import { BorderRadius, Spacing, Heights } from '../../constants/spacing';
+import { BorderRadius, Spacing, Heights, IconSize } from '../../constants/spacing';
 import { FontSize, FontFamily } from '../../constants/typography';
 
 type IconName = keyof typeof MaterialCommunityIcons.glyphMap;
@@ -70,7 +70,7 @@ export const Input: React.FC<InputProps> = ({
         {leftIcon && (
           <MaterialCommunityIcons
             name={leftIcon}
-            size={22}
+            size={IconSize.input}
             color={isFocused ? Colors.primary : Colors.textMuted}
             style={styles.leftIcon}
           />
@@ -92,7 +92,7 @@ export const Input: React.FC<InputProps> = ({
           <TouchableOpacity onPress={handleTogglePassword} style={styles.rightIconButton}>
             <MaterialCommunityIcons
               name={showPassword ? 'eye-outline' : 'eye-off-outline'}
-              size={22}
+              size={IconSize.input}
               color={Colors.textMuted}
             />
           </TouchableOpacity>
@@ -104,7 +104,7 @@ export const Input: React.FC<InputProps> = ({
           >
             <MaterialCommunityIcons
               name={rightIcon}
-              size={22}
+              size={IconSize.input}
               color={Colors.textMuted}
             />
           </TouchableOpacity>
@@ -130,7 +130,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: Colors.cardDark,
-    borderRadius: BorderRadius.md,
+    borderRadius: BorderRadius.lg,
     borderWidth: 1,
     borderColor: Colors.borderDark,
     height: Heights.input,

@@ -10,7 +10,6 @@ import {
     Alert,
     Animated,
     Easing,
-    Platform,
     Keyboard,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -23,7 +22,7 @@ import {
 } from 'phosphor-react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { Colors } from '../constants/colors';
-import { Spacing, BorderRadius, Heights } from '../constants/spacing';
+import { Spacing, BorderRadius, Heights, Shadows } from '../constants/spacing';
 import { FontSize, FontFamily } from '../constants/typography';
 import { ResolutionOptions, ValidationLimits, CommonImages, Placeholders, AnimationDuration, AnimationEasing } from '../constants';
 import { orderService, disputeService } from '../services/supabaseService';
@@ -601,17 +600,7 @@ const styles = StyleSheet.create({
         borderRadius: BorderRadius.lg,
         justifyContent: 'center',
         alignItems: 'center',
-        ...Platform.select({
-            ios: {
-                shadowColor: Colors.primary,
-                shadowOffset: { width: 0, height: 4 },
-                shadowOpacity: 0.3,
-                shadowRadius: 8,
-            },
-            android: {
-                elevation: 4,
-            },
-        }),
+        ...Shadows.glowPrimary,
     },
     submitButtonText: {
         fontFamily: FontFamily.displaySemiBold,

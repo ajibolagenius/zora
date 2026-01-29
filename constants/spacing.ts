@@ -29,6 +29,19 @@ export const BorderRadius = {
 // Shadows - Cross-platform compatible
 // Uses boxShadow for web (suppresses deprecation warning) and native shadow props for iOS/Android
 export const Shadows = {
+    // Extra small - very subtle shadow
+    xs: Platform.select({
+        web: {
+            boxShadow: '0px 1px 1px rgba(34, 23, 16, 0.03)',
+        },
+        default: {
+            shadowColor: '#221710',
+            shadowOffset: { width: 0, height: 1 },
+            shadowOpacity: 0.03,
+            shadowRadius: 1,
+            elevation: 1,
+        },
+    }),
     sm: Platform.select({
         web: {
             boxShadow: '0px 1px 2px rgba(34, 23, 16, 0.05)',
@@ -77,15 +90,85 @@ export const Shadows = {
             elevation: 8,
         },
     }),
+    // Card shadow - alias for md (commonly used for cards)
+    card: Platform.select({
+        web: {
+            boxShadow: '0px 2px 4px rgba(34, 23, 16, 0.08)',
+        },
+        default: {
+            shadowColor: '#221710',
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.08,
+            shadowRadius: 4,
+            elevation: 2,
+        },
+    }),
+    // Bottom sheet / modal shadow
+    modal: Platform.select({
+        web: {
+            boxShadow: '0px -4px 20px rgba(0, 0, 0, 0.15)',
+        },
+        default: {
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: -4 },
+            shadowOpacity: 0.15,
+            shadowRadius: 20,
+            elevation: 10,
+        },
+    }),
+    // Glow effect for primary color (buttons, CTAs)
+    glowPrimary: Platform.select({
+        web: {
+            boxShadow: '0px 4px 12px rgba(204, 0, 0, 0.3)',
+        },
+        default: {
+            shadowColor: '#CC0000',
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.3,
+            shadowRadius: 12,
+            elevation: 6,
+        },
+    }),
+    // Glow effect for secondary color (price highlights)
+    glowSecondary: Platform.select({
+        web: {
+            boxShadow: '0px 4px 12px rgba(255, 204, 0, 0.3)',
+        },
+        default: {
+            shadowColor: '#FFCC00',
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.3,
+            shadowRadius: 12,
+            elevation: 6,
+        },
+    }),
+    // None - explicit no shadow
+    none: Platform.select({
+        web: {
+            boxShadow: 'none',
+        },
+        default: {
+            shadowColor: 'transparent',
+            shadowOffset: { width: 0, height: 0 },
+            shadowOpacity: 0,
+            shadowRadius: 0,
+            elevation: 0,
+        },
+    }),
 };
 
 // Icon Sizes
 export const IconSize = {
+    xs: 12,
     tiny: 16,
     small: 20,
     medium: 24,
     large: 28,
     xl: 32,
+    xxl: 40,
+    // Input icon sizes (commonly used)
+    input: 22,
+    inputSmall: 18,
 };
 
 // Touch Targets
@@ -140,12 +223,40 @@ export const ComponentDimensions = {
     badge: {
         height: 20,
         minWidth: 24,
+        dotSize: 8,
     },
     // Card dimensions
     card: {
         minHeight: 80,
         imageHeight: 200,
         productImage: 260,
+        // Product card specific
+        productCardHeight: 280,
+        productCardImageHeight: 130,
+        // Vendor card specific
+        vendorCardHeight: 140,
+        vendorCardImageHeight: 80,
+        // Featured/banner cards
+        featuredHeight: 180,
+        bannerHeight: 160,
+    },
+    // Quantity selector
+    quantitySelector: {
+        buttonSize: 32,
+        buttonSizeSmall: 28,
+        minWidth: 100,
+    },
+    // Rating display
+    rating: {
+        starSize: 14,
+        starSizeSmall: 12,
+        starSizeLarge: 18,
+    },
+    // Price display
+    price: {
+        largeFontSize: 30,
+        mediumFontSize: 24,
+        smallFontSize: 16,
     },
 } as const;
 

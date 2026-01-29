@@ -7,24 +7,21 @@ import {
   TouchableOpacity,
   Animated,
   Easing,
-  Platform,
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import {
   ShoppingCart,
   Trash,
-  Minus,
-  Plus,
   ArrowLeft,
   ArrowRight,
   Storefront,
 } from 'phosphor-react-native';
 import { Colors } from '../../constants/colors';
-import { Spacing, BorderRadius, Heights } from '../../constants/spacing';
+import { Spacing, BorderRadius, Heights, Shadows } from '../../constants/spacing';
 import { FontSize, FontFamily } from '../../constants/typography';
 import { PlaceholderImages, AnimationDuration, AnimationEasing } from '../../constants';
-import { Button, LazyImage } from '../../components/ui';
+import { Button, LazyImage, QuantitySelector } from '../../components/ui';
 import { useCartStore } from '../../stores/cartStore';
 import { productService as supabaseProductService, vendorService as supabaseVendorService } from '../../services/supabaseService';
 import { realtimeService } from '../../services/realtimeService';
@@ -258,21 +255,17 @@ export default function CartTab() {
                       </Text>
 
                       {/* Quantity Stepper */}
-                      <View style={styles.quantityStepper}>
-                        <TouchableOpacity
-                          style={styles.stepperButtonMinus}
-                          onPress={() => updateQuantity(item.product_id, item.quantity - 1)}
-                        >
-                          <Minus size={14} color={Colors.textPrimary} weight="bold" />
-                        </TouchableOpacity>
-                        <Text style={styles.quantityText}>{item.quantity}</Text>
-                        <TouchableOpacity
-                          style={styles.stepperButtonPlus}
-                          onPress={() => updateQuantity(item.product_id, item.quantity + 1)}
-                        >
-                          <Plus size={14} color={Colors.backgroundDark} weight="bold" />
-                        </TouchableOpacity>
-                      </View>
+                      <QuantitySelector
+                        quantity={item.quantity}
+                        onIncrease={() => updateQuantity(item.product_id, item.quantity + 1)}
+                        onDecrease={() => updateQuantity(item.product_id, item.quantity - 1)}
+                        onRemove={() => removeItem(item.product_id)}
+                        min={1}
+                        max={99}
+                        size="small"
+                        variant="compact"
+                        showRemoveOnMin={true}
+                      />
                     </View>
                   </View>
                 </TouchableOpacity>
@@ -282,7 +275,7 @@ export default function CartTab() {
         ))}
 
         {/* Bottom spacing for fixed checkout button + tab bar */}
-        <View style={{ height: 160 }} />
+        <View style={{ height: Spacing['5xl'] * 2.5 }} />
       </Animated.ScrollView>
 
       {/* Fixed Footer */}
@@ -344,9 +337,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.xl,
   },
   emptyIconContainer: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
+    width: Spacing['5xl'] + Spacing['2xl'] + Spacing.xs,
+    height: Spacing['5xl'] + Spacing['2xl'] + Spacing.xs,
+    borderRadius: BorderRadius.full,
     backgroundColor: Colors.cardDark,
     justifyContent: 'center',
     alignItems: 'center',
@@ -424,8 +417,8 @@ const styles = StyleSheet.create({
     borderTopColor: Colors.borderDark,
   },
   itemImage: {
-    width: 100,
-    height: 100,
+    width: Spacing['5xl'] + Spacing['2xl'] + Spacing.xs,
+    height: Spacing['5xl'] + Spacing['2xl'] + Spacing.xs,
     borderRadius: BorderRadius.lg,
     backgroundColor: Colors.backgroundDark,
   },
@@ -468,38 +461,6 @@ const styles = StyleSheet.create({
     color: Colors.secondary,
   },
 
-  // Quantity Stepper
-  quantityStepper: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: Colors.backgroundDark,
-    borderRadius: BorderRadius.full,
-    height: 36,
-  },
-  stepperButtonMinus: {
-    width: 36,
-    height: 36,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: Colors.backgroundDark,
-    borderRadius: 18,
-  },
-  stepperButtonPlus: {
-    width: 36,
-    height: 36,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: Colors.secondary,
-    borderRadius: 18,
-  },
-  quantityText: {
-    fontFamily: FontFamily.bodySemiBold,
-    fontSize: FontSize.body,
-    color: Colors.textPrimary,
-    width: 32,
-    textAlign: 'center',
-  },
-
   // Footer
   footerContainer: {
     position: 'absolute',
@@ -536,17 +497,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.secondary,
     borderRadius: BorderRadius.lg,
     height: Heights.button,
-    ...Platform.select({
-      ios: {
-        shadowColor: Colors.secondary,
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.3,
-        shadowRadius: 8,
-      },
-      android: {
-        elevation: 4,
-      },
-    }),
+    ...Shadows.lg,
   },
   checkoutText: {
     fontFamily: FontFamily.displaySemiBold,

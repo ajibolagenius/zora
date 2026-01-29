@@ -3,11 +3,39 @@
 import { ApiEndpoints } from './api';
 
 /**
+ * Blurhash Placeholders
+ * Compact placeholder strings that render as blurred backgrounds
+ * These are rendered natively by expo-image without fetching external images
+ *
+ * Generate custom blurhashes at: https://blurha.sh/
+ */
+export const PlaceholderBlurhash = {
+    // Neutral dark (matches app's dark theme - cardDark #342418)
+    dark: 'L03+}KWB00of00of00of00WB00WB',
+
+    // Warm brown (matches app's backgroundDark #221710)
+    warmBrown: 'L02rs}t700t700t700t700t700',
+
+    // Neutral gray
+    gray: 'L6PZfSi_.AyE_3t7t7R**0teleP',
+
+    // Food-themed warm placeholder
+    food: 'LBF~xq9F00Rj~qM{IUt79Fxu-;M{',
+
+    // Avatar placeholder (circular friendly)
+    avatar: 'L9AS*J~q00%M00M{~q%M00%M00%M',
+
+    // Default - warm dark matching app theme
+    default: 'L03+}KWB00of00of00of00WB00WB',
+} as const;
+
+/**
  * Placeholder Image URLs
- * Default images used when actual images are not available
+ * Fallback images used when actual images fail to load (not for preload)
+ * These are only shown on error, not during loading
  */
 export const PlaceholderImages = {
-    // Product images
+    // Product images (fallback only)
     product: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=400',
     productThumbnail: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=200',
     productLarge: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800',
@@ -21,7 +49,7 @@ export const PlaceholderImages = {
     userAvatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=User',
     userAvatarDefault: 'https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=200',
 
-    // Generic placeholders - using Unsplash instead of via.placeholder
+    // Generic placeholders (fallback only - blurhash used for preload)
     image: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=200',
     image100: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=100',
     image200: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=200',

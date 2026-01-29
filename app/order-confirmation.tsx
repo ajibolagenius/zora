@@ -6,7 +6,6 @@ import {
   ScrollView,
   TouchableOpacity,
   Image,
-  Platform,
   Animated,
   Easing,
 } from 'react-native';
@@ -20,7 +19,7 @@ import {
   Export,
 } from 'phosphor-react-native';
 import { Colors } from '../constants/colors';
-import { Spacing, BorderRadius, Heights } from '../constants/spacing';
+import { Spacing, BorderRadius, Heights, Shadows } from '../constants/spacing';
 import { FontSize, FontFamily } from '../constants/typography';
 import { AnimationDuration, AnimationEasing } from '../constants';
 import { orderService } from '../services/supabaseService';
@@ -341,17 +340,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.secondary,
     justifyContent: 'center',
     alignItems: 'center',
-    ...Platform.select({
-      ios: {
-        shadowColor: Colors.secondary,
-        shadowOffset: { width: 0, height: 8 },
-        shadowOpacity: 0.4,
-        shadowRadius: 16,
-      },
-      android: {
-        elevation: 12,
-      },
-    }),
+    ...Shadows.glowSecondary,
   },
   
   // Header Text
@@ -391,17 +380,7 @@ const styles = StyleSheet.create({
     borderRadius: BorderRadius.lg,
     justifyContent: 'center',
     alignItems: 'center',
-    ...Platform.select({
-      ios: {
-        shadowColor: Colors.secondary,
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.3,
-        shadowRadius: 8,
-      },
-      android: {
-        elevation: 4,
-      },
-    }),
+    ...Shadows.glowSecondary,
   },
   trackButtonText: {
     fontFamily: FontFamily.displaySemiBold,

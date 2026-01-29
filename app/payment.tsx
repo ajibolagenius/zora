@@ -8,7 +8,6 @@ import {
   Switch,
   ActivityIndicator,
   Alert,
-  Platform,
   Animated,
   Easing,
 } from 'react-native';
@@ -23,7 +22,7 @@ import {
   CheckCircle,
 } from 'phosphor-react-native';
 import { Colors } from '../constants/colors';
-import { Spacing, BorderRadius, Heights } from '../constants/spacing';
+import { Spacing, BorderRadius, Heights, Shadows } from '../constants/spacing';
 import { FontSize, FontFamily } from '../constants/typography';
 import { AnimationDuration, AnimationEasing } from '../constants';
 import { useCartStore } from '../stores/cartStore';
@@ -752,17 +751,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.primary,
     borderRadius: BorderRadius.lg,
     height: Heights.button,
-    ...Platform.select({
-      ios: {
-        shadowColor: Colors.primary,
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.3,
-        shadowRadius: 8,
-      },
-      android: {
-        elevation: 4,
-      },
-    }),
+    ...Shadows.glowPrimary,
   },
   payButtonDisabled: {
     opacity: 0.7,

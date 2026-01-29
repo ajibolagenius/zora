@@ -8,7 +8,6 @@ import {
   Image,
   Animated,
   Easing,
-  Platform,
   ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -18,7 +17,7 @@ import {
   Check,
 } from 'phosphor-react-native';
 import { Colors } from '../constants/colors';
-import { Spacing, BorderRadius, Heights } from '../constants/spacing';
+import { Spacing, BorderRadius, Heights, Shadows } from '../constants/spacing';
 import { FontSize, FontFamily } from '../constants/typography';
 import { AnimationDuration, AnimationEasing, PlaceholderImages } from '../constants';
 import { orderService } from '../services/supabaseService';
@@ -453,28 +452,11 @@ const styles = StyleSheet.create({
     borderRadius: BorderRadius.lg,
     justifyContent: 'center',
     alignItems: 'center',
-    ...Platform.select({
-      ios: {
-        shadowColor: Colors.primary,
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.3,
-        shadowRadius: 8,
-      },
-      android: {
-        elevation: 4,
-      },
-    }),
+    ...Shadows.glowPrimary,
   },
   continueButtonDisabled: {
     backgroundColor: Colors.primary + '66', // 40% opacity
-    ...Platform.select({
-      ios: {
-        shadowOpacity: 0,
-      },
-      android: {
-        elevation: 0,
-      },
-    }),
+    ...Shadows.none,
   },
   continueButtonText: {
     fontFamily: FontFamily.displaySemiBold,

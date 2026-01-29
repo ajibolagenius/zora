@@ -7,7 +7,6 @@ import {
   TouchableOpacity,
   Animated,
   Easing,
-  Platform,
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -19,7 +18,7 @@ import {
   MapTrifold,
 } from 'phosphor-react-native';
 import { Colors } from '../constants/colors';
-import { Spacing, BorderRadius, Heights } from '../constants/spacing';
+import { Spacing, BorderRadius, Heights, Shadows } from '../constants/spacing';
 import { FontSize, FontFamily } from '../constants/typography';
 import { AnimationDuration, AnimationEasing } from '../constants';
 import { useCartStore } from '../stores/cartStore';
@@ -655,17 +654,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.secondary,
     borderRadius: BorderRadius.lg,
     height: Heights.button,
-    ...Platform.select({
-      ios: {
-        shadowColor: Colors.secondary,
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.3,
-        shadowRadius: 8,
-      },
-      android: {
-        elevation: 4,
-      },
-    }),
+    ...Shadows.glowSecondary,
   },
   continueButtonText: {
     fontFamily: FontFamily.displaySemiBold,

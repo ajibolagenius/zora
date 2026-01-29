@@ -12,6 +12,12 @@ export { Toggle } from './Toggle';
 export { Toast } from './Toast';
 export { ToastProvider, useToast } from './ToastProvider';
 
+// Display Components (Reusable patterns)
+export { QuantitySelector } from './QuantitySelector';
+export { PriceDisplay } from './PriceDisplay';
+export { RatingDisplay } from './RatingDisplay';
+export { StatusBadge } from './StatusBadge';
+
 // Feature Components
 export { ProductCard } from './ProductCard';
 export { LazyImage } from './LazyImage';

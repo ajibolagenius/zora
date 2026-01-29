@@ -10,6 +10,7 @@ import {
 } from 'phosphor-react-native';
 import { Colors } from '../../constants/colors';
 import { FontSize, FontFamily } from '../../constants/typography';
+import { Spacing, BorderRadius } from '../../constants/spacing';
 import { useCartStore } from '../../stores/cartStore';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -42,7 +43,7 @@ export default function FloatingTabBar() {
   };
 
   return (
-    <View style={[styles.container, { paddingBottom: insets.bottom || 8 }]}>
+    <View style={[styles.container, { paddingBottom: insets.bottom || Spacing.sm }]}>
       <View style={styles.tabBar}>
         {tabs.map((tab) => {
           const isActive = isTabActive(tab.route, tab.name);
@@ -97,8 +98,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-around',
     alignItems: 'center',
-    paddingTop: 8,
-    paddingBottom: 8,
+    paddingTop: Spacing.sm,
+    paddingBottom: Spacing.sm,
   },
   tabItem: {
     alignItems: 'center',
@@ -113,17 +114,17 @@ const styles = StyleSheet.create({
     top: -4,
     right: -8,
     backgroundColor: Colors.primary,
-    borderRadius: 10,
+    borderRadius: BorderRadius.sm,
     minWidth: 18,
     height: 18,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: 4,
+    paddingHorizontal: Spacing.xs,
   },
   badgeText: {
     fontFamily: FontFamily.bodyBold,
     color: Colors.textPrimary,
-    fontSize: 10,
+    fontSize: FontSize.tiny,
   },
   tabLabel: {
     fontFamily: FontFamily.bodyMedium,
