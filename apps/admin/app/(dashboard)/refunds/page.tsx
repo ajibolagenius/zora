@@ -370,8 +370,8 @@ export default function RefundsPage() {
                                             <button
                                                 onClick={() => setRefundType("original")}
                                                 className={`p-4 rounded-xl border-2 transition-colors ${refundType === "original"
-                                                        ? "border-primary bg-primary/5"
-                                                        : "border-gray-200 hover:border-gray-300"
+                                                    ? "border-primary bg-primary/5"
+                                                    : "border-gray-200 hover:border-gray-300"
                                                     }`}
                                             >
                                                 <CreditCard className={`w-6 h-6 mx-auto mb-2 ${refundType === "original" ? "text-primary" : "text-gray-400"}`} />
@@ -381,8 +381,8 @@ export default function RefundsPage() {
                                             <button
                                                 onClick={() => setRefundType("credit")}
                                                 className={`p-4 rounded-xl border-2 transition-colors ${refundType === "credit"
-                                                        ? "border-primary bg-primary/5"
-                                                        : "border-gray-200 hover:border-gray-300"
+                                                    ? "border-primary bg-primary/5"
+                                                    : "border-gray-200 hover:border-gray-300"
                                                     }`}
                                             >
                                                 <Wallet className={`w-6 h-6 mx-auto mb-2 ${refundType === "credit" ? "text-primary" : "text-gray-400"}`} />

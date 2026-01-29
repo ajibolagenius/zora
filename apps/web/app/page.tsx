@@ -118,7 +118,7 @@ export default function Home() {
                             </h1>
 
                             <p className="text-lg text-gray-600 mb-8 leading-relaxed">
-                                Access authentic African groceries, a vibrant marketplace, and community-focused 
+                                Access authentic African groceries, a vibrant marketplace, and community-focused
                                 services that reflect African culture—delivered across the UK.
                             </p>
 
@@ -274,7 +274,7 @@ export default function Home() {
                             Grow Your African Business
                         </h2>
                         <p className="text-white/80 mb-8 text-lg">
-                            Join 100+ vendors reaching thousands of customers across the UK. 
+                            Join 100+ vendors reaching thousands of customers across the UK.
                             No monthly fees—only pay when you sell.
                         </p>
                         <div className="flex flex-col sm:flex-row gap-4 justify-center">

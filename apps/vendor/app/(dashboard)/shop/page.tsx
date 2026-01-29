@@ -326,11 +326,11 @@ export default function ShopProfilePage() {
                                                     type="button"
                                                     onClick={toggleDay}
                                                     className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${isClosed
-                                                            ? "bg-gray-100 text-gray-600 hover:bg-gray-200"
-                                                            : "bg-green-100 text-green-700 hover:bg-green-200"
+                                                        ? "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                                                        : "bg-red-100 text-red-700 hover:bg-red-200"
                                                         }`}
                                                 >
-                                                    {isClosed ? "Set Open" : "Open"}
+                                                    {isClosed ? "Set Open" : "Set Closed"}
                                                 </button>
                                             </div>
                                         </div>

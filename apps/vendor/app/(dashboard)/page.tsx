@@ -14,6 +14,7 @@ import {
     TrendingUp,
     ArrowRight,
     Plus,
+    MapPin,
 } from "lucide-react";
 import { Header } from "../../components/Header";
 import {
@@ -221,18 +222,18 @@ export default function VendorDashboard() {
                                         </div>
                                     </motion.div>
                                 </Link>
-                                <Link href="/coverage" className="block">
+                                <Link href="/settings" className="block">
                                     <motion.div
                                         whileHover={{ scale: 1.02, x: 4 }}
                                         whileTap={{ scale: 0.98 }}
                                         className="flex items-center gap-3 p-4 bg-green-50 rounded-xl hover:bg-green-100 transition-colors"
                                     >
                                         <div className="w-10 h-10 rounded-lg bg-green-100 flex items-center justify-center">
-                                            <Package className="w-5 h-5 text-green-600" />
+                                            <MapPin className="w-5 h-5 text-green-600" />
                                         </div>
                                         <div>
-                                            <p className="font-medium text-gray-900">Delivery Zones</p>
-                                            <p className="text-xs text-gray-500">Manage coverage areas</p>
+                                            <p className="font-medium text-gray-900">Delivery Settings</p>
+                                            <p className="text-xs text-gray-500">Configure delivery options</p>
                                         </div>
                                     </motion.div>
                                 </Link>

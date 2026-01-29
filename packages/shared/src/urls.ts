@@ -1,6 +1,6 @@
 /**
  * Cross-app URL utilities for Zora platform
- * 
+ *
  * These utilities help manage URLs across the different apps
  * (web, vendor, admin) in both development and production.
  */
