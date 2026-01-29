@@ -1,0 +1,1302 @@
+[
+    {
+        "email": "emily.johnson@x.dummyjson.com",
+        "name": "Emily Johnson",
+        "avatar_url": "https://dummyjson.com/icon/emilys/128",
+        "phone": "+81 965-431-3024",
+        "membership_tier": "gold",
+        "zora_credits": 63.2,
+        "loyalty_points": 94,
+        "cultural_interests": [
+            "West Africa"
+        ]
+    },
+    {
+        "email": "michael.williams@x.dummyjson.com",
+        "name": "Michael Williams",
+        "avatar_url": "https://dummyjson.com/icon/michaelw/128",
+        "phone": "+49 258-627-6644",
+        "membership_tier": "platinum",
+        "zora_credits": 55.95,
+        "loyalty_points": 68,
+        "cultural_interests": [
+            "West Africa",
+            "East Africa"
+        ]
+    },
+    {
+        "email": "sophia.brown@x.dummyjson.com",
+        "name": "Sophia Brown",
+        "avatar_url": "https://dummyjson.com/icon/sophiab/128",
+        "phone": "+81 210-652-2785",
+        "membership_tier": "platinum",
+        "zora_credits": 85.48,
+        "loyalty_points": 786,
+        "cultural_interests": [
+            "West Africa",
+            "East Africa",
+            "North Africa"
+        ]
+    },
+    {
+        "email": "james.davis@x.dummyjson.com",
+        "name": "James Davis",
+        "avatar_url": "https://dummyjson.com/icon/jamesd/128",
+        "phone": "+49 614-958-9364",
+        "membership_tier": "gold",
+        "zora_credits": 48.5,
+        "loyalty_points": 803,
+        "cultural_interests": [
+            "West Africa",
+            "East Africa",
+            "North Africa"
+        ]
+    },
+    {
+        "email": "emma.miller@x.dummyjson.com",
+        "name": "Emma Miller",
+        "avatar_url": "https://dummyjson.com/icon/emmaj/128",
+        "phone": "+91 759-776-1614",
+        "membership_tier": "bronze",
+        "zora_credits": 92.37,
+        "loyalty_points": 18,
+        "cultural_interests": [
+            "West Africa",
+            "East Africa",
+            "North Africa"
+        ]
+    },
+    {
+        "email": "olivia.wilson@x.dummyjson.com",
+        "name": "Olivia Wilson",
+        "avatar_url": "https://dummyjson.com/icon/oliviaw/128",
+        "phone": "+91 607-295-6448",
+        "membership_tier": "silver",
+        "zora_credits": 60.29,
+        "loyalty_points": 486,
+        "cultural_interests": [
+            "West Africa"
+        ]
+    },
+    {
+        "email": "alexander.jones@x.dummyjson.com",
+        "name": "Alexander Jones",
+        "avatar_url": "https://dummyjson.com/icon/alexanderj/128",
+        "phone": "+61 260-824-4986",
+        "membership_tier": "gold",
+        "zora_credits": 35.88,
+        "loyalty_points": 495,
+        "cultural_interests": [
+            "West Africa"
+        ]
+    },
+    {
+        "email": "ava.taylor@x.dummyjson.com",
+        "name": "Ava Taylor",
+        "avatar_url": "https://dummyjson.com/icon/avat/128",
+        "phone": "+1 458-853-7877",
+        "membership_tier": "gold",
+        "zora_credits": 30.46,
+        "loyalty_points": 512,
+        "cultural_interests": [
+            "West Africa"
+        ]
+    },
+    {
+        "email": "ethan.martinez@x.dummyjson.com",
+        "name": "Ethan Martinez",
+        "avatar_url": "https://dummyjson.com/icon/ethanm/128",
+        "phone": "+92 933-608-5081",
+        "membership_tier": "gold",
+        "zora_credits": 27.11,
+        "loyalty_points": 8,
+        "cultural_interests": [
+            "West Africa"
+        ]
+    },
+    {
+        "email": "isabella.anderson@x.dummyjson.com",
+        "name": "Isabella Anderson",
+        "avatar_url": "https://dummyjson.com/icon/isabellad/128",
+        "phone": "+49 770-658-4885",
+        "membership_tier": "silver",
+        "zora_credits": 90.45,
+        "loyalty_points": 365,
+        "cultural_interests": [
+            "West Africa"
+        ]
+    },
+    {
+        "email": "liam.garcia@x.dummyjson.com",
+        "name": "Liam Garcia",
+        "avatar_url": "https://dummyjson.com/icon/liamg/128",
+        "phone": "+92 870-217-6201",
+        "membership_tier": "platinum",
+        "zora_credits": 4.64,
+        "loyalty_points": 114,
+        "cultural_interests": [
+            "West Africa",
+            "East Africa",
+            "North Africa"
+        ]
+    },
+    {
+        "email": "mia.rodriguez@x.dummyjson.com",
+        "name": "Mia Rodriguez",
+        "avatar_url": "https://dummyjson.com/icon/miar/128",
+        "phone": "+49 989-461-8403",
+        "membership_tier": "silver",
+        "zora_credits": 21.83,
+        "loyalty_points": 184,
+        "cultural_interests": [
+            "West Africa",
+            "East Africa"
+        ]
+    },
+    {
+        "email": "noah.hernandez@x.dummyjson.com",
+        "name": "Noah Hernandez",
+        "avatar_url": "https://dummyjson.com/icon/noahh/128",
+        "phone": "+49 393-605-6968",
+        "membership_tier": "gold",
+        "zora_credits": 60.18,
+        "loyalty_points": 430,
+        "cultural_interests": [
+            "West Africa",
+            "East Africa"
+        ]
+    },
+    {
+        "email": "charlotte.lopez@x.dummyjson.com",
+        "name": "Charlotte Lopez",
+        "avatar_url": "https://dummyjson.com/icon/charlottem/128",
+        "phone": "+44 373-953-5028",
+        "membership_tier": "bronze",
+        "zora_credits": 86.46,
+        "loyalty_points": 446,
+        "cultural_interests": [
+            "West Africa",
+            "East Africa",
+            "North Africa"
+        ]
+    },
+    {
+        "email": "william.gonzalez@x.dummyjson.com",
+        "name": "William Gonzalez",
+        "avatar_url": "https://dummyjson.com/icon/williamg/128",
+        "phone": "+81 905-252-7319",
+        "membership_tier": "bronze",
+        "zora_credits": 66.63,
+        "loyalty_points": 359,
+        "cultural_interests": [
+            "West Africa",
+            "East Africa"
+        ]
+    },
+    {
+        "email": "avery.perez@x.dummyjson.com",
+        "name": "Avery Perez",
+        "avatar_url": "https://dummyjson.com/icon/averyp/128",
+        "phone": "+61 731-431-3457",
+        "membership_tier": "bronze",
+        "zora_credits": 83.1,
+        "loyalty_points": 477,
+        "cultural_interests": [
+            "West Africa",
+            "East Africa"
+        ]
+    },
+    {
+        "email": "evelyn.sanchez@x.dummyjson.com",
+        "name": "Evelyn Sanchez",
+        "avatar_url": "https://dummyjson.com/icon/evelyns/128",
+        "phone": "+1 623-880-6871",
+        "membership_tier": "gold",
+        "zora_credits": 30.94,
+        "loyalty_points": 482,
+        "cultural_interests": [
+            "West Africa"
+        ]
+    },
+    {
+        "email": "logan.torres@x.dummyjson.com",
+        "name": "Logan Torres",
+        "avatar_url": "https://dummyjson.com/icon/logant/128",
+        "phone": "+81 507-434-8733",
+        "membership_tier": "bronze",
+        "zora_credits": 22.61,
+        "loyalty_points": 7,
+        "cultural_interests": [
+            "West Africa",
+            "East Africa",
+            "North Africa"
+        ]
+    },
+    {
+        "email": "abigail.rivera@x.dummyjson.com",
+        "name": "Abigail Rivera",
+        "avatar_url": "https://dummyjson.com/icon/abigailr/128",
+        "phone": "+91 228-363-7806",
+        "membership_tier": "gold",
+        "zora_credits": 42.16,
+        "loyalty_points": 657,
+        "cultural_interests": [
+            "West Africa"
+        ]
+    },
+    {
+        "email": "jackson.evans@x.dummyjson.com",
+        "name": "Jackson Evans",
+        "avatar_url": "https://dummyjson.com/icon/jacksone/128",
+        "phone": "+44 468-628-6686",
+        "membership_tier": "bronze",
+        "zora_credits": 60.03,
+        "loyalty_points": 849,
+        "cultural_interests": [
+            "West Africa",
+            "East Africa"
+        ]
+    },
+    {
+        "email": "madison.collins@x.dummyjson.com",
+        "name": "Madison Collins",
+        "avatar_url": "https://dummyjson.com/icon/madisonc/128",
+        "phone": "+81 259-957-5711",
+        "membership_tier": "silver",
+        "zora_credits": 31.8,
+        "loyalty_points": 652,
+        "cultural_interests": [
+            "West Africa",
+            "East Africa",
+            "North Africa"
+        ]
+    },
+    {
+        "email": "elijah.stewart@x.dummyjson.com",
+        "name": "Elijah Stewart",
+        "avatar_url": "https://dummyjson.com/icon/elijahs/128",
+        "phone": "+44 468-357-7872",
+        "membership_tier": "gold",
+        "zora_credits": 17.61,
+        "loyalty_points": 200,
+        "cultural_interests": [
+            "West Africa",
+            "East Africa",
+            "North Africa"
+        ]
+    },
+    {
+        "email": "chloe.morales@x.dummyjson.com",
+        "name": "Chloe Morales",
+        "avatar_url": "https://dummyjson.com/icon/chloem/128",
+        "phone": "+92 468-541-7133",
+        "membership_tier": "gold",
+        "zora_credits": 44.64,
+        "loyalty_points": 736,
+        "cultural_interests": [
+            "West Africa",
+            "East Africa",
+            "North Africa"
+        ]
+    },
+    {
+        "email": "mateo.nguyen@x.dummyjson.com",
+        "name": "Mateo Nguyen",
+        "avatar_url": "https://dummyjson.com/icon/mateon/128",
+        "phone": "+1 341-597-6694",
+        "membership_tier": "gold",
+        "zora_credits": 83.2,
+        "loyalty_points": 570,
+        "cultural_interests": [
+            "West Africa",
+            "East Africa",
+            "North Africa"
+        ]
+    },
+    {
+        "email": "harper.kelly@x.dummyjson.com",
+        "name": "Harper Kelly",
+        "avatar_url": "https://dummyjson.com/icon/harpere/128",
+        "phone": "+92 518-863-2863",
+        "membership_tier": "silver",
+        "zora_credits": 27.48,
+        "loyalty_points": 919,
+        "cultural_interests": [
+            "West Africa",
+            "East Africa"
+        ]
+    },
+    {
+        "email": "evelyn.gonzalez@x.dummyjson.com",
+        "name": "Evelyn Gonzalez",
+        "avatar_url": "https://dummyjson.com/icon/evelyng/128",
+        "phone": "+61 708-508-4638",
+        "membership_tier": "gold",
+        "zora_credits": 92.96,
+        "loyalty_points": 338,
+        "cultural_interests": [
+            "West Africa"
+        ]
+    },
+    {
+        "email": "daniel.cook@x.dummyjson.com",
+        "name": "Daniel Cook",
+        "avatar_url": "https://dummyjson.com/icon/danielc/128",
+        "phone": "+44 254-761-6843",
+        "membership_tier": "bronze",
+        "zora_credits": 38.87,
+        "loyalty_points": 88,
+        "cultural_interests": [
+            "West Africa"
+        ]
+    },
+    {
+        "email": "lily.lee@x.dummyjson.com",
+        "name": "Lily Lee",
+        "avatar_url": "https://dummyjson.com/icon/lilyb/128",
+        "phone": "+1 808-757-9867",
+        "membership_tier": "bronze",
+        "zora_credits": 55.53,
+        "loyalty_points": 780,
+        "cultural_interests": [
+            "West Africa"
+        ]
+    },
+    {
+        "email": "henry.hill@x.dummyjson.com",
+        "name": "Henry Hill",
+        "avatar_url": "https://dummyjson.com/icon/henryh/128",
+        "phone": "+1 240-833-4680",
+        "membership_tier": "platinum",
+        "zora_credits": 70.52,
+        "loyalty_points": 444,
+        "cultural_interests": [
+            "West Africa",
+            "East Africa",
+            "North Africa"
+        ]
+    },
+    {
+        "email": "addison.wright@x.dummyjson.com",
+        "name": "Addison Wright",
+        "avatar_url": "https://dummyjson.com/icon/addisonw/128",
+        "phone": "+1 514-384-3300",
+        "membership_tier": "silver",
+        "zora_credits": 33.39,
+        "loyalty_points": 215,
+        "cultural_interests": [
+            "West Africa",
+            "East Africa",
+            "North Africa"
+        ]
+    },
+    {
+        "email": "gabriel.adams@x.dummyjson.com",
+        "name": "Gabriel Adams",
+        "avatar_url": "https://dummyjson.com/icon/gabriela/128",
+        "phone": "+91 936-400-4116",
+        "membership_tier": "silver",
+        "zora_credits": 91.48,
+        "loyalty_points": 526,
+        "cultural_interests": [
+            "West Africa",
+            "East Africa",
+            "North Africa"
+        ]
+    },
+    {
+        "email": "natalie.harris@x.dummyjson.com",
+        "name": "Natalie Harris",
+        "avatar_url": "https://dummyjson.com/icon/natalieh/128",
+        "phone": "+49 584-501-9302",
+        "membership_tier": "silver",
+        "zora_credits": 53.84,
+        "loyalty_points": 198,
+        "cultural_interests": [
+            "West Africa",
+            "East Africa",
+            "North Africa"
+        ]
+    },
+    {
+        "email": "carter.baker@x.dummyjson.com",
+        "name": "Carter Baker",
+        "avatar_url": "https://dummyjson.com/icon/carterb/128",
+        "phone": "+49 787-512-9117",
+        "membership_tier": "gold",
+        "zora_credits": 37.07,
+        "loyalty_points": 396,
+        "cultural_interests": [
+            "West Africa"
+        ]
+    },
+    {
+        "email": "sofia.mitchell@x.dummyjson.com",
+        "name": "Sofia Mitchell",
+        "avatar_url": "https://dummyjson.com/icon/sofiam/128",
+        "phone": "+92 957-686-6804",
+        "membership_tier": "bronze",
+        "zora_credits": 94.59,
+        "loyalty_points": 850,
+        "cultural_interests": [
+            "West Africa",
+            "East Africa"
+        ]
+    },
+    {
+        "email": "jack.ward@x.dummyjson.com",
+        "name": "Jack Ward",
+        "avatar_url": "https://dummyjson.com/icon/jackw/128",
+        "phone": "+91 857-765-4373",
+        "membership_tier": "platinum",
+        "zora_credits": 23.27,
+        "loyalty_points": 174,
+        "cultural_interests": [
+            "West Africa",
+            "East Africa"
+        ]
+    },
+    {
+        "email": "harper.turner@x.dummyjson.com",
+        "name": "Harper Turner",
+        "avatar_url": "https://dummyjson.com/icon/harpert/128",
+        "phone": "+49 980-340-5333",
+        "membership_tier": "platinum",
+        "zora_credits": 89.29,
+        "loyalty_points": 244,
+        "cultural_interests": [
+            "West Africa",
+            "East Africa",
+            "North Africa"
+        ]
+    },
+    {
+        "email": "mason.parker@x.dummyjson.com",
+        "name": "Mason Parker",
+        "avatar_url": "https://dummyjson.com/icon/masonp/128",
+        "phone": "+61 837-389-4095",
+        "membership_tier": "platinum",
+        "zora_credits": 23.64,
+        "loyalty_points": 994,
+        "cultural_interests": [
+            "West Africa",
+            "East Africa",
+            "North Africa"
+        ]
+    },
+    {
+        "email": "aria.roberts@x.dummyjson.com",
+        "name": "Aria Roberts",
+        "avatar_url": "https://dummyjson.com/icon/ariar/128",
+        "phone": "+61 411-514-5320",
+        "membership_tier": "bronze",
+        "zora_credits": 23.5,
+        "loyalty_points": 73,
+        "cultural_interests": [
+            "West Africa",
+            "East Africa"
+        ]
+    },
+    {
+        "email": "lucas.gray@x.dummyjson.com",
+        "name": "Lucas Gray",
+        "avatar_url": "https://dummyjson.com/icon/lucasg/128",
+        "phone": "+44 687-435-7119",
+        "membership_tier": "silver",
+        "zora_credits": 71.61,
+        "loyalty_points": 336,
+        "cultural_interests": [
+            "West Africa",
+            "East Africa"
+        ]
+    },
+    {
+        "email": "ella.adams@x.dummyjson.com",
+        "name": "Ella Adams",
+        "avatar_url": "https://dummyjson.com/icon/ellaa/128",
+        "phone": "+1 450-865-6061",
+        "membership_tier": "platinum",
+        "zora_credits": 8.92,
+        "loyalty_points": 159,
+        "cultural_interests": [
+            "West Africa",
+            "East Africa",
+            "North Africa"
+        ]
+    },
+    {
+        "email": "evan.reed@x.dummyjson.com",
+        "name": "Evan Reed",
+        "avatar_url": "https://dummyjson.com/icon/evanr/128",
+        "phone": "+61 932-569-4853",
+        "membership_tier": "bronze",
+        "zora_credits": 78.46,
+        "loyalty_points": 585,
+        "cultural_interests": [
+            "West Africa",
+            "East Africa"
+        ]
+    },
+    {
+        "email": "avery.carter@x.dummyjson.com",
+        "name": "Avery Carter",
+        "avatar_url": "https://dummyjson.com/icon/averyc/128",
+        "phone": "+44 254-655-6112",
+        "membership_tier": "bronze",
+        "zora_credits": 21.54,
+        "loyalty_points": 837,
+        "cultural_interests": [
+            "West Africa"
+        ]
+    },
+    {
+        "email": "benjamin.foster@x.dummyjson.com",
+        "name": "Benjamin Foster",
+        "avatar_url": "https://dummyjson.com/icon/benjaminf/128",
+        "phone": "+61 333-911-3476",
+        "membership_tier": "platinum",
+        "zora_credits": 67.2,
+        "loyalty_points": 206,
+        "cultural_interests": [
+            "West Africa",
+            "East Africa"
+        ]
+    },
+    {
+        "email": "scarlett.wright@x.dummyjson.com",
+        "name": "Scarlett Wright",
+        "avatar_url": "https://dummyjson.com/icon/scarlettw/128",
+        "phone": "+1 599-432-3048",
+        "membership_tier": "platinum",
+        "zora_credits": 83.61,
+        "loyalty_points": 767,
+        "cultural_interests": [
+            "West Africa"
+        ]
+    },
+    {
+        "email": "lincoln.kelly@x.dummyjson.com",
+        "name": "Lincoln Kelly",
+        "avatar_url": "https://dummyjson.com/icon/lincolnk/128",
+        "phone": "+49 680-666-9673",
+        "membership_tier": "silver",
+        "zora_credits": 11.65,
+        "loyalty_points": 208,
+        "cultural_interests": [
+            "West Africa",
+            "East Africa",
+            "North Africa"
+        ]
+    },
+    {
+        "email": "hannah.robinson@x.dummyjson.com",
+        "name": "Hannah Robinson",
+        "avatar_url": "https://dummyjson.com/icon/hannahr/128",
+        "phone": "+92 556-625-4398",
+        "membership_tier": "bronze",
+        "zora_credits": 6.36,
+        "loyalty_points": 172,
+        "cultural_interests": [
+            "West Africa",
+            "East Africa",
+            "North Africa"
+        ]
+    },
+    {
+        "email": "nicholas.bailey@x.dummyjson.com",
+        "name": "Nicholas Bailey",
+        "avatar_url": "https://dummyjson.com/icon/nicholasb/128",
+        "phone": "+49 212-856-4272",
+        "membership_tier": "bronze",
+        "zora_credits": 34.52,
+        "loyalty_points": 844,
+        "cultural_interests": [
+            "West Africa"
+        ]
+    },
+    {
+        "email": "luna.russell@x.dummyjson.com",
+        "name": "Luna Russell",
+        "avatar_url": "https://dummyjson.com/icon/lunar/128",
+        "phone": "+91 730-486-3735",
+        "membership_tier": "silver",
+        "zora_credits": 46.77,
+        "loyalty_points": 956,
+        "cultural_interests": [
+            "West Africa"
+        ]
+    },
+    {
+        "email": "jacob.cooper@x.dummyjson.com",
+        "name": "Jacob Cooper",
+        "avatar_url": "https://dummyjson.com/icon/jacobc/128",
+        "phone": "+91 322-775-7582",
+        "membership_tier": "silver",
+        "zora_credits": 27.14,
+        "loyalty_points": 273,
+        "cultural_interests": [
+            "West Africa",
+            "East Africa"
+        ]
+    },
+    {
+        "email": "stella.hughes@x.dummyjson.com",
+        "name": "Stella Hughes",
+        "avatar_url": "https://dummyjson.com/icon/stellah/128",
+        "phone": "+92 378-326-3439",
+        "membership_tier": "platinum",
+        "zora_credits": 76.54,
+        "loyalty_points": 131,
+        "cultural_interests": [
+            "West Africa",
+            "East Africa"
+        ]
+    },
+    {
+        "email": "eli.bennett@x.dummyjson.com",
+        "name": "Eli Bennett",
+        "avatar_url": "https://dummyjson.com/icon/elib/128",
+        "phone": "+1 465-379-7226",
+        "membership_tier": "platinum",
+        "zora_credits": 98.71,
+        "loyalty_points": 236,
+        "cultural_interests": [
+            "West Africa",
+            "East Africa",
+            "North Africa"
+        ]
+    },
+    {
+        "email": "grace.perry@x.dummyjson.com",
+        "name": "Grace Perry",
+        "avatar_url": "https://dummyjson.com/icon/gracep/128",
+        "phone": "+49 550-430-8269",
+        "membership_tier": "gold",
+        "zora_credits": 38.31,
+        "loyalty_points": 404,
+        "cultural_interests": [
+            "West Africa",
+            "East Africa"
+        ]
+    },
+    {
+        "email": "lucas.gordon@x.dummyjson.com",
+        "name": "Lucas Gordon",
+        "avatar_url": "https://dummyjson.com/icon/lucasgx/128",
+        "phone": "+81 367-320-4960",
+        "membership_tier": "silver",
+        "zora_credits": 10.83,
+        "loyalty_points": 673,
+        "cultural_interests": [
+            "West Africa",
+            "East Africa",
+            "North Africa"
+        ]
+    },
+    {
+        "email": "ava.harrison@x.dummyjson.com",
+        "name": "Ava Harrison",
+        "avatar_url": "https://dummyjson.com/icon/avah/128",
+        "phone": "+44 926-778-4653",
+        "membership_tier": "bronze",
+        "zora_credits": 59.32,
+        "loyalty_points": 358,
+        "cultural_interests": [
+            "West Africa"
+        ]
+    },
+    {
+        "email": "owen.fisher@x.dummyjson.com",
+        "name": "Owen Fisher",
+        "avatar_url": "https://dummyjson.com/icon/owenf/128",
+        "phone": "+49 328-635-8057",
+        "membership_tier": "gold",
+        "zora_credits": 50.01,
+        "loyalty_points": 168,
+        "cultural_interests": [
+            "West Africa",
+            "East Africa",
+            "North Africa"
+        ]
+    },
+    {
+        "email": "samantha.howard@x.dummyjson.com",
+        "name": "Samantha Howard",
+        "avatar_url": "https://dummyjson.com/icon/samanthah/128",
+        "phone": "+91 458-289-9756",
+        "membership_tier": "bronze",
+        "zora_credits": 30.68,
+        "loyalty_points": 701,
+        "cultural_interests": [
+            "West Africa",
+            "East Africa"
+        ]
+    },
+    {
+        "email": "nathan.dixon@x.dummyjson.com",
+        "name": "Nathan Dixon",
+        "avatar_url": "https://dummyjson.com/icon/nathand/128",
+        "phone": "+44 540-488-4436",
+        "membership_tier": "gold",
+        "zora_credits": 72.33,
+        "loyalty_points": 736,
+        "cultural_interests": [
+            "West Africa"
+        ]
+    },
+    {
+        "email": "bella.grant@x.dummyjson.com",
+        "name": "Bella Grant",
+        "avatar_url": "https://dummyjson.com/icon/bellag/128",
+        "phone": "+92 896-206-1901",
+        "membership_tier": "bronze",
+        "zora_credits": 82.37,
+        "loyalty_points": 645,
+        "cultural_interests": [
+            "West Africa",
+            "East Africa"
+        ]
+    },
+    {
+        "email": "ethan.fletcher@x.dummyjson.com",
+        "name": "Ethan Fletcher",
+        "avatar_url": "https://dummyjson.com/icon/ethanf/128",
+        "phone": "+1 251-564-2643",
+        "membership_tier": "gold",
+        "zora_credits": 79.68,
+        "loyalty_points": 637,
+        "cultural_interests": [
+            "West Africa"
+        ]
+    },
+    {
+        "email": "lillian.simmons@x.dummyjson.com",
+        "name": "Lillian Simmons",
+        "avatar_url": "https://dummyjson.com/icon/lillians/128",
+        "phone": "+61 857-625-2029",
+        "membership_tier": "silver",
+        "zora_credits": 25.18,
+        "loyalty_points": 397,
+        "cultural_interests": [
+            "West Africa"
+        ]
+    },
+    {
+        "email": "mason.pearson@x.dummyjson.com",
+        "name": "Mason Pearson",
+        "avatar_url": "https://dummyjson.com/icon/masonpx/128",
+        "phone": "+1 394-401-1757",
+        "membership_tier": "gold",
+        "zora_credits": 78.94,
+        "loyalty_points": 114,
+        "cultural_interests": [
+            "West Africa",
+            "East Africa"
+        ]
+    },
+    {
+        "email": "leah.henderson@x.dummyjson.com",
+        "name": "Leah Henderson",
+        "avatar_url": "https://dummyjson.com/icon/leahh/128",
+        "phone": "+91 453-220-4258",
+        "membership_tier": "gold",
+        "zora_credits": 43.33,
+        "loyalty_points": 82,
+        "cultural_interests": [
+            "West Africa",
+            "East Africa"
+        ]
+    },
+    {
+        "email": "logan.lawson@x.dummyjson.com",
+        "name": "Logan Lawson",
+        "avatar_url": "https://dummyjson.com/icon/loganl/128",
+        "phone": "+1 750-526-9455",
+        "membership_tier": "gold",
+        "zora_credits": 19.08,
+        "loyalty_points": 654,
+        "cultural_interests": [
+            "West Africa",
+            "East Africa",
+            "North Africa"
+        ]
+    },
+    {
+        "email": "avery.barnes@x.dummyjson.com",
+        "name": "Avery Barnes",
+        "avatar_url": "https://dummyjson.com/icon/averyb/128",
+        "phone": "+91 207-801-7417",
+        "membership_tier": "gold",
+        "zora_credits": 41.11,
+        "loyalty_points": 294,
+        "cultural_interests": [
+            "West Africa",
+            "East Africa",
+            "North Africa"
+        ]
+    },
+    {
+        "email": "caleb.perkins@x.dummyjson.com",
+        "name": "Caleb Perkins",
+        "avatar_url": "https://dummyjson.com/icon/calebp/128",
+        "phone": "+81 351-413-9369",
+        "membership_tier": "platinum",
+        "zora_credits": 87.4,
+        "loyalty_points": 634,
+        "cultural_interests": [
+            "West Africa",
+            "East Africa"
+        ]
+    },
+    {
+        "email": "aria.ferguson@x.dummyjson.com",
+        "name": "Aria Ferguson",
+        "avatar_url": "https://dummyjson.com/icon/ariaf/128",
+        "phone": "+44 434-406-8551",
+        "membership_tier": "silver",
+        "zora_credits": 96.29,
+        "loyalty_points": 244,
+        "cultural_interests": [
+            "West Africa"
+        ]
+    },
+    {
+        "email": "gabriel.hayes@x.dummyjson.com",
+        "name": "Gabriel Hayes",
+        "avatar_url": "https://dummyjson.com/icon/gabrielh/128",
+        "phone": "+61 386-511-8949",
+        "membership_tier": "platinum",
+        "zora_credits": 37.89,
+        "loyalty_points": 764,
+        "cultural_interests": [
+            "West Africa",
+            "East Africa",
+            "North Africa"
+        ]
+    },
+    {
+        "email": "layla.sullivan@x.dummyjson.com",
+        "name": "Layla Sullivan",
+        "avatar_url": "https://dummyjson.com/icon/laylas/128",
+        "phone": "+92 657-388-7474",
+        "membership_tier": "platinum",
+        "zora_credits": 39.78,
+        "loyalty_points": 903,
+        "cultural_interests": [
+            "West Africa"
+        ]
+    },
+    {
+        "email": "christopher.west@x.dummyjson.com",
+        "name": "Christopher West",
+        "avatar_url": "https://dummyjson.com/icon/christopherw/128",
+        "phone": "+49 968-571-2475",
+        "membership_tier": "bronze",
+        "zora_credits": 27.45,
+        "loyalty_points": 830,
+        "cultural_interests": [
+            "West Africa",
+            "East Africa",
+            "North Africa"
+        ]
+    },
+    {
+        "email": "zoe.nicholson@x.dummyjson.com",
+        "name": "Zoe Nicholson",
+        "avatar_url": "https://dummyjson.com/icon/zoen/128",
+        "phone": "+49 638-976-6904",
+        "membership_tier": "bronze",
+        "zora_credits": 4.68,
+        "loyalty_points": 896,
+        "cultural_interests": [
+            "West Africa",
+            "East Africa"
+        ]
+    },
+    {
+        "email": "nolan.bryant@x.dummyjson.com",
+        "name": "Nolan Bryant",
+        "avatar_url": "https://dummyjson.com/icon/nolanb/128",
+        "phone": "+44 618-916-5243",
+        "membership_tier": "bronze",
+        "zora_credits": 7.37,
+        "loyalty_points": 508,
+        "cultural_interests": [
+            "West Africa",
+            "East Africa"
+        ]
+    },
+    {
+        "email": "victoria.mcdonald@x.dummyjson.com",
+        "name": "Victoria McDonald",
+        "avatar_url": "https://dummyjson.com/icon/victoriam/128",
+        "phone": "+91 624-944-2089",
+        "membership_tier": "bronze",
+        "zora_credits": 75.68,
+        "loyalty_points": 455,
+        "cultural_interests": [
+            "West Africa",
+            "East Africa"
+        ]
+    },
+    {
+        "email": "max.russell@x.dummyjson.com",
+        "name": "Max Russell",
+        "avatar_url": "https://dummyjson.com/icon/maxr/128",
+        "phone": "+44 663-850-4302",
+        "membership_tier": "silver",
+        "zora_credits": 65.07,
+        "loyalty_points": 72,
+        "cultural_interests": [
+            "West Africa"
+        ]
+    },
+    {
+        "email": "penelope.harper@x.dummyjson.com",
+        "name": "Penelope Harper",
+        "avatar_url": "https://dummyjson.com/icon/penelopeh/128",
+        "phone": "+44 907-679-1302",
+        "membership_tier": "bronze",
+        "zora_credits": 65.95,
+        "loyalty_points": 708,
+        "cultural_interests": [
+            "West Africa",
+            "East Africa",
+            "North Africa"
+        ]
+    },
+    {
+        "email": "ryan.graham@x.dummyjson.com",
+        "name": "Ryan Graham",
+        "avatar_url": "https://dummyjson.com/icon/ryang/128",
+        "phone": "+92 260-518-7256",
+        "membership_tier": "platinum",
+        "zora_credits": 6.45,
+        "loyalty_points": 452,
+        "cultural_interests": [
+            "West Africa",
+            "East Africa",
+            "North Africa"
+        ]
+    },
+    {
+        "email": "madeline.simpson@x.dummyjson.com",
+        "name": "Madeline Simpson",
+        "avatar_url": "https://dummyjson.com/icon/madelines/128",
+        "phone": "+44 371-964-4017",
+        "membership_tier": "bronze",
+        "zora_credits": 76.05,
+        "loyalty_points": 857,
+        "cultural_interests": [
+            "West Africa",
+            "East Africa",
+            "North Africa"
+        ]
+    },
+    {
+        "email": "jonathan.pierce@x.dummyjson.com",
+        "name": "Jonathan Pierce",
+        "avatar_url": "https://dummyjson.com/icon/jonathanp/128",
+        "phone": "+61 456-307-5568",
+        "membership_tier": "gold",
+        "zora_credits": 56.98,
+        "loyalty_points": 305,
+        "cultural_interests": [
+            "West Africa"
+        ]
+    },
+    {
+        "email": "eleanor.tyler@x.dummyjson.com",
+        "name": "Eleanor Tyler",
+        "avatar_url": "https://dummyjson.com/icon/eleanort/128",
+        "phone": "+1 232-621-9938",
+        "membership_tier": "bronze",
+        "zora_credits": 50.88,
+        "loyalty_points": 862,
+        "cultural_interests": [
+            "West Africa",
+            "East Africa",
+            "North Africa"
+        ]
+    },
+    {
+        "email": "isaac.lawrence@x.dummyjson.com",
+        "name": "Isaac Lawrence",
+        "avatar_url": "https://dummyjson.com/icon/isaacl/128",
+        "phone": "+81 693-260-7234",
+        "membership_tier": "bronze",
+        "zora_credits": 84.17,
+        "loyalty_points": 486,
+        "cultural_interests": [
+            "West Africa"
+        ]
+    },
+    {
+        "email": "hazel.gardner@x.dummyjson.com",
+        "name": "Hazel Gardner",
+        "avatar_url": "https://dummyjson.com/icon/hazelg/128",
+        "phone": "+91 688-478-9459",
+        "membership_tier": "platinum",
+        "zora_credits": 92.34,
+        "loyalty_points": 783,
+        "cultural_interests": [
+            "West Africa"
+        ]
+    },
+    {
+        "email": "austin.hudson@x.dummyjson.com",
+        "name": "Austin Hudson",
+        "avatar_url": "https://dummyjson.com/icon/austinh/128",
+        "phone": "+81 405-412-4250",
+        "membership_tier": "gold",
+        "zora_credits": 69.2,
+        "loyalty_points": 77,
+        "cultural_interests": [
+            "West Africa"
+        ]
+    },
+    {
+        "email": "lillian.bishop@x.dummyjson.com",
+        "name": "Lillian Bishop",
+        "avatar_url": "https://dummyjson.com/icon/lillianb/128",
+        "phone": "+92 538-589-5885",
+        "membership_tier": "gold",
+        "zora_credits": 6.79,
+        "loyalty_points": 88,
+        "cultural_interests": [
+            "West Africa",
+            "East Africa"
+        ]
+    },
+    {
+        "email": "dylan.wells@x.dummyjson.com",
+        "name": "Dylan Wells",
+        "avatar_url": "https://dummyjson.com/icon/dylanw/128",
+        "phone": "+49 659-638-1106",
+        "membership_tier": "gold",
+        "zora_credits": 35.38,
+        "loyalty_points": 546,
+        "cultural_interests": [
+            "West Africa",
+            "East Africa"
+        ]
+    },
+    {
+        "email": "aaliyah.hanson@x.dummyjson.com",
+        "name": "Aaliyah Hanson",
+        "avatar_url": "https://dummyjson.com/icon/aaliyahh/128",
+        "phone": "+1 275-501-1119",
+        "membership_tier": "platinum",
+        "zora_credits": 96.76,
+        "loyalty_points": 91,
+        "cultural_interests": [
+            "West Africa"
+        ]
+    },
+    {
+        "email": "cameron.burke@x.dummyjson.com",
+        "name": "Cameron Burke",
+        "avatar_url": "https://dummyjson.com/icon/cameronb/128",
+        "phone": "+1 976-686-7996",
+        "membership_tier": "bronze",
+        "zora_credits": 13.3,
+        "loyalty_points": 615,
+        "cultural_interests": [
+            "West Africa"
+        ]
+    },
+    {
+        "email": "nora.mills@x.dummyjson.com",
+        "name": "Nora Mills",
+        "avatar_url": "https://dummyjson.com/icon/noram/128",
+        "phone": "+44 767-262-6860",
+        "membership_tier": "platinum",
+        "zora_credits": 96.78,
+        "loyalty_points": 438,
+        "cultural_interests": [
+            "West Africa",
+            "East Africa"
+        ]
+    },
+    {
+        "email": "hunter.gordon@x.dummyjson.com",
+        "name": "Hunter Gordon",
+        "avatar_url": "https://dummyjson.com/icon/hunterg/128",
+        "phone": "+1 986-988-5297",
+        "membership_tier": "gold",
+        "zora_credits": 80.85,
+        "loyalty_points": 667,
+        "cultural_interests": [
+            "West Africa",
+            "East Africa",
+            "North Africa"
+        ]
+    },
+    {
+        "email": "aubrey.wagner@x.dummyjson.com",
+        "name": "Aubrey Wagner",
+        "avatar_url": "https://dummyjson.com/icon/aubreyw/128",
+        "phone": "+81 285-568-5834",
+        "membership_tier": "platinum",
+        "zora_credits": 42.12,
+        "loyalty_points": 896,
+        "cultural_interests": [
+            "West Africa"
+        ]
+    },
+    {
+        "email": "brayden.fleming@x.dummyjson.com",
+        "name": "Brayden Fleming",
+        "avatar_url": "https://dummyjson.com/icon/braydenf/128",
+        "phone": "+1 404-382-1778",
+        "membership_tier": "gold",
+        "zora_credits": 40.87,
+        "loyalty_points": 901,
+        "cultural_interests": [
+            "West Africa",
+            "East Africa",
+            "North Africa"
+        ]
+    },
+    {
+        "email": "scarlett.bowman@x.dummyjson.com",
+        "name": "Scarlett Bowman",
+        "avatar_url": "https://dummyjson.com/icon/scarlettb/128",
+        "phone": "+44 928-549-7517",
+        "membership_tier": "platinum",
+        "zora_credits": 10.53,
+        "loyalty_points": 406,
+        "cultural_interests": [
+            "West Africa"
+        ]
+    },
+    {
+        "email": "levi.hicks@x.dummyjson.com",
+        "name": "Levi Hicks",
+        "avatar_url": "https://dummyjson.com/icon/levih/128",
+        "phone": "+92 931-753-3850",
+        "membership_tier": "gold",
+        "zora_credits": 20.21,
+        "loyalty_points": 708,
+        "cultural_interests": [
+            "West Africa"
+        ]
+    },
+    {
+        "email": "autumn.gomez@x.dummyjson.com",
+        "name": "Autumn Gomez",
+        "avatar_url": "https://dummyjson.com/icon/autumng/128",
+        "phone": "+1 340-455-2897",
+        "membership_tier": "gold",
+        "zora_credits": 88.8,
+        "loyalty_points": 383,
+        "cultural_interests": [
+            "West Africa"
+        ]
+    },
+    {
+        "email": "julian.newton@x.dummyjson.com",
+        "name": "Julian Newton",
+        "avatar_url": "https://dummyjson.com/icon/juliann/128",
+        "phone": "+92 865-328-8737",
+        "membership_tier": "gold",
+        "zora_credits": 75.91,
+        "loyalty_points": 34,
+        "cultural_interests": [
+            "West Africa"
+        ]
+    },
+    {
+        "email": "ruby.andrews@x.dummyjson.com",
+        "name": "Ruby Andrews",
+        "avatar_url": "https://dummyjson.com/icon/rubya/128",
+        "phone": "+1 343-203-7912",
+        "membership_tier": "silver",
+        "zora_credits": 47.76,
+        "loyalty_points": 799,
+        "cultural_interests": [
+            "West Africa"
+        ]
+    },
+    {
+        "email": "miles.stevenson@x.dummyjson.com",
+        "name": "Miles Stevenson",
+        "avatar_url": "https://dummyjson.com/icon/miless/128",
+        "phone": "+49 708-659-4394",
+        "membership_tier": "bronze",
+        "zora_credits": 9.52,
+        "loyalty_points": 449,
+        "cultural_interests": [
+            "West Africa",
+            "East Africa",
+            "North Africa"
+        ]
+    },
+    {
+        "email": "aurora.lawson@x.dummyjson.com",
+        "name": "Aurora Lawson",
+        "avatar_url": "https://dummyjson.com/icon/auroral/128",
+        "phone": "+92 802-452-4192",
+        "membership_tier": "gold",
+        "zora_credits": 88.07,
+        "loyalty_points": 365,
+        "cultural_interests": [
+            "West Africa",
+            "East Africa",
+            "North Africa"
+        ]
+    },
+    {
+        "email": "oscar.powers@x.dummyjson.com",
+        "name": "Oscar Powers",
+        "avatar_url": "https://dummyjson.com/icon/oscarp/128",
+        "phone": "+61 929-572-1408",
+        "membership_tier": "gold",
+        "zora_credits": 3.02,
+        "loyalty_points": 959,
+        "cultural_interests": [
+            "West Africa",
+            "East Africa"
+        ]
+    },
+    {
+        "email": "clara.berry@x.dummyjson.com",
+        "name": "Clara Berry",
+        "avatar_url": "https://dummyjson.com/icon/clarab/128",
+        "phone": "+1 390-831-5172",
+        "membership_tier": "gold",
+        "zora_credits": 77.84,
+        "loyalty_points": 808,
+        "cultural_interests": [
+            "West Africa",
+            "East Africa"
+        ]
+    },
+    {
+        "email": "gavin.stanley@x.dummyjson.com",
+        "name": "Gavin Stanley",
+        "avatar_url": "https://dummyjson.com/icon/gavins/128",
+        "phone": "+44 466-358-6026",
+        "membership_tier": "platinum",
+        "zora_credits": 80.07,
+        "loyalty_points": 630,
+        "cultural_interests": [
+            "West Africa",
+            "East Africa",
+            "North Africa"
+        ]
+    },
+    {
+        "email": "lila.hudson@x.dummyjson.com",
+        "name": "Lila Hudson",
+        "avatar_url": "https://dummyjson.com/icon/lilah/128",
+        "phone": "+91 697-236-1544",
+        "membership_tier": "gold",
+        "zora_credits": 26.18,
+        "loyalty_points": 384,
+        "cultural_interests": [
+            "West Africa",
+            "East Africa"
+        ]
+    }
+]

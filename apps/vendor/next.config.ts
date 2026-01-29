@@ -1,7 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-    transpilePackages: ["@zora/types", "@zora/design-tokens", "@zora/api-client"],
+    transpilePackages: ["@zora/types", "@zora/design-tokens", "@zora/api-client", "@zora/ui-web"],
     images: {
         remotePatterns: [
             {

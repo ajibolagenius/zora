@@ -12,7 +12,7 @@ import {
     Animated,
     Easing,
     Keyboard,
-    TouchableWithoutFeedback,
+    Pressable,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -133,14 +133,14 @@ export default function LoginScreen() {
                 }
             } else {
                 await signUpWithEmail(email, password, name);
-                
+
                 // Ensure loading state is cleared
                 setLocalLoading(false);
                 useAuthStore.getState().setLoading(false);
-                
+
                 // Check if user is authenticated (email might be auto-verified)
                 const { isAuthenticated, emailVerified, hasCompletedOnboarding } = useAuthStore.getState();
-                
+
                 if (isAuthenticated && emailVerified) {
                     // Email is already verified, navigate based on onboarding status
                     if (hasCompletedOnboarding) {
@@ -153,7 +153,7 @@ export default function LoginScreen() {
                     setRegisteredEmail(email);
                     setShowVerificationBanner(true);
                     setMode('signin'); // Switch to sign in mode
-                    
+
                     showToast('Please check your email for the confirmation link.', 'info');
                 }
             }
@@ -234,7 +234,7 @@ export default function LoginScreen() {
                 behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
                 style={styles.keyboardView}
             >
-                <TouchableWithoutFeedback onPress={dismissKeyboard}>
+                <Pressable onPress={dismissKeyboard} style={{ flex: 1 }}>
                     <ScrollView
                         contentContainerStyle={styles.scrollContent}
                         showsVerticalScrollIndicator={false}
@@ -448,7 +448,7 @@ export default function LoginScreen() {
                             </Text>
                         </Animated.View>
                     </ScrollView>
-                </TouchableWithoutFeedback>
+                </Pressable>
             </KeyboardAvoidingView>
         </SafeAreaView>
     );

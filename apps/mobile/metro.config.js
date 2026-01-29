@@ -4,12 +4,25 @@ const { withNativeWind } = require("nativewind/metro");
 const path = require('path');
 const { FileStore } = require('metro-cache');
 
-const config = getDefaultConfig(__dirname);
+// Monorepo root (2 levels up from apps/mobile)
+const projectRoot = __dirname;
+const monorepoRoot = path.resolve(projectRoot, '../..');
+
+const config = getDefaultConfig(projectRoot);
+
+// Watch all files in the monorepo
+config.watchFolders = [monorepoRoot];
+
+// Let Metro know where to resolve packages from (for monorepo support)
+config.resolver.nodeModulesPaths = [
+    path.resolve(projectRoot, 'node_modules'),
+    path.resolve(monorepoRoot, 'node_modules'),
+];
 
 // Use a stable on-disk store (shared across web/android)
 const root = process.env.METRO_CACHE_ROOT || path.join(__dirname, '.metro-cache');
 config.cacheStores = [
-  new FileStore({ root: path.join(root, 'cache') }),
+    new FileStore({ root: path.join(root, 'cache') }),
 ];
 
 // Optimize workers based on CPU count (but cap at 4 for better performance)
@@ -18,31 +31,31 @@ config.maxWorkers = Math.min(os.cpus().length || 2, 4);
 
 // Enable transformer optimizations
 config.transformer = {
-  ...config.transformer,
-  // Enable minification in production
-  minifierPath: require.resolve('metro-minify-terser'),
-  minifierConfig: {
-    ecma: 8,
-    keep_classnames: true,
-    keep_fnames: true,
-    module: true,
-    mangle: {
-      module: true,
-      keep_classnames: true,
-      keep_fnames: true,
+    ...config.transformer,
+    // Enable minification in production
+    minifierPath: require.resolve('metro-minify-terser'),
+    minifierConfig: {
+        ecma: 8,
+        keep_classnames: true,
+        keep_fnames: true,
+        module: true,
+        mangle: {
+            module: true,
+            keep_classnames: true,
+            keep_fnames: true,
+        },
     },
-  },
-  // Optimize asset handling
-  assetPlugins: config.transformer?.assetPlugins || [],
+    // Optimize asset handling
+    assetPlugins: config.transformer?.assetPlugins || [],
 };
 
 // Optimize resolver for faster module resolution
 config.resolver = {
-  ...config.resolver,
-  // Enable source map support for better debugging
-  sourceExts: [...(config.resolver?.sourceExts || []), 'jsx', 'js', 'ts', 'tsx', 'json'],
-  // Optimize asset extensions
-  assetExts: config.resolver?.assetExts?.filter((ext) => ext !== 'svg') || [],
+    ...config.resolver,
+    // Enable source map support for better debugging
+    sourceExts: [...(config.resolver?.sourceExts || []), 'jsx', 'js', 'ts', 'tsx', 'json'],
+    // Optimize asset extensions
+    assetExts: config.resolver?.assetExts?.filter((ext) => ext !== 'svg') || [],
 };
 
 // Apply NativeWind configuration

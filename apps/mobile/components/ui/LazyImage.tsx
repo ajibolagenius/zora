@@ -81,7 +81,8 @@ export const LazyImage: React.FC<LazyImageProps> = ({
     const finalImageUri = imageUri || fallbackUri;
     // Prefer blurhash for instant placeholder (no network request needed)
     // Falls back to provided placeholder prop, then default blurhash
-    const finalPlaceholder = blurhash || placeholder || defaultBlurhash;
+    // Use object format { blurhash: string } to explicitly tell expo-image it's a blurhash, not a URL
+    const finalPlaceholderHash = blurhash || placeholder || defaultBlurhash;
     const finalFallback = fallbackUri;
 
     // Enhanced caching: memory-disk provides best performance
@@ -100,7 +101,7 @@ export const LazyImage: React.FC<LazyImageProps> = ({
                 source={finalImageUri}
                 style={StyleSheet.absoluteFill}
                 contentFit={props.contentFit || 'cover'}
-                placeholder={finalPlaceholder}
+                placeholder={{ blurhash: finalPlaceholderHash }}
                 transition={200}
                 cachePolicy={cachePolicy}
                 priority={imagePriority}

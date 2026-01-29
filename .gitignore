@@ -55,6 +55,22 @@ web-build/
 ios/
 android/
 
+# Auto-generated TypeScript declaration files
+next-env.d.ts
+expo-env.d.ts
+
+# Application lock files (Affinity, etc.)
+*~lock~*
+*.lock
+!pnpm-lock.yaml
+!package-lock.json
+!yarn.lock
+
 # Misc
 *.pem
 .vercel
+
+# Temporary files
+*.tmp
+*.temp
+*~
