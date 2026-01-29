@@ -10,41 +10,128 @@ export default {
     theme: {
         extend: {
             colors: {
-                // Primary brand colors
+                // ============================================
+                // ZORA DESIGN SYSTEM - Color Tokens
+                // ============================================
+
+                // Primary - Zora Red (#CC0000)
                 primary: {
-                    DEFAULT: "#FF6B35",
-                    dark: "#E55A2B",
-                    light: "#FF8C5A",
+                    DEFAULT: "#CC0000",
+                    dark: "#A30000",
+                    light: "#FF3333",
+                    50: "#FEF2F2",
+                    100: "#FEE2E2",
+                    500: "#CC0000",
+                    600: "#B91C1C",
+                    700: "#991B1B",
                 },
-                // Secondary colors
+
+                // Secondary - Zora Yellow (#FFCC00)
                 secondary: {
-                    DEFAULT: "#FFC857",
-                    dark: "#E6B34E",
-                    light: "#FFD685",
+                    DEFAULT: "#FFCC00",
+                    dark: "#E6B800",
+                    light: "#FFD633",
+                    50: "#FFFBEB",
+                    100: "#FEF3C7",
+                    500: "#FFCC00",
                 },
-                // Accent colors
-                accent: {
-                    DEFAULT: "#2EC4B6",
-                    dark: "#249890",
-                    light: "#5DD9CD",
+
+                // Background Colors
+                background: {
+                    dark: "#221710",
+                    light: "#F8F7F5",
+                },
+                surface: {
+                    DEFAULT: "#342418",
+                    light: "#FFFFFF",
+                },
+
+                // Text Colors
+                text: {
+                    primary: "#FFFFFF",
+                    secondary: "#CBA990",
+                    muted: "#CBA990",
+                    dark: "#221710",
+                },
+
+                // Status Colors
+                success: {
+                    DEFAULT: "#22C55E",
+                    50: "#F0FDF4",
+                    500: "#22C55E",
+                    600: "#16A34A",
+                },
+                warning: {
+                    DEFAULT: "#FFCC00",
+                    50: "#FFFBEB",
+                    500: "#FFCC00",
+                },
+                error: {
+                    DEFAULT: "#CC0000",
+                    50: "#FEF2F2",
+                    500: "#CC0000",
+                },
+                info: {
+                    DEFAULT: "#3B82F6",
+                    50: "#EFF6FF",
+                    500: "#3B82F6",
                 },
             },
+
+            // ============================================
+            // TYPOGRAPHY - Font Families (Design System)
+            // ============================================
             fontFamily: {
-                sans: ["Inter", "system-ui", "sans-serif"],
-                display: ["Plus Jakarta Sans", "Inter", "sans-serif"],
+                display: ["Montserrat", "sans-serif"],
+                body: ["Poppins", "sans-serif"],
+                sans: ["Poppins", "sans-serif"],
             },
+
+            // ============================================
+            // SPACING - Design System Scale
+            // ============================================
+            spacing: {
+                'xs': '4px',
+                'sm': '8px',
+                'md': '12px',
+                'base': '16px',
+                'lg': '20px',
+                'xl': '24px',
+                '2xl': '32px',
+                '3xl': '40px',
+            },
+
+            // ============================================
+            // BORDER RADIUS - Design System Scale
+            // ============================================
             borderRadius: {
-                "2xl": "1rem",
-                "3xl": "1.5rem",
+                'sm': '4px',
+                'md': '8px',
+                'lg': '12px',
+                'xl': '16px',
+                '2xl': '20px',
+                'full': '9999px',
             },
+
+            // ============================================
+            // SHADOWS - Design System Scale
+            // ============================================
             boxShadow: {
-                glow: "0 0 20px rgba(255, 107, 53, 0.3)",
-                card: "0 2px 8px rgba(0, 0, 0, 0.04), 0 4px 24px rgba(0, 0, 0, 0.06)",
+                'sm': '0 1px 2px rgba(34, 23, 16, 0.05)',
+                'md': '0 2px 4px rgba(34, 23, 16, 0.08)',
+                'lg': '0 4px 8px rgba(34, 23, 16, 0.10)',
+                'xl': '0 8px 16px rgba(34, 23, 16, 0.12)',
+                'card': '0 2px 8px rgba(0, 0, 0, 0.04), 0 4px 24px rgba(0, 0, 0, 0.06)',
+                'glow': '0 0 20px rgba(204, 0, 0, 0.3)',
             },
+
+            // ============================================
+            // ANIMATIONS
+            // ============================================
             animation: {
                 "fade-in": "fadeIn 0.3s ease-out",
                 "slide-up": "slideUp 0.3s ease-out",
-                shimmer: "shimmer 2s infinite",
+                "shimmer": "shimmer 2s infinite",
             },
             keyframes: {
                 fadeIn: {

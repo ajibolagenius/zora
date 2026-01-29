@@ -55,7 +55,7 @@ export function Sidebar({ mobileOpen = false, onMobileClose }: SidebarProps) {
             <div className="p-4 flex items-center justify-between border-b border-white/10">
                 <Link href="/" className="flex items-center gap-2 overflow-hidden">
                     <span className="text-2xl font-bold text-primary">ZORA</span>
-                    <span className="text-xs text-[#CBA990] hidden lg:inline">Vendor</span>
+                    <span className="text-xs bg-[#342418] px-2 py-0.5 rounded text-[#CBA990] hidden lg:inline">Vendor</span>
                 </Link>
                 {/* Desktop collapse button */}
                 <button

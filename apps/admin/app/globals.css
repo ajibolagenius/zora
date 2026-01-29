@@ -2,17 +2,123 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ============================================
+   ZORA DESIGN SYSTEM - Admin Portal Styles
+   ============================================ */
+
+/* Google Fonts - Montserrat (Headlines) & Poppins (Body) */
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Poppins:wght@400;500;600;700&display=swap');
 
+/* ============================================
+   CSS Custom Properties (Design Tokens)
+   ============================================ */
 @layer base {
-  * {
-    @apply border-slate-200;
-  }
-  body {
-    @apply bg-slate-50 text-slate-900;
-    font-family: 'Poppins', sans-serif;
-  }
-  h1, h2, h3, h4, h5, h6 {
-    font-family: 'Montserrat', sans-serif;
-  }
+    :root {
+        /* Zora Brand Colors */
+        --zora-primary: #CC0000;
+        --zora-primary-dark: #A30000;
+        --zora-secondary: #FFCC00;
+        --zora-secondary-dark: #E6B800;
+        --zora-background-dark: #221710;
+        --zora-background-light: #F8F7F5;
+        --zora-surface: #342418;
+        --zora-text-secondary: #CBA990;
+        --zora-success: #22C55E;
+        --zora-warning: #FFCC00;
+        --zora-error: #CC0000;
+        --zora-info: #3B82F6;
+    }
+}
+
+/* ============================================
+   Base Styles
+   ============================================ */
+@layer base {
+    * {
+        @apply border-slate-200;
+    }
+
+    html {
+        scroll-behavior: smooth;
+    }
+
+    body {
+        @apply bg-slate-50 text-slate-900 antialiased;
+        font-family: 'Poppins', sans-serif;
+    }
+
+    /* Typography - Headings use Montserrat */
+    h1, h2, h3, h4, h5, h6 {
+        font-family: 'Montserrat', sans-serif;
+        font-weight: 700;
+    }
+
+    /* Focus styles */
+    *:focus-visible {
+        @apply outline-none ring-2 ring-primary ring-offset-2 ring-offset-white;
+    }
+}
+
+/* ============================================
+   Responsive Form Elements
+   ============================================ */
+@layer components {
+    /* Responsive button groups */
+    .btn-group-responsive {
+        @apply flex flex-col sm:flex-row gap-2 sm:gap-3;
+    }
+
+    /* Responsive form grid */
+    .form-grid {
+        @apply grid grid-cols-1 sm:grid-cols-2 gap-4;
+    }
+
+    /* Responsive filter bar */
+    .filter-bar {
+        @apply flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between;
+    }
+
+    /* Responsive action buttons */
+    .action-buttons {
+        @apply flex flex-wrap gap-2;
+    }
+}
+
+/* ============================================
+   Custom Scrollbar
+   ============================================ */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #a1a1a1;
+}
+
+/* ============================================
+   Selection Styling
+   ============================================ */
+::selection {
+    background-color: rgba(204, 0, 0, 0.2);
+    color: inherit;
+}
+
+/* ============================================
+   Print Styles
+   ============================================ */
+@media print {
+    body {
+        background: white;
+        color: black;
+    }
 }

@@ -270,9 +270,10 @@ export default function OrdersPage() {
 
                 {/* Filters */}
                 <Card className="mb-6">
-                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                        <div className="flex flex-1 items-center gap-4">
-                            <div className="w-full sm:w-80">
+                    <div className="flex flex-col gap-4">
+                        {/* Search and Filter Row */}
+                        <div className="flex flex-col sm:flex-row gap-3">
+                            <div className="w-full sm:flex-1 lg:max-w-md">
                                 <Input
                                     placeholder="Search by order ID, customer, or vendor..."
                                     value={searchTerm}
@@ -281,7 +282,7 @@ export default function OrdersPage() {
                                 />
                             </div>
                             <Select value={selectedStatus} onValueChange={setSelectedStatus}>
-                                <SelectTrigger className="w-40">
+                                <SelectTrigger className="w-full sm:w-40">
                                     <SelectValue placeholder="Status" />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -295,9 +296,12 @@ export default function OrdersPage() {
                                 </SelectContent>
                             </Select>
                         </div>
-                        <Button variant="outline" leftIcon={<Download className="w-4 h-4" />}>
-                            Export Orders
-                        </Button>
+                        {/* Actions Row */}
+                        <div className="flex justify-end">
+                            <Button variant="outline" size="sm" leftIcon={<Download className="w-4 h-4" />} className="w-full sm:w-auto">
+                                Export Orders
+                            </Button>
+                        </div>
                     </div>
                 </Card>
 

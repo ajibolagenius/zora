@@ -29,7 +29,7 @@ export default function DashboardLayout({
                         <Menu className="w-6 h-6 text-gray-600" aria-hidden="true" />
                     </button>
                     <span className="text-xl font-bold text-primary">ZORA</span>
-                    <span className="text-xs text-[#CBA990]">Vendor</span>
+                    <span className="text-xs bg-[#342418] px-2 py-0.5 rounded text-[#CBA990]">Vendor</span>
                 </div>
                 {children}
             </main>

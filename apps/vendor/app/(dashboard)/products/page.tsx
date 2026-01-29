@@ -267,9 +267,10 @@ export default function ProductsPage() {
 
                 {/* Filters & Actions */}
                 <Card className="mb-6">
-                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                        <div className="flex flex-1 items-center gap-4">
-                            <div className="w-full sm:w-80">
+                    <div className="flex flex-col gap-4">
+                        {/* Search and Filters Row */}
+                        <div className="flex flex-col sm:flex-row gap-3">
+                            <div className="w-full sm:w-64 lg:w-80">
                                 <Input
                                     placeholder="Search products..."
                                     value={searchTerm}
@@ -277,39 +278,45 @@ export default function ProductsPage() {
                                     leftIcon={<Search className="w-4 h-4" />}
                                 />
                             </div>
-                            <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                                <SelectTrigger className="w-40">
-                                    <SelectValue placeholder="Category" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {categories.map((cat) => (
-                                        <SelectItem key={cat} value={cat}>{cat}</SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                            <Select value={selectedStatus} onValueChange={setSelectedStatus}>
-                                <SelectTrigger className="w-40">
-                                    <SelectValue placeholder="Status" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="all">All Status</SelectItem>
-                                    <SelectItem value="active">Active</SelectItem>
-                                    <SelectItem value="low_stock">Low Stock</SelectItem>
-                                    <SelectItem value="out_of_stock">Out of Stock</SelectItem>
-                                    <SelectItem value="draft">Draft</SelectItem>
-                                </SelectContent>
-                            </Select>
+                            <div className="flex flex-wrap gap-2">
+                                <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                                    <SelectTrigger className="w-full sm:w-36">
+                                        <SelectValue placeholder="Category" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {categories.map((cat) => (
+                                            <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                                <Select value={selectedStatus} onValueChange={setSelectedStatus}>
+                                    <SelectTrigger className="w-full sm:w-36">
+                                        <SelectValue placeholder="Status" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="all">All Status</SelectItem>
+                                        <SelectItem value="active">Active</SelectItem>
+                                        <SelectItem value="low_stock">Low Stock</SelectItem>
+                                        <SelectItem value="out_of_stock">Out of Stock</SelectItem>
+                                        <SelectItem value="draft">Draft</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
                         </div>
-                        <div className="flex items-center gap-2">
-                            <Button variant="outline" leftIcon={<Download className="w-4 h-4" />}>
-                                Export
+                        {/* Action Buttons Row */}
+                        <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-gray-100 sm:border-0 sm:pt-0 sm:justify-end">
+                            <Button variant="outline" size="sm" leftIcon={<Download className="w-4 h-4" />} className="flex-1 sm:flex-none">
+                                <span className="hidden sm:inline">Export</span>
+                                <span className="sm:hidden">Export</span>
                             </Button>
-                            <Button variant="outline" leftIcon={<Upload className="w-4 h-4" />}>
-                                Import
+                            <Button variant="outline" size="sm" leftIcon={<Upload className="w-4 h-4" />} className="flex-1 sm:flex-none">
+                                <span className="hidden sm:inline">Import</span>
+                                <span className="sm:hidden">Import</span>
                             </Button>
-                            <Link href="/products/new">
-                                <Button leftIcon={<Plus className="w-4 h-4" />}>
-                                    Add Product
+                            <Link href="/products/new" className="flex-1 sm:flex-none">
+                                <Button size="sm" leftIcon={<Plus className="w-4 h-4" />} className="w-full">
+                                    <span className="hidden sm:inline">Add Product</span>
+                                    <span className="sm:hidden">Add</span>
                                 </Button>
                             </Link>
                         </div>
