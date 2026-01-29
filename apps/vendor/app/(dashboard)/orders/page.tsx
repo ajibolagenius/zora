@@ -64,7 +64,7 @@ const nextStatusMap: Record<string, OrderStatus> = {
 };
 
 interface OrderWithDetails extends Order {
-    user?: {
+    customer?: {
         id: string;
         full_name: string;
         email: string;
@@ -114,8 +114,8 @@ export default function OrdersPage() {
             return (
                 order.order_number?.toLowerCase().includes(searchLower) ||
                 order.id.toLowerCase().includes(searchLower) ||
-                order.user?.full_name?.toLowerCase().includes(searchLower) ||
-                order.user?.email?.toLowerCase().includes(searchLower)
+                order.customer?.full_name?.toLowerCase().includes(searchLower) ||
+                order.customer?.email?.toLowerCase().includes(searchLower)
             );
         });
     }, [ordersData?.data, searchTerm]);
@@ -293,7 +293,7 @@ export default function OrdersPage() {
                                                             <Badge variant={status.variant}>{status.label}</Badge>
                                                         </div>
                                                         <p className="text-sm text-gray-500 truncate">
-                                                            {order.user?.full_name || "Customer"} • {itemCount} item{itemCount !== 1 ? "s" : ""} • {formatRelativeTime(new Date(order.created_at))}
+                                                            {order.customer?.full_name || "Customer"} • {itemCount} item{itemCount !== 1 ? "s" : ""} • {formatRelativeTime(new Date(order.created_at))}
                                                         </p>
                                                     </div>
                                                 </div>
@@ -361,23 +361,23 @@ export default function OrdersPage() {
                                         <div className="flex items-center gap-3">
                                             <Avatar size="sm">
                                                 <AvatarFallback>
-                                                    {selectedOrder.user?.full_name
+                                                    {selectedOrder.customer?.full_name
                                                         ?.split(" ")
                                                         .map((n) => n[0])
                                                         .join("") || "?"}
                                                 </AvatarFallback>
                                             </Avatar>
                                             <div>
-                                                <p className="font-medium">{selectedOrder.user?.full_name || "Customer"}</p>
+                                                <p className="font-medium">{selectedOrder.customer?.full_name || "Customer"}</p>
                                             </div>
                                         </div>
-                                        {selectedOrder.user?.email && (
+                                        {selectedOrder.customer?.email && (
                                             <div className="flex items-center gap-2 text-sm text-gray-600">
                                                 <Mail className="w-4 h-4" />
                                                 {selectedOrder.user.email}
                                             </div>
                                         )}
-                                        {selectedOrder.user?.phone && (
+                                        {selectedOrder.customer?.phone && (
                                             <div className="flex items-center gap-2 text-sm text-gray-600">
                                                 <Phone className="w-4 h-4" />
                                                 {selectedOrder.user.phone}

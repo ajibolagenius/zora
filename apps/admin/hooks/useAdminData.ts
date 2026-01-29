@@ -155,7 +155,7 @@ export function usePendingItems() {
 // =============================================================================
 
 interface OrderWithDetails extends Order {
-    user?: {
+    customer?: {
         id: string;
         full_name: string;
         email: string;
@@ -175,7 +175,7 @@ export function useRecentOrders(limit = 5) {
                 .from('orders')
                 .select(`
                     *,
-                    user:profiles(id, full_name, email),
+                    customer:profiles(id, full_name, email),
                     vendor:vendors(id, shop_name)
                 `)
                 .order('created_at', { ascending: false })
@@ -217,7 +217,7 @@ export function useAllOrders(params?: OrderQueryParams) {
                 .from('orders')
                 .select(`
                     *,
-                    user:profiles(id, full_name, email, avatar_url),
+                    customer:profiles(id, full_name, email, avatar_url),
                     vendor:vendors(id, shop_name),
                     items:order_items(*, product:products(id, name, image_url))
                 `, { count: 'exact' })

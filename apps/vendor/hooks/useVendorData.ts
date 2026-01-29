@@ -154,7 +154,7 @@ export function useRecentOrders(vendorId: string | null, limit = 5) {
                 .from('orders')
                 .select(`
                     *,
-                    user:profiles(id, full_name, email, avatar_url)
+                    customer:profiles(id, full_name, email, avatar_url)
                 `)
                 .eq('vendor_id', vendorId)
                 .order('created_at', { ascending: false })
@@ -185,7 +185,7 @@ export function useVendorOrders(vendorId: string | null, params?: OrderQueryPara
                 .from('orders')
                 .select(`
                     *,
-                    user:profiles(id, full_name, email, avatar_url),
+                    customer:profiles(id, full_name, email, avatar_url),
                     items:order_items(*, product:products(id, name, image_url))
                 `, { count: 'exact' })
                 .eq('vendor_id', vendorId)

@@ -240,9 +240,9 @@ export default function AdminDashboard() {
                                 <div>
                                     <h2 className="text-lg font-semibold text-slate-900">
                                         Recent Orders
-                                        {realtimeStats.newOrdersToday > 0 && (
-                                            <Badge variant="success" size="sm" className="ml-2">
-                                                {realtimeStats.newOrdersToday} today
+                                        {realtimeStats.pendingOrders > 0 && (
+                                            <Badge variant="warning" size="sm" className="ml-2">
+                                                {realtimeStats.pendingOrders} pending
                                             </Badge>
                                         )}
                                     </h2>
@@ -280,7 +280,7 @@ export default function AdminDashboard() {
                                                     <div className="flex items-center gap-4">
                                                         <Avatar size="sm">
                                                             <AvatarFallback className="bg-slate-100 text-slate-600">
-                                                                {(order as any).user?.full_name
+                                                                {(order as any).customer?.full_name
                                                                     ?.split(" ")
                                                                     .map((n: string) => n[0])
                                                                     .join("") || "?"}
@@ -303,7 +303,7 @@ export default function AdminDashboard() {
                                                                 </Badge>
                                                             </div>
                                                             <p className="text-sm text-slate-500">
-                                                                {(order as any).user?.full_name || "Customer"} •{" "}
+                                                                {(order as any).customer?.full_name || "Customer"} •{" "}
                                                                 {(order as any).vendor?.shop_name || "Vendor"}
                                                             </p>
                                                         </div>

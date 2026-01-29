@@ -221,7 +221,7 @@ export default function VendorDashboard() {
                                                     <div className="flex items-center gap-4">
                                                         <Avatar size="sm">
                                                             <AvatarFallback>
-                                                                {(order as any).user?.full_name
+                                                                {(order as any).customer?.full_name
                                                                     ?.split(" ")
                                                                     .map((n: string) => n[0])
                                                                     .join("") || "?"}
@@ -229,7 +229,7 @@ export default function VendorDashboard() {
                                                         </Avatar>
                                                         <div>
                                                             <p className="font-medium text-gray-900">
-                                                                {(order as any).user?.full_name || "Customer"}
+                                                                {(order as any).customer?.full_name || "Customer"}
                                                             </p>
                                                             <p className="text-sm text-gray-500">
                                                                 {order.order_number || order.id.slice(0, 8)} •{" "}

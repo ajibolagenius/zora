@@ -241,9 +241,9 @@ export default function VendorsPage() {
                         leftIcon={<RefreshCw className="w-4 h-4" />}
                     >
                         Refresh
-                        {realtimeStats.pendingApplications > 0 && (
+                        {realtimeStats.pendingVendorApplications > 0 && (
                             <Badge variant="warning" size="sm" className="ml-2">
-                                {realtimeStats.pendingApplications} pending
+                                {realtimeStats.pendingVendorApplications} pending
                             </Badge>
                         )}
                     </Button>

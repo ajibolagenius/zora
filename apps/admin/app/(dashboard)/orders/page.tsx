@@ -65,7 +65,7 @@ const paymentStatusConfig = {
 };
 
 interface OrderWithDetails extends Order {
-    user?: {
+    customer?: {
         id: string;
         full_name: string;
         email: string;
@@ -117,8 +117,8 @@ export default function OrdersPage() {
             return (
                 order.order_number?.toLowerCase().includes(searchLower) ||
                 order.id.toLowerCase().includes(searchLower) ||
-                order.user?.full_name?.toLowerCase().includes(searchLower) ||
-                order.user?.email?.toLowerCase().includes(searchLower) ||
+                order.customer?.full_name?.toLowerCase().includes(searchLower) ||
+                order.customer?.email?.toLowerCase().includes(searchLower) ||
                 order.vendor?.shop_name?.toLowerCase().includes(searchLower)
             );
         });
@@ -172,15 +172,15 @@ export default function OrdersPage() {
                 <div className="flex items-center gap-3">
                     <Avatar size="sm">
                         <AvatarFallback className="bg-slate-100 text-slate-600">
-                            {order.user?.full_name
+                            {order.customer?.full_name
                                 ?.split(" ")
                                 .map((n) => n[0])
                                 .join("") || "?"}
                         </AvatarFallback>
                     </Avatar>
                     <div>
-                        <p className="font-medium text-slate-900">{order.user?.full_name || "Customer"}</p>
-                        <p className="text-xs text-slate-500">{order.user?.email || ""}</p>
+                        <p className="font-medium text-slate-900">{order.customer?.full_name || "Customer"}</p>
+                        <p className="text-xs text-slate-500">{order.customer?.email || ""}</p>
                     </div>
                 </div>
             ),
@@ -274,9 +274,9 @@ export default function OrdersPage() {
                         leftIcon={<RefreshCw className="w-4 h-4" />}
                     >
                         Refresh
-                        {realtimeStats.newOrdersToday > 0 && (
-                            <Badge variant="success" size="sm" className="ml-2">
-                                {realtimeStats.newOrdersToday} today
+                        {realtimeStats.pendingOrders > 0 && (
+                            <Badge variant="warning" size="sm" className="ml-2">
+                                {realtimeStats.pendingOrders} pending
                             </Badge>
                         )}
                     </Button>

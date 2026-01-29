@@ -119,9 +119,11 @@ export function AdminRealtimeProvider({
             pendingOrders: prev.pendingOrders + 1,
         }));
 
-        // Invalidate queries
-        queryClient.invalidateQueries({ queryKey: ['orders'] });
-        queryClient.invalidateQueries({ queryKey: ['dashboard-stats'] });
+        // Invalidate queries - aligned with adminQueryKeys in useAdminData.ts
+        queryClient.invalidateQueries({ queryKey: ['admin', 'orders'] });
+        queryClient.invalidateQueries({ queryKey: ['admin', 'recentOrders'] });
+        queryClient.invalidateQueries({ queryKey: ['admin', 'stats'] });
+        queryClient.invalidateQueries({ queryKey: ['admin', 'pendingItems'] });
 
         onNewOrder?.(order);
     }, [queryClient, onNewOrder]);
@@ -130,9 +132,10 @@ export function AdminRealtimeProvider({
     const handleOrderUpdate = useCallback(({ new: order }: { old: Order; new: Order }) => {
         console.log('[AdminRealtime] Order updated:', order.id, 'status:', order.status);
 
-        // Invalidate queries
-        queryClient.invalidateQueries({ queryKey: ['orders'] });
-        queryClient.invalidateQueries({ queryKey: ['order', order.id] });
+        // Invalidate queries - aligned with adminQueryKeys in useAdminData.ts
+        queryClient.invalidateQueries({ queryKey: ['admin', 'orders'] });
+        queryClient.invalidateQueries({ queryKey: ['admin', 'order', order.id] });
+        queryClient.invalidateQueries({ queryKey: ['admin', 'recentOrders'] });
     }, [queryClient]);
 
     // Handle new vendor application
@@ -145,9 +148,11 @@ export function AdminRealtimeProvider({
             pendingVendorApplications: prev.pendingVendorApplications + 1,
         }));
 
-        // Invalidate queries
-        queryClient.invalidateQueries({ queryKey: ['vendor-applications'] });
-        queryClient.invalidateQueries({ queryKey: ['dashboard-stats'] });
+        // Invalidate queries - aligned with adminQueryKeys in useAdminData.ts
+        queryClient.invalidateQueries({ queryKey: ['admin', 'vendorApplications'] });
+        queryClient.invalidateQueries({ queryKey: ['admin', 'pendingItems'] });
+        queryClient.invalidateQueries({ queryKey: ['admin', 'stats'] });
+        queryClient.invalidateQueries({ queryKey: ['admin', 'vendors'] });
 
         onNewApplication?.(application);
     }, [queryClient, onNewApplication]);
@@ -156,9 +161,10 @@ export function AdminRealtimeProvider({
     const handleApplicationUpdate = useCallback(({ new: application }: { old: VendorApplication; new: VendorApplication }) => {
         console.log('[AdminRealtime] Vendor application updated:', application.id, 'status:', application.status);
 
-        // Invalidate queries
-        queryClient.invalidateQueries({ queryKey: ['vendor-applications'] });
-        queryClient.invalidateQueries({ queryKey: ['vendor-application', application.id] });
+        // Invalidate queries - aligned with adminQueryKeys in useAdminData.ts
+        queryClient.invalidateQueries({ queryKey: ['admin', 'vendorApplications'] });
+        queryClient.invalidateQueries({ queryKey: ['admin', 'vendorApplication', application.id] });
+        queryClient.invalidateQueries({ queryKey: ['admin', 'pendingItems'] });
     }, [queryClient]);
 
     // Handle new email thread
