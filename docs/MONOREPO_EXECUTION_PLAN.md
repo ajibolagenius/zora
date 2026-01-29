@@ -851,9 +851,9 @@ NEXT_PUBLIC_ADMIN_URL=
 
 | App | Platform | Domain |
 |-----|----------|--------|
-| Landing (web) | Vercel | zoramarket.com |
-| Vendor Portal | Vercel | vendor.zoramarket.com |
-| Admin Dashboard | Vercel | admin.zoramarket.com |
+| Landing (web) | Vercel | zoraapp.co.uk |
+| Vendor Portal | Vercel | vendor.zoraapp.co.uk |
+| Admin Dashboard | Vercel | admin.zoraapp.co.uk |
 | Mobile App | EAS / App Stores | iOS & Android apps |
 
 ---

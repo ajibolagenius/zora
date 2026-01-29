@@ -155,4 +155,4 @@ This project is proprietary software. All rights reserved.
 
 ## Support
 
-For support, email support@zoramarket.com or join our Slack channel.
+For support, email support@zoraapp.co.uk or join our Slack channel.
