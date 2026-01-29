@@ -243,13 +243,13 @@ export default function OrdersPage() {
         <>
             <Header title="Orders" description="Manage all platform orders" />
 
-            <div className="p-8">
+            <div className="p-4 sm:p-6 lg:p-8">
                 {/* Stats Row */}
                 <motion.div
                     variants={staggerContainer}
                     initial="initial"
                     animate="animate"
-                    className="grid grid-cols-6 gap-4 mb-8"
+                    className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 mb-8"
                 >
                     {[
                         { label: "All Orders", count: orderCounts.all, color: "bg-slate-100 text-slate-600" },
@@ -272,7 +272,7 @@ export default function OrdersPage() {
                 <Card className="mb-6">
                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                         <div className="flex flex-1 items-center gap-4">
-                            <div className="w-80">
+                            <div className="w-full sm:w-80">
                                 <Input
                                     placeholder="Search by order ID, customer, or vendor..."
                                     value={searchTerm}

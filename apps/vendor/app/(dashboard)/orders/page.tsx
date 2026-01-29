@@ -172,13 +172,13 @@ export default function OrdersPage() {
         <>
             <Header title="Orders" description="Manage and fulfill customer orders" />
 
-            <div className="p-8">
+            <div className="p-4 sm:p-6 lg:p-8">
                 {/* Stats Row */}
                 <motion.div
                     variants={staggerContainer}
                     initial="initial"
                     animate="animate"
-                    className="grid grid-cols-5 gap-4 mb-8"
+                    className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 mb-8"
                 >
                     {[
                         { label: "Pending", count: orderCounts.pending, color: "bg-yellow-100 text-yellow-600" },
@@ -200,17 +200,17 @@ export default function OrdersPage() {
 
                 {/* Filters */}
                 <Card className="mb-6">
-                    <div className="flex items-center justify-between">
-                        <Tabs value={selectedTab} onValueChange={setSelectedTab}>
-                            <TabsList>
-                                <TabsTrigger value="all">All ({orderCounts.all})</TabsTrigger>
-                                <TabsTrigger value="pending">Pending ({orderCounts.pending})</TabsTrigger>
-                                <TabsTrigger value="confirmed">Confirmed ({orderCounts.confirmed})</TabsTrigger>
-                                <TabsTrigger value="preparing">Preparing ({orderCounts.preparing})</TabsTrigger>
-                                <TabsTrigger value="ready">Ready ({orderCounts.ready})</TabsTrigger>
+                    <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                        <Tabs value={selectedTab} onValueChange={setSelectedTab} className="w-full lg:w-auto">
+                            <TabsList className="flex-wrap h-auto gap-1">
+                                <TabsTrigger value="all" className="text-xs sm:text-sm">All ({orderCounts.all})</TabsTrigger>
+                                <TabsTrigger value="pending" className="text-xs sm:text-sm">Pending ({orderCounts.pending})</TabsTrigger>
+                                <TabsTrigger value="confirmed" className="text-xs sm:text-sm">Confirmed ({orderCounts.confirmed})</TabsTrigger>
+                                <TabsTrigger value="preparing" className="text-xs sm:text-sm">Preparing ({orderCounts.preparing})</TabsTrigger>
+                                <TabsTrigger value="ready" className="text-xs sm:text-sm">Ready ({orderCounts.ready})</TabsTrigger>
                             </TabsList>
                         </Tabs>
-                        <div className="w-64">
+                        <div className="w-full lg:w-64">
                             <Input
                                 placeholder="Search orders..."
                                 value={searchTerm}
@@ -259,40 +259,43 @@ export default function OrdersPage() {
                                                 setDetailsOpen(true);
                                             }}
                                         >
-                                            <div className="flex items-center justify-between">
-                                                <div className="flex items-center gap-4">
-                                                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${status.color}`}>
-                                                        <StatusIcon className="w-6 h-6" />
-                                                    </div>
-                                                    <div>
-                                                        <div className="flex items-center gap-3">
-                                                            <p className="font-semibold text-gray-900">{order.id}</p>
-                                                            <Badge variant={status.variant}>{status.label}</Badge>
+                                                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                                            <div className="flex items-center gap-3 sm:gap-4">
+                                                                <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center flex-shrink-0 ${status.color}`}>
+                                                                    <StatusIcon className="w-5 h-5 sm:w-6 sm:h-6" />
+                                                                </div>
+                                                                <div className="min-w-0">
+                                                                    <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
+                                                                        <p className="font-semibold text-gray-900">{order.id}</p>
+                                                                        <Badge variant={status.variant}>{status.label}</Badge>
+                                                                    </div>
+                                                                    <p className="text-sm text-gray-500 truncate">
+                                                                        {order.customer.name} • {order.items.length} item{order.items.length > 1 ? "s" : ""} • {formatRelativeTime(order.createdAt)}
+                                                                    </p>
+                                                                </div>
+                                                            </div>
+                                                            <div className="flex items-center justify-between sm:justify-end gap-4 sm:gap-6 pl-13 sm:pl-0">
+                                                                <div className="text-left sm:text-right">
+                                                                    <p className="font-semibold text-gray-900">{formatCurrency(order.total)}</p>
+                                                                    <p className="text-sm text-gray-500">Est. {order.estimatedDelivery}</p>
+                                                                </div>
+                                                                <div className="flex items-center gap-2">
+                                                                    {nextStatus && (
+                                                                        <Button
+                                                                            size="sm"
+                                                                            className="text-xs sm:text-sm whitespace-nowrap"
+                                                                            onClick={(e) => {
+                                                                                e.stopPropagation();
+                                                                                updateOrderStatus(order.id, nextStatus);
+                                                                            }}
+                                                                        >
+                                                                            <span className="hidden sm:inline">Mark as </span>{statusConfig[nextStatus as keyof typeof statusConfig].label}
+                                                                        </Button>
+                                                                    )}
+                                                                    <ChevronRight className="w-5 h-5 text-gray-400 hidden sm:block" />
+                                                                </div>
+                                                            </div>
                                                         </div>
-                                                        <p className="text-sm text-gray-500">
-                                                            {order.customer.name} • {order.items.length} item{order.items.length > 1 ? "s" : ""} • {formatRelativeTime(order.createdAt)}
-                                                        </p>
-                                                    </div>
-                                                </div>
-                                                <div className="flex items-center gap-6">
-                                                    <div className="text-right">
-                                                        <p className="font-semibold text-gray-900">{formatCurrency(order.total)}</p>
-                                                        <p className="text-sm text-gray-500">Est. {order.estimatedDelivery}</p>
-                                                    </div>
-                                                    {nextStatus && (
-                                                        <Button
-                                                            size="sm"
-                                                            onClick={(e) => {
-                                                                e.stopPropagation();
-                                                                updateOrderStatus(order.id, nextStatus);
-                                                            }}
-                                                        >
-                                                            Mark as {statusConfig[nextStatus as keyof typeof statusConfig].label}
-                                                        </Button>
-                                                    )}
-                                                    <ChevronRight className="w-5 h-5 text-gray-400" />
-                                                </div>
-                                            </div>
                                         </Card>
                                     </motion.div>
                                 );
@@ -321,7 +324,7 @@ export default function OrdersPage() {
                                 </div>
                             </DialogHeader>
 
-                            <div className="grid grid-cols-2 gap-6 mt-6">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-6">
                                 {/* Customer Info */}
                                 <div>
                                     <h3 className="font-semibold text-gray-900 mb-3">Customer</h3>

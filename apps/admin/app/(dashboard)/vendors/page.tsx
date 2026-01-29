@@ -255,19 +255,19 @@ export default function VendorsPage() {
         <>
             <Header title="Vendors" description="Manage vendors and applications" />
 
-            <div className="p-8">
+            <div className="p-4 sm:p-6 lg:p-8">
                 {/* Tabs */}
                 <Tabs value={selectedTab} onValueChange={setSelectedTab} className="mb-6">
-                    <div className="flex items-center justify-between">
-                        <TabsList>
-                            <TabsTrigger value="vendors">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <TabsList className="w-full sm:w-auto">
+                            <TabsTrigger value="vendors" className="text-xs sm:text-sm">
                                 Active Vendors ({vendors.filter(v => v.status === "active").length})
                             </TabsTrigger>
-                            <TabsTrigger value="applications">
+                            <TabsTrigger value="applications" className="text-xs sm:text-sm">
                                 Applications ({applications.length})
                             </TabsTrigger>
                         </TabsList>
-                        <div className="w-72">
+                        <div className="w-full sm:w-72">
                             <Input
                                 placeholder="Search vendors..."
                                 value={searchTerm}
@@ -383,7 +383,7 @@ export default function VendorsPage() {
                                 </DialogDescription>
                             </DialogHeader>
 
-                            <div className="grid grid-cols-2 gap-6 py-4">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 py-4">
                                 <div>
                                     <h4 className="font-medium text-slate-900 mb-3">Business Information</h4>
                                     <Card padding="sm" className="space-y-3">
@@ -419,7 +419,7 @@ export default function VendorsPage() {
 
                             <div>
                                 <h4 className="font-medium text-slate-900 mb-3">Submitted Documents</h4>
-                                <div className="grid grid-cols-3 gap-3">
+                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                                     {selectedApplication.documents.map((doc) => (
                                         <Card key={doc} padding="sm" className="flex items-center gap-2">
                                             <FileText className="w-4 h-4 text-primary" />

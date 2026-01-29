@@ -1,6 +1,9 @@
+"use client";
+
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowUpRight, Star, ShoppingBag, TrendingUp, Users, Truck, Shield, MapPin, Check, Globe, CreditCard, Package, Heart, Search, Map } from "lucide-react";
+import { useState } from "react";
+import { ArrowUpRight, Star, ShoppingBag, TrendingUp, Users, Truck, Shield, MapPin, Check, Globe, CreditCard, Package, Heart, Search, Map, Menu, X } from "lucide-react";
 
 // Zora Logo Component
 const ZoraLogo = ({ className = "w-10 h-10" }: { className?: string }) => (
@@ -9,8 +12,8 @@ const ZoraLogo = ({ className = "w-10 h-10" }: { className?: string }) => (
             {/* Shopping Bag */}
             <g id="bag">
                 {/* Hands */}
-                <path id="hand_2" d="M55.643 29.404c-0.298-1.356-0.613-3.954-0.613-5.398v-2.559c0-10.801 8.769-19.569 19.569-19.569h7.112c10.801 0 19.569 8.769 19.569 19.569v2.559c0 2.421-0.571 5.206-1.376 7.347" fill="none" stroke="#000" strokeWidth="2.08" />
-                <path id="hand_1" d="M63.832 31.655c-0.298-1.356-0.613-3.954-0.613-5.398v-2.559c0-10.801 8.769-19.569 19.569-19.569h7.112c10.801 0 19.569 8.769 19.569 19.569v2.559c0 2.421-0.192 3.493-0.997 5.634" fill="none" stroke="#000" strokeWidth="2.08" />
+                <path id="hand_2" d="M55.643 29.404c-0.298-1.356-0.613-3.954-0.613-5.398v-2.559c0-10.801 8.769-19.569 19.569-19.569h7.112c10.801 0 19.569 8.769 19.569 19.569v2.559c0 2.421-0.571 5.206-1.376 7.347" fill="none" stroke="#fff" strokeWidth="2.08" />
+                <path id="hand_1" d="M63.832 31.655c-0.298-1.356-0.613-3.954-0.613-5.398v-2.559c0-10.801 8.769-19.569 19.569-19.569h7.112c10.801 0 19.569 8.769 19.569 19.569v2.559c0 2.421-0.192 3.493-0.997 5.634" fill="none" stroke="#fff" strokeWidth="2.08" />
                 {/* Bag Shape */}
                 <g id="bag_line">
                     <path id="bag_line_1" d="M17.657 31.446l9.865-0.065 6.93-6.059 27.742 2.627-3.487 10.757-6.086 0.988 0.083 4.076-11.435 15.164v7.407l-2.445 5.046c0 0 15.955 21.579 25.604 15.127l7.746-2.576 4.453 2.558-0.342 8.748 3.387 2.559-43.111-11.716-11.381 0.63-12.184 0.845 4.66-56.116Z" fill="#c00" />
@@ -26,19 +29,21 @@ const ZoraLogo = ({ className = "w-10 h-10" }: { className?: string }) => (
 );
 
 export default function Home() {
+    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
     return (
         <main className="min-h-screen bg-[#F8F7F5]">
             {/* Navigation */}
             <nav className="fixed top-0 left-0 right-0 z-50 bg-[#F8F7F5]/80 backdrop-blur-md">
-                <div className="container mx-auto px-6 py-4 flex items-center justify-between">
+                <div className="container mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
                     {/* Logo */}
                     <Link href="/" className="flex items-center gap-2">
                         <ZoraLogo className="w-9 h-9" />
                         <span className="text-xl font-bold font-display text-gray-900">Zora</span>
                     </Link>
 
-                    {/* Center Navigation - Pill Style */}
-                    <div className="hidden md:flex items-center bg-white rounded-full px-2 py-1.5 border border-gray-200 shadow-sm">
+                    {/* Center Navigation - Pill Style (Desktop) */}
+                    <div className="hidden lg:flex items-center bg-white rounded-full px-2 py-1.5 border border-gray-200 shadow-sm">
                         <Link
                             href="#features"
                             className="px-5 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors rounded-full hover:bg-gray-50"
@@ -65,14 +70,69 @@ export default function Home() {
                         </Link>
                     </div>
 
-                    {/* Right CTA */}
-                    <Link
-                        href="/vendor-onboarding"
-                        className="bg-secondary hover:bg-secondary-dark text-gray-900 px-5 py-2.5 rounded-full text-sm font-semibold transition-colors shadow-sm"
-                    >
-                        Get Started
-                    </Link>
+                    {/* Right CTA & Mobile Menu */}
+                    <div className="flex items-center gap-3">
+                        <Link
+                            href="/vendor-onboarding"
+                            className="hidden sm:inline-flex bg-secondary hover:bg-secondary-dark text-gray-900 px-5 py-2.5 rounded-full text-sm font-semibold transition-colors shadow-sm"
+                        >
+                            Get Started
+                        </Link>
+                        <button
+                            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                            className="lg:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors"
+                        >
+                            {mobileMenuOpen ? (
+                                <X className="w-6 h-6 text-gray-700" />
+                            ) : (
+                                <Menu className="w-6 h-6 text-gray-700" />
+                            )}
+                        </button>
+                    </div>
                 </div>
+
+                {/* Mobile Menu */}
+                {mobileMenuOpen && (
+                    <div className="lg:hidden bg-white border-t border-gray-200 shadow-lg">
+                        <div className="container mx-auto px-4 py-4 flex flex-col space-y-2">
+                            <Link
+                                href="#features"
+                                onClick={() => setMobileMenuOpen(false)}
+                                className="px-4 py-3 text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors"
+                            >
+                                Features
+                            </Link>
+                            <Link
+                                href="#how-it-works"
+                                onClick={() => setMobileMenuOpen(false)}
+                                className="px-4 py-3 text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors"
+                            >
+                                How It Works
+                            </Link>
+                            <Link
+                                href="#vendors"
+                                onClick={() => setMobileMenuOpen(false)}
+                                className="px-4 py-3 text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors"
+                            >
+                                For Vendors
+                            </Link>
+                            <Link
+                                href="#download"
+                                onClick={() => setMobileMenuOpen(false)}
+                                className="px-4 py-3 text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors"
+                            >
+                                Download
+                            </Link>
+                            <Link
+                                href="/vendor-onboarding"
+                                onClick={() => setMobileMenuOpen(false)}
+                                className="sm:hidden mt-2 bg-secondary hover:bg-secondary-dark text-gray-900 px-5 py-3 rounded-full text-base font-semibold transition-colors shadow-sm text-center"
+                            >
+                                Get Started
+                            </Link>
+                        </div>
+                    </div>
+                )}
             </nav>
 
             {/* Hero Section */}

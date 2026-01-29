@@ -77,7 +77,7 @@ export default function AdminDashboard() {
         <>
             <Header title="Admin Dashboard" description="Platform overview and management" />
 
-            <div className="p-8">
+            <div className="p-4 sm:p-6 lg:p-8">
                 {/* Stats Grid */}
                 <motion.div
                     variants={staggerContainer}
@@ -97,7 +97,7 @@ export default function AdminDashboard() {
                     variants={staggerContainer}
                     initial="initial"
                     animate="animate"
-                    className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8"
+                    className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8"
                 >
                     {pendingItems.map((item) => (
                         <motion.div key={item.type} variants={staggerItem}>

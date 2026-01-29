@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import {
     LayoutDashboard,
     ShoppingCart,
@@ -18,9 +18,10 @@ import {
     ChevronLeft,
     Menu,
     Shield,
+    X,
 } from "lucide-react";
 import { cn } from "@zora/ui-web";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 const navItems = [
     { name: "Dashboard", icon: LayoutDashboard, href: "/" },
@@ -35,40 +36,47 @@ const navItems = [
     { name: "Settings", icon: Settings, href: "/settings" },
 ];
 
-export function Sidebar() {
+interface SidebarProps {
+    mobileOpen?: boolean;
+    onMobileClose?: () => void;
+}
+
+export function Sidebar({ mobileOpen = false, onMobileClose }: SidebarProps) {
     const pathname = usePathname();
     const [collapsed, setCollapsed] = useState(false);
 
-    return (
-        <motion.aside
-            initial={false}
-            animate={{ width: collapsed ? 80 : 256 }}
-            transition={{ duration: 0.2, ease: [0.0, 0.0, 0.2, 1] }}
-            className="bg-slate-900 text-white flex flex-col h-screen sticky top-0"
-        >
+    // Close mobile menu when route changes
+    useEffect(() => {
+        if (mobileOpen && onMobileClose) {
+            onMobileClose();
+        }
+    }, [pathname]);
+
+    const sidebarContent = (
+        <>
             {/* Header */}
             <div className="p-4 flex items-center justify-between border-b border-white/10">
                 <Link href="/" className="flex items-center gap-2 overflow-hidden">
-                    <motion.span
-                        initial={false}
-                        animate={{ opacity: collapsed ? 0 : 1, width: collapsed ? 0 : "auto" }}
-                        className="text-2xl font-bold text-primary"
-                    >
-                        ZORA
-                    </motion.span>
-                    {!collapsed && (
-                        <span className="text-xs bg-slate-700 px-2 py-0.5 rounded text-slate-300">Admin</span>
-                    )}
+                    <span className="text-2xl font-bold text-primary">ZORA</span>
+                    <span className="text-xs bg-slate-700 px-2 py-0.5 rounded text-slate-300 hidden lg:inline">Admin</span>
                 </Link>
+                {/* Desktop collapse button */}
                 <button
                     onClick={() => setCollapsed(!collapsed)}
-                    className="p-2 rounded-lg hover:bg-white/10 transition-colors"
+                    className="p-2 rounded-lg hover:bg-white/10 transition-colors hidden lg:block"
                 >
                     {collapsed ? (
                         <Menu className="w-5 h-5" />
                     ) : (
                         <ChevronLeft className="w-5 h-5" />
                     )}
+                </button>
+                {/* Mobile close button */}
+                <button
+                    onClick={onMobileClose}
+                    className="p-2 rounded-lg hover:bg-white/10 transition-colors lg:hidden"
+                >
+                    <X className="w-5 h-5" />
                 </button>
             </div>
 
@@ -82,6 +90,7 @@ export function Sidebar() {
                         <Link
                             key={item.name}
                             href={item.href}
+                            onClick={onMobileClose}
                             className={cn(
                                 "flex items-center gap-3 px-4 py-3 rounded-xl mb-1 transition-all duration-200 group relative",
                                 isActive
@@ -96,13 +105,13 @@ export function Sidebar() {
                                     opacity: collapsed ? 0 : 1,
                                     width: collapsed ? 0 : "auto"
                                 }}
-                                className="whitespace-nowrap overflow-hidden"
+                                className="whitespace-nowrap overflow-hidden lg:block"
                             >
                                 {item.name}
                             </motion.span>
                             {/* Tooltip for collapsed state */}
                             {collapsed && (
-                                <div className="absolute left-full ml-2 px-2 py-1 bg-gray-900 text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-50">
+                                <div className="absolute left-full ml-2 px-2 py-1 bg-gray-900 text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-50 hidden lg:block">
                                     {item.name}
                                 </div>
                             )}
@@ -112,19 +121,17 @@ export function Sidebar() {
             </nav>
 
             {/* Admin Badge */}
-            {!collapsed && (
-                <div className="px-4 py-3 mx-3 mb-3 bg-slate-800 rounded-xl">
-                    <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center">
-                            <Shield className="w-4 h-4 text-primary" />
-                        </div>
-                        <div>
-                            <p className="text-sm font-medium text-white">Super Admin</p>
-                            <p className="text-xs text-slate-400">Full Access</p>
-                        </div>
+            <div className="px-4 py-3 mx-3 mb-3 bg-slate-800 rounded-xl">
+                <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center">
+                        <Shield className="w-4 h-4 text-primary" />
+                    </div>
+                    <div className={cn(collapsed && "hidden lg:hidden", "lg:block")}>
+                        <p className="text-sm font-medium text-white">Super Admin</p>
+                        <p className="text-xs text-slate-400">Full Access</p>
                     </div>
                 </div>
-            )}
+            </div>
 
             {/* Footer */}
             <div className="p-3 border-t border-white/10">
@@ -142,6 +149,46 @@ export function Sidebar() {
                     </motion.span>
                 </button>
             </div>
-        </motion.aside>
+        </>
+    );
+
+    return (
+        <>
+            {/* Desktop Sidebar */}
+            <motion.aside
+                initial={false}
+                animate={{ width: collapsed ? 80 : 256 }}
+                transition={{ duration: 0.2, ease: [0.0, 0.0, 0.2, 1] }}
+                className="bg-slate-900 text-white flex-col h-screen sticky top-0 hidden lg:flex"
+            >
+                {sidebarContent}
+            </motion.aside>
+
+            {/* Mobile Sidebar Overlay */}
+            <AnimatePresence>
+                {mobileOpen && (
+                    <>
+                        {/* Backdrop */}
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            onClick={onMobileClose}
+                            className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+                        />
+                        {/* Sidebar */}
+                        <motion.aside
+                            initial={{ x: -280 }}
+                            animate={{ x: 0 }}
+                            exit={{ x: -280 }}
+                            transition={{ duration: 0.2, ease: [0.0, 0.0, 0.2, 1] }}
+                            className="fixed left-0 top-0 bottom-0 w-[280px] bg-slate-900 text-white flex flex-col z-50 lg:hidden"
+                        >
+                            {sidebarContent}
+                        </motion.aside>
+                    </>
+                )}
+            </AnimatePresence>
+        </>
     );
 }

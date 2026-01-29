@@ -237,13 +237,13 @@ export default function ProductsPage() {
         <>
             <Header title="Products" description="Manage your product catalog" />
 
-            <div className="p-8">
+            <div className="p-4 sm:p-6 lg:p-8">
                 {/* Stats Row */}
                 <motion.div
                     variants={staggerContainer}
                     initial="initial"
                     animate="animate"
-                    className="grid grid-cols-4 gap-4 mb-8"
+                    className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8"
                 >
                     {[
                         { label: "Total Products", value: products.length, color: "bg-blue-100 text-blue-600" },
@@ -269,7 +269,7 @@ export default function ProductsPage() {
                 <Card className="mb-6">
                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                         <div className="flex flex-1 items-center gap-4">
-                            <div className="w-80">
+                            <div className="w-full sm:w-80">
                                 <Input
                                     placeholder="Search products..."
                                     value={searchTerm}

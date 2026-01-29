@@ -226,13 +226,13 @@ export default function CustomersPage() {
         <>
             <Header title="Customers" description="Manage customer accounts" />
 
-            <div className="p-8">
+            <div className="p-4 sm:p-6 lg:p-8">
                 {/* Stats Row */}
                 <motion.div
                     variants={staggerContainer}
                     initial="initial"
                     animate="animate"
-                    className="grid grid-cols-4 gap-6 mb-8"
+                    className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8"
                 >
                     {stats.map((stat) => (
                         <motion.div key={stat.label} variants={staggerItem}>
@@ -253,7 +253,7 @@ export default function CustomersPage() {
                 <Card className="mb-6">
                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                         <div className="flex flex-1 items-center gap-4">
-                            <div className="w-80">
+                            <div className="w-full sm:w-80">
                                 <Input
                                     placeholder="Search customers..."
                                     value={searchTerm}
@@ -320,7 +320,7 @@ export default function CustomersPage() {
                                     </div>
                                 </div>
 
-                                <div className="grid grid-cols-2 gap-6">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                                     <Card padding="sm">
                                         <h4 className="font-medium text-slate-900 mb-3">Contact Information</h4>
                                         <div className="space-y-3">

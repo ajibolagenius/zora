@@ -48,40 +48,58 @@ export default function VendorOnboardingPage() {
         <div className="min-h-screen bg-surface-light">
             {/* Header */}
             <header className="bg-white border-b border-border">
-                <div className="container mx-auto px-4 h-16 flex items-center justify-between">
+                <div className="container mx-auto px-4 h-14 sm:h-16 flex items-center justify-between">
                     <Link href="/" className="flex items-center gap-2">
-                        <span className="text-2xl font-bold font-display text-primary">ZORA</span>
+                        <span className="text-xl sm:text-2xl font-bold font-display text-primary">ZORA</span>
                     </Link>
                     <Link
                         href="/"
-                        className="text-sm text-muted-foreground hover:text-foreground flex items-center gap-2"
+                        className="text-xs sm:text-sm text-muted-foreground hover:text-foreground flex items-center gap-1 sm:gap-2"
                     >
                         <ArrowLeft className="w-4 h-4" />
-                        Back to Home
+                        <span className="hidden sm:inline">Back to Home</span>
+                        <span className="sm:hidden">Back</span>
                     </Link>
                 </div>
             </header>
 
-            <div className="container mx-auto px-4 py-12">
+            <div className="container mx-auto px-4 py-6 sm:py-12">
                 <div className="max-w-4xl mx-auto">
                     {/* Title */}
-                    <div className="text-center mb-12">
-                        <h1 className="text-3xl font-bold font-display mb-2">
+                    <div className="text-center mb-8 sm:mb-12">
+                        <h1 className="text-2xl sm:text-3xl font-bold font-display mb-2">
                             Become a Zora Vendor
                         </h1>
-                        <p className="text-muted-foreground">
+                        <p className="text-sm sm:text-base text-muted-foreground">
                             Complete the form below to start selling on Zora
                         </p>
                     </div>
 
                     {/* Progress Steps */}
-                    <div className="mb-12">
-                        <div className="flex items-center justify-between">
+                    <div className="mb-8 sm:mb-12">
+                        {/* Mobile: Simple step indicator */}
+                        <div className="sm:hidden flex items-center justify-center gap-2 mb-4">
+                            {steps.map((step) => (
+                                <div
+                                    key={step.id}
+                                    className={`w-2 h-2 rounded-full transition-colors ${
+                                        currentStep >= step.id ? "bg-primary" : "bg-gray-300"
+                                    }`}
+                                />
+                            ))}
+                        </div>
+                        <div className="sm:hidden text-center">
+                            <p className="text-sm text-muted-foreground">Step {currentStep} of {steps.length}</p>
+                            <p className="font-medium">{steps[currentStep - 1].name}</p>
+                        </div>
+
+                        {/* Desktop: Full step progress */}
+                        <div className="hidden sm:flex items-center justify-between">
                             {steps.map((step, index) => (
                                 <div key={step.id} className="flex items-center">
                                     <div className="flex flex-col items-center">
                                         <div
-                                            className={`w-12 h-12 rounded-full flex items-center justify-center ${currentStep > step.id
+                                            className={`w-10 h-10 lg:w-12 lg:h-12 rounded-full flex items-center justify-center ${currentStep > step.id
                                                     ? "bg-green-500 text-white"
                                                     : currentStep === step.id
                                                         ? "bg-primary text-white"
@@ -89,13 +107,13 @@ export default function VendorOnboardingPage() {
                                                 }`}
                                         >
                                             {currentStep > step.id ? (
-                                                <Check className="w-6 h-6" />
+                                                <Check className="w-5 h-5 lg:w-6 lg:h-6" />
                                             ) : (
-                                                <step.icon className="w-6 h-6" />
+                                                <step.icon className="w-5 h-5 lg:w-6 lg:h-6" />
                                             )}
                                         </div>
                                         <span
-                                            className={`mt-2 text-xs font-medium ${currentStep >= step.id
+                                            className={`mt-2 text-xs font-medium text-center hidden lg:block ${currentStep >= step.id
                                                     ? "text-foreground"
                                                     : "text-muted-foreground"
                                                 }`}
@@ -105,7 +123,7 @@ export default function VendorOnboardingPage() {
                                     </div>
                                     {index < steps.length - 1 && (
                                         <div
-                                            className={`flex-1 h-1 mx-4 ${currentStep > step.id ? "bg-green-500" : "bg-gray-200"
+                                            className={`flex-1 h-1 mx-2 lg:mx-4 ${currentStep > step.id ? "bg-green-500" : "bg-gray-200"
                                                 }`}
                                         />
                                     )}
@@ -115,7 +133,7 @@ export default function VendorOnboardingPage() {
                     </div>
 
                     {/* Form */}
-                    <div className="bg-white rounded-2xl shadow-lg p-8">
+                    <div className="bg-white rounded-xl sm:rounded-2xl shadow-lg p-4 sm:p-6 lg:p-8">
                         {currentStep === 1 && (
                             <div className="space-y-6">
                                 <h2 className="text-xl font-semibold mb-4">Business Information</h2>
@@ -330,21 +348,21 @@ export default function VendorOnboardingPage() {
 
                         {currentStep === 5 && (
                             <div className="space-y-6">
-                                <h2 className="text-xl font-semibold mb-4">Delivery Coverage Area</h2>
-                                <p className="text-muted-foreground mb-6">
+                                <h2 className="text-lg sm:text-xl font-semibold mb-4">Delivery Coverage Area</h2>
+                                <p className="text-sm sm:text-base text-muted-foreground mb-6">
                                     Select the areas where you can deliver products.
                                 </p>
-                                <div className="bg-gray-100 rounded-xl h-64 flex items-center justify-center">
-                                    <p className="text-muted-foreground">
+                                <div className="bg-gray-100 rounded-xl h-48 sm:h-64 flex items-center justify-center">
+                                    <p className="text-muted-foreground text-sm sm:text-base text-center px-4">
                                         Interactive map will be displayed here
                                     </p>
                                 </div>
-                                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
                                     {["London", "Birmingham", "Manchester", "Leeds", "Liverpool", "Bristol", "Sheffield", "Newcastle"].map(
                                         (city) => (
                                             <label
                                                 key={city}
-                                                className="flex items-center gap-2 p-3 border border-border rounded-xl cursor-pointer hover:bg-gray-50"
+                                                className="flex items-center gap-2 p-2.5 sm:p-3 border border-border rounded-lg sm:rounded-xl cursor-pointer hover:bg-gray-50 text-sm sm:text-base"
                                             >
                                                 <input type="checkbox" className="rounded" />
                                                 <span>{city}</span>
@@ -357,11 +375,11 @@ export default function VendorOnboardingPage() {
 
                         {currentStep === 6 && (
                             <div className="space-y-6">
-                                <h2 className="text-xl font-semibold mb-4">Product Categories</h2>
-                                <p className="text-muted-foreground mb-6">
+                                <h2 className="text-lg sm:text-xl font-semibold mb-4">Product Categories</h2>
+                                <p className="text-sm sm:text-base text-muted-foreground mb-6">
                                     Select the categories of products you&apos;ll be selling.
                                 </p>
-                                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                                     {[
                                         "Spices & Seasonings",
                                         "Grains & Cereals",
@@ -378,7 +396,7 @@ export default function VendorOnboardingPage() {
                                     ].map((category) => (
                                         <label
                                             key={category}
-                                            className="flex items-center gap-2 p-4 border border-border rounded-xl cursor-pointer hover:bg-gray-50"
+                                            className="flex items-center gap-2 p-3 sm:p-4 border border-border rounded-lg sm:rounded-xl cursor-pointer hover:bg-gray-50 text-sm sm:text-base"
                                         >
                                             <input type="checkbox" className="rounded" />
                                             <span>{category}</span>

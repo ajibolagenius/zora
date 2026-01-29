@@ -54,7 +54,7 @@ export default function VendorDashboard() {
         <>
             <Header title="Dashboard" description="Welcome back, African Spice House" />
 
-            <div className="p-8">
+            <div className="p-4 sm:p-6 lg:p-8">
                 {/* Stats Grid */}
                 <motion.div
                     variants={staggerContainer}
