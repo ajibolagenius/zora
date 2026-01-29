@@ -7,10 +7,39 @@ import { motion } from "framer-motion";
 import { Shield, Mail, Lock, Eye, EyeOff, ArrowRight } from "lucide-react";
 import { Button, Input, Card } from "@zora/ui-web";
 
+/**
+ * Validates and sanitizes a redirect URL to prevent open redirect attacks.
+ * Only allows relative paths starting with "/" and blocks external URLs.
+ */
+function getSafeRedirectUrl(url: string | null): string {
+    const defaultRedirect = "/";
+
+    if (!url) return defaultRedirect;
+
+    // Must start with "/" (relative path)
+    if (!url.startsWith("/")) return defaultRedirect;
+
+    // Block protocol-relative URLs (e.g., "//evil.com")
+    if (url.startsWith("//")) return defaultRedirect;
+
+    // Block URLs with protocols (e.g., "/\evil.com" or encoded variants)
+    try {
+        const decoded = decodeURIComponent(url);
+        if (decoded.includes("://") || decoded.startsWith("//")) {
+            return defaultRedirect;
+        }
+    } catch {
+        // If decoding fails, reject the URL
+        return defaultRedirect;
+    }
+
+    return url;
+}
+
 export default function AdminLoginPage() {
     const router = useRouter();
     const searchParams = useSearchParams();
-    const redirect = searchParams.get("redirect") || "/";
+    const redirect = getSafeRedirectUrl(searchParams.get("redirect"));
 
     const [showPassword, setShowPassword] = useState(false);
     const [isLoading, setIsLoading] = useState(false);

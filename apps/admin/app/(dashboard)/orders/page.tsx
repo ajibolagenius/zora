@@ -221,7 +221,7 @@ export default function OrdersPage() {
                     >
                         <Eye className="w-4 h-4" />
                     </Button>
-                    {order.paymentStatus === "paid" && order.status !== "refunded" && (
+                    {order.paymentStatus === "paid" && (
                         <Button
                             variant="ghost"
                             size="icon"
