@@ -1,22 +1,22 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
     Search,
-    Filter,
     Package,
     Clock,
     CheckCircle,
     Truck,
     XCircle,
-    Eye,
     ChevronRight,
     Calendar,
     MapPin,
     Phone,
     Mail,
     Printer,
+    RefreshCw,
+    AlertCircle,
 } from "lucide-react";
 import { Header } from "../../../components/Header";
 import {
@@ -27,7 +27,6 @@ import {
     Tabs,
     TabsList,
     TabsTrigger,
-    TabsContent,
     Avatar,
     AvatarFallback,
     Dialog,
@@ -35,85 +34,16 @@ import {
     DialogHeader,
     DialogTitle,
     DialogFooter,
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
     EmptyState,
     formatCurrency,
-    formatDate,
     formatRelativeTime,
     staggerContainer,
     staggerItem,
+    SkeletonCard,
 } from "@zora/ui-web";
-
-// Mock orders data
-const mockOrders = [
-    {
-        id: "ORD-2024-001",
-        customer: { name: "John Doe", email: "john@example.com", phone: "+44 7123 456789", avatar: null },
-        items: [
-            { name: "Premium Suya Spice Mix", quantity: 2, price: 8.99 },
-            { name: "Jollof Rice Seasoning", quantity: 1, price: 5.49 },
-        ],
-        total: 23.47,
-        status: "pending",
-        deliveryAddress: "123 High Street, London, SW1A 1AA",
-        createdAt: new Date(Date.now() - 1000 * 60 * 15), // 15 mins ago
-        estimatedDelivery: "Jan 30, 2026",
-    },
-    {
-        id: "ORD-2024-002",
-        customer: { name: "Jane Smith", email: "jane@example.com", phone: "+44 7234 567890", avatar: null },
-        items: [
-            { name: "Nigerian Palm Oil (1L)", quantity: 3, price: 12.50 },
-            { name: "Egusi Seeds (500g)", quantity: 2, price: 6.99 },
-        ],
-        total: 51.48,
-        status: "confirmed",
-        deliveryAddress: "456 Baker Street, London, NW1 6XE",
-        createdAt: new Date(Date.now() - 1000 * 60 * 45), // 45 mins ago
-        estimatedDelivery: "Jan 30, 2026",
-    },
-    {
-        id: "ORD-2024-003",
-        customer: { name: "Mike Johnson", email: "mike@example.com", phone: "+44 7345 678901", avatar: null },
-        items: [
-            { name: "Dried Stockfish", quantity: 1, price: 24.99 },
-        ],
-        total: 24.99,
-        status: "preparing",
-        deliveryAddress: "789 Oxford Road, Manchester, M1 5AN",
-        createdAt: new Date(Date.now() - 1000 * 60 * 120), // 2 hours ago
-        estimatedDelivery: "Jan 31, 2026",
-    },
-    {
-        id: "ORD-2024-004",
-        customer: { name: "Sarah Wilson", email: "sarah@example.com", phone: "+44 7456 789012", avatar: null },
-        items: [
-            { name: "Premium Suya Spice Mix", quantity: 5, price: 8.99 },
-        ],
-        total: 44.95,
-        status: "ready",
-        deliveryAddress: "321 Queens Road, Birmingham, B1 1RS",
-        createdAt: new Date(Date.now() - 1000 * 60 * 180), // 3 hours ago
-        estimatedDelivery: "Jan 30, 2026",
-    },
-    {
-        id: "ORD-2024-005",
-        customer: { name: "Chris Brown", email: "chris@example.com", phone: "+44 7567 890123", avatar: null },
-        items: [
-            { name: "Nigerian Palm Oil (1L)", quantity: 2, price: 12.50 },
-            { name: "Jollof Rice Seasoning", quantity: 3, price: 5.49 },
-        ],
-        total: 41.47,
-        status: "out_for_delivery",
-        deliveryAddress: "654 Park Lane, Leeds, LS1 3BE",
-        createdAt: new Date(Date.now() - 1000 * 60 * 300), // 5 hours ago
-        estimatedDelivery: "Jan 29, 2026",
-    },
-];
+import { useAuth, useVendorOrders, useUpdateOrderStatus } from "../../../hooks";
+import { useVendorRealtime } from "../../../providers";
+import type { Order, OrderStatus } from "@zora/types";
 
 const statusConfig = {
     pending: { label: "Pending", variant: "warning" as const, icon: Clock, color: "text-yellow-600 bg-yellow-100" },
@@ -125,7 +55,7 @@ const statusConfig = {
     cancelled: { label: "Cancelled", variant: "error" as const, icon: XCircle, color: "text-red-600 bg-red-100" },
 };
 
-const nextStatusMap: Record<string, string> = {
+const nextStatusMap: Record<string, OrderStatus> = {
     pending: "confirmed",
     confirmed: "preparing",
     preparing: "ready",
@@ -133,44 +63,113 @@ const nextStatusMap: Record<string, string> = {
     out_for_delivery: "delivered",
 };
 
+interface OrderWithDetails extends Order {
+    user?: {
+        id: string;
+        full_name: string;
+        email: string;
+        phone?: string;
+        avatar_url?: string;
+    };
+    items?: Array<{
+        id: string;
+        quantity: number;
+        price: number;
+        product?: {
+            id: string;
+            name: string;
+            image_url?: string;
+        };
+    }>;
+}
+
 export default function OrdersPage() {
-    const [orders, setOrders] = useState(mockOrders);
+    const { vendor } = useAuth();
+    const { newOrdersCount, resetNewOrdersCount } = useVendorRealtime();
+
     const [searchTerm, setSearchTerm] = useState("");
     const [selectedTab, setSelectedTab] = useState("all");
-    const [selectedOrder, setSelectedOrder] = useState<typeof mockOrders[0] | null>(null);
+    const [selectedOrder, setSelectedOrder] = useState<OrderWithDetails | null>(null);
     const [detailsOpen, setDetailsOpen] = useState(false);
 
-    const filteredOrders = orders.filter((order) => {
-        const matchesSearch =
-            order.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            order.customer.name.toLowerCase().includes(searchTerm.toLowerCase());
-        const matchesTab = selectedTab === "all" || order.status === selectedTab;
-        return matchesSearch && matchesTab;
-    });
+    // Fetch orders from database
+    const statusFilter = selectedTab === "all" ? undefined : selectedTab as OrderStatus;
+    const {
+        data: ordersData,
+        isLoading,
+        isError,
+        refetch,
+    } = useVendorOrders(vendor?.id ?? null, { status: statusFilter });
 
-    const updateOrderStatus = (orderId: string, newStatus: string) => {
-        setOrders((prev) =>
-            prev.map((order) =>
-                order.id === orderId ? { ...order, status: newStatus } : order
-            )
-        );
-        if (selectedOrder?.id === orderId) {
-            setSelectedOrder({ ...selectedOrder, status: newStatus });
+    // Update order status mutation
+    const updateStatusMutation = useUpdateOrderStatus();
+
+    // Filter orders by search term
+    const filteredOrders = useMemo(() => {
+        if (!ordersData?.data) return [];
+        if (!searchTerm) return ordersData.data as OrderWithDetails[];
+
+        return (ordersData.data as OrderWithDetails[]).filter((order) => {
+            const searchLower = searchTerm.toLowerCase();
+            return (
+                order.order_number?.toLowerCase().includes(searchLower) ||
+                order.id.toLowerCase().includes(searchLower) ||
+                order.user?.full_name?.toLowerCase().includes(searchLower) ||
+                order.user?.email?.toLowerCase().includes(searchLower)
+            );
+        });
+    }, [ordersData?.data, searchTerm]);
+
+    // Calculate order counts
+    const orderCounts = useMemo(() => {
+        const orders = ordersData?.data || [];
+        return {
+            all: orders.length,
+            pending: orders.filter((o) => o.status === "pending").length,
+            confirmed: orders.filter((o) => o.status === "confirmed").length,
+            preparing: orders.filter((o) => o.status === "preparing").length,
+            ready: orders.filter((o) => o.status === "ready").length,
+            out_for_delivery: orders.filter((o) => o.status === "out_for_delivery").length,
+        };
+    }, [ordersData?.data]);
+
+    const handleUpdateStatus = async (orderId: string, newStatus: OrderStatus) => {
+        try {
+            await updateStatusMutation.mutateAsync({ orderId, status: newStatus });
+            if (selectedOrder?.id === orderId) {
+                setSelectedOrder({ ...selectedOrder, status: newStatus });
+            }
+        } catch (error) {
+            console.error("Failed to update order status:", error);
         }
     };
 
-    const orderCounts = {
-        all: orders.length,
-        pending: orders.filter((o) => o.status === "pending").length,
-        confirmed: orders.filter((o) => o.status === "confirmed").length,
-        preparing: orders.filter((o) => o.status === "preparing").length,
-        ready: orders.filter((o) => o.status === "ready").length,
-        out_for_delivery: orders.filter((o) => o.status === "out_for_delivery").length,
+    const handleRefresh = () => {
+        refetch();
+        resetNewOrdersCount();
     };
 
     return (
         <>
-            <Header title="Orders" description="Manage and fulfill customer orders" />
+            <Header
+                title="Orders"
+                description="Manage and fulfill customer orders"
+                action={
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={handleRefresh}
+                        leftIcon={<RefreshCw className="w-4 h-4" />}
+                    >
+                        Refresh
+                        {newOrdersCount > 0 && (
+                            <Badge variant="error" size="sm" className="ml-2">
+                                {newOrdersCount}
+                            </Badge>
+                        )}
+                    </Button>
+                }
+            />
 
             <div className="p-4 sm:p-6 lg:p-8">
                 {/* Stats Row */}
@@ -222,14 +221,35 @@ export default function OrdersPage() {
                     </div>
                 </Card>
 
+                {/* Loading State */}
+                {isLoading && (
+                    <div className="space-y-4">
+                        {[1, 2, 3].map((i) => (
+                            <SkeletonCard key={i} />
+                        ))}
+                    </div>
+                )}
+
+                {/* Error State */}
+                {isError && (
+                    <Card className="p-8 text-center">
+                        <AlertCircle className="w-12 h-12 mx-auto mb-4 text-red-500" />
+                        <h3 className="text-lg font-semibold text-gray-900 mb-2">Failed to load orders</h3>
+                        <p className="text-gray-500 mb-4">There was an error loading your orders.</p>
+                        <Button onClick={() => refetch()}>Try Again</Button>
+                    </Card>
+                )}
+
                 {/* Orders List */}
-                {filteredOrders.length === 0 ? (
+                {!isLoading && !isError && filteredOrders.length === 0 && (
                     <EmptyState
                         icon={Package}
                         title="No orders found"
-                        description={searchTerm ? "Try adjusting your search" : "New orders will appear here"}
+                        description={searchTerm ? "Try adjusting your search" : "New orders will appear here when customers place them"}
                     />
-                ) : (
+                )}
+
+                {!isLoading && !isError && filteredOrders.length > 0 && (
                     <motion.div
                         variants={staggerContainer}
                         initial="initial"
@@ -237,10 +257,11 @@ export default function OrdersPage() {
                         className="space-y-4"
                     >
                         <AnimatePresence mode="popLayout">
-                            {filteredOrders.map((order, index) => {
-                                const status = statusConfig[order.status as keyof typeof statusConfig];
+                            {filteredOrders.map((order) => {
+                                const status = statusConfig[order.status as keyof typeof statusConfig] || statusConfig.pending;
                                 const StatusIcon = status.icon;
                                 const nextStatus = nextStatusMap[order.status];
+                                const itemCount = order.items?.length || 0;
 
                                 return (
                                     <motion.div
@@ -259,43 +280,49 @@ export default function OrdersPage() {
                                                 setDetailsOpen(true);
                                             }}
                                         >
-                                                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                                                            <div className="flex items-center gap-3 sm:gap-4">
-                                                                <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center flex-shrink-0 ${status.color}`}>
-                                                                    <StatusIcon className="w-5 h-5 sm:w-6 sm:h-6" />
-                                                                </div>
-                                                                <div className="min-w-0">
-                                                                    <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
-                                                                        <p className="font-semibold text-gray-900">{order.id}</p>
-                                                                        <Badge variant={status.variant}>{status.label}</Badge>
-                                                                    </div>
-                                                                    <p className="text-sm text-gray-500 truncate">
-                                                                        {order.customer.name} • {order.items.length} item{order.items.length > 1 ? "s" : ""} • {formatRelativeTime(order.createdAt)}
-                                                                    </p>
-                                                                </div>
-                                                            </div>
-                                                            <div className="flex items-center justify-between sm:justify-end gap-4 sm:gap-6 pl-13 sm:pl-0">
-                                                                <div className="text-left sm:text-right">
-                                                                    <p className="font-semibold text-gray-900">{formatCurrency(order.total)}</p>
-                                                                    <p className="text-sm text-gray-500">Est. {order.estimatedDelivery}</p>
-                                                                </div>
-                                                                <div className="flex items-center gap-2">
-                                                                    {nextStatus && (
-                                                                        <Button
-                                                                            size="sm"
-                                                                            className="text-xs sm:text-sm whitespace-nowrap"
-                                                                            onClick={(e) => {
-                                                                                e.stopPropagation();
-                                                                                updateOrderStatus(order.id, nextStatus);
-                                                                            }}
-                                                                        >
-                                                                            <span className="hidden sm:inline">Mark as </span>{statusConfig[nextStatus as keyof typeof statusConfig].label}
-                                                                        </Button>
-                                                                    )}
-                                                                    <ChevronRight className="w-5 h-5 text-gray-400 hidden sm:block" />
-                                                                </div>
-                                                            </div>
+                                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                                <div className="flex items-center gap-3 sm:gap-4">
+                                                    <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center flex-shrink-0 ${status.color}`}>
+                                                        <StatusIcon className="w-5 h-5 sm:w-6 sm:h-6" />
+                                                    </div>
+                                                    <div className="min-w-0">
+                                                        <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
+                                                            <p className="font-semibold text-gray-900">
+                                                                {order.order_number || order.id.slice(0, 8)}
+                                                            </p>
+                                                            <Badge variant={status.variant}>{status.label}</Badge>
                                                         </div>
+                                                        <p className="text-sm text-gray-500 truncate">
+                                                            {order.user?.full_name || "Customer"} • {itemCount} item{itemCount !== 1 ? "s" : ""} • {formatRelativeTime(new Date(order.created_at))}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                                <div className="flex items-center justify-between sm:justify-end gap-4 sm:gap-6 pl-13 sm:pl-0">
+                                                    <div className="text-left sm:text-right">
+                                                        <p className="font-semibold text-gray-900">{formatCurrency(order.total || 0)}</p>
+                                                        {order.estimated_delivery && (
+                                                            <p className="text-sm text-gray-500">Est. {new Date(order.estimated_delivery).toLocaleDateString()}</p>
+                                                        )}
+                                                    </div>
+                                                    <div className="flex items-center gap-2">
+                                                        {nextStatus && (
+                                                            <Button
+                                                                size="sm"
+                                                                className="text-xs sm:text-sm whitespace-nowrap"
+                                                                loading={updateStatusMutation.isPending}
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    handleUpdateStatus(order.id, nextStatus);
+                                                                }}
+                                                            >
+                                                                <span className="hidden sm:inline">Mark as </span>
+                                                                {statusConfig[nextStatus]?.label || nextStatus}
+                                                            </Button>
+                                                        )}
+                                                        <ChevronRight className="w-5 h-5 text-gray-400 hidden sm:block" />
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </Card>
                                     </motion.div>
                                 );
@@ -313,13 +340,15 @@ export default function OrdersPage() {
                             <DialogHeader>
                                 <div className="flex items-center justify-between">
                                     <div>
-                                        <DialogTitle>{selectedOrder.id}</DialogTitle>
+                                        <DialogTitle>
+                                            {selectedOrder.order_number || selectedOrder.id.slice(0, 8)}
+                                        </DialogTitle>
                                         <p className="text-sm text-gray-500 mt-1">
-                                            Placed {formatRelativeTime(selectedOrder.createdAt)}
+                                            Placed {formatRelativeTime(new Date(selectedOrder.created_at))}
                                         </p>
                                     </div>
-                                    <Badge variant={statusConfig[selectedOrder.status as keyof typeof statusConfig].variant}>
-                                        {statusConfig[selectedOrder.status as keyof typeof statusConfig].label}
+                                    <Badge variant={statusConfig[selectedOrder.status as keyof typeof statusConfig]?.variant || "default"}>
+                                        {statusConfig[selectedOrder.status as keyof typeof statusConfig]?.label || selectedOrder.status}
                                     </Badge>
                                 </div>
                             </DialogHeader>
@@ -332,21 +361,28 @@ export default function OrdersPage() {
                                         <div className="flex items-center gap-3">
                                             <Avatar size="sm">
                                                 <AvatarFallback>
-                                                    {selectedOrder.customer.name.split(" ").map((n) => n[0]).join("")}
+                                                    {selectedOrder.user?.full_name
+                                                        ?.split(" ")
+                                                        .map((n) => n[0])
+                                                        .join("") || "?"}
                                                 </AvatarFallback>
                                             </Avatar>
                                             <div>
-                                                <p className="font-medium">{selectedOrder.customer.name}</p>
+                                                <p className="font-medium">{selectedOrder.user?.full_name || "Customer"}</p>
                                             </div>
                                         </div>
-                                        <div className="flex items-center gap-2 text-sm text-gray-600">
-                                            <Mail className="w-4 h-4" />
-                                            {selectedOrder.customer.email}
-                                        </div>
-                                        <div className="flex items-center gap-2 text-sm text-gray-600">
-                                            <Phone className="w-4 h-4" />
-                                            {selectedOrder.customer.phone}
-                                        </div>
+                                        {selectedOrder.user?.email && (
+                                            <div className="flex items-center gap-2 text-sm text-gray-600">
+                                                <Mail className="w-4 h-4" />
+                                                {selectedOrder.user.email}
+                                            </div>
+                                        )}
+                                        {selectedOrder.user?.phone && (
+                                            <div className="flex items-center gap-2 text-sm text-gray-600">
+                                                <Phone className="w-4 h-4" />
+                                                {selectedOrder.user.phone}
+                                            </div>
+                                        )}
                                     </Card>
                                 </div>
 
@@ -354,14 +390,18 @@ export default function OrdersPage() {
                                 <div>
                                     <h3 className="font-semibold text-gray-900 mb-3">Delivery</h3>
                                     <Card padding="sm" className="space-y-3">
-                                        <div className="flex items-start gap-2 text-sm text-gray-600">
-                                            <MapPin className="w-4 h-4 mt-0.5" />
-                                            {selectedOrder.deliveryAddress}
-                                        </div>
-                                        <div className="flex items-center gap-2 text-sm text-gray-600">
-                                            <Calendar className="w-4 h-4" />
-                                            Est. delivery: {selectedOrder.estimatedDelivery}
-                                        </div>
+                                        {selectedOrder.delivery_address && (
+                                            <div className="flex items-start gap-2 text-sm text-gray-600">
+                                                <MapPin className="w-4 h-4 mt-0.5" />
+                                                {selectedOrder.delivery_address}
+                                            </div>
+                                        )}
+                                        {selectedOrder.estimated_delivery && (
+                                            <div className="flex items-center gap-2 text-sm text-gray-600">
+                                                <Calendar className="w-4 h-4" />
+                                                Est. delivery: {new Date(selectedOrder.estimated_delivery).toLocaleDateString()}
+                                            </div>
+                                        )}
                                     </Card>
                                 </div>
                             </div>
@@ -371,23 +411,37 @@ export default function OrdersPage() {
                                 <h3 className="font-semibold text-gray-900 mb-3">Items</h3>
                                 <Card padding="none">
                                     <div className="divide-y divide-gray-100">
-                                        {selectedOrder.items.map((item, index) => (
-                                            <div key={index} className="flex items-center justify-between p-4">
-                                                <div className="flex items-center gap-3">
-                                                    <div className="w-12 h-12 rounded-lg bg-gray-100" />
-                                                    <div>
-                                                        <p className="font-medium">{item.name}</p>
-                                                        <p className="text-sm text-gray-500">Qty: {item.quantity}</p>
+                                        {selectedOrder.items && selectedOrder.items.length > 0 ? (
+                                            selectedOrder.items.map((item) => (
+                                                <div key={item.id} className="flex items-center justify-between p-4">
+                                                    <div className="flex items-center gap-3">
+                                                        {item.product?.image_url ? (
+                                                            <img
+                                                                src={item.product.image_url}
+                                                                alt={item.product.name}
+                                                                className="w-12 h-12 rounded-lg object-cover"
+                                                            />
+                                                        ) : (
+                                                            <div className="w-12 h-12 rounded-lg bg-gray-100" />
+                                                        )}
+                                                        <div>
+                                                            <p className="font-medium">{item.product?.name || "Product"}</p>
+                                                            <p className="text-sm text-gray-500">Qty: {item.quantity}</p>
+                                                        </div>
                                                     </div>
+                                                    <p className="font-medium">{formatCurrency(item.price * item.quantity)}</p>
                                                 </div>
-                                                <p className="font-medium">{formatCurrency(item.price * item.quantity)}</p>
+                                            ))
+                                        ) : (
+                                            <div className="p-4 text-center text-gray-500">
+                                                No items found
                                             </div>
-                                        ))}
+                                        )}
                                     </div>
                                     <div className="border-t border-gray-200 p-4">
                                         <div className="flex justify-between text-lg font-semibold">
                                             <span>Total</span>
-                                            <span>{formatCurrency(selectedOrder.total)}</span>
+                                            <span>{formatCurrency(selectedOrder.total || 0)}</span>
                                         </div>
                                     </div>
                                 </Card>
@@ -399,11 +453,12 @@ export default function OrdersPage() {
                                 </Button>
                                 {nextStatusMap[selectedOrder.status] && (
                                     <Button
+                                        loading={updateStatusMutation.isPending}
                                         onClick={() => {
-                                            updateOrderStatus(selectedOrder.id, nextStatusMap[selectedOrder.status]);
+                                            handleUpdateStatus(selectedOrder.id, nextStatusMap[selectedOrder.status]);
                                         }}
                                     >
-                                        Mark as {statusConfig[nextStatusMap[selectedOrder.status] as keyof typeof statusConfig].label}
+                                        Mark as {statusConfig[nextStatusMap[selectedOrder.status]]?.label || nextStatusMap[selectedOrder.status]}
                                     </Button>
                                 )}
                             </DialogFooter>

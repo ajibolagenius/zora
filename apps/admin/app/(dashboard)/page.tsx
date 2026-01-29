@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useMemo } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import {
@@ -36,29 +36,13 @@ import {
     SkeletonStats,
     SkeletonCard,
 } from "@zora/ui-web";
-
-// Mock data
-const stats = [
-    { title: "Total Orders", value: "1,234", change: 12, icon: ShoppingCart, iconColor: "text-blue-600", iconBgColor: "bg-blue-100" },
-    { title: "Total Revenue", value: "£89,432", change: 8, icon: DollarSign, iconColor: "text-green-600", iconBgColor: "bg-green-100" },
-    { title: "Active Vendors", value: "156", change: 5, icon: Store, iconColor: "text-purple-600", iconBgColor: "bg-purple-100" },
-    { title: "Total Customers", value: "8,421", change: 15, icon: Users, iconColor: "text-orange-600", iconBgColor: "bg-orange-100" },
-];
-
-const pendingItems = [
-    { type: "Vendor Applications", count: 8, icon: UserPlus, href: "/vendors", color: "bg-blue-100 text-blue-600" },
-    { type: "Pending Reviews", count: 23, icon: Star, href: "/reviews", color: "bg-yellow-100 text-yellow-600" },
-    { type: "Refund Requests", count: 5, icon: RefreshCw, href: "/refunds", color: "bg-red-100 text-red-600" },
-    { type: "Open Emails", count: 12, icon: Mail, href: "/emails", color: "bg-purple-100 text-purple-600" },
-];
-
-const recentOrders = [
-    { id: "ORD-1234", customer: "John Doe", vendor: "African Spice House", total: 45.99, status: "delivered", time: new Date(Date.now() - 1000 * 60 * 30) },
-    { id: "ORD-1235", customer: "Jane Smith", vendor: "Mama's Kitchen", total: 89.50, status: "preparing", time: new Date(Date.now() - 1000 * 60 * 60) },
-    { id: "ORD-1236", customer: "Mike Johnson", vendor: "Lagos Foods", total: 23.00, status: "pending", time: new Date(Date.now() - 1000 * 60 * 90) },
-    { id: "ORD-1237", customer: "Sarah Wilson", vendor: "African Spice House", total: 67.25, status: "out_for_delivery", time: new Date(Date.now() - 1000 * 60 * 120) },
-    { id: "ORD-1238", customer: "Chris Brown", vendor: "Naija Delights", total: 112.00, status: "confirmed", time: new Date(Date.now() - 1000 * 60 * 180) },
-];
+import {
+    useAdminStats,
+    usePendingItems,
+    useRecentOrders,
+    useVendorApplications,
+} from "../../hooks";
+import { useAdminRealtime } from "../../providers";
 
 const statusColors = {
     pending: "warning",
@@ -67,26 +51,134 @@ const statusColors = {
     ready: "success",
     out_for_delivery: "info",
     delivered: "success",
+    cancelled: "error",
 } as const;
 
-const vendorApplications = [
-    { name: "Afro Bites London", type: "Restaurant", submitted: new Date(Date.now() - 1000 * 60 * 60 * 2) },
-    { name: "Ghana Grocery", type: "Grocery Store", submitted: new Date(Date.now() - 1000 * 60 * 60 * 5) },
-    { name: "Naija Spice Co", type: "Wholesaler", submitted: new Date(Date.now() - 1000 * 60 * 60 * 24) },
-];
-
 export default function AdminDashboard() {
-    const [isLoading, setIsLoading] = useState(true);
+    const { isConnected, stats: realtimeStats } = useAdminRealtime();
 
-    // Simulate loading state
-    useEffect(() => {
-        const timer = setTimeout(() => setIsLoading(false), 1000);
-        return () => clearTimeout(timer);
-    }, []);
+    // Fetch real data
+    const {
+        data: stats,
+        isLoading: statsLoading,
+        refetch: refetchStats,
+    } = useAdminStats();
+
+    const {
+        data: pendingItems,
+        isLoading: pendingLoading,
+        refetch: refetchPending,
+    } = usePendingItems();
+
+    const {
+        data: recentOrders,
+        isLoading: ordersLoading,
+        refetch: refetchOrders,
+    } = useRecentOrders(5);
+
+    const {
+        data: applicationsData,
+        isLoading: applicationsLoading,
+    } = useVendorApplications('pending');
+
+    const isLoading = statsLoading || pendingLoading || ordersLoading;
+
+    // Transform stats for display
+    const statsCards = useMemo(() => {
+        if (!stats) return [];
+        return [
+            {
+                title: "Total Orders",
+                value: stats.totalOrders.toLocaleString(),
+                change: stats.ordersChange,
+                icon: ShoppingCart,
+                iconColor: "text-blue-600",
+                iconBgColor: "bg-blue-100",
+            },
+            {
+                title: "Total Revenue",
+                value: formatCurrency(stats.totalRevenue),
+                change: stats.revenueChange,
+                icon: DollarSign,
+                iconColor: "text-green-600",
+                iconBgColor: "bg-green-100",
+            },
+            {
+                title: "Active Vendors",
+                value: stats.activeVendors.toString(),
+                change: stats.vendorsChange,
+                icon: Store,
+                iconColor: "text-purple-600",
+                iconBgColor: "bg-purple-100",
+            },
+            {
+                title: "Total Customers",
+                value: stats.totalCustomers.toLocaleString(),
+                change: stats.customersChange,
+                icon: Users,
+                iconColor: "text-orange-600",
+                iconBgColor: "bg-orange-100",
+            },
+        ];
+    }, [stats]);
+
+    // Transform pending items for display
+    const pendingItemsList = useMemo(() => {
+        if (!pendingItems) return [];
+        return [
+            {
+                type: "Vendor Applications",
+                count: pendingItems.vendorApplications,
+                icon: UserPlus,
+                href: "/vendors",
+                color: "bg-blue-100 text-blue-600",
+            },
+            {
+                type: "Pending Reviews",
+                count: pendingItems.pendingReviews,
+                icon: Star,
+                href: "/reviews",
+                color: "bg-yellow-100 text-yellow-600",
+            },
+            {
+                type: "Refund Requests",
+                count: pendingItems.refundRequests,
+                icon: RefreshCw,
+                href: "/refunds",
+                color: "bg-red-100 text-red-600",
+            },
+            {
+                type: "Open Emails",
+                count: pendingItems.openEmails,
+                icon: Mail,
+                href: "/emails",
+                color: "bg-purple-100 text-purple-600",
+            },
+        ];
+    }, [pendingItems]);
+
+    const handleRefresh = () => {
+        refetchStats();
+        refetchPending();
+        refetchOrders();
+    };
 
     return (
         <>
-            <Header title="Admin Dashboard" description="Platform overview and management" />
+            <Header
+                title="Admin Dashboard"
+                description="Platform overview and management"
+                action={
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={handleRefresh}
+                        leftIcon={<RefreshCw className="w-4 h-4" />}
+                    >
+                        Refresh
+                    </Button>
+                }
+            />
 
             <div className="p-4 sm:p-6 lg:p-8">
                 {/* Stats Grid */}
@@ -99,7 +191,7 @@ export default function AdminDashboard() {
                         animate="animate"
                         className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8"
                     >
-                        {stats.map((stat) => (
+                        {statsCards.map((stat) => (
                             <motion.div key={stat.title} variants={staggerItem}>
                                 <StatsCard {...stat} />
                             </motion.div>
@@ -114,12 +206,14 @@ export default function AdminDashboard() {
                     animate="animate"
                     className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8"
                 >
-                    {pendingItems.map((item) => (
+                    {pendingItemsList.map((item) => (
                         <motion.div key={item.type} variants={staggerItem}>
                             <Link href={item.href}>
                                 <Card hover className="cursor-pointer">
                                     <div className="flex items-center gap-4">
-                                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${item.color}`}>
+                                        <div
+                                            className={`w-12 h-12 rounded-xl flex items-center justify-center ${item.color}`}
+                                        >
                                             <item.icon className="w-6 h-6" />
                                         </div>
                                         <div>
@@ -144,50 +238,89 @@ export default function AdminDashboard() {
                         <Card padding="none">
                             <div className="p-6 border-b border-slate-100 flex items-center justify-between">
                                 <div>
-                                    <h2 className="text-lg font-semibold text-slate-900">Recent Orders</h2>
+                                    <h2 className="text-lg font-semibold text-slate-900">
+                                        Recent Orders
+                                        {realtimeStats.newOrdersToday > 0 && (
+                                            <Badge variant="success" size="sm" className="ml-2">
+                                                {realtimeStats.newOrdersToday} today
+                                            </Badge>
+                                        )}
+                                    </h2>
                                     <p className="text-sm text-slate-500">Latest platform orders</p>
                                 </div>
                                 <Link href="/orders">
-                                    <Button variant="ghost" size="sm" rightIcon={<ArrowRight className="w-4 h-4" />}>
+                                    <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        rightIcon={<ArrowRight className="w-4 h-4" />}
+                                    >
                                         View All
                                     </Button>
                                 </Link>
                             </div>
                             <div className="divide-y divide-slate-100">
-                                {recentOrders.map((order, index) => (
-                                    <motion.div
-                                        key={order.id}
-                                        initial={{ opacity: 0, x: -20 }}
-                                        animate={{ opacity: 1, x: 0 }}
-                                        transition={{ delay: 0.05 * index }}
-                                        className="p-4 hover:bg-slate-50 transition-colors"
-                                    >
-                                        <div className="flex items-center justify-between">
-                                            <div className="flex items-center gap-4">
-                                                <Avatar size="sm">
-                                                    <AvatarFallback className="bg-slate-100 text-slate-600">
-                                                        {order.customer.split(" ").map(n => n[0]).join("")}
-                                                    </AvatarFallback>
-                                                </Avatar>
-                                                <div>
-                                                    <div className="flex items-center gap-2">
-                                                        <p className="font-medium text-primary">{order.id}</p>
-                                                        <Badge variant={statusColors[order.status as keyof typeof statusColors]} size="sm">
-                                                            {order.status.replace("_", " ")}
-                                                        </Badge>
+                                {ordersLoading ? (
+                                    <div className="p-8 text-center text-slate-500">Loading orders...</div>
+                                ) : !recentOrders || recentOrders.length === 0 ? (
+                                    <div className="p-8 text-center text-slate-500">
+                                        <ShoppingCart className="w-12 h-12 mx-auto mb-4 text-slate-300" />
+                                        <p>No orders yet</p>
+                                    </div>
+                                ) : (
+                                    recentOrders.map((order, index) => (
+                                        <motion.div
+                                            key={order.id}
+                                            initial={{ opacity: 0, x: -20 }}
+                                            animate={{ opacity: 1, x: 0 }}
+                                            transition={{ delay: 0.05 * index }}
+                                            className="p-4 hover:bg-slate-50 transition-colors"
+                                        >
+                                            <Link href={`/orders/${order.id}`}>
+                                                <div className="flex items-center justify-between">
+                                                    <div className="flex items-center gap-4">
+                                                        <Avatar size="sm">
+                                                            <AvatarFallback className="bg-slate-100 text-slate-600">
+                                                                {(order as any).user?.full_name
+                                                                    ?.split(" ")
+                                                                    .map((n: string) => n[0])
+                                                                    .join("") || "?"}
+                                                            </AvatarFallback>
+                                                        </Avatar>
+                                                        <div>
+                                                            <div className="flex items-center gap-2">
+                                                                <p className="font-medium text-primary">
+                                                                    {order.order_number || order.id.slice(0, 8)}
+                                                                </p>
+                                                                <Badge
+                                                                    variant={
+                                                                        statusColors[
+                                                                        order.status as keyof typeof statusColors
+                                                                        ] || "default"
+                                                                    }
+                                                                    size="sm"
+                                                                >
+                                                                    {order.status?.replace(/_/g, " ")}
+                                                                </Badge>
+                                                            </div>
+                                                            <p className="text-sm text-slate-500">
+                                                                {(order as any).user?.full_name || "Customer"} •{" "}
+                                                                {(order as any).vendor?.shop_name || "Vendor"}
+                                                            </p>
+                                                        </div>
                                                     </div>
-                                                    <p className="text-sm text-slate-500">
-                                                        {order.customer} • {order.vendor}
-                                                    </p>
+                                                    <div className="text-right">
+                                                        <p className="font-semibold text-slate-900">
+                                                            {formatCurrency(order.total || 0)}
+                                                        </p>
+                                                        <p className="text-xs text-slate-400">
+                                                            {formatRelativeTime(new Date(order.created_at))}
+                                                        </p>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                            <div className="text-right">
-                                                <p className="font-semibold text-slate-900">{formatCurrency(order.total)}</p>
-                                                <p className="text-xs text-slate-400">{formatRelativeTime(order.time)}</p>
-                                            </div>
-                                        </div>
-                                    </motion.div>
-                                ))}
+                                            </Link>
+                                        </motion.div>
+                                    ))
+                                )}
                             </div>
                         </Card>
                     </motion.div>
@@ -205,18 +338,26 @@ export default function AdminDashboard() {
                                     <CardTitle>System Status</CardTitle>
                                 </CardHeader>
                                 <CardContent className="space-y-3">
-                                    <div className="flex items-start gap-3 p-3 bg-yellow-50 rounded-xl">
-                                        <AlertCircle className="w-5 h-5 text-yellow-600 mt-0.5 flex-shrink-0" />
-                                        <div>
-                                            <p className="text-sm font-medium text-slate-900">8 vendors pending approval</p>
-                                            <p className="text-xs text-slate-500">Review required</p>
+                                    {(pendingItems?.vendorApplications ?? 0) > 0 && (
+                                        <div className="flex items-start gap-3 p-3 bg-yellow-50 rounded-xl">
+                                            <AlertCircle className="w-5 h-5 text-yellow-600 mt-0.5 flex-shrink-0" />
+                                            <div>
+                                                <p className="text-sm font-medium text-slate-900">
+                                                    {pendingItems?.vendorApplications} vendors pending approval
+                                                </p>
+                                                <p className="text-xs text-slate-500">Review required</p>
+                                            </div>
                                         </div>
-                                    </div>
+                                    )}
                                     <div className="flex items-start gap-3 p-3 bg-green-50 rounded-xl">
                                         <CheckCircle className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
                                         <div>
-                                            <p className="text-sm font-medium text-slate-900">All systems operational</p>
-                                            <p className="text-xs text-slate-500">Last checked 5 min ago</p>
+                                            <p className="text-sm font-medium text-slate-900">
+                                                {isConnected ? "All systems operational" : "Connecting..."}
+                                            </p>
+                                            <p className="text-xs text-slate-500">
+                                                {isConnected ? "Real-time connected" : "Establishing connection"}
+                                            </p>
                                         </div>
                                     </div>
                                 </CardContent>
@@ -234,34 +375,52 @@ export default function AdminDashboard() {
                                     <div className="flex items-center justify-between">
                                         <CardTitle>New Applications</CardTitle>
                                         <Link href="/vendors">
-                                            <Button variant="ghost" size="sm">View All</Button>
+                                            <Button variant="ghost" size="sm">
+                                                View All
+                                            </Button>
                                         </Link>
                                     </div>
                                 </CardHeader>
                                 <CardContent className="space-y-3">
-                                    {vendorApplications.map((app, index) => (
-                                        <motion.div
-                                            key={app.name}
-                                            initial={{ opacity: 0, x: -10 }}
-                                            animate={{ opacity: 1, x: 0 }}
-                                            transition={{ delay: 0.1 * index }}
-                                            className="flex items-center gap-3 p-3 rounded-xl hover:bg-slate-50 transition-colors cursor-pointer"
-                                        >
-                                            <Avatar size="sm">
-                                                <AvatarFallback className="bg-primary/10 text-primary">
-                                                    {app.name.split(" ").map(n => n[0]).join("").slice(0, 2)}
-                                                </AvatarFallback>
-                                            </Avatar>
-                                            <div className="flex-1 min-w-0">
-                                                <p className="font-medium text-slate-900 truncate">{app.name}</p>
-                                                <p className="text-xs text-slate-500">{app.type}</p>
-                                            </div>
-                                            <div className="flex items-center gap-1 text-xs text-slate-400">
-                                                <Clock className="w-3 h-3" />
-                                                {formatRelativeTime(app.submitted)}
-                                            </div>
-                                        </motion.div>
-                                    ))}
+                                    {applicationsLoading ? (
+                                        <div className="text-center text-slate-500 py-4">Loading...</div>
+                                    ) : !applicationsData?.data || applicationsData.data.length === 0 ? (
+                                        <div className="text-center text-slate-500 py-4">
+                                            No pending applications
+                                        </div>
+                                    ) : (
+                                        applicationsData.data.slice(0, 3).map((app, index) => (
+                                            <motion.div
+                                                key={app.id}
+                                                initial={{ opacity: 0, x: -10 }}
+                                                animate={{ opacity: 1, x: 0 }}
+                                                transition={{ delay: 0.1 * index }}
+                                                className="flex items-center gap-3 p-3 rounded-xl hover:bg-slate-50 transition-colors cursor-pointer"
+                                            >
+                                                <Link href={`/vendors/${app.id}`} className="flex-1 flex items-center gap-3">
+                                                    <Avatar size="sm">
+                                                        <AvatarFallback className="bg-primary/10 text-primary">
+                                                            {app.business_name
+                                                                ?.split(" ")
+                                                                .map((n) => n[0])
+                                                                .join("")
+                                                                .slice(0, 2) || "??"}
+                                                        </AvatarFallback>
+                                                    </Avatar>
+                                                    <div className="flex-1 min-w-0">
+                                                        <p className="font-medium text-slate-900 truncate">
+                                                            {app.business_name}
+                                                        </p>
+                                                        <p className="text-xs text-slate-500">{app.business_type}</p>
+                                                    </div>
+                                                    <div className="flex items-center gap-1 text-xs text-slate-400">
+                                                        <Clock className="w-3 h-3" />
+                                                        {formatRelativeTime(new Date(app.created_at))}
+                                                    </div>
+                                                </Link>
+                                            </motion.div>
+                                        ))
+                                    )}
                                 </CardContent>
                             </Card>
                         </motion.div>

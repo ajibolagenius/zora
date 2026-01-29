@@ -1,19 +1,19 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
+import Link from "next/link";
 import { motion } from "framer-motion";
 import {
     Search,
-    Filter,
     Download,
     Eye,
-    MoreVertical,
     Package,
     Clock,
     CheckCircle,
     Truck,
     XCircle,
     RefreshCw,
+    AlertCircle,
 } from "lucide-react";
 import { Header } from "../../../components/Header";
 import {
@@ -27,9 +27,6 @@ import {
     SelectItem,
     SelectTrigger,
     SelectValue,
-    Tabs,
-    TabsList,
-    TabsTrigger,
     Dialog,
     DialogContent,
     DialogHeader,
@@ -38,66 +35,16 @@ import {
     DialogFooter,
     Avatar,
     AvatarFallback,
+    EmptyState,
     formatCurrency,
-    formatDate,
     formatRelativeTime,
     staggerContainer,
     staggerItem,
+    SkeletonCard,
 } from "@zora/ui-web";
-
-// Mock orders data
-const mockOrders = [
-    {
-        id: "ORD-2024-001",
-        customer: { name: "John Doe", email: "john@example.com" },
-        vendor: { name: "African Spice House", id: "v1" },
-        items: 3,
-        total: 45.99,
-        status: "pending",
-        paymentStatus: "paid",
-        createdAt: new Date(Date.now() - 1000 * 60 * 30),
-    },
-    {
-        id: "ORD-2024-002",
-        customer: { name: "Jane Smith", email: "jane@example.com" },
-        vendor: { name: "Mama's Kitchen", id: "v2" },
-        items: 5,
-        total: 89.50,
-        status: "preparing",
-        paymentStatus: "paid",
-        createdAt: new Date(Date.now() - 1000 * 60 * 60),
-    },
-    {
-        id: "ORD-2024-003",
-        customer: { name: "Mike Johnson", email: "mike@example.com" },
-        vendor: { name: "Lagos Foods", id: "v3" },
-        items: 2,
-        total: 23.00,
-        status: "delivered",
-        paymentStatus: "paid",
-        createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24),
-    },
-    {
-        id: "ORD-2024-004",
-        customer: { name: "Sarah Wilson", email: "sarah@example.com" },
-        vendor: { name: "African Spice House", id: "v1" },
-        items: 4,
-        total: 67.25,
-        status: "cancelled",
-        paymentStatus: "refunded",
-        createdAt: new Date(Date.now() - 1000 * 60 * 60 * 48),
-    },
-    {
-        id: "ORD-2024-005",
-        customer: { name: "Chris Brown", email: "chris@example.com" },
-        vendor: { name: "Naija Delights", id: "v4" },
-        items: 7,
-        total: 112.00,
-        status: "out_for_delivery",
-        paymentStatus: "paid",
-        createdAt: new Date(Date.now() - 1000 * 60 * 60 * 3),
-    },
-];
+import { useAllOrders, useUpdateOrderStatus } from "../../../hooks";
+import { useAdminRealtime } from "../../../providers";
+import type { Order, OrderStatus } from "@zora/types";
 
 const statusConfig = {
     pending: { label: "Pending", variant: "warning" as const, icon: Clock },
@@ -114,31 +61,95 @@ const paymentStatusConfig = {
     paid: { label: "Paid", variant: "success" as const },
     failed: { label: "Failed", variant: "error" as const },
     refunded: { label: "Refunded", variant: "default" as const },
+    refund_requested: { label: "Refund Requested", variant: "warning" as const },
 };
 
+interface OrderWithDetails extends Order {
+    user?: {
+        id: string;
+        full_name: string;
+        email: string;
+        avatar_url?: string;
+    };
+    vendor?: {
+        id: string;
+        shop_name: string;
+    };
+    items?: Array<{
+        id: string;
+        quantity: number;
+        price: number;
+        product?: {
+            id: string;
+            name: string;
+            image_url?: string;
+        };
+    }>;
+}
+
 export default function OrdersPage() {
-    const [orders] = useState(mockOrders);
+    const { stats: realtimeStats } = useAdminRealtime();
+
     const [searchTerm, setSearchTerm] = useState("");
     const [selectedStatus, setSelectedStatus] = useState("all");
-    const [selectedOrder, setSelectedOrder] = useState<typeof mockOrders[0] | null>(null);
+    const [selectedOrder, setSelectedOrder] = useState<OrderWithDetails | null>(null);
     const [refundDialogOpen, setRefundDialogOpen] = useState(false);
 
-    const filteredOrders = orders.filter((order) => {
-        const matchesSearch =
-            order.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            order.customer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            order.vendor.name.toLowerCase().includes(searchTerm.toLowerCase());
-        const matchesStatus = selectedStatus === "all" || order.status === selectedStatus;
-        return matchesSearch && matchesStatus;
-    });
+    // Fetch orders from database
+    const statusFilter = selectedStatus === "all" ? undefined : selectedStatus as OrderStatus;
+    const {
+        data: ordersData,
+        isLoading,
+        isError,
+        refetch,
+    } = useAllOrders({ status: statusFilter });
 
-    const orderCounts = {
-        all: orders.length,
-        pending: orders.filter((o) => o.status === "pending").length,
-        preparing: orders.filter((o) => o.status === "preparing" || o.status === "confirmed").length,
-        in_transit: orders.filter((o) => o.status === "out_for_delivery").length,
-        delivered: orders.filter((o) => o.status === "delivered").length,
-        cancelled: orders.filter((o) => o.status === "cancelled").length,
+    // Update order status mutation
+    const updateStatusMutation = useUpdateOrderStatus();
+
+    // Filter orders by search
+    const filteredOrders = useMemo(() => {
+        if (!ordersData?.data) return [];
+        if (!searchTerm) return ordersData.data as OrderWithDetails[];
+
+        const searchLower = searchTerm.toLowerCase();
+        return (ordersData.data as OrderWithDetails[]).filter((order) => {
+            return (
+                order.order_number?.toLowerCase().includes(searchLower) ||
+                order.id.toLowerCase().includes(searchLower) ||
+                order.user?.full_name?.toLowerCase().includes(searchLower) ||
+                order.user?.email?.toLowerCase().includes(searchLower) ||
+                order.vendor?.shop_name?.toLowerCase().includes(searchLower)
+            );
+        });
+    }, [ordersData?.data, searchTerm]);
+
+    // Calculate order counts
+    const orderCounts = useMemo(() => {
+        const orders = ordersData?.data || [];
+        return {
+            all: orders.length,
+            pending: orders.filter((o) => o.status === "pending").length,
+            preparing: orders.filter((o) => o.status === "preparing" || o.status === "confirmed").length,
+            in_transit: orders.filter((o) => o.status === "out_for_delivery").length,
+            delivered: orders.filter((o) => o.status === "delivered").length,
+            cancelled: orders.filter((o) => o.status === "cancelled").length,
+        };
+    }, [ordersData?.data]);
+
+    const handleProcessRefund = async () => {
+        if (selectedOrder) {
+            try {
+                await updateStatusMutation.mutateAsync({
+                    orderId: selectedOrder.id,
+                    status: "cancelled" as OrderStatus,
+                });
+                setRefundDialogOpen(false);
+                setSelectedOrder(null);
+            } catch (error) {
+                console.error("Failed to process refund:", error);
+            }
+        }
     };
 
     const columns = [
@@ -146,23 +157,30 @@ export default function OrdersPage() {
             key: "id",
             header: "Order ID",
             sortable: true,
-            render: (order: typeof mockOrders[0]) => (
-                <span className="font-medium text-primary">{order.id}</span>
+            render: (order: OrderWithDetails) => (
+                <Link href={`/orders/${order.id}`}>
+                    <span className="font-medium text-primary hover:underline">
+                        {order.order_number || order.id.slice(0, 8)}
+                    </span>
+                </Link>
             ),
         },
         {
             key: "customer",
             header: "Customer",
-            render: (order: typeof mockOrders[0]) => (
+            render: (order: OrderWithDetails) => (
                 <div className="flex items-center gap-3">
                     <Avatar size="sm">
                         <AvatarFallback className="bg-slate-100 text-slate-600">
-                            {order.customer.name.split(" ").map(n => n[0]).join("")}
+                            {order.user?.full_name
+                                ?.split(" ")
+                                .map((n) => n[0])
+                                .join("") || "?"}
                         </AvatarFallback>
                     </Avatar>
                     <div>
-                        <p className="font-medium text-slate-900">{order.customer.name}</p>
-                        <p className="text-xs text-slate-500">{order.customer.email}</p>
+                        <p className="font-medium text-slate-900">{order.user?.full_name || "Customer"}</p>
+                        <p className="text-xs text-slate-500">{order.user?.email || ""}</p>
                     </div>
                 </div>
             ),
@@ -171,57 +189,61 @@ export default function OrdersPage() {
             key: "vendor",
             header: "Vendor",
             sortable: true,
-            render: (order: typeof mockOrders[0]) => (
-                <span className="text-slate-600">{order.vendor.name}</span>
+            render: (order: OrderWithDetails) => (
+                <span className="text-slate-600">{order.vendor?.shop_name || "N/A"}</span>
             ),
         },
         {
             key: "total",
             header: "Total",
             sortable: true,
-            render: (order: typeof mockOrders[0]) => (
-                <span className="font-semibold">{formatCurrency(order.total)}</span>
+            render: (order: OrderWithDetails) => (
+                <span className="font-semibold">{formatCurrency(order.total || 0)}</span>
             ),
         },
         {
             key: "status",
             header: "Status",
-            render: (order: typeof mockOrders[0]) => {
-                const config = statusConfig[order.status as keyof typeof statusConfig];
+            render: (order: OrderWithDetails) => {
+                const config = statusConfig[order.status as keyof typeof statusConfig] || statusConfig.pending;
                 return <Badge variant={config.variant}>{config.label}</Badge>;
             },
         },
         {
             key: "paymentStatus",
             header: "Payment",
-            render: (order: typeof mockOrders[0]) => {
-                const config = paymentStatusConfig[order.paymentStatus as keyof typeof paymentStatusConfig];
-                return <Badge variant={config.variant} size="sm">{config.label}</Badge>;
+            render: (order: OrderWithDetails) => {
+                const status = order.payment_status || "pending";
+                const config = paymentStatusConfig[status as keyof typeof paymentStatusConfig] || paymentStatusConfig.pending;
+                return (
+                    <Badge variant={config.variant} size="sm">
+                        {config.label}
+                    </Badge>
+                );
             },
         },
         {
             key: "createdAt",
             header: "Date",
             sortable: true,
-            render: (order: typeof mockOrders[0]) => (
-                <span className="text-slate-500 text-sm">{formatRelativeTime(order.createdAt)}</span>
+            render: (order: OrderWithDetails) => (
+                <span className="text-slate-500 text-sm">
+                    {formatRelativeTime(new Date(order.created_at))}
+                </span>
             ),
         },
         {
             key: "actions",
             header: "",
             width: "100px",
-            render: (order: typeof mockOrders[0]) => (
+            render: (order: OrderWithDetails) => (
                 <div className="flex items-center gap-1">
-                    <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8"
-                        onClick={() => setSelectedOrder(order)}
-                    >
-                        <Eye className="w-4 h-4" />
-                    </Button>
-                    {order.paymentStatus === "paid" && (
+                    <Link href={`/orders/${order.id}`}>
+                        <Button variant="ghost" size="icon" className="h-8 w-8">
+                            <Eye className="w-4 h-4" />
+                        </Button>
+                    </Link>
+                    {order.payment_status === "paid" && order.status !== "cancelled" && (
                         <Button
                             variant="ghost"
                             size="icon"
@@ -241,7 +263,25 @@ export default function OrdersPage() {
 
     return (
         <>
-            <Header title="Orders" description="Manage all platform orders" />
+            <Header
+                title="Orders"
+                description="Manage all platform orders"
+                action={
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => refetch()}
+                        leftIcon={<RefreshCw className="w-4 h-4" />}
+                    >
+                        Refresh
+                        {realtimeStats.newOrdersToday > 0 && (
+                            <Badge variant="success" size="sm" className="ml-2">
+                                {realtimeStats.newOrdersToday} today
+                            </Badge>
+                        )}
+                    </Button>
+                }
+            />
 
             <div className="p-4 sm:p-6 lg:p-8">
                 {/* Stats Row */}
@@ -261,7 +301,7 @@ export default function OrdersPage() {
                     ].map((stat) => (
                         <motion.div key={stat.label} variants={staggerItem}>
                             <Card className="text-center py-4">
-                                <p className={`text-2xl font-bold mb-1`}>{stat.count}</p>
+                                <p className="text-2xl font-bold mb-1">{stat.count}</p>
                                 <p className="text-sm text-slate-500">{stat.label}</p>
                             </Card>
                         </motion.div>
@@ -305,21 +345,51 @@ export default function OrdersPage() {
                     </div>
                 </Card>
 
-                {/* Orders Table */}
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.2 }}
-                >
-                    <Card padding="none">
-                        <DataTable
-                            data={filteredOrders}
-                            columns={columns}
-                            getRowId={(item) => item.id}
-                            searchable={false}
-                        />
+                {/* Loading State */}
+                {isLoading && (
+                    <div className="space-y-4">
+                        {[1, 2, 3].map((i) => (
+                            <SkeletonCard key={i} />
+                        ))}
+                    </div>
+                )}
+
+                {/* Error State */}
+                {isError && (
+                    <Card className="p-8 text-center">
+                        <AlertCircle className="w-12 h-12 mx-auto mb-4 text-red-500" />
+                        <h3 className="text-lg font-semibold text-slate-900 mb-2">Failed to load orders</h3>
+                        <p className="text-slate-500 mb-4">There was an error loading orders.</p>
+                        <Button onClick={() => refetch()}>Try Again</Button>
                     </Card>
-                </motion.div>
+                )}
+
+                {/* Empty State */}
+                {!isLoading && !isError && filteredOrders.length === 0 && (
+                    <EmptyState
+                        icon={Package}
+                        title="No orders found"
+                        description={searchTerm ? "Try adjusting your search or filters" : "Orders will appear here"}
+                    />
+                )}
+
+                {/* Orders Table */}
+                {!isLoading && !isError && filteredOrders.length > 0 && (
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.2 }}
+                    >
+                        <Card padding="none">
+                            <DataTable
+                                data={filteredOrders}
+                                columns={columns}
+                                getRowId={(item) => item.id}
+                                searchable={false}
+                            />
+                        </Card>
+                    </motion.div>
+                )}
             </div>
 
             {/* Refund Dialog */}
@@ -328,7 +398,9 @@ export default function OrdersPage() {
                     <DialogHeader>
                         <DialogTitle>Process Refund</DialogTitle>
                         <DialogDescription>
-                            Are you sure you want to refund {selectedOrder?.id}? This will refund {formatCurrency(selectedOrder?.total || 0)} to the customer.
+                            Are you sure you want to refund{" "}
+                            {selectedOrder?.order_number || selectedOrder?.id.slice(0, 8)}? This will refund{" "}
+                            {formatCurrency(selectedOrder?.total || 0)} to the customer.
                         </DialogDescription>
                     </DialogHeader>
                     <div className="py-4">
@@ -345,7 +417,7 @@ export default function OrdersPage() {
                         <Button variant="outline" onClick={() => setRefundDialogOpen(false)}>
                             Cancel
                         </Button>
-                        <Button onClick={() => setRefundDialogOpen(false)}>
+                        <Button onClick={handleProcessRefund} loading={updateStatusMutation.isPending}>
                             Process Refund
                         </Button>
                     </DialogFooter>

@@ -1,21 +1,20 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import {
     Plus,
     Search,
-    Filter,
-    MoreVertical,
+    Package,
     Edit,
     Trash2,
     Eye,
-    Package,
-    ArrowUpDown,
     Download,
     Upload,
+    RefreshCw,
+    AlertCircle,
 } from "lucide-react";
 import { Header } from "../../../components/Header";
 import {
@@ -36,75 +35,15 @@ import {
     SelectItem,
     SelectTrigger,
     SelectValue,
-    Tabs,
-    TabsList,
-    TabsTrigger,
-    TabsContent,
     formatCurrency,
     staggerContainer,
     staggerItem,
+    SkeletonCard,
 } from "@zora/ui-web";
+import { useAuth, useVendorProducts, useDeleteProduct } from "../../../hooks";
+import type { Product } from "@zora/types";
 
-// Mock product data
-const mockProducts = [
-    {
-        id: "1",
-        name: "Premium Suya Spice Mix",
-        sku: "SSM-001",
-        price: 8.99,
-        stock: 145,
-        category: "Spices",
-        status: "active",
-        image: "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?w=100",
-        sales: 234,
-    },
-    {
-        id: "2",
-        name: "Nigerian Palm Oil (1L)",
-        sku: "NPO-002",
-        price: 12.50,
-        stock: 67,
-        category: "Oils",
-        status: "active",
-        image: "https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=100",
-        sales: 189,
-    },
-    {
-        id: "3",
-        name: "Dried Stockfish",
-        sku: "DSF-003",
-        price: 24.99,
-        stock: 12,
-        category: "Seafood",
-        status: "low_stock",
-        image: "https://images.unsplash.com/photo-1510130387422-82bed34b37e9?w=100",
-        sales: 156,
-    },
-    {
-        id: "4",
-        name: "Egusi Seeds (500g)",
-        sku: "EGS-004",
-        price: 6.99,
-        stock: 0,
-        category: "Seeds",
-        status: "out_of_stock",
-        image: "https://images.unsplash.com/photo-1515023115689-589c33041d3c?w=100",
-        sales: 98,
-    },
-    {
-        id: "5",
-        name: "Jollof Rice Seasoning",
-        sku: "JRS-005",
-        price: 5.49,
-        stock: 234,
-        category: "Spices",
-        status: "active",
-        image: "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?w=100",
-        sales: 312,
-    },
-];
-
-const categories = ["All", "Spices", "Oils", "Seafood", "Seeds", "Grains", "Vegetables"];
+const categories = ["All", "Spices", "Oils", "Seafood", "Seeds", "Grains", "Vegetables", "Meat", "Beverages"];
 
 const statusConfig = {
     active: { label: "Active", variant: "success" as const },
@@ -113,29 +52,68 @@ const statusConfig = {
     draft: { label: "Draft", variant: "default" as const },
 };
 
+function getProductStatus(product: Product): string {
+    if (!product.in_stock || product.stock_quantity === 0) return "out_of_stock";
+    if (product.stock_quantity && product.stock_quantity < 20) return "low_stock";
+    return "active";
+}
+
 export default function ProductsPage() {
-    const [products, setProducts] = useState(mockProducts);
+    const { vendor } = useAuth();
+
     const [searchTerm, setSearchTerm] = useState("");
     const [selectedCategory, setSelectedCategory] = useState("All");
     const [selectedStatus, setSelectedStatus] = useState("all");
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-    const [productToDelete, setProductToDelete] = useState<typeof mockProducts[0] | null>(null);
-    const [viewMode, setViewMode] = useState<"table" | "grid">("table");
+    const [productToDelete, setProductToDelete] = useState<Product | null>(null);
+
+    // Fetch products from database
+    const {
+        data: productsData,
+        isLoading,
+        isError,
+        refetch,
+    } = useVendorProducts(vendor?.id ?? null);
+
+    // Delete product mutation
+    const deleteProductMutation = useDeleteProduct();
 
     // Filter products
-    const filteredProducts = products.filter((product) => {
-        const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            product.sku.toLowerCase().includes(searchTerm.toLowerCase());
-        const matchesCategory = selectedCategory === "All" || product.category === selectedCategory;
-        const matchesStatus = selectedStatus === "all" || product.status === selectedStatus;
-        return matchesSearch && matchesCategory && matchesStatus;
-    });
+    const filteredProducts = useMemo(() => {
+        if (!productsData?.data) return [];
 
-    const handleDelete = () => {
+        return productsData.data.filter((product) => {
+            const matchesSearch =
+                product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                product.sku?.toLowerCase().includes(searchTerm.toLowerCase());
+            const matchesCategory =
+                selectedCategory === "All" || product.category === selectedCategory;
+            const productStatus = getProductStatus(product);
+            const matchesStatus = selectedStatus === "all" || productStatus === selectedStatus;
+            return matchesSearch && matchesCategory && matchesStatus;
+        });
+    }, [productsData?.data, searchTerm, selectedCategory, selectedStatus]);
+
+    // Calculate stats
+    const stats = useMemo(() => {
+        const products = productsData?.data || [];
+        return {
+            total: products.length,
+            active: products.filter((p) => getProductStatus(p) === "active").length,
+            lowStock: products.filter((p) => getProductStatus(p) === "low_stock").length,
+            outOfStock: products.filter((p) => getProductStatus(p) === "out_of_stock").length,
+        };
+    }, [productsData?.data]);
+
+    const handleDelete = async () => {
         if (productToDelete) {
-            setProducts(products.filter(p => p.id !== productToDelete.id));
-            setDeleteDialogOpen(false);
-            setProductToDelete(null);
+            try {
+                await deleteProductMutation.mutateAsync(productToDelete.id);
+                setDeleteDialogOpen(false);
+                setProductToDelete(null);
+            } catch (error) {
+                console.error("Failed to delete product:", error);
+            }
         }
     };
 
@@ -144,20 +122,26 @@ export default function ProductsPage() {
             key: "name",
             header: "Product",
             sortable: true,
-            render: (product: typeof mockProducts[0]) => (
+            render: (product: Product) => (
                 <div className="flex items-center gap-3">
                     <div className="w-12 h-12 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
-                        <Image
-                            src={product.image}
-                            alt={product.name}
-                            width={48}
-                            height={48}
-                            className="w-full h-full object-cover"
-                        />
+                        {product.image_url ? (
+                            <Image
+                                src={product.image_url}
+                                alt={product.name}
+                                width={48}
+                                height={48}
+                                className="w-full h-full object-cover"
+                            />
+                        ) : (
+                            <div className="w-full h-full flex items-center justify-center">
+                                <Package className="w-6 h-6 text-gray-400" />
+                            </div>
+                        )}
                     </div>
                     <div>
                         <p className="font-medium text-gray-900">{product.name}</p>
-                        <p className="text-sm text-gray-500">{product.sku}</p>
+                        <p className="text-sm text-gray-500">{product.sku || product.id.slice(0, 8)}</p>
                     </div>
                 </div>
             ),
@@ -166,12 +150,15 @@ export default function ProductsPage() {
             key: "category",
             header: "Category",
             sortable: true,
+            render: (product: Product) => (
+                <span className="capitalize">{product.category || "Uncategorized"}</span>
+            ),
         },
         {
             key: "price",
             header: "Price",
             sortable: true,
-            render: (product: typeof mockProducts[0]) => (
+            render: (product: Product) => (
                 <span className="font-medium">{formatCurrency(product.price)}</span>
             ),
         },
@@ -179,33 +166,47 @@ export default function ProductsPage() {
             key: "stock",
             header: "Stock",
             sortable: true,
-            render: (product: typeof mockProducts[0]) => (
-                <span className={product.stock === 0 ? "text-red-600" : product.stock < 20 ? "text-yellow-600" : "text-gray-900"}>
-                    {product.stock} units
-                </span>
-            ),
+            render: (product: Product) => {
+                const stock = product.stock_quantity ?? 0;
+                return (
+                    <span
+                        className={
+                            stock === 0
+                                ? "text-red-600"
+                                : stock < 20
+                                    ? "text-yellow-600"
+                                    : "text-gray-900"
+                        }
+                    >
+                        {stock} units
+                    </span>
+                );
+            },
         },
         {
             key: "status",
             header: "Status",
-            render: (product: typeof mockProducts[0]) => {
-                const config = statusConfig[product.status as keyof typeof statusConfig];
+            render: (product: Product) => {
+                const status = getProductStatus(product);
+                const config = statusConfig[status as keyof typeof statusConfig];
                 return <Badge variant={config.variant}>{config.label}</Badge>;
             },
         },
         {
-            key: "sales",
-            header: "Sales",
+            key: "rating",
+            header: "Rating",
             sortable: true,
-            render: (product: typeof mockProducts[0]) => (
-                <span className="text-gray-600">{product.sales} sold</span>
+            render: (product: Product) => (
+                <span className="text-gray-600">
+                    {product.rating?.toFixed(1) || "N/A"} ({product.review_count || 0})
+                </span>
             ),
         },
         {
             key: "actions",
             header: "",
             width: "100px",
-            render: (product: typeof mockProducts[0]) => (
+            render: (product: Product) => (
                 <div className="flex items-center gap-1">
                     <Link href={`/products/${product.id}`}>
                         <Button variant="ghost" size="icon" className="h-8 w-8">
@@ -235,7 +236,20 @@ export default function ProductsPage() {
 
     return (
         <>
-            <Header title="Products" description="Manage your product catalog" />
+            <Header
+                title="Products"
+                description="Manage your product catalog"
+                action={
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => refetch()}
+                        leftIcon={<RefreshCw className="w-4 h-4" />}
+                    >
+                        Refresh
+                    </Button>
+                }
+            />
 
             <div className="p-4 sm:p-6 lg:p-8">
                 {/* Stats Row */}
@@ -246,11 +260,11 @@ export default function ProductsPage() {
                     className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8"
                 >
                     {[
-                        { label: "Total Products", value: products.length, color: "bg-blue-100 text-blue-600" },
-                        { label: "Active", value: products.filter(p => p.status === "active").length, color: "bg-green-100 text-green-600" },
-                        { label: "Low Stock", value: products.filter(p => p.status === "low_stock").length, color: "bg-yellow-100 text-yellow-600" },
-                        { label: "Out of Stock", value: products.filter(p => p.status === "out_of_stock").length, color: "bg-red-100 text-red-600" },
-                    ].map((stat, index) => (
+                        { label: "Total Products", value: stats.total, color: "bg-blue-100 text-blue-600" },
+                        { label: "Active", value: stats.active, color: "bg-green-100 text-green-600" },
+                        { label: "Low Stock", value: stats.lowStock, color: "bg-yellow-100 text-yellow-600" },
+                        { label: "Out of Stock", value: stats.outOfStock, color: "bg-red-100 text-red-600" },
+                    ].map((stat) => (
                         <motion.div key={stat.label} variants={staggerItem}>
                             <Card className="flex items-center gap-4">
                                 <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${stat.color}`}>
@@ -285,7 +299,9 @@ export default function ProductsPage() {
                                     </SelectTrigger>
                                     <SelectContent>
                                         {categories.map((cat) => (
-                                            <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                                            <SelectItem key={cat} value={cat}>
+                                                {cat}
+                                            </SelectItem>
                                         ))}
                                     </SelectContent>
                                 </Select>
@@ -305,11 +321,21 @@ export default function ProductsPage() {
                         </div>
                         {/* Action Buttons Row */}
                         <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-gray-100 sm:border-0 sm:pt-0 sm:justify-end">
-                            <Button variant="outline" size="sm" leftIcon={<Download className="w-4 h-4" />} className="flex-1 sm:flex-none">
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                leftIcon={<Download className="w-4 h-4" />}
+                                className="flex-1 sm:flex-none"
+                            >
                                 <span className="hidden sm:inline">Export</span>
                                 <span className="sm:hidden">Export</span>
                             </Button>
-                            <Button variant="outline" size="sm" leftIcon={<Upload className="w-4 h-4" />} className="flex-1 sm:flex-none">
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                leftIcon={<Upload className="w-4 h-4" />}
+                                className="flex-1 sm:flex-none"
+                            >
                                 <span className="hidden sm:inline">Import</span>
                                 <span className="sm:hidden">Import</span>
                             </Button>
@@ -323,18 +349,43 @@ export default function ProductsPage() {
                     </div>
                 </Card>
 
+                {/* Loading State */}
+                {isLoading && (
+                    <div className="space-y-4">
+                        {[1, 2, 3].map((i) => (
+                            <SkeletonCard key={i} />
+                        ))}
+                    </div>
+                )}
+
+                {/* Error State */}
+                {isError && (
+                    <Card className="p-8 text-center">
+                        <AlertCircle className="w-12 h-12 mx-auto mb-4 text-red-500" />
+                        <h3 className="text-lg font-semibold text-gray-900 mb-2">Failed to load products</h3>
+                        <p className="text-gray-500 mb-4">There was an error loading your products.</p>
+                        <Button onClick={() => refetch()}>Try Again</Button>
+                    </Card>
+                )}
+
                 {/* Products Table/Grid */}
-                {filteredProducts.length === 0 ? (
+                {!isLoading && !isError && filteredProducts.length === 0 && (
                     <EmptyState
                         icon={Package}
                         title="No products found"
-                        description={searchTerm ? "Try adjusting your search or filters" : "Get started by adding your first product"}
+                        description={
+                            searchTerm
+                                ? "Try adjusting your search or filters"
+                                : "Get started by adding your first product"
+                        }
                         action={{
                             label: "Add Product",
                             onClick: () => { },
                         }}
                     />
-                ) : (
+                )}
+
+                {!isLoading && !isError && filteredProducts.length > 0 && (
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
@@ -357,14 +408,19 @@ export default function ProductsPage() {
                     <DialogHeader>
                         <DialogTitle>Delete Product</DialogTitle>
                         <DialogDescription>
-                            Are you sure you want to delete "{productToDelete?.name}"? This action cannot be undone.
+                            Are you sure you want to delete "{productToDelete?.name}"? This action cannot
+                            be undone.
                         </DialogDescription>
                     </DialogHeader>
                     <DialogFooter>
                         <Button variant="outline" onClick={() => setDeleteDialogOpen(false)}>
                             Cancel
                         </Button>
-                        <Button variant="destructive" onClick={handleDelete}>
+                        <Button
+                            variant="destructive"
+                            onClick={handleDelete}
+                            loading={deleteProductMutation.isPending}
+                        >
                             Delete
                         </Button>
                     </DialogFooter>
