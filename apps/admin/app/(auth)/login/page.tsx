@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { Shield, Mail, Lock, Eye, EyeOff, ArrowRight } from "lucide-react";
 import { Button, Input, Card } from "@zora/ui-web";
+import { useAuth } from "../../../hooks";
 
 /**
  * Validates and sanitizes a redirect URL to prevent open redirect attacks.
@@ -40,6 +41,7 @@ export default function AdminLoginPage() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const redirect = getSafeRedirectUrl(searchParams.get("redirect"));
+    const { signIn, isAuthenticated, isAdmin, isLoading: authLoading } = useAuth();
 
     const [showPassword, setShowPassword] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
@@ -49,22 +51,25 @@ export default function AdminLoginPage() {
     });
     const [error, setError] = useState("");
 
+    // Redirect if already authenticated as admin
+    useEffect(() => {
+        if (isAuthenticated && isAdmin && !authLoading) {
+            router.push(redirect);
+        }
+    }, [isAuthenticated, isAdmin, authLoading, router, redirect]);
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsLoading(true);
         setError("");
 
         try {
-            // Simulate API call
-            await new Promise((resolve) => setTimeout(resolve, 1500));
-
-            // In production, this would set cookies via API response
-            document.cookie = `admin_auth_token=mock_token; path=/; max-age=${60 * 60 * 24 * 7}`;
-            document.cookie = `admin_role=super_admin; path=/; max-age=${60 * 60 * 24 * 7}`;
-
+            await signIn(formData.email, formData.password);
+            // The useAuth hook will check if user is admin and handle cookies
+            // The useEffect above will handle redirect
             router.push(redirect);
-        } catch {
-            setError("Invalid credentials or insufficient permissions");
+        } catch (err) {
+            setError(err instanceof Error ? err.message : "Invalid credentials or insufficient permissions");
         } finally {
             setIsLoading(false);
         }

@@ -1,16 +1,18 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { Store, Mail, Lock, Eye, EyeOff, ArrowRight } from "lucide-react";
 import { Button, Input, Card } from "@zora/ui-web";
+import { useAuth } from "../../../hooks";
 
 export default function VendorLoginPage() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const redirect = searchParams.get("redirect") || "/";
+    const { signIn, isAuthenticated, isLoading: authLoading } = useAuth();
 
     const [showPassword, setShowPassword] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
@@ -20,21 +22,24 @@ export default function VendorLoginPage() {
     });
     const [error, setError] = useState("");
 
+    // Redirect if already authenticated
+    useEffect(() => {
+        if (isAuthenticated && !authLoading) {
+            router.push(redirect);
+        }
+    }, [isAuthenticated, authLoading, router, redirect]);
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsLoading(true);
         setError("");
 
         try {
-            // Simulate API call
-            await new Promise((resolve) => setTimeout(resolve, 1500));
-
-            // In production, this would set cookies via API response
-            document.cookie = `vendor_auth_token=mock_token; path=/; max-age=${60 * 60 * 24 * 7}`;
-
+            await signIn(formData.email, formData.password);
+            // The useAuth hook will handle setting cookies and the useEffect above will redirect
             router.push(redirect);
-        } catch {
-            setError("Invalid email or password");
+        } catch (err) {
+            setError(err instanceof Error ? err.message : "Invalid email or password");
         } finally {
             setIsLoading(false);
         }
