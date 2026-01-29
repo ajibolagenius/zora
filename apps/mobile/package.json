@@ -4,12 +4,12 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "start": "expo start",
-    "dev": "expo start",
-    "start-clear": "expo start --clear",
-    "android": "expo start --android",
-    "ios": "expo start --ios",
-    "web": "expo start --web",
+    "start": "dotenv -e ../../.env -- expo start",
+    "dev": "dotenv -e ../../.env -- expo start",
+    "start-clear": "dotenv -e ../../.env -- expo start --clear",
+    "android": "dotenv -e ../../.env -- expo start --android",
+    "ios": "dotenv -e ../../.env -- expo start --ios",
+    "web": "dotenv -e ../../.env -- expo start --web",
     "lint": "expo lint",
     "type-check": "tsc --noEmit",
     "clean": "rm -rf node_modules .expo"
