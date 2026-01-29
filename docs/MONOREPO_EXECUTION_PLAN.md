@@ -1066,10 +1066,4 @@ pnpm add <package> --filter=@zora/shared
 
 ---
 
-**Document Prepared By:** AI Assistant
-**Reviewed By:** [Pending]
-**Approved By:** [Pending]
-
----
-
 *This document is subject to revision based on team feedback and evolving requirements.*

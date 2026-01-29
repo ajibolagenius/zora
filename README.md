@@ -1,24 +1,65 @@
-# Zora African Market
+# Zora African Market - Monorepo
 
-A premium mobile e-commerce marketplace connecting the African diaspora in the UK with authentic African groceries, products, and vendors.
+A comprehensive platform connecting the African diaspora with authentic African groceries, products, and vendors.
+
+## Architecture
+
+This is a monorepo containing:
+
+| App | Description | Port | Stack |
+|-----|-------------|------|-------|
+| **Mobile** | Customer-facing iOS/Android app | Expo Go | React Native, Expo |
+| **Web** | Landing page & vendor onboarding | 3000 | Next.js 15 |
+| **Vendor** | Vendor management portal | 3001 | Next.js 15 |
+| **Admin** | Platform administration dashboard | 3002 | Next.js 15 |
 
 ## Tech Stack
 
-- **Frontend**: React Native with Expo (SDK 52+)
-- **Backend**: Supabase (PostgreSQL, Auth, Storage, Realtime)
-- **Styling**: StyleSheet + NativeWind (Tailwind CSS)
-- **State Management**: Zustand + TanStack Query
-- **Navigation**: Expo Router (file-based routing)
-- **Payments**: Stripe, Klarna, Clearpay
+### Mobile App
+- React Native with Expo (SDK 54+)
+- NativeWind (Tailwind CSS)
+- Zustand + TanStack Query
+- Expo Router
+
+### Web Apps
+- Next.js 15 (App Router)
+- Tailwind CSS + shadcn/ui
+- Zustand + TanStack Query
+- React Hook Form + Zod
+
+### Shared
+- Supabase (PostgreSQL, Auth, Storage, Realtime)
+- TypeScript
+- Turborepo
+
+## Project Structure
+
+```
+zora/
+├── apps/
+│   ├── mobile/          # React Native (Expo) - Customer App
+│   ├── web/             # Next.js - Landing Page
+│   ├── vendor/          # Next.js - Vendor Portal
+│   └── admin/           # Next.js - Admin Dashboard
+│
+├── packages/
+│   ├── types/           # Shared TypeScript types
+│   ├── api-client/      # Shared Supabase client & services
+│   ├── design-tokens/   # Colors, typography, spacing
+│   └── shared/          # Shared utilities
+│
+├── supabase/            # Database migrations
+├── docs/                # Documentation
+└── data/                # Mock data & email templates
+```
 
 ## Getting Started
 
 ### Prerequisites
 
 - Node.js 18+
-- npm or yarn
-- Expo CLI (`npm install -g expo-cli`)
-- Expo Go app on your mobile device (for testing)
+- pnpm 9+
+- Expo CLI (for mobile development)
 
 ### Installation
 
@@ -30,129 +71,97 @@ cd zora
 
 2. Install dependencies:
 ```bash
-npm install
+pnpm install
 ```
 
 3. Set up environment variables:
 ```bash
+# Copy the example env file
 cp .env.example .env
+
+# Edit .env with your actual values
 ```
 
-Edit `.env` with your actual values:
+4. Start development:
+
+```bash
+# Start all apps
+pnpm dev
+
+# Or start individual apps
+pnpm dev:mobile    # Mobile app (Expo)
+pnpm dev:web       # Landing page (http://localhost:3000)
+pnpm dev:vendor    # Vendor portal (http://localhost:3001)
+pnpm dev:admin     # Admin dashboard (http://localhost:3002)
+```
+
+## Environment Variables
+
+Create a `.env` file in the root directory:
+
 ```env
-# Supabase (Required)
-EXPO_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+# Supabase
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+EXPO_PUBLIC_SUPABASE_URL=your_supabase_url
 EXPO_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
 
 # Stripe
-EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_your_key
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=your_stripe_key
+EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY=your_stripe_key
 
-# Google Maps (Optional)
+# Google Maps
+NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=your_google_maps_key
 EXPO_PUBLIC_GOOGLE_MAPS_API_KEY=your_google_maps_key
 ```
 
-4. Start the development server:
+## Scripts
+
+| Command | Description |
+|---------|-------------|
+| `pnpm dev` | Start all apps in development mode |
+| `pnpm dev:mobile` | Start mobile app only |
+| `pnpm dev:web` | Start landing page only |
+| `pnpm dev:vendor` | Start vendor portal only |
+| `pnpm dev:admin` | Start admin dashboard only |
+| `pnpm build` | Build all apps |
+| `pnpm lint` | Lint all apps |
+| `pnpm type-check` | Type check all apps |
+| `pnpm clean` | Clean all build artifacts |
+
+## Deployment
+
+### Web Apps (Vercel)
+
+| App | Recommended Domain |
+|-----|-------------------|
+| Landing Page | zoraapp.co.uk |
+| Vendor Portal | vendor.zoraapp.co.uk |
+| Admin Dashboard | admin.zoraapp.co.uk |
+
+### Mobile App
+
+Build and deploy using Expo Application Services (EAS):
+
 ```bash
-npx expo start
-```
-
-5. Scan the QR code with Expo Go (iOS/Android) or press `w` for web preview.
-
-## Project Structure
-
-```
-zora/
-├── app/                    # Expo Router screens
-│   ├── (auth)/            # Authentication screens
-│   ├── (tabs)/            # Main tab navigation
-│   ├── onboarding/        # Onboarding flow
-│   ├── order/             # Order details
-│   ├── product/           # Product details
-│   ├── settings/          # Settings screens
-│   └── vendor/            # Vendor storefront
-├── components/            # Reusable UI components
-│   ├── ui/                # Base UI components
-│   └── nativewind/        # NativeWind components
-├── constants/             # Design tokens & configuration
-├── data/                  # Mock data (development)
-├── hooks/                 # Custom React hooks
-├── lib/                   # Supabase client & utilities
-├── providers/             # Context providers
-├── services/              # API & business logic
-├── stores/                # Zustand state stores
-├── supabase/              # Database migrations
-├── types/                 # TypeScript definitions
-└── docs/                  # Documentation
-    └── PRD.md             # Product Requirements Document
-```
-
-## Features
-
-### MVP Features
-- 🏠 Home screen with hero banners, regions, vendors, and products
-- 🔍 Explore screen with category filtering
-- 📦 Product details with reviews and vendor info
-- 🏪 Vendor storefronts
-- 🛒 Multi-vendor shopping cart
-- 💳 Checkout with multiple payment options
-- 📋 Order management and tracking
-- 👤 User profile with membership tiers
-- 🔐 Authentication (Google OAuth, Email/Password)
-- 📱 Onboarding flow for new users
-
-### Design System
-- Primary: #CC0000 (Zora Red)
-- Secondary: #FFCC00 (Zora Yellow)
-- Dark theme with warm brown tones
-
-## Supabase Setup
-
-1. Create a new project at [supabase.com](https://supabase.com)
-
-2. Run the initial migration:
-```sql
--- Copy contents from supabase/migrations/001_initial_schema.sql
-```
-
-3. Enable Google OAuth in Authentication settings
-
-4. Copy your project URL and anon key to `.env`
-
-## Building for Production
-
-### EAS Build (Recommended)
-```bash
-# Install EAS CLI
-npm install -g eas-cli
-
-# Configure EAS
-eas build:configure
-
-# Build for all platforms
+cd apps/mobile
 eas build --platform all
+eas submit --platform all
 ```
 
-### Local Build
-```bash
-# iOS
-npx expo run:ios
+## Documentation
 
-# Android
-npx expo run:android
-```
+- [Project Requirements Document](docs/PRD.md)
+- [Monorepo Execution Plan](docs/MONOREPO_EXECUTION_PLAN.md)
+- [Database Schema](supabase/migrations/)
 
 ## Contributing
 
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+1. Create a feature branch
+2. Make your changes
+3. Run tests and linting
+4. Submit a pull request
 
 ## License
 
-This project is proprietary software. All rights reserved.
-
-## Support
-
-For support, email support@zoraapp.co.uk or join our Slack channel.
+Proprietary - All rights reserved.

@@ -1,65 +1,50 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
 
-# IDE and editors
+# Build outputs
+dist/
+build/
+.next/
+out/
+.expo/
+*.tsbuildinfo
+
+# Cache
+.turbo/
+.metro-cache/
+.cache/
+
+# Environment files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# IDE
 .idea/
 .vscode/
 *.swp
 *.swo
 
-# Dependencies
-node_modules/
-/.pnp
-.pnp.js
-.yarn/install-state.gz
-.yarn/*
-!.yarn/patches
-!.yarn/plugins
-!.yarn/releases
-!.yarn/versions
-
-# Testing
-/coverage
-
-# Production builds
-/build
-dist/
-
-# Environment files
-.env
-.env.*
-.env.local
-.env.development
-.env.production
-.env.test
-
-# Secrets and credentials
-*token.json*
-*credentials.json*
-*.pem
-
-# Logs and debug files
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-.pnpm-debug.log*
-*.log
-
-# System files
+# OS
 .DS_Store
 Thumbs.db
 
-# Build caches
-.cache/
-*.tsbuildinfo
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+*.log
 
-# Archive files
-**/*.zip
-**/*.tar.gz
-**/*.tar
-**/*.tgz
+# Testing
+coverage/
+.nyc_output/
 
-# Expo / React Native
-.expo/
+# Mobile specific
 *.jks
 *.p8
 *.p12
@@ -67,38 +52,9 @@ Thumbs.db
 *.mobileprovision
 *.orig.*
 web-build/
-
-# Metro bundler
-.metro-health-check*
-.metro-cache/
-
-# EAS Build
-.eas/
-
-# Native builds
 ios/
 android/
-*.ipa
-*.apk
-*.aab
 
-# Vercel
+# Misc
+*.pem
 .vercel
-
-# Expo TypeScript
-expo-env.d.ts
-
-# Native
-.kotlin/
-
-# Project specific
-app-example
-assets/brand/
-assets/documents/
-assets/ui_images/
-data/docs/
-testsprite_tests/
-temp_cache/
-
-# Generated migration files (dynamically created with varying UUIDs)
-supabase/migrations/006_populate_vendors_products.sql

@@ -1,0 +1,84 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Poppins:wght@400;500;600;700&display=swap');
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 20 10% 10%;
+    --card: 0 0% 100%;
+    --card-foreground: 20 10% 10%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 20 10% 10%;
+    --primary: 0 100% 40%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 45 100% 50%;
+    --secondary-foreground: 20 10% 10%;
+    --muted: 30 30% 70%;
+    --muted-foreground: 30 20% 45%;
+    --accent: 30 30% 96%;
+    --accent-foreground: 20 10% 10%;
+    --destructive: 0 100% 40%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 30 20% 90%;
+    --input: 30 20% 90%;
+    --ring: 0 100% 40%;
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    --background: 20 33% 8%;
+    --foreground: 0 0% 100%;
+    --card: 20 30% 12%;
+    --card-foreground: 0 0% 100%;
+    --popover: 20 30% 12%;
+    --popover-foreground: 0 0% 100%;
+    --primary: 0 100% 40%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 45 100% 50%;
+    --secondary-foreground: 20 10% 10%;
+    --muted: 30 30% 70%;
+    --muted-foreground: 30 20% 60%;
+    --accent: 20 30% 15%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 100% 40%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 0 0% 15%;
+    --input: 0 0% 15%;
+    --ring: 0 100% 40%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'Poppins', sans-serif;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Montserrat', sans-serif;
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: hsl(var(--muted) / 0.1);
+}
+
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--muted) / 0.3);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--muted) / 0.5);
+}

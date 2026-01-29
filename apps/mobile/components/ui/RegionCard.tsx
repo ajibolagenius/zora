@@ -1,0 +1,70 @@
+import React from 'react';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { Colors } from '../../constants/colors';
+import { BorderRadius, Spacing } from '../../constants/spacing';
+import { FontSize, FontFamily } from '../../constants/typography';
+import { Region } from '../../types';
+import { LazyImage } from './LazyImage';
+
+interface RegionCardProps {
+  region: Region;
+  onPress?: () => void;
+  selected?: boolean;
+}
+
+export const RegionCard: React.FC<RegionCardProps> = ({
+  region,
+  onPress,
+  selected = false,
+}) => {
+  return (
+    <TouchableOpacity style={styles.container} onPress={onPress} activeOpacity={0.7}>
+      <View style={[styles.imageWrapper, selected && styles.imageWrapperSelected]}>
+        <LazyImage
+          source={region.image_url}
+          style={styles.image}
+          contentFit="cover"
+          showLoader={false}
+        />
+      </View>
+      <Text style={[styles.name, selected && styles.nameSelected]} numberOfLines={1}>
+        {region.name}
+      </Text>
+    </TouchableOpacity>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    alignItems: 'center',
+    width: 80,
+  },
+  imageWrapper: {
+    width: 72,
+    height: 72,
+    borderRadius: BorderRadius.full,
+    overflow: 'hidden',
+    borderWidth: 2,
+    borderColor: 'transparent',
+    marginBottom: Spacing.sm,
+  },
+  imageWrapperSelected: {
+    borderColor: Colors.primary,
+  },
+  image: {
+    width: '100%',
+    height: '100%',
+    backgroundColor: Colors.cardDark,
+  },
+  name: {
+    fontFamily: FontFamily.bodyMedium,
+    color: Colors.textPrimary,
+    fontSize: FontSize.caption,
+    textAlign: 'center',
+  },
+  nameSelected: {
+    color: Colors.primary,
+  },
+});
+
+export default RegionCard;
