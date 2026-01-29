@@ -141,7 +141,7 @@ export default function VendorLoginPage() {
                         <p className="text-sm text-gray-600">
                             Want to become a vendor?{" "}
                             <Link
-                                href="https://zora.com/vendor-onboarding"
+                                href="https://zoraapp.co.uk/vendor-onboarding"
                                 className="text-primary font-medium hover:text-primary/80 transition-colors"
                             >
                                 Apply now

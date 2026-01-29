@@ -111,7 +111,7 @@ export default function AdminLoginPage() {
                         <Input
                             label="Email address"
                             type="email"
-                            placeholder="admin@zora.com"
+                            placeholder="admin@zoraapp.co.uk"
                             value={formData.email}
                             onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                             leftIcon={<Mail className="w-4 h-4" />}
