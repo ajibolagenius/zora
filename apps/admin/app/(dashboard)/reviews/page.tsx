@@ -19,7 +19,10 @@ import {
     Card,
     Button,
     Badge,
-    Modal,
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
     Avatar,
     AvatarFallback,
 } from "@zora/ui-web";
@@ -309,54 +312,55 @@ export default function ReviewsPage() {
             </div>
 
             {/* Review Detail Modal */}
-            <Modal
-                isOpen={isModalOpen}
-                onClose={() => setIsModalOpen(false)}
-                title="Review Details"
-            >
-                {selectedReview && (
-                    <div className="space-y-6">
-                        <div className="flex items-start gap-4">
-                            <Avatar size="lg">
-                                <AvatarFallback>
-                                    {selectedReview.customer.split(" ").map(n => n[0]).join("")}
-                                </AvatarFallback>
-                            </Avatar>
+            <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Review Details</DialogTitle>
+                    </DialogHeader>
+                    {selectedReview && (
+                        <div className="space-y-6">
+                            <div className="flex items-start gap-4">
+                                <Avatar size="lg">
+                                    <AvatarFallback>
+                                        {selectedReview.customer.split(" ").map(n => n[0]).join("")}
+                                    </AvatarFallback>
+                                </Avatar>
+                                <div>
+                                    <h3 className="text-lg font-semibold text-gray-900">{selectedReview.customer}</h3>
+                                    <p className="text-gray-500">{selectedReview.createdAt}</p>
+                                </div>
+                            </div>
+
                             <div>
-                                <h3 className="text-lg font-semibold text-gray-900">{selectedReview.customer}</h3>
-                                <p className="text-gray-500">{selectedReview.createdAt}</p>
+                                <p className="text-sm text-gray-500 mb-1">Product</p>
+                                <p className="font-medium">{selectedReview.product}</p>
+                                <p className="text-sm text-gray-500">{selectedReview.vendor}</p>
                             </div>
-                        </div>
 
-                        <div>
-                            <p className="text-sm text-gray-500 mb-1">Product</p>
-                            <p className="font-medium">{selectedReview.product}</p>
-                            <p className="text-sm text-gray-500">{selectedReview.vendor}</p>
-                        </div>
-
-                        <div>
-                            <p className="text-sm text-gray-500 mb-2">Rating</p>
-                            <StarRating rating={selectedReview.rating} />
-                        </div>
-
-                        <div>
-                            <p className="text-sm text-gray-500 mb-2">Review</p>
-                            <p className="text-gray-700 bg-gray-50 p-4 rounded-xl">{selectedReview.comment}</p>
-                        </div>
-
-                        {selectedReview.status === "pending" && (
-                            <div className="flex gap-3 pt-4 border-t">
-                                <Button className="flex-1" leftIcon={<CheckCircle className="w-4 h-4" />}>
-                                    Approve
-                                </Button>
-                                <Button variant="outline" className="flex-1 text-red-600 border-red-300" leftIcon={<XCircle className="w-4 h-4" />}>
-                                    Reject
-                                </Button>
+                            <div>
+                                <p className="text-sm text-gray-500 mb-2">Rating</p>
+                                <StarRating rating={selectedReview.rating} />
                             </div>
-                        )}
-                    </div>
-                )}
-            </Modal>
+
+                            <div>
+                                <p className="text-sm text-gray-500 mb-2">Review</p>
+                                <p className="text-gray-700 bg-gray-50 p-4 rounded-xl">{selectedReview.comment}</p>
+                            </div>
+
+                            {selectedReview.status === "pending" && (
+                                <div className="flex gap-3 pt-4 border-t">
+                                    <Button className="flex-1" leftIcon={<CheckCircle className="w-4 h-4" />}>
+                                        Approve
+                                    </Button>
+                                    <Button variant="outline" className="flex-1 text-red-600 border-red-300" leftIcon={<XCircle className="w-4 h-4" />}>
+                                        Reject
+                                    </Button>
+                                </div>
+                            )}
+                        </div>
+                    )}
+                </DialogContent>
+            </Dialog>
         </>
     );
 }

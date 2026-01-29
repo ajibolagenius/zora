@@ -46,10 +46,10 @@ const stats = [
 ];
 
 const pendingItems = [
-    { type: "Vendor Applications", count: 8, icon: UserPlus, href: "/vendors?tab=applications", color: "bg-blue-100 text-blue-600" },
-    { type: "Pending Reviews", count: 23, icon: Star, href: "/reviews?status=pending", color: "bg-yellow-100 text-yellow-600" },
+    { type: "Vendor Applications", count: 8, icon: UserPlus, href: "/vendors", color: "bg-blue-100 text-blue-600" },
+    { type: "Pending Reviews", count: 23, icon: Star, href: "/reviews", color: "bg-yellow-100 text-yellow-600" },
     { type: "Refund Requests", count: 5, icon: RefreshCw, href: "/refunds", color: "bg-red-100 text-red-600" },
-    { type: "Support Tickets", count: 12, icon: Mail, href: "/emails", color: "bg-purple-100 text-purple-600" },
+    { type: "Open Emails", count: 12, icon: Mail, href: "/emails", color: "bg-purple-100 text-purple-600" },
 ];
 
 const recentOrders = [
@@ -233,7 +233,7 @@ export default function AdminDashboard() {
                                 <CardHeader>
                                     <div className="flex items-center justify-between">
                                         <CardTitle>New Applications</CardTitle>
-                                        <Link href="/vendors?tab=applications">
+                                        <Link href="/vendors">
                                             <Button variant="ghost" size="sm">View All</Button>
                                         </Link>
                                     </div>
@@ -262,6 +262,45 @@ export default function AdminDashboard() {
                                             </div>
                                         </motion.div>
                                     ))}
+                                </CardContent>
+                            </Card>
+                        </motion.div>
+
+                        {/* Quick Actions */}
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.5 }}
+                        >
+                            <Card>
+                                <CardHeader>
+                                    <CardTitle>Quick Actions</CardTitle>
+                                </CardHeader>
+                                <CardContent className="grid grid-cols-2 gap-2">
+                                    <Link href="/analytics">
+                                        <div className="p-3 rounded-xl bg-blue-50 hover:bg-blue-100 transition-colors text-center cursor-pointer">
+                                            <TrendingUp className="w-5 h-5 text-blue-600 mx-auto mb-1" />
+                                            <span className="text-xs font-medium text-blue-700">Analytics</span>
+                                        </div>
+                                    </Link>
+                                    <Link href="/products">
+                                        <div className="p-3 rounded-xl bg-purple-50 hover:bg-purple-100 transition-colors text-center cursor-pointer">
+                                            <Store className="w-5 h-5 text-purple-600 mx-auto mb-1" />
+                                            <span className="text-xs font-medium text-purple-700">Products</span>
+                                        </div>
+                                    </Link>
+                                    <Link href="/settings">
+                                        <div className="p-3 rounded-xl bg-gray-50 hover:bg-gray-100 transition-colors text-center cursor-pointer">
+                                            <AlertCircle className="w-5 h-5 text-gray-600 mx-auto mb-1" />
+                                            <span className="text-xs font-medium text-gray-700">Settings</span>
+                                        </div>
+                                    </Link>
+                                    <Link href="/customers">
+                                        <div className="p-3 rounded-xl bg-green-50 hover:bg-green-100 transition-colors text-center cursor-pointer">
+                                            <Users className="w-5 h-5 text-green-600 mx-auto mb-1" />
+                                            <span className="text-xs font-medium text-green-700">Customers</span>
+                                        </div>
+                                    </Link>
                                 </CardContent>
                             </Card>
                         </motion.div>

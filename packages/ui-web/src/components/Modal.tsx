@@ -124,6 +124,34 @@ const DialogDescription = React.forwardRef<
 ));
 DialogDescription.displayName = DialogPrimitive.Description.displayName;
 
+/**
+ * Simple Modal component for easy usage
+ * Wraps Dialog components with a cleaner API
+ */
+interface ModalProps {
+    isOpen: boolean;
+    onClose: () => void;
+    title?: string;
+    description?: string;
+    children: React.ReactNode;
+    size?: "sm" | "default" | "lg" | "xl" | "full";
+}
+
+const Modal = ({ isOpen, onClose, title, description, children, size = "default" }: ModalProps) => (
+    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+        <DialogContent size={size}>
+            {(title || description) && (
+                <DialogHeader>
+                    {title && <DialogTitle>{title}</DialogTitle>}
+                    {description && <DialogDescription>{description}</DialogDescription>}
+                </DialogHeader>
+            )}
+            {children}
+        </DialogContent>
+    </Dialog>
+);
+Modal.displayName = "Modal";
+
 export {
     Dialog,
     DialogPortal,
@@ -135,4 +163,6 @@ export {
     DialogFooter,
     DialogTitle,
     DialogDescription,
+    Modal,
+    type ModalProps,
 };

@@ -118,9 +118,9 @@ export default function LoginPage() {
                     </div>
 
                     <p className="mt-8 text-center text-sm text-muted-foreground">
-                        Don&apos;t have an account?{" "}
-                        <Link href="/register" className="text-primary font-medium hover:underline">
-                            Sign up
+                        Want to become a vendor?{" "}
+                        <Link href="/vendor-onboarding" className="text-primary font-medium hover:underline">
+                            Apply here
                         </Link>
                     </p>
                 </div>

@@ -64,7 +64,7 @@ export function Header({ variant = "light" }: HeaderProps) {
 
                 {/* Right CTA & Mobile Menu */}
                 <div className="flex items-center gap-3">
-                    <Link href="/(auth)/login" className={`hidden sm:inline-flex ${linkClass} px-4 py-2 text-sm font-medium transition-colors`}>
+                    <Link href="/login" className={`hidden sm:inline-flex ${linkClass} px-4 py-2 text-sm font-medium transition-colors`}>
                         Sign In
                     </Link>
                     <Link
@@ -104,7 +104,7 @@ export function Header({ variant = "light" }: HeaderProps) {
                         <Link href="/contact" onClick={() => setMobileMenuOpen(false)} className={`px-4 py-3 text-base font-medium ${linkClass} rounded-lg transition-colors`}>
                             Contact
                         </Link>
-                        <Link href="/(auth)/login" onClick={() => setMobileMenuOpen(false)} className={`px-4 py-3 text-base font-medium ${linkClass} rounded-lg transition-colors`}>
+                        <Link href="/login" onClick={() => setMobileMenuOpen(false)} className={`px-4 py-3 text-base font-medium ${linkClass} rounded-lg transition-colors`}>
                             Sign In
                         </Link>
                         <Link

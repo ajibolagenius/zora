@@ -147,7 +147,7 @@ export default function SettingsPage() {
                                 <div className="mt-6">
                                     <Button
                                         onClick={handleSave}
-                                        loading={isSaving}
+                                        isLoading={isSaving}
                                         leftIcon={<Save className="w-4 h-4" />}
                                     >
                                         Save Changes

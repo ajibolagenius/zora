@@ -133,17 +133,46 @@ EXPO_PUBLIC_GOOGLE_MAPS_API_KEY=your_google_maps_key
 
 ## Deployment
 
-### Web Apps (Vercel)
+### Domain Structure
 
-| App | Recommended Domain |
-|-----|-------------------|
-| Landing Page | zoraapp.co.uk |
-| Vendor Portal | vendor.zoraapp.co.uk |
-| Admin Dashboard | admin.zoraapp.co.uk |
+The Zora platform uses subdomain-based routing for its applications:
 
-### Mobile App
+| App | Domain | Description |
+|-----|--------|-------------|
+| **Web** | `zoraapp.co.uk` | Main landing page, vendor onboarding |
+| **Vendor Portal** | `vendor.zoraapp.co.uk` | Vendor management dashboard |
+| **Admin Dashboard** | `admin.zoraapp.co.uk` | Platform administration |
+| **Mobile App** | iOS App Store / Google Play | Customer shopping experience |
 
-Build and deploy using Expo Application Services (EAS):
+### Vercel Deployment
+
+Each Next.js app is deployed as a separate Vercel project:
+
+1. **Create Vercel Projects:**
+   ```bash
+   # From each app directory
+   cd apps/web && vercel
+   cd apps/vendor && vercel
+   cd apps/admin && vercel
+   ```
+
+2. **Configure Domains in Vercel Dashboard:**
+   - `apps/web` → `zoraapp.co.uk`
+   - `apps/vendor` → `vendor.zoraapp.co.uk`
+   - `apps/admin` → `admin.zoraapp.co.uk`
+
+3. **Set Environment Variables:**
+   Add these to each Vercel project:
+   ```
+   NEXT_PUBLIC_MAIN_DOMAIN=zoraapp.co.uk
+   NEXT_PUBLIC_APP_URL=https://zoraapp.co.uk
+   NEXT_PUBLIC_VENDOR_URL=https://vendor.zoraapp.co.uk
+   NEXT_PUBLIC_ADMIN_URL=https://admin.zoraapp.co.uk
+   ```
+
+### Mobile App (EAS)
+
+Build and deploy using Expo Application Services:
 
 ```bash
 cd apps/mobile

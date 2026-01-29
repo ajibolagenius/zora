@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useState } from "react";
-import { ArrowUpRight, Star, ShoppingBag, TrendingUp, Users, Truck, Shield, MapPin, Check, Globe, CreditCard, Package, Heart, Search, Map, Menu, X } from "lucide-react";
+import { ArrowUpRight, Star, ShoppingBag, TrendingUp, Truck, Globe, CreditCard, Menu, X, MapPin, ArrowRight } from "lucide-react";
 
 // Zora Logo Component
 const ZoraLogo = ({ className = "w-10 h-10" }: { className?: string }) => (
@@ -44,29 +44,17 @@ export default function Home() {
 
                     {/* Center Navigation - Pill Style (Desktop) */}
                     <div className="hidden lg:flex items-center bg-white rounded-full px-2 py-1.5 border border-gray-200 shadow-sm">
-                        <Link
-                            href="#features"
-                            className="px-5 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors rounded-full hover:bg-gray-50"
-                        >
+                        <Link href="/about" className="px-5 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors rounded-full hover:bg-gray-50">
+                            About
+                        </Link>
+                        <Link href="/features" className="px-5 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors rounded-full hover:bg-gray-50">
                             Features
                         </Link>
-                        <Link
-                            href="#how-it-works"
-                            className="px-5 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors rounded-full hover:bg-gray-50"
-                        >
-                            How It Works
-                        </Link>
-                        <Link
-                            href="#vendors"
-                            className="px-5 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors rounded-full hover:bg-gray-50"
-                        >
+                        <Link href="/vendors" className="px-5 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors rounded-full hover:bg-gray-50">
                             For Vendors
                         </Link>
-                        <Link
-                            href="#download"
-                            className="px-5 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors rounded-full hover:bg-gray-50"
-                        >
-                            Download
+                        <Link href="/contact" className="px-5 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors rounded-full hover:bg-gray-50">
+                            Contact
                         </Link>
                     </div>
 
@@ -80,57 +68,24 @@ export default function Home() {
                         </Link>
                         <button
                             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                            className="lg:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+                            className="lg:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors"
                             aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
                             aria-expanded={mobileMenuOpen}
-                            aria-controls="mobile-menu"
                         >
-                            {mobileMenuOpen ? (
-                                <X className="w-6 h-6 text-gray-700" aria-hidden="true" />
-                            ) : (
-                                <Menu className="w-6 h-6 text-gray-700" aria-hidden="true" />
-                            )}
+                            {mobileMenuOpen ? <X className="w-6 h-6 text-gray-700" /> : <Menu className="w-6 h-6 text-gray-700" />}
                         </button>
                     </div>
                 </div>
 
                 {/* Mobile Menu */}
                 {mobileMenuOpen && (
-                    <div id="mobile-menu" className="lg:hidden bg-white border-t border-gray-200 shadow-lg" role="menu" aria-label="Mobile navigation">
+                    <div className="lg:hidden bg-white border-t border-gray-200 shadow-lg">
                         <div className="container mx-auto px-4 py-4 flex flex-col space-y-2">
-                            <Link
-                                href="#features"
-                                onClick={() => setMobileMenuOpen(false)}
-                                className="px-4 py-3 text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors"
-                            >
-                                Features
-                            </Link>
-                            <Link
-                                href="#how-it-works"
-                                onClick={() => setMobileMenuOpen(false)}
-                                className="px-4 py-3 text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors"
-                            >
-                                How It Works
-                            </Link>
-                            <Link
-                                href="#vendors"
-                                onClick={() => setMobileMenuOpen(false)}
-                                className="px-4 py-3 text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors"
-                            >
-                                For Vendors
-                            </Link>
-                            <Link
-                                href="#download"
-                                onClick={() => setMobileMenuOpen(false)}
-                                className="px-4 py-3 text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors"
-                            >
-                                Download
-                            </Link>
-                            <Link
-                                href="/vendor-onboarding"
-                                onClick={() => setMobileMenuOpen(false)}
-                                className="sm:hidden mt-2 bg-secondary hover:bg-secondary-dark text-gray-900 px-5 py-3 rounded-full text-base font-semibold transition-colors shadow-sm text-center"
-                            >
+                            <Link href="/about" onClick={() => setMobileMenuOpen(false)} className="px-4 py-3 text-base font-medium text-gray-700 hover:bg-gray-50 rounded-lg">About</Link>
+                            <Link href="/features" onClick={() => setMobileMenuOpen(false)} className="px-4 py-3 text-base font-medium text-gray-700 hover:bg-gray-50 rounded-lg">Features</Link>
+                            <Link href="/vendors" onClick={() => setMobileMenuOpen(false)} className="px-4 py-3 text-base font-medium text-gray-700 hover:bg-gray-50 rounded-lg">For Vendors</Link>
+                            <Link href="/contact" onClick={() => setMobileMenuOpen(false)} className="px-4 py-3 text-base font-medium text-gray-700 hover:bg-gray-50 rounded-lg">Contact</Link>
+                            <Link href="/vendor-onboarding" onClick={() => setMobileMenuOpen(false)} className="sm:hidden mt-2 bg-secondary text-gray-900 px-5 py-3 rounded-full text-base font-semibold text-center">
                                 Get Started
                             </Link>
                         </div>
@@ -139,12 +94,11 @@ export default function Home() {
             </nav>
 
             {/* Hero Section */}
-            <section className="pt-28 pb-16 lg:pt-32 lg:pb-24 overflow-hidden" aria-labelledby="hero-heading">
+            <section className="pt-28 pb-16 lg:pt-32 lg:pb-20 overflow-hidden" aria-labelledby="hero-heading">
                 <div className="container mx-auto px-4 sm:px-6">
                     <div className="grid lg:grid-cols-2 gap-12 lg:gap-8 items-center">
                         {/* Left Content */}
                         <div className="max-w-xl">
-                            {/* Tagline */}
                             <div className="flex items-center gap-3 mb-6">
                                 <div className="w-8 h-0.5 bg-primary"></div>
                                 <span className="text-xs font-semibold tracking-widest text-gray-600 uppercase">
@@ -152,47 +106,33 @@ export default function Home() {
                                 </span>
                             </div>
 
-                            {/* Headline */}
                             <h1 id="hero-heading" className="text-4xl sm:text-5xl lg:text-display font-bold font-display leading-[1.1] text-gray-900 mb-6">
                                 Your home away{" "}
                                 <span className="relative inline-block">
                                     from home
-                                    <svg
-                                        className="absolute -bottom-2 left-0 w-full"
-                                        viewBox="0 0 200 12"
-                                        fill="none"
-                                        xmlns="http://www.w3.org/2000/svg"
-                                    >
-                                        <path
-                                            d="M2 8.5C50 2.5 150 2.5 198 8.5"
-                                            stroke="#22C55E"
-                                            strokeWidth="4"
-                                            strokeLinecap="round"
-                                        />
+                                    <svg className="absolute -bottom-2 left-0 w-full" viewBox="0 0 200 12" fill="none">
+                                        <path d="M2 8.5C50 2.5 150 2.5 198 8.5" stroke="#22C55E" strokeWidth="4" strokeLinecap="round" />
                                     </svg>
                                 </span>{" "}
                                 delivered!
                             </h1>
 
-                            {/* Subtext */}
                             <p className="text-lg text-gray-600 mb-8 leading-relaxed">
-                                A central hub for Africans in the diaspora to access authentic groceries,
-                                a vibrant marketplace, and community-focused services that reflect African
-                                culture—wherever you live.
+                                Access authentic African groceries, a vibrant marketplace, and community-focused 
+                                services that reflect African culture—delivered across the UK.
                             </p>
 
-                            {/* CTA Buttons */}
                             <div className="flex flex-col sm:flex-row gap-4">
                                 <Link
                                     href="#download"
-                                    className="inline-flex items-center justify-center gap-2 bg-secondary hover:bg-secondary-dark text-gray-900 px-7 py-4 rounded-full text-base font-semibold transition-all shadow-lg shadow-secondary/25 hover:shadow-xl hover:shadow-secondary/30"
+                                    className="inline-flex items-center justify-center gap-2 bg-secondary hover:bg-secondary-dark text-gray-900 px-7 py-4 rounded-full text-base font-semibold transition-all shadow-lg shadow-secondary/25"
                                 >
                                     Download App
                                     <ArrowUpRight className="w-5 h-5" />
                                 </Link>
                                 <Link
                                     href="/vendor-onboarding"
-                                    className="inline-flex items-center justify-center gap-2 bg-white hover:bg-gray-50 text-gray-900 px-7 py-4 rounded-full text-base font-semibold transition-colors border border-gray-200"
+                                    className="inline-flex items-center justify-center gap-2 bg-white hover:bg-gray-50 text-gray-900 px-7 py-4 rounded-full text-base font-semibold border border-gray-200"
                                 >
                                     Start Selling
                                 </Link>
@@ -203,10 +143,7 @@ export default function Home() {
                                 <div className="flex items-center gap-2">
                                     <div className="flex -space-x-2">
                                         {[1, 2, 3, 4].map((i) => (
-                                            <div
-                                                key={i}
-                                                className="w-8 h-8 rounded-full bg-gradient-to-br from-primary/20 to-secondary/20 border-2 border-white"
-                                            />
+                                            <div key={i} className="w-8 h-8 rounded-full bg-gradient-to-br from-primary/20 to-secondary/20 border-2 border-white" />
                                         ))}
                                     </div>
                                     <span className="text-sm text-gray-600">
@@ -221,25 +158,17 @@ export default function Home() {
                             </div>
                         </div>
 
-                        {/* Right - Floating Cards & App Preview */}
+                        {/* Right - App Preview */}
                         <div className="relative h-[500px] lg:h-[580px]">
-                            {/* Main App Screenshot */}
                             <div className="absolute top-8 right-0 lg:right-4 w-[260px] z-10">
                                 <div className="bg-background-dark rounded-[2.5rem] p-2 shadow-2xl">
                                     <div className="rounded-[2rem] overflow-hidden">
-                                        <Image
-                                            src="/images/screenshots/home.png"
-                                            alt="Zora App Home Screen"
-                                            width={260}
-                                            height={520}
-                                            className="w-full h-auto"
-                                            priority
-                                        />
+                                        <Image src="/images/screenshots/home.png" alt="Zora App" width={260} height={520} className="w-full h-auto" priority />
                                     </div>
                                 </div>
                             </div>
 
-                            {/* Today's Sales Card */}
+                            {/* Floating Cards */}
                             <div className="absolute top-0 right-48 lg:right-56 w-[170px] bg-white rounded-xl shadow-lg p-4 z-20">
                                 <div className="flex items-center gap-2 mb-3">
                                     <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
@@ -247,32 +176,20 @@ export default function Home() {
                                     </div>
                                     <span className="text-sm font-medium text-gray-600">Daily Orders</span>
                                 </div>
-                                <div className="text-2xl font-bold text-gray-900 mb-1">847</div>
+                                <div className="text-2xl font-bold text-gray-900">847</div>
                                 <div className="flex items-center gap-1 text-xs">
                                     <span className="text-green-600 font-medium bg-green-50 px-1.5 py-0.5 rounded">+18.4%</span>
-                                    <span className="text-gray-500">this week</span>
                                 </div>
                             </div>
 
-                            {/* Vendor Stats Card */}
                             <div className="absolute top-44 left-0 lg:left-4 w-[180px] bg-success rounded-xl shadow-lg p-4 z-20">
                                 <div className="flex items-center gap-2 mb-4">
                                     <ShoppingBag className="w-5 h-5 text-white/80" />
                                     <span className="text-sm font-medium text-white/80">Active Vendors</span>
                                 </div>
-                                <div className="text-4xl font-bold text-white mb-2">100+</div>
-                                <p className="text-white/70 text-xs">African-owned businesses</p>
+                                <div className="text-4xl font-bold text-white">100+</div>
                             </div>
 
-                            {/* Region Badge */}
-                            <div className="absolute bottom-36 left-8 lg:left-16 bg-white rounded-lg shadow-md px-3 py-2 flex items-center gap-2 z-20">
-                                <div className="w-6 h-6 bg-primary rounded-full flex items-center justify-center">
-                                    <Globe className="w-3 h-3 text-white" />
-                                </div>
-                                <span className="text-sm font-medium text-gray-900">5 African Regions</span>
-                            </div>
-
-                            {/* UK Delivery Badge */}
                             <div className="absolute bottom-8 right-4 lg:right-12 w-[160px] bg-white rounded-xl shadow-lg p-4 z-20">
                                 <div className="flex items-center gap-2 mb-2">
                                     <div className="w-8 h-8 bg-secondary/20 rounded-full flex items-center justify-center">
@@ -280,15 +197,15 @@ export default function Home() {
                                     </div>
                                     <span className="text-sm font-medium text-gray-600">UK Wide</span>
                                 </div>
-                                <p className="text-xs text-gray-500">Fast delivery across the United Kingdom</p>
+                                <p className="text-xs text-gray-500">Fast delivery across the UK</p>
                             </div>
                         </div>
                     </div>
                 </div>
             </section>
 
-            {/* Partner Logos Section */}
-            <section className="py-12 border-t border-gray-200 bg-white/50">
+            {/* Partner Logos */}
+            <section className="py-10 border-t border-gray-200 bg-white/50">
                 <div className="container mx-auto px-6">
                     <p className="text-center text-sm text-gray-500 mb-6">Trusted payment partners</p>
                     <div className="flex flex-wrap items-center justify-center gap-x-12 gap-y-6">
@@ -311,291 +228,93 @@ export default function Home() {
                 </div>
             </section>
 
-            {/* Features Section */}
-            <section id="features" className="py-20 bg-white">
+            {/* African Regions */}
+            <section className="py-16 bg-white">
                 <div className="container mx-auto px-6">
-                    <div className="text-center mb-16">
-                        <div className="flex items-center justify-center gap-3 mb-4">
-                            <div className="w-8 h-0.5 bg-primary"></div>
-                            <span className="text-xs font-semibold tracking-widest text-gray-600 uppercase">
-                                Explore
-                            </span>
-                            <div className="w-8 h-0.5 bg-primary"></div>
-                        </div>
+                    <div className="text-center mb-12">
                         <h2 className="text-3xl md:text-4xl font-bold font-display text-gray-900 mb-4">
                             Shop by African Region
                         </h2>
                         <p className="text-gray-600 max-w-2xl mx-auto">
-                            Discover authentic products from across the continent, curated from trusted African-owned vendors
+                            Discover authentic products from across the continent
                         </p>
                     </div>
-                    <div className="grid grid-cols-2 md:grid-cols-5 gap-6">
+                    <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
                         {[
-                            { name: "West Africa", color: "from-orange-100 to-amber-100", products: "Jollof, Egusi, Plantains" },
-                            { name: "East Africa", color: "from-green-100 to-emerald-100", products: "Injera, Ugali, Spices" },
-                            { name: "North Africa", color: "from-blue-100 to-cyan-100", products: "Couscous, Dates, Oils" },
-                            { name: "South Africa", color: "from-purple-100 to-pink-100", products: "Biltong, Rooibos, Chakalaka" },
-                            { name: "Central Africa", color: "from-red-100 to-orange-100", products: "Cassava, Palm Oil, Ndolé" },
+                            { name: "West Africa", color: "from-orange-100 to-amber-100" },
+                            { name: "East Africa", color: "from-green-100 to-emerald-100" },
+                            { name: "North Africa", color: "from-blue-100 to-cyan-100" },
+                            { name: "South Africa", color: "from-purple-100 to-pink-100" },
+                            { name: "Central Africa", color: "from-red-100 to-orange-100" },
                         ].map((region) => (
                             <div
                                 key={region.name}
                                 className="group bg-white rounded-2xl p-6 text-center hover:shadow-xl transition-all cursor-pointer border border-gray-100 hover:border-primary/20 hover:-translate-y-1"
                             >
-                                <div className={`w-20 h-20 bg-gradient-to-br ${region.color} rounded-full mx-auto mb-4 group-hover:scale-110 transition-transform flex items-center justify-center`}>
-                                    <Globe className="w-8 h-8 text-gray-600/50" />
+                                <div className={`w-16 h-16 bg-gradient-to-br ${region.color} rounded-full mx-auto mb-3 group-hover:scale-110 transition-transform flex items-center justify-center`}>
+                                    <Globe className="w-7 h-7 text-gray-600/50" />
                                 </div>
-                                <h3 className="font-semibold text-gray-900 mb-1">{region.name}</h3>
-                                <p className="text-xs text-gray-500">{region.products}</p>
+                                <h3 className="font-semibold text-gray-900">{region.name}</h3>
                             </div>
                         ))}
                     </div>
-                </div>
-            </section>
-
-            {/* App Features Showcase */}
-            <section className="py-20 bg-background-light" aria-labelledby="features-showcase-heading">
-                <div className="container mx-auto px-6">
-                    <div className="grid lg:grid-cols-2 gap-12 items-center">
-                        {/* Left - Feature List */}
-                        <div>
-                            <div className="flex items-center gap-3 mb-4">
-                                <div className="w-8 h-0.5 bg-primary"></div>
-                                <span className="text-xs font-semibold tracking-widest text-gray-600 uppercase">
-                                    App Features
-                                </span>
-                            </div>
-                            <h2 className="text-3xl md:text-4xl font-bold font-display text-gray-900 mb-6">
-                                Everything you need in one app
-                            </h2>
-                            <p className="text-gray-600 mb-8">
-                                The Zora mobile app brings authentic African products right to your fingertips
-                                with powerful features designed for the diaspora community.
-                            </p>
-
-                            <div className="space-y-4">
-                                {[
-                                    { icon: Search, title: "Smart Search", desc: "Find products by name, vendor, or cultural region" },
-                                    { icon: Map, title: "Vendor Discovery", desc: "Interactive maps showing nearby African vendors" },
-                                    { icon: ShoppingBag, title: "Multi-Vendor Cart", desc: "Shop from multiple vendors in a single order" },
-                                    { icon: CreditCard, title: "Flexible Payments", desc: "Stripe, Klarna, and Clearpay supported" },
-                                    { icon: Package, title: "Order Tracking", desc: "Real-time updates on your delivery status" },
-                                    { icon: Heart, title: "Save Favourites", desc: "Build your personal list of go-to products" },
-                                ].map((feature) => (
-                                    <div key={feature.title} className="flex items-start gap-4 p-4 bg-white rounded-xl border border-gray-100 hover:shadow-md transition-shadow">
-                                        <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center flex-shrink-0">
-                                            <feature.icon className="w-5 h-5 text-primary" />
-                                        </div>
-                                        <div>
-                                            <h4 className="font-semibold text-gray-900">{feature.title}</h4>
-                                            <p className="text-sm text-gray-600">{feature.desc}</p>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-
-                        {/* Right - App Screenshots */}
-                        <div className="relative flex justify-center items-center">
-                            <div className="relative">
-                                {/* Main Phone */}
-                                <div className="relative z-10 bg-background-dark rounded-[2.5rem] p-2 shadow-2xl">
-                                    <div className="rounded-[2rem] overflow-hidden w-[240px]">
-                                        <Image
-                                            src="/images/screenshots/explore.png"
-                                            alt="Zora App Explore Screen"
-                                            width={240}
-                                            height={480}
-                                            className="w-full h-auto"
-                                        />
-                                    </div>
-                                </div>
-                                {/* Background Phone */}
-                                <div className="absolute -right-16 top-8 z-0 bg-background-dark rounded-[2.5rem] p-2 shadow-xl opacity-60 rotate-6">
-                                    <div className="rounded-[2rem] overflow-hidden w-[200px]">
-                                        <Image
-                                            src="/images/screenshots/cart.png"
-                                            alt="Zora App Cart Screen"
-                                            width={200}
-                                            height={400}
-                                            className="w-full h-auto"
-                                        />
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                    <div className="text-center mt-8">
+                        <Link href="/features" className="inline-flex items-center gap-2 text-primary font-medium hover:underline">
+                            Explore all features <ArrowRight className="w-4 h-4" />
+                        </Link>
                     </div>
                 </div>
             </section>
 
-            {/* How It Works */}
-            <section id="how-it-works" className="py-20 bg-white">
+            {/* Vendor CTA - Simplified */}
+            <section className="py-16 bg-gradient-to-br from-primary to-primary-dark text-white">
                 <div className="container mx-auto px-6">
-                    <div className="text-center mb-16">
-                        <div className="flex items-center justify-center gap-3 mb-4">
-                            <div className="w-8 h-0.5 bg-primary"></div>
-                            <span className="text-xs font-semibold tracking-widest text-gray-600 uppercase">
-                                Simple Process
-                            </span>
-                            <div className="w-8 h-0.5 bg-primary"></div>
-                        </div>
-                        <h2 className="text-3xl md:text-4xl font-bold font-display text-gray-900 mb-4">
-                            How Zora Works
+                    <div className="max-w-3xl mx-auto text-center">
+                        <h2 className="text-3xl md:text-4xl font-bold font-display mb-4">
+                            Grow Your African Business
                         </h2>
-                        <p className="text-gray-600 max-w-2xl mx-auto">
-                            Get your favourite African products delivered in just a few simple steps
+                        <p className="text-white/80 mb-8 text-lg">
+                            Join 100+ vendors reaching thousands of customers across the UK. 
+                            No monthly fees—only pay when you sell.
                         </p>
-                    </div>
-                    <div className="grid md:grid-cols-4 gap-8">
-                        {[
-                            {
-                                icon: Search,
-                                title: "Browse",
-                                description: "Explore products from 100+ vendors across 5 African regions",
-                                color: "bg-orange-100 text-orange-600",
-                            },
-                            {
-                                icon: ShoppingBag,
-                                title: "Add to Cart",
-                                description: "Mix items from different vendors in one convenient cart",
-                                color: "bg-yellow-100 text-yellow-600",
-                            },
-                            {
-                                icon: CreditCard,
-                                title: "Pay Securely",
-                                description: "Choose Stripe, Klarna, or Clearpay at checkout",
-                                color: "bg-green-100 text-green-600",
-                            },
-                            {
-                                icon: Truck,
-                                title: "Receive",
-                                description: "Track your order and enjoy authentic products at home",
-                                color: "bg-blue-100 text-blue-600",
-                            },
-                        ].map((step, index) => (
-                            <div key={step.title} className="text-center group">
-                                <div className="relative mb-6">
-                                    <div className={`w-20 h-20 ${step.color} rounded-2xl flex items-center justify-center mx-auto group-hover:scale-110 transition-transform`}>
-                                        <step.icon className="w-8 h-8" />
-                                    </div>
-                                    <div className="absolute -top-2 -right-2 w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center text-sm font-bold">
-                                        {index + 1}
-                                    </div>
-                                </div>
-                                <h3 className="text-xl font-semibold text-gray-900 mb-2">{step.title}</h3>
-                                <p className="text-gray-600">{step.description}</p>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            </section>
-
-            {/* Vendor CTA */}
-            <section id="vendors" className="py-20 bg-gradient-to-br from-primary to-primary-dark text-white overflow-hidden relative">
-                {/* Background Pattern */}
-                <div className="absolute inset-0 opacity-10">
-                    <div className="absolute top-0 left-0 w-64 h-64 bg-white rounded-full -translate-x-1/2 -translate-y-1/2" />
-                    <div className="absolute bottom-0 right-0 w-96 h-96 bg-white rounded-full translate-x-1/3 translate-y-1/3" />
-                </div>
-
-                <div className="container mx-auto px-6 relative z-10">
-                    <div className="grid lg:grid-cols-2 gap-12 items-center">
-                        {/* Left Content */}
-                        <div>
-                            <div className="flex items-center gap-3 mb-4">
-                                <div className="w-8 h-0.5 bg-white/50"></div>
-                                <span className="text-xs font-semibold tracking-widest text-white/80 uppercase">
-                                    For Vendors
-                                </span>
-                            </div>
-                            <h2 className="text-3xl md:text-4xl font-bold font-display mb-4">
-                                Grow Your African Business with Zora
-                            </h2>
-                            <p className="text-white/80 mb-8 text-lg">
-                                Join our marketplace and reach thousands of customers in the UK diaspora looking for
-                                authentic African products. Easy setup, powerful tools, and dedicated support.
-                            </p>
-
-                            <div className="grid sm:grid-cols-2 gap-4 mb-8">
-                                {[
-                                    { title: "No Monthly Fees", description: "Only pay when you sell", icon: "💰" },
-                                    { title: "Easy Dashboard", description: "Manage products & orders", icon: "📊" },
-                                    { title: "Fast Payouts", description: "Get paid within days", icon: "⚡" },
-                                    { title: "Full Support", description: "We help you succeed", icon: "🤝" },
-                                ].map((benefit) => (
-                                    <div key={benefit.title} className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/10">
-                                        <div className="text-2xl mb-2">{benefit.icon}</div>
-                                        <h3 className="font-semibold mb-1">{benefit.title}</h3>
-                                        <p className="text-white/70 text-sm">{benefit.description}</p>
-                                    </div>
-                                ))}
-                            </div>
-
+                        <div className="flex flex-col sm:flex-row gap-4 justify-center">
                             <Link
                                 href="/vendor-onboarding"
-                                className="inline-flex items-center gap-2 bg-secondary hover:bg-secondary-dark text-gray-900 px-8 py-4 rounded-full text-lg font-semibold transition-all shadow-lg hover:shadow-xl"
+                                className="inline-flex items-center justify-center gap-2 bg-secondary hover:bg-secondary-dark text-gray-900 px-8 py-4 rounded-full text-lg font-semibold transition-all"
                             >
                                 Start Selling Today
                                 <ArrowUpRight className="w-5 h-5" />
                             </Link>
-                        </div>
-
-                        {/* Right - Vendor App Preview (cropped to show top portion) */}
-                        <div className="relative flex justify-center">
-                            <div className="bg-background-dark rounded-t-[2.5rem] rounded-b-[1rem] p-2 pb-4 shadow-2xl">
-                                <div className="rounded-t-[2rem] rounded-b-lg overflow-hidden w-[260px] max-h-[580px]">
-                                    <Image
-                                        src="/images/screenshots/product_page.png"
-                                        alt="Vendor Store Profile"
-                                        width={260}
-                                        height={520}
-                                        className="w-full h-auto"
-                                    />
-                                </div>
-                            </div>
+                            <Link
+                                href="/vendors"
+                                className="inline-flex items-center justify-center gap-2 bg-white/10 hover:bg-white/20 text-white px-8 py-4 rounded-full text-lg font-semibold border border-white/20"
+                            >
+                                Learn More
+                            </Link>
                         </div>
                     </div>
                 </div>
             </section>
 
             {/* Download App Section */}
-            <section id="download" className="py-20 bg-background-light" aria-labelledby="download-heading">
+            <section id="download" className="py-16 bg-background-light">
                 <div className="container mx-auto px-6">
-                    <div className="max-w-5xl mx-auto">
-                        <div className="bg-gradient-to-br from-background-dark to-surface rounded-3xl p-6 sm:p-8 md:p-12 relative overflow-hidden">
-                            {/* Background decoration */}
+                    <div className="max-w-4xl mx-auto">
+                        <div className="bg-gradient-to-br from-background-dark to-surface rounded-3xl p-8 md:p-12 relative overflow-hidden">
                             <div className="absolute top-0 right-0 w-64 h-64 bg-primary/20 rounded-full blur-3xl" />
                             <div className="absolute bottom-0 left-0 w-48 h-48 bg-secondary/20 rounded-full blur-3xl" />
 
                             <div className="relative z-10 grid md:grid-cols-2 gap-8 items-center">
                                 <div>
-                                    <div className="flex items-center gap-3 mb-4">
-                                        <div className="w-8 h-0.5 bg-primary"></div>
-                                        <span className="text-xs font-semibold tracking-widest text-gray-400 uppercase">
-                                            Mobile App
-                                        </span>
-                                    </div>
                                     <h2 className="text-3xl md:text-4xl font-bold font-display text-white mb-4">
                                         Download the Zora App
                                     </h2>
                                     <p className="text-gray-400 mb-6">
-                                        Get the best shopping experience on your mobile device.
-                                        Browse products, discover vendors, track orders, and more.
+                                        Shop from 100+ vendors, explore 5 African regions, and get fast UK-wide delivery.
                                     </p>
 
-                                    {/* App Features */}
-                                    <div className="flex flex-wrap gap-3 mb-8">
-                                        {["100+ Vendors", "5 Regions", "Fast Delivery", "Secure Payments"].map((feature) => (
-                                            <span key={feature} className="bg-white/10 text-white/80 px-3 py-1 rounded-full text-sm">
-                                                {feature}
-                                            </span>
-                                        ))}
-                                    </div>
-
                                     <div className="flex flex-col sm:flex-row gap-4">
-                                        <a
-                                            href="#"
-                                            className="bg-white text-gray-900 px-6 py-3 rounded-xl flex items-center gap-3 hover:bg-gray-100 transition-colors"
-                                        >
+                                        <a href="#" className="bg-white text-gray-900 px-6 py-3 rounded-xl flex items-center gap-3 hover:bg-gray-100 transition-colors">
                                             <svg className="w-7 h-7" viewBox="0 0 24 24" fill="currentColor">
                                                 <path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09l.01-.01zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z" />
                                             </svg>
@@ -604,10 +323,7 @@ export default function Home() {
                                                 <div className="text-base font-semibold leading-tight">App Store</div>
                                             </div>
                                         </a>
-                                        <a
-                                            href="#"
-                                            className="bg-white text-gray-900 px-6 py-3 rounded-xl flex items-center gap-3 hover:bg-gray-100 transition-colors"
-                                        >
+                                        <a href="#" className="bg-white text-gray-900 px-6 py-3 rounded-xl flex items-center gap-3 hover:bg-gray-100 transition-colors">
                                             <svg className="w-7 h-7" viewBox="0 0 24 24" fill="currentColor">
                                                 <path d="M3.609 1.814L13.792 12 3.61 22.186a.996.996 0 01-.61-.92V2.734a1 1 0 01.609-.92zm10.89 10.893l2.302 2.302-10.937 6.333 8.635-8.635zm3.199-3.198l2.807 1.626a1 1 0 010 1.73l-2.808 1.626L15.206 12l2.492-2.491zM5.864 2.658L16.802 8.99l-2.303 2.303-8.635-8.635z" />
                                             </svg>
@@ -619,19 +335,10 @@ export default function Home() {
                                     </div>
                                 </div>
 
-                                {/* App Preview */}
                                 <div className="hidden md:flex justify-center">
-                                    <div className="relative">
-                                        <div className="bg-surface rounded-[2.5rem] p-2 shadow-2xl border border-white/10">
-                                            <div className="rounded-[2rem] overflow-hidden w-[220px]">
-                                                <Image
-                                                    src="/images/screenshots/home.png"
-                                                    alt="Zora App Preview"
-                                                    width={220}
-                                                    height={440}
-                                                    className="w-full h-auto"
-                                                />
-                                            </div>
+                                    <div className="bg-surface rounded-[2.5rem] p-2 shadow-2xl border border-white/10">
+                                        <div className="rounded-[2rem] overflow-hidden w-[200px]">
+                                            <Image src="/images/screenshots/home.png" alt="Zora App" width={200} height={400} className="w-full h-auto" />
                                         </div>
                                     </div>
                                 </div>
@@ -641,101 +348,48 @@ export default function Home() {
                 </div>
             </section>
 
-            {/* Stats Section */}
-            <section className="py-16 bg-white">
-                <div className="container mx-auto px-6">
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-                        {[
-                            { value: "100+", label: "Trusted Vendors", icon: Users, desc: "African-owned businesses" },
-                            { value: "5,000+", label: "Products", icon: ShoppingBag, desc: "Authentic African goods" },
-                            { value: "UK Wide", label: "Delivery", icon: Truck, desc: "Fast & reliable" },
-                            { value: "4.8★", label: "App Rating", icon: Star, desc: "Loved by customers" },
-                        ].map((stat) => (
-                            <div key={stat.label} className="text-center">
-                                <div className="w-14 h-14 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                                    <stat.icon className="w-6 h-6 text-primary" />
-                                </div>
-                                <div className="text-3xl font-bold font-display text-gray-900 mb-1">{stat.value}</div>
-                                <div className="font-medium text-gray-900">{stat.label}</div>
-                                <div className="text-sm text-gray-500">{stat.desc}</div>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            </section>
-
             {/* Footer */}
-            <footer className="bg-background-dark text-white py-16" role="contentinfo">
+            <footer className="bg-background-dark text-white py-12" role="contentinfo">
                 <div className="container mx-auto px-6">
-                    <div className="grid md:grid-cols-5 gap-8 mb-12">
-                        <div className="md:col-span-2">
+                    <div className="grid md:grid-cols-4 gap-8 mb-8">
+                        <div>
                             <Link href="/" className="flex items-center gap-2 mb-4">
-                                <ZoraLogo className="w-12 h-12" />
-                                <span className="text-2xl font-bold font-display">Zora</span>
+                                <ZoraLogo className="w-10 h-10" />
+                                <span className="text-xl font-bold font-display">Zora</span>
                             </Link>
-                            <p className="text-gray-400 mb-6 max-w-sm">
-                                A central hub for Africans in the diaspora to access authentic groceries
-                                and community-focused services that reflect African culture.
+                            <p className="text-gray-400 text-sm">
+                                Authentic African groceries and marketplace for the diaspora community.
                             </p>
-                            <div className="flex gap-4">
-                                {["Twitter", "Instagram", "Facebook"].map((social) => (
-                                    <a
-                                        key={social}
-                                        href="#"
-                                        className="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center hover:bg-white/20 transition-colors"
-                                    >
-                                        <span className="sr-only">{social}</span>
-                                        <div className="w-5 h-5 bg-white/50 rounded" />
-                                    </a>
-                                ))}
-                            </div>
                         </div>
                         <div>
                             <h4 className="font-semibold mb-4 text-white">Company</h4>
-                            <ul className="space-y-3">
-                                {["About Us", "Careers", "Press", "Blog"].map((item) => (
-                                    <li key={item}>
-                                        <Link href="#" className="text-gray-400 hover:text-white transition-colors">
-                                            {item}
-                                        </Link>
-                                    </li>
-                                ))}
+                            <ul className="space-y-2 text-sm">
+                                <li><Link href="/about" className="text-gray-400 hover:text-white transition-colors">About Us</Link></li>
+                                <li><Link href="/features" className="text-gray-400 hover:text-white transition-colors">Features</Link></li>
+                                <li><Link href="/vendors" className="text-gray-400 hover:text-white transition-colors">For Vendors</Link></li>
                             </ul>
                         </div>
                         <div>
                             <h4 className="font-semibold mb-4 text-white">Support</h4>
-                            <ul className="space-y-3">
-                                {["Help Centre", "Shipping Info", "Returns", "Contact Us"].map((item) => (
-                                    <li key={item}>
-                                        <Link href="#" className="text-gray-400 hover:text-white transition-colors">
-                                            {item}
-                                        </Link>
-                                    </li>
-                                ))}
+                            <ul className="space-y-2 text-sm">
+                                <li><Link href="/contact" className="text-gray-400 hover:text-white transition-colors">Contact Us</Link></li>
+                                <li><Link href="#" className="text-gray-400 hover:text-white transition-colors">Help Centre</Link></li>
+                                <li><Link href="#" className="text-gray-400 hover:text-white transition-colors">Shipping Info</Link></li>
                             </ul>
                         </div>
                         <div>
                             <h4 className="font-semibold mb-4 text-white">Legal</h4>
-                            <ul className="space-y-3">
-                                {["Privacy Policy", "Terms of Service", "Cookie Policy"].map((item) => (
-                                    <li key={item}>
-                                        <Link href="#" className="text-gray-400 hover:text-white transition-colors">
-                                            {item}
-                                        </Link>
-                                    </li>
-                                ))}
+                            <ul className="space-y-2 text-sm">
+                                <li><Link href="#" className="text-gray-400 hover:text-white transition-colors">Privacy Policy</Link></li>
+                                <li><Link href="#" className="text-gray-400 hover:text-white transition-colors">Terms of Service</Link></li>
                             </ul>
                         </div>
                     </div>
                     <div className="border-t border-white/10 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
-                        <p className="text-gray-400 text-sm">
-                            &copy; {new Date().getFullYear()} Zora African Market. All rights reserved.
-                        </p>
-                        <div className="flex items-center gap-6 text-sm text-gray-400">
-                            <span className="flex items-center gap-2">
-                                <MapPin className="w-4 h-4" /> United Kingdom
-                            </span>
-                        </div>
+                        <p className="text-gray-400 text-sm">&copy; {new Date().getFullYear()} Zora African Market. All rights reserved.</p>
+                        <span className="flex items-center gap-2 text-sm text-gray-400">
+                            <MapPin className="w-4 h-4" /> United Kingdom
+                        </span>
                     </div>
                 </div>
             </footer>

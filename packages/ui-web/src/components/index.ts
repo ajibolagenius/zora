@@ -23,6 +23,8 @@ export {
     DialogFooter,
     DialogTitle,
     DialogDescription,
+    Modal,
+    type ModalProps,
 } from "./Modal";
 
 // Form components

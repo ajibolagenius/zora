@@ -71,7 +71,7 @@ export default function ShopProfilePage() {
                 actions={
                     <Button
                         onClick={handleSave}
-                        loading={isSaving}
+                        isLoading={isSaving}
                         leftIcon={<Save className="w-4 h-4" />}
                     >
                         Save Changes
@@ -273,29 +273,69 @@ export default function ShopProfilePage() {
                                 Operating Hours
                             </h3>
                             <div className="space-y-3">
-                                {days.map((day) => (
-                                    <div key={day} className="flex items-center gap-4">
-                                        <span className="w-24 text-sm font-medium text-gray-700 capitalize">{day}</span>
-                                        <div className="flex items-center gap-2 flex-1">
-                                            <input
-                                                type="time"
-                                                value={formData.openingHours[day as keyof typeof formData.openingHours]?.open || ""}
-                                                className="px-3 py-2 rounded-lg border border-gray-300 text-sm"
-                                                disabled={!formData.openingHours[day as keyof typeof formData.openingHours]?.open}
-                                            />
-                                            <span className="text-gray-400">to</span>
-                                            <input
-                                                type="time"
-                                                value={formData.openingHours[day as keyof typeof formData.openingHours]?.close || ""}
-                                                className="px-3 py-2 rounded-lg border border-gray-300 text-sm"
-                                                disabled={!formData.openingHours[day as keyof typeof formData.openingHours]?.close}
-                                            />
-                                            {!formData.openingHours[day as keyof typeof formData.openingHours]?.open && (
-                                                <Badge variant="default" size="sm">Closed</Badge>
-                                            )}
+                                {days.map((day) => {
+                                    const dayKey = day as keyof typeof formData.openingHours;
+                                    const dayHours = formData.openingHours[dayKey];
+                                    const isClosed = !dayHours?.open;
+
+                                    const handleTimeChange = (field: 'open' | 'close', value: string) => {
+                                        setFormData(prev => ({
+                                            ...prev,
+                                            openingHours: {
+                                                ...prev.openingHours,
+                                                [day]: {
+                                                    ...prev.openingHours[dayKey],
+                                                    [field]: value || null,
+                                                },
+                                            },
+                                        }));
+                                    };
+
+                                    const toggleDay = () => {
+                                        setFormData(prev => ({
+                                            ...prev,
+                                            openingHours: {
+                                                ...prev.openingHours,
+                                                [day]: isClosed
+                                                    ? { open: "09:00", close: "17:00" }
+                                                    : { open: null, close: null },
+                                            },
+                                        }));
+                                    };
+
+                                    return (
+                                        <div key={day} className="flex items-center gap-4">
+                                            <span className="w-24 text-sm font-medium text-gray-700 capitalize">{day}</span>
+                                            <div className="flex items-center gap-2 flex-1">
+                                                <input
+                                                    type="time"
+                                                    value={dayHours?.open || ""}
+                                                    onChange={(e) => handleTimeChange('open', e.target.value)}
+                                                    className="px-3 py-2 rounded-lg border border-gray-300 text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none"
+                                                    disabled={isClosed}
+                                                />
+                                                <span className="text-gray-400">to</span>
+                                                <input
+                                                    type="time"
+                                                    value={dayHours?.close || ""}
+                                                    onChange={(e) => handleTimeChange('close', e.target.value)}
+                                                    className="px-3 py-2 rounded-lg border border-gray-300 text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none"
+                                                    disabled={isClosed}
+                                                />
+                                                <button
+                                                    type="button"
+                                                    onClick={toggleDay}
+                                                    className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${isClosed
+                                                            ? "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                                                            : "bg-green-100 text-green-700 hover:bg-green-200"
+                                                        }`}
+                                                >
+                                                    {isClosed ? "Set Open" : "Open"}
+                                                </button>
+                                            </div>
                                         </div>
-                                    </div>
-                                ))}
+                                    );
+                                })}
                             </div>
                         </Card>
                     </motion.div>

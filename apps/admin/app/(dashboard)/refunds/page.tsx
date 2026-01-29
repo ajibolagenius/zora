@@ -19,7 +19,10 @@ import {
     Card,
     Button,
     Badge,
-    Modal,
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
     Avatar,
     AvatarFallback,
     DataTable,
@@ -123,16 +126,16 @@ export default function RefundsPage() {
 
     const columns = [
         {
+            key: "id",
             header: "Refund ID",
-            accessor: "id" as const,
-            cell: (refund: typeof refunds[0]) => (
+            render: (refund: typeof refunds[0]) => (
                 <span className="font-medium text-gray-900">{refund.id}</span>
             ),
         },
         {
+            key: "customer",
             header: "Customer",
-            accessor: "customer" as const,
-            cell: (refund: typeof refunds[0]) => (
+            render: (refund: typeof refunds[0]) => (
                 <div className="flex items-center gap-3">
                     <Avatar size="sm">
                         <AvatarFallback>
@@ -147,35 +150,35 @@ export default function RefundsPage() {
             ),
         },
         {
+            key: "amount",
             header: "Amount",
-            accessor: "amount" as const,
-            cell: (refund: typeof refunds[0]) => (
+            render: (refund: typeof refunds[0]) => (
                 <span className="font-semibold text-gray-900">{formatCurrency(refund.amount)}</span>
             ),
         },
         {
+            key: "reason",
             header: "Reason",
-            accessor: "reason" as const,
-            cell: (refund: typeof refunds[0]) => (
+            render: (refund: typeof refunds[0]) => (
                 <span className="text-gray-600">{refund.reason}</span>
             ),
         },
         {
+            key: "status",
             header: "Status",
-            accessor: "status" as const,
-            cell: (refund: typeof refunds[0]) => {
+            render: (refund: typeof refunds[0]) => {
                 const config = statusConfig[refund.status as keyof typeof statusConfig];
                 return <Badge variant={config.variant}>{config.label}</Badge>;
             },
         },
         {
+            key: "requestedAt",
             header: "Requested",
-            accessor: "requestedAt" as const,
         },
         {
+            key: "actions",
             header: "Actions",
-            accessor: "id" as const,
-            cell: (refund: typeof refunds[0]) => (
+            render: (refund: typeof refunds[0]) => (
                 <div className="flex items-center gap-2">
                     <Button
                         variant="ghost"
@@ -301,106 +304,108 @@ export default function RefundsPage() {
                             columns={columns}
                             data={filteredRefunds}
                             emptyMessage="No refund requests found"
+                            getRowId={(refund) => refund.id}
                         />
                     </Card>
                 </motion.div>
             </div>
 
             {/* Refund Detail Modal */}
-            <Modal
-                isOpen={isModalOpen}
-                onClose={() => setIsModalOpen(false)}
-                title="Refund Details"
-            >
-                {selectedRefund && (
-                    <div className="space-y-6">
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <p className="text-sm text-gray-500">Refund ID</p>
-                                <p className="font-semibold text-lg">{selectedRefund.id}</p>
-                            </div>
-                            <Badge variant={statusConfig[selectedRefund.status as keyof typeof statusConfig].variant}>
-                                {statusConfig[selectedRefund.status as keyof typeof statusConfig].label}
-                            </Badge>
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-4">
-                            <div>
-                                <p className="text-sm text-gray-500">Customer</p>
-                                <p className="font-medium">{selectedRefund.customer}</p>
-                                <p className="text-sm text-gray-500">{selectedRefund.email}</p>
-                            </div>
-                            <div>
-                                <p className="text-sm text-gray-500">Order ID</p>
-                                <p className="font-medium">{selectedRefund.orderId}</p>
-                            </div>
-                            <div>
-                                <p className="text-sm text-gray-500">Amount</p>
-                                <p className="font-semibold text-lg text-primary">{formatCurrency(selectedRefund.amount)}</p>
-                            </div>
-                            <div>
-                                <p className="text-sm text-gray-500">Payment Method</p>
-                                <p className="font-medium capitalize">{selectedRefund.paymentMethod}</p>
-                            </div>
-                        </div>
-
-                        <div>
-                            <p className="text-sm text-gray-500 mb-2">Reason</p>
-                            <p className="text-gray-700 bg-gray-50 p-3 rounded-lg">{selectedRefund.reason}</p>
-                        </div>
-
-                        <div>
-                            <p className="text-sm text-gray-500 mb-2">Items</p>
-                            <ul className="bg-gray-50 p-3 rounded-lg space-y-1">
-                                {selectedRefund.items.map((item, index) => (
-                                    <li key={index} className="text-gray-700">{item}</li>
-                                ))}
-                            </ul>
-                        </div>
-
-                        {selectedRefund.status === "requested" && (
-                            <>
+            <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Refund Details</DialogTitle>
+                    </DialogHeader>
+                    {selectedRefund && (
+                        <div className="space-y-6">
+                            <div className="flex items-center justify-between">
                                 <div>
-                                    <p className="text-sm text-gray-500 mb-3">Refund to</p>
-                                    <div className="grid grid-cols-2 gap-3">
-                                        <button
-                                            onClick={() => setRefundType("original")}
-                                            className={`p-4 rounded-xl border-2 transition-colors ${refundType === "original"
-                                                    ? "border-primary bg-primary/5"
-                                                    : "border-gray-200 hover:border-gray-300"
-                                                }`}
-                                        >
-                                            <CreditCard className={`w-6 h-6 mx-auto mb-2 ${refundType === "original" ? "text-primary" : "text-gray-400"}`} />
-                                            <p className="font-medium">Original Payment</p>
-                                            <p className="text-xs text-gray-500">Refund to {selectedRefund.paymentMethod}</p>
-                                        </button>
-                                        <button
-                                            onClick={() => setRefundType("credit")}
-                                            className={`p-4 rounded-xl border-2 transition-colors ${refundType === "credit"
-                                                    ? "border-primary bg-primary/5"
-                                                    : "border-gray-200 hover:border-gray-300"
-                                                }`}
-                                        >
-                                            <Wallet className={`w-6 h-6 mx-auto mb-2 ${refundType === "credit" ? "text-primary" : "text-gray-400"}`} />
-                                            <p className="font-medium">Store Credit</p>
-                                            <p className="text-xs text-gray-500">Add to customer balance</p>
-                                        </button>
-                                    </div>
+                                    <p className="text-sm text-gray-500">Refund ID</p>
+                                    <p className="font-semibold text-lg">{selectedRefund.id}</p>
                                 </div>
+                                <Badge variant={statusConfig[selectedRefund.status as keyof typeof statusConfig].variant}>
+                                    {statusConfig[selectedRefund.status as keyof typeof statusConfig].label}
+                                </Badge>
+                            </div>
 
-                                <div className="flex gap-3 pt-4 border-t">
-                                    <Button className="flex-1" leftIcon={<CheckCircle className="w-4 h-4" />}>
-                                        Approve Refund
-                                    </Button>
-                                    <Button variant="outline" className="flex-1 text-red-600 border-red-300" leftIcon={<XCircle className="w-4 h-4" />}>
-                                        Reject
-                                    </Button>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <p className="text-sm text-gray-500">Customer</p>
+                                    <p className="font-medium">{selectedRefund.customer}</p>
+                                    <p className="text-sm text-gray-500">{selectedRefund.email}</p>
                                 </div>
-                            </>
-                        )}
-                    </div>
-                )}
-            </Modal>
+                                <div>
+                                    <p className="text-sm text-gray-500">Order ID</p>
+                                    <p className="font-medium">{selectedRefund.orderId}</p>
+                                </div>
+                                <div>
+                                    <p className="text-sm text-gray-500">Amount</p>
+                                    <p className="font-semibold text-lg text-primary">{formatCurrency(selectedRefund.amount)}</p>
+                                </div>
+                                <div>
+                                    <p className="text-sm text-gray-500">Payment Method</p>
+                                    <p className="font-medium capitalize">{selectedRefund.paymentMethod}</p>
+                                </div>
+                            </div>
+
+                            <div>
+                                <p className="text-sm text-gray-500 mb-2">Reason</p>
+                                <p className="text-gray-700 bg-gray-50 p-3 rounded-lg">{selectedRefund.reason}</p>
+                            </div>
+
+                            <div>
+                                <p className="text-sm text-gray-500 mb-2">Items</p>
+                                <ul className="bg-gray-50 p-3 rounded-lg space-y-1">
+                                    {selectedRefund.items.map((item, index) => (
+                                        <li key={index} className="text-gray-700">{item}</li>
+                                    ))}
+                                </ul>
+                            </div>
+
+                            {selectedRefund.status === "requested" && (
+                                <>
+                                    <div>
+                                        <p className="text-sm text-gray-500 mb-3">Refund to</p>
+                                        <div className="grid grid-cols-2 gap-3">
+                                            <button
+                                                onClick={() => setRefundType("original")}
+                                                className={`p-4 rounded-xl border-2 transition-colors ${refundType === "original"
+                                                        ? "border-primary bg-primary/5"
+                                                        : "border-gray-200 hover:border-gray-300"
+                                                    }`}
+                                            >
+                                                <CreditCard className={`w-6 h-6 mx-auto mb-2 ${refundType === "original" ? "text-primary" : "text-gray-400"}`} />
+                                                <p className="font-medium">Original Payment</p>
+                                                <p className="text-xs text-gray-500">Refund to {selectedRefund.paymentMethod}</p>
+                                            </button>
+                                            <button
+                                                onClick={() => setRefundType("credit")}
+                                                className={`p-4 rounded-xl border-2 transition-colors ${refundType === "credit"
+                                                        ? "border-primary bg-primary/5"
+                                                        : "border-gray-200 hover:border-gray-300"
+                                                    }`}
+                                            >
+                                                <Wallet className={`w-6 h-6 mx-auto mb-2 ${refundType === "credit" ? "text-primary" : "text-gray-400"}`} />
+                                                <p className="font-medium">Store Credit</p>
+                                                <p className="text-xs text-gray-500">Add to customer balance</p>
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex gap-3 pt-4 border-t">
+                                        <Button className="flex-1" leftIcon={<CheckCircle className="w-4 h-4" />}>
+                                            Approve Refund
+                                        </Button>
+                                        <Button variant="outline" className="flex-1 text-red-600 border-red-300" leftIcon={<XCircle className="w-4 h-4" />}>
+                                            Reject
+                                        </Button>
+                                    </div>
+                                </>
+                            )}
+                        </div>
+                    )}
+                </DialogContent>
+            </Dialog>
         </>
     );
 }

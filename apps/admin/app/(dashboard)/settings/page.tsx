@@ -11,7 +11,7 @@ import {
     Shield,
     Palette,
     Save,
-    Toggle,
+    ToggleLeft,
     Percent,
     Mail,
     Clock,
@@ -60,7 +60,7 @@ export default function SettingsPage() {
         { id: "general", label: "General", icon: Globe },
         { id: "commission", label: "Commission", icon: Percent },
         { id: "delivery", label: "Delivery", icon: Truck },
-        { id: "features", label: "Features", icon: Toggle },
+        { id: "features", label: "Features", icon: ToggleLeft },
         { id: "notifications", label: "Notifications", icon: Bell },
     ];
 
@@ -72,7 +72,7 @@ export default function SettingsPage() {
                 actions={
                     <Button
                         onClick={handleSave}
-                        loading={isSaving}
+                        isLoading={isSaving}
                         leftIcon={<Save className="w-4 h-4" />}
                     >
                         Save Changes

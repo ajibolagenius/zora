@@ -9,7 +9,12 @@
     "./typescript/base": "./typescript/base.json",
     "./typescript/nextjs": "./typescript/nextjs.json",
     "./typescript/react-native": "./typescript/react-native.json",
-    "./tailwind/web": "./tailwind/web.js"
+    "./tailwind/web": "./tailwind/web.js",
+    "./domains": {
+      "types": "./domains.d.ts",
+      "import": "./domains.ts",
+      "require": "./domains.ts"
+    }
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^8.0.0",

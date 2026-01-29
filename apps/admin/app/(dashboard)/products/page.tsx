@@ -21,7 +21,10 @@ import {
     Badge,
     Input,
     DataTable,
-    Modal,
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
     formatCurrency,
 } from "@zora/ui-web";
 
@@ -65,9 +68,9 @@ export default function ProductModerationPage() {
 
     const columns = [
         {
+            key: "name",
             header: "Product",
-            accessor: "name" as const,
-            cell: (product: typeof products[0]) => (
+            render: (product: typeof products[0]) => (
                 <div className="flex items-center gap-3">
                     <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center">
                         <Package className="w-5 h-5 text-gray-400" />
@@ -80,9 +83,9 @@ export default function ProductModerationPage() {
             ),
         },
         {
+            key: "vendor",
             header: "Vendor",
-            accessor: "vendor" as const,
-            cell: (product: typeof products[0]) => (
+            render: (product: typeof products[0]) => (
                 <div className="flex items-center gap-2">
                     <Store className="w-4 h-4 text-gray-400" />
                     <span className="text-gray-700">{product.vendor}</span>
@@ -90,28 +93,28 @@ export default function ProductModerationPage() {
             ),
         },
         {
+            key: "price",
             header: "Price",
-            accessor: "price" as const,
-            cell: (product: typeof products[0]) => (
+            render: (product: typeof products[0]) => (
                 <span className="font-medium text-gray-900">{formatCurrency(product.price)}</span>
             ),
         },
         {
+            key: "status",
             header: "Status",
-            accessor: "status" as const,
-            cell: (product: typeof products[0]) => {
+            render: (product: typeof products[0]) => {
                 const config = statusConfig[product.status as keyof typeof statusConfig];
                 return <Badge variant={config.variant}>{config.label}</Badge>;
             },
         },
         {
+            key: "createdAt",
             header: "Submitted",
-            accessor: "createdAt" as const,
         },
         {
+            key: "actions",
             header: "Actions",
-            accessor: "id" as const,
-            cell: (product: typeof products[0]) => (
+            render: (product: typeof products[0]) => (
                 <div className="flex items-center gap-2">
                     <Button
                         variant="ghost"
@@ -236,60 +239,62 @@ export default function ProductModerationPage() {
                             columns={columns}
                             data={filteredProducts}
                             emptyMessage="No products found"
+                            getRowId={(product) => product.id}
                         />
                     </Card>
                 </motion.div>
             </div>
 
             {/* Product Detail Modal */}
-            <Modal
-                isOpen={isModalOpen}
-                onClose={() => setIsModalOpen(false)}
-                title="Product Details"
-            >
-                {selectedProduct && (
-                    <div className="space-y-6">
-                        <div className="flex items-start gap-4">
-                            <div className="w-24 h-24 bg-gray-100 rounded-xl flex items-center justify-center">
-                                <Package className="w-10 h-10 text-gray-400" />
+            <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Product Details</DialogTitle>
+                    </DialogHeader>
+                    {selectedProduct && (
+                        <div className="space-y-6">
+                            <div className="flex items-start gap-4">
+                                <div className="w-24 h-24 bg-gray-100 rounded-xl flex items-center justify-center">
+                                    <Package className="w-10 h-10 text-gray-400" />
+                                </div>
+                                <div>
+                                    <h3 className="text-lg font-semibold text-gray-900">{selectedProduct.name}</h3>
+                                    <p className="text-gray-500">{selectedProduct.vendor}</p>
+                                    <Badge variant={statusConfig[selectedProduct.status as keyof typeof statusConfig].variant} className="mt-2">
+                                        {statusConfig[selectedProduct.status as keyof typeof statusConfig].label}
+                                    </Badge>
+                                </div>
                             </div>
-                            <div>
-                                <h3 className="text-lg font-semibold text-gray-900">{selectedProduct.name}</h3>
-                                <p className="text-gray-500">{selectedProduct.vendor}</p>
-                                <Badge variant={statusConfig[selectedProduct.status as keyof typeof statusConfig].variant} className="mt-2">
-                                    {statusConfig[selectedProduct.status as keyof typeof statusConfig].label}
-                                </Badge>
-                            </div>
-                        </div>
 
-                        <div className="grid grid-cols-2 gap-4">
-                            <div>
-                                <p className="text-sm text-gray-500">Category</p>
-                                <p className="font-medium">{selectedProduct.category}</p>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <p className="text-sm text-gray-500">Category</p>
+                                    <p className="font-medium">{selectedProduct.category}</p>
+                                </div>
+                                <div>
+                                    <p className="text-sm text-gray-500">Price</p>
+                                    <p className="font-medium">{formatCurrency(selectedProduct.price)}</p>
+                                </div>
+                                <div>
+                                    <p className="text-sm text-gray-500">Submitted</p>
+                                    <p className="font-medium">{selectedProduct.createdAt}</p>
+                                </div>
                             </div>
-                            <div>
-                                <p className="text-sm text-gray-500">Price</p>
-                                <p className="font-medium">{formatCurrency(selectedProduct.price)}</p>
-                            </div>
-                            <div>
-                                <p className="text-sm text-gray-500">Submitted</p>
-                                <p className="font-medium">{selectedProduct.createdAt}</p>
-                            </div>
-                        </div>
 
-                        {selectedProduct.status === "pending" && (
-                            <div className="flex gap-3 pt-4 border-t">
-                                <Button className="flex-1" leftIcon={<CheckCircle className="w-4 h-4" />}>
-                                    Approve
-                                </Button>
-                                <Button variant="outline" className="flex-1 text-red-600 border-red-300" leftIcon={<XCircle className="w-4 h-4" />}>
-                                    Reject
-                                </Button>
-                            </div>
-                        )}
-                    </div>
-                )}
-            </Modal>
+                            {selectedProduct.status === "pending" && (
+                                <div className="flex gap-3 pt-4 border-t">
+                                    <Button className="flex-1" leftIcon={<CheckCircle className="w-4 h-4" />}>
+                                        Approve
+                                    </Button>
+                                    <Button variant="outline" className="flex-1 text-red-600 border-red-300" leftIcon={<XCircle className="w-4 h-4" />}>
+                                        Reject
+                                    </Button>
+                                </div>
+                            )}
+                        </div>
+                    )}
+                </DialogContent>
+            </Dialog>
         </>
     );
 }
