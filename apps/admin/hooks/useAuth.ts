@@ -114,24 +114,29 @@ export function useAuth(): UseAuthReturn {
         initAuth();
 
         // Listen for auth changes
-        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+        // IMPORTANT: Async calls inside onAuthStateChange can cause deadlocks in Supabase.js
+        // We defer the profile fetch using setTimeout to run outside the handler
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
             console.log('[useAuth] Auth state changed:', event);
 
             if (session?.user) {
-                const profile = await fetchAdminProfile(session.user.id);
-                const isAdmin = profile?.role === 'admin' || profile?.role === 'super_admin';
-
-                setState({
-                    user: session.user,
-                    profile,
-                    isLoading: false,
-                    isAuthenticated: true,
-                    isAdmin,
-                    error: null,
-                });
-
-                // Set cookie for middleware
+                // Set cookie immediately (synchronous)
                 document.cookie = `admin_auth_token=${session.access_token}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax`;
+
+                // Defer async profile fetch to avoid deadlock
+                setTimeout(async () => {
+                    const profile = await fetchAdminProfile(session.user.id);
+                    const isAdmin = profile?.role === 'admin' || profile?.role === 'super_admin';
+
+                    setState({
+                        user: session.user,
+                        profile,
+                        isLoading: false,
+                        isAuthenticated: true,
+                        isAdmin,
+                        error: null,
+                    });
+                }, 0);
             } else {
                 setState({
                     user: null,

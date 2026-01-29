@@ -108,21 +108,26 @@ export function useAuth(): UseAuthReturn {
         initAuth();
 
         // Listen for auth changes
-        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+        // IMPORTANT: Async calls inside onAuthStateChange can cause deadlocks in Supabase.js
+        // We defer the profile fetch using setTimeout to run outside the handler
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
             console.log('[useAuth] Auth state changed:', event);
 
             if (session?.user) {
-                const vendor = await fetchVendorProfile(session.user.id);
-                setState({
-                    user: session.user,
-                    vendor,
-                    isLoading: false,
-                    isAuthenticated: true,
-                    error: null,
-                });
-
-                // Set cookie for middleware
+                // Set cookie immediately (synchronous)
                 document.cookie = `vendor_auth_token=${session.access_token}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax`;
+
+                // Defer async profile fetch to avoid deadlock
+                setTimeout(async () => {
+                    const vendor = await fetchVendorProfile(session.user.id);
+                    setState({
+                        user: session.user,
+                        vendor,
+                        isLoading: false,
+                        isAuthenticated: true,
+                        error: null,
+                    });
+                }, 0);
             } else {
                 setState({
                     user: null,
