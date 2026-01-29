@@ -39,10 +39,7 @@ const config: Config = {
                     800: "#92400E",
                     900: "#451A03",
                 },
-                background: {
-                    DEFAULT: "#221710",
-                    light: "#F8F7F5",
-                },
+                background: "hsl(var(--background))",
                 surface: {
                     DEFAULT: "#342418",
                     light: "#FFFFFF",

@@ -9,7 +9,7 @@
     @apply border-slate-200;
   }
   body {
-    @apply bg-background text-slate-900;
+    @apply bg-slate-50 text-slate-900;
     font-family: 'Poppins', sans-serif;
   }
   h1, h2, h3, h4, h5, h6 {
