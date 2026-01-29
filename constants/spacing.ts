@@ -1,4 +1,5 @@
 // Zora African Market Design Tokens - Spacing
+import { Platform } from 'react-native';
 
 // Spacing Scale
 export const Spacing = {
@@ -25,36 +26,57 @@ export const BorderRadius = {
     full: 9999,
 };
 
-// Shadows
+// Shadows - Cross-platform compatible
+// Uses boxShadow for web (suppresses deprecation warning) and native shadow props for iOS/Android
 export const Shadows = {
-    sm: {
-        shadowColor: '#221710',
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.05,
-        shadowRadius: 2,
-        elevation: 1,
-    },
-    md: {
-        shadowColor: '#221710',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.08,
-        shadowRadius: 4,
-        elevation: 2,
-    },
-    lg: {
-        shadowColor: '#221710',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.10,
-        shadowRadius: 8,
-        elevation: 4,
-    },
-    xl: {
-        shadowColor: '#221710',
-        shadowOffset: { width: 0, height: 8 },
-        shadowOpacity: 0.12,
-        shadowRadius: 16,
-        elevation: 8,
-    },
+    sm: Platform.select({
+        web: {
+            boxShadow: '0px 1px 2px rgba(34, 23, 16, 0.05)',
+        },
+        default: {
+            shadowColor: '#221710',
+            shadowOffset: { width: 0, height: 1 },
+            shadowOpacity: 0.05,
+            shadowRadius: 2,
+            elevation: 1,
+        },
+    }),
+    md: Platform.select({
+        web: {
+            boxShadow: '0px 2px 4px rgba(34, 23, 16, 0.08)',
+        },
+        default: {
+            shadowColor: '#221710',
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.08,
+            shadowRadius: 4,
+            elevation: 2,
+        },
+    }),
+    lg: Platform.select({
+        web: {
+            boxShadow: '0px 4px 8px rgba(34, 23, 16, 0.10)',
+        },
+        default: {
+            shadowColor: '#221710',
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.10,
+            shadowRadius: 8,
+            elevation: 4,
+        },
+    }),
+    xl: Platform.select({
+        web: {
+            boxShadow: '0px 8px 16px rgba(34, 23, 16, 0.12)',
+        },
+        default: {
+            shadowColor: '#221710',
+            shadowOffset: { width: 0, height: 8 },
+            shadowOpacity: 0.12,
+            shadowRadius: 16,
+            elevation: 8,
+        },
+    }),
 };
 
 // Icon Sizes
