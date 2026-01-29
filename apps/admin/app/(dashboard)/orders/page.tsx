@@ -298,7 +298,7 @@ export default function OrdersPage() {
                         </div>
                         {/* Actions Row */}
                         <div className="flex justify-end">
-                            <Button variant="outline" size="sm" leftIcon={<Download className="w-4 h-4" />} className="w-full sm:w-auto">
+                            <Button variant="outline" size="sm" leftIcon={<Download className="w-4 h-4" />}>
                                 Export Orders
                             </Button>
                         </div>
