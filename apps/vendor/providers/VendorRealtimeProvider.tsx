@@ -98,8 +98,10 @@ export function VendorRealtimeProvider({
         setNewOrdersCount((prev) => prev + 1);
         setLastOrder(order);
 
-        // Invalidate orders query
-        queryClient.invalidateQueries({ queryKey: ['orders', 'vendor', vendorId] });
+        // Invalidate orders query - aligned with vendorQueryKeys in useVendorData.ts
+        queryClient.invalidateQueries({ queryKey: ['vendor', 'orders', vendorId] });
+        queryClient.invalidateQueries({ queryKey: ['vendor', 'recentOrders', vendorId] });
+        queryClient.invalidateQueries({ queryKey: ['vendor', 'stats', vendorId] });
 
         // Call external handler
         onNewOrder?.(order);
@@ -122,18 +124,19 @@ export function VendorRealtimeProvider({
     const handleOrderUpdate = useCallback(({ old: oldOrder, new: newOrder }: { old: Order; new: Order }) => {
         console.log('[VendorRealtime] Order updated:', newOrder.id, oldOrder.status, '->', newOrder.status);
 
-        // Invalidate specific order and orders list
-        queryClient.invalidateQueries({ queryKey: ['order', newOrder.id] });
-        queryClient.invalidateQueries({ queryKey: ['orders', 'vendor', vendorId] });
+        // Invalidate specific order and orders list - aligned with vendorQueryKeys
+        queryClient.invalidateQueries({ queryKey: ['vendor', 'order', newOrder.id] });
+        queryClient.invalidateQueries({ queryKey: ['vendor', 'orders', vendorId] });
+        queryClient.invalidateQueries({ queryKey: ['vendor', 'recentOrders', vendorId] });
     }, [vendorId, queryClient]);
 
     // Handle product update
     const handleProductUpdate = useCallback(({ new: product }: { old: Product; new: Product }) => {
         console.log('[VendorRealtime] Product updated:', product.id);
 
-        // Invalidate products queries
-        queryClient.invalidateQueries({ queryKey: ['products', 'vendor', vendorId] });
-        queryClient.invalidateQueries({ queryKey: ['product', product.id] });
+        // Invalidate products queries - aligned with vendorQueryKeys
+        queryClient.invalidateQueries({ queryKey: ['vendor', 'products', vendorId] });
+        queryClient.invalidateQueries({ queryKey: ['vendor', 'product', product.id] });
 
         onProductUpdate?.(product);
     }, [vendorId, queryClient, onProductUpdate]);
@@ -164,7 +167,8 @@ export function VendorRealtimeProvider({
             onUpdate: handleProductUpdate,
             onDelete: (product) => {
                 console.log('[VendorRealtime] Product deleted:', product.id);
-                queryClient.invalidateQueries({ queryKey: ['products', 'vendor', vendorId] });
+                queryClient.invalidateQueries({ queryKey: ['vendor', 'products', vendorId] });
+                queryClient.invalidateQueries({ queryKey: ['vendor', 'stats', vendorId] });
             },
         });
 
@@ -173,7 +177,7 @@ export function VendorRealtimeProvider({
             table: 'notifications',
             filter: `user_id=eq.${vendorId}`,
             onInsert: () => {
-                queryClient.invalidateQueries({ queryKey: ['notifications'] });
+                queryClient.invalidateQueries({ queryKey: ['vendor', 'notifications'] });
             },
         });
 

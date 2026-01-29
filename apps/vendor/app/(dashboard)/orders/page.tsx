@@ -374,13 +374,13 @@ export default function OrdersPage() {
                                         {selectedOrder.customer?.email && (
                                             <div className="flex items-center gap-2 text-sm text-gray-600">
                                                 <Mail className="w-4 h-4" />
-                                                {selectedOrder.user.email}
+                                                {selectedOrder.customer.email}
                                             </div>
                                         )}
                                         {selectedOrder.customer?.phone && (
                                             <div className="flex items-center gap-2 text-sm text-gray-600">
                                                 <Phone className="w-4 h-4" />
-                                                {selectedOrder.user.phone}
+                                                {selectedOrder.customer.phone}
                                             </div>
                                         )}
                                     </Card>

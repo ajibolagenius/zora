@@ -177,8 +177,9 @@ export function AdminRealtimeProvider({
             unreadEmailThreads: prev.unreadEmailThreads + 1,
         }));
 
-        // Invalidate queries
-        queryClient.invalidateQueries({ queryKey: ['email-threads'] });
+        // Invalidate queries - aligned with expected query keys
+        queryClient.invalidateQueries({ queryKey: ['admin', 'emailThreads'] });
+        queryClient.invalidateQueries({ queryKey: ['admin', 'pendingItems'] });
 
         onNewEmailThread?.(thread);
     }, [queryClient, onNewEmailThread]);
@@ -187,9 +188,9 @@ export function AdminRealtimeProvider({
     const handleEmailThreadUpdate = useCallback(({ new: thread }: { old: EmailThread; new: EmailThread }) => {
         console.log('[AdminRealtime] Email thread updated:', thread.id);
 
-        // Invalidate queries
-        queryClient.invalidateQueries({ queryKey: ['email-threads'] });
-        queryClient.invalidateQueries({ queryKey: ['email-thread', thread.id] });
+        // Invalidate queries - aligned with expected query keys
+        queryClient.invalidateQueries({ queryKey: ['admin', 'emailThreads'] });
+        queryClient.invalidateQueries({ queryKey: ['admin', 'emailThread', thread.id] });
     }, [queryClient]);
 
     // Subscribe to realtime updates
@@ -228,7 +229,7 @@ export function AdminRealtimeProvider({
         const emailMessagesSub = RealtimeManager.subscribe({
             table: 'email_messages',
             onInsert: () => {
-                queryClient.invalidateQueries({ queryKey: ['email-messages'] });
+                queryClient.invalidateQueries({ queryKey: ['admin', 'emailMessages'] });
             },
         });
 
@@ -237,7 +238,7 @@ export function AdminRealtimeProvider({
             table: 'notifications',
             filter: `user_id=eq.${adminId}`,
             onInsert: () => {
-                queryClient.invalidateQueries({ queryKey: ['notifications'] });
+                queryClient.invalidateQueries({ queryKey: ['admin', 'notifications'] });
             },
         });
 
