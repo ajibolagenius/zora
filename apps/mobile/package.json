@@ -4,15 +4,17 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "start": "dotenv -e ../../.env -- expo start",
-    "dev": "dotenv -e ../../.env -- expo start",
-    "start-clear": "dotenv -e ../../.env -- expo start --clear",
-    "android": "dotenv -e ../../.env -- expo start --android",
-    "ios": "dotenv -e ../../.env -- expo start --ios",
-    "web": "dotenv -e ../../.env -- expo start --web",
+    "prestart": "node scripts/sync-env.js",
+    "start": "expo start",
+    "dev": "npm run prestart && expo start",
+    "start-clear": "npm run prestart && expo start --clear",
+    "android": "npm run prestart && expo start --android",
+    "ios": "npm run prestart && expo start --ios",
+    "web": "npm run prestart && expo start --web",
     "lint": "expo lint",
     "type-check": "tsc --noEmit",
-    "clean": "rm -rf node_modules .expo"
+    "clean": "rm -rf node_modules .expo .env",
+    "env:link": "node scripts/sync-env.js"
   },
   "dependencies": {
     "@expo-google-fonts/montserrat": "^0.4.2",
