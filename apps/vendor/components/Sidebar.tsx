@@ -17,7 +17,7 @@ import {
     X,
 } from "lucide-react";
 import { cn } from "@zora/ui-web";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
 const navItems = [
     { name: "Dashboard", icon: LayoutDashboard, href: "/" },
@@ -37,11 +37,15 @@ interface SidebarProps {
 export function Sidebar({ mobileOpen = false, onMobileClose }: SidebarProps) {
     const pathname = usePathname();
     const [collapsed, setCollapsed] = useState(false);
+    const prevPathnameRef = useRef(pathname);
 
-    // Close mobile menu when route changes
+    // Close mobile menu when route changes (not when mobileOpen changes)
     useEffect(() => {
-        if (mobileOpen && onMobileClose) {
-            onMobileClose();
+        if (prevPathnameRef.current !== pathname) {
+            prevPathnameRef.current = pathname;
+            if (mobileOpen && onMobileClose) {
+                onMobileClose();
+            }
         }
     }, [pathname, mobileOpen, onMobileClose]);
 

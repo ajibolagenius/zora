@@ -68,10 +68,10 @@ function SkeletonTable({ rows = 5 }: { rows?: number }) {
     );
 }
 
-function SkeletonStats() {
+function SkeletonStats({ count = 4 }: { count?: number }) {
     return (
-        <div className="grid grid-cols-4 gap-6">
-            {[1, 2, 3, 4].map((i) => (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            {Array.from({ length: count }).map((_, i) => (
                 <div key={i} className="space-y-3 rounded-2xl border border-gray-100 bg-white p-6">
                     <div className="flex items-center justify-between">
                         <Skeleton className="h-12 w-12 rounded-xl" />
