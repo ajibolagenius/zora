@@ -65,9 +65,11 @@ zora/
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/ajibolagenius/zora.git
+git clone https://github.com/<your-username>/zora.git
 cd zora
 ```
+
+> **Note:** Replace `<your-username>` with your GitHub username if you forked the repo, or use the original repository URL if cloning directly.
 
 2. Install dependencies:
 ```bash
