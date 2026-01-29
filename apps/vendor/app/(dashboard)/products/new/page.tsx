@@ -113,9 +113,9 @@ export default function NewProductPage() {
                     Back to Products
                 </Link>
 
-                <div className="grid grid-cols-3 gap-8">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
                     {/* Main Form */}
-                    <div className="col-span-2 space-y-6">
+                    <div className="lg:col-span-2 space-y-6">
                         {/* Basic Info */}
                         <motion.div
                             initial={{ opacity: 0, y: 20 }}
@@ -171,7 +171,7 @@ export default function NewProductPage() {
                                     </CardTitle>
                                 </CardHeader>
                                 <CardContent>
-                                    <div className="grid grid-cols-4 gap-4">
+                                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
                                         {images.map((img, index) => (
                                             <div
                                                 key={index}
@@ -216,7 +216,7 @@ export default function NewProductPage() {
                                     </CardTitle>
                                 </CardHeader>
                                 <CardContent>
-                                    <div className="grid grid-cols-3 gap-4">
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                                         <Input
                                             label="Price"
                                             placeholder="0.00"

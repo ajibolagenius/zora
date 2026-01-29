@@ -50,7 +50,7 @@ export function Sidebar({ mobileOpen = false, onMobileClose }: SidebarProps) {
         if (mobileOpen && onMobileClose) {
             onMobileClose();
         }
-    }, [pathname]);
+    }, [pathname, mobileOpen, onMobileClose]);
 
     const sidebarContent = (
         <>
@@ -63,25 +63,28 @@ export function Sidebar({ mobileOpen = false, onMobileClose }: SidebarProps) {
                 {/* Desktop collapse button */}
                 <button
                     onClick={() => setCollapsed(!collapsed)}
-                    className="p-2 rounded-lg hover:bg-white/10 transition-colors hidden lg:block"
+                    className="p-2 rounded-lg hover:bg-white/10 transition-colors hidden lg:block focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                    aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+                    aria-expanded={!collapsed}
                 >
                     {collapsed ? (
-                        <Menu className="w-5 h-5" />
+                        <Menu className="w-5 h-5" aria-hidden="true" />
                     ) : (
-                        <ChevronLeft className="w-5 h-5" />
+                        <ChevronLeft className="w-5 h-5" aria-hidden="true" />
                     )}
                 </button>
                 {/* Mobile close button */}
                 <button
                     onClick={onMobileClose}
-                    className="p-2 rounded-lg hover:bg-white/10 transition-colors lg:hidden"
+                    className="p-2 rounded-lg hover:bg-white/10 transition-colors lg:hidden focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                    aria-label="Close navigation menu"
                 >
-                    <X className="w-5 h-5" />
+                    <X className="w-5 h-5" aria-hidden="true" />
                 </button>
             </div>
 
             {/* Navigation */}
-            <nav className="flex-1 px-3 py-4 overflow-y-auto">
+            <nav className="flex-1 px-3 py-4 overflow-y-auto" role="navigation" aria-label="Main navigation">
                 {navItems.map((item) => {
                     const isActive = pathname === item.href ||
                         (item.href !== "/" && pathname.startsWith(item.href));
@@ -91,8 +94,9 @@ export function Sidebar({ mobileOpen = false, onMobileClose }: SidebarProps) {
                             key={item.name}
                             href={item.href}
                             onClick={onMobileClose}
+                            aria-current={isActive ? "page" : undefined}
                             className={cn(
-                                "flex items-center gap-3 px-4 py-3 rounded-xl mb-1 transition-all duration-200 group relative",
+                                "flex items-center gap-3 px-4 py-3 rounded-xl mb-1 transition-all duration-200 group relative focus:outline-none focus-visible:ring-2 focus-visible:ring-primary",
                                 isActive
                                     ? "bg-primary text-white shadow-lg shadow-primary/20"
                                     : "text-slate-400 hover:bg-white/10 hover:text-white"
@@ -126,17 +130,27 @@ export function Sidebar({ mobileOpen = false, onMobileClose }: SidebarProps) {
                     <div className="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center">
                         <Shield className="w-4 h-4 text-primary" />
                     </div>
-                    <div className={cn(collapsed && "hidden lg:hidden", "lg:block")}>
+                    <motion.div
+                        initial={false}
+                        animate={{
+                            opacity: collapsed ? 0 : 1,
+                            width: collapsed ? 0 : "auto"
+                        }}
+                        className="whitespace-nowrap overflow-hidden"
+                    >
                         <p className="text-sm font-medium text-white">Super Admin</p>
                         <p className="text-xs text-slate-400">Full Access</p>
-                    </div>
+                    </motion.div>
                 </div>
             </div>
 
             {/* Footer */}
             <div className="p-3 border-t border-white/10">
-                <button className="flex items-center gap-3 px-4 py-3 w-full text-slate-400 hover:text-white hover:bg-white/10 rounded-xl transition-colors">
-                    <LogOut className="w-5 h-5 flex-shrink-0" />
+                <button
+                    className="flex items-center gap-3 px-4 py-3 w-full text-slate-400 hover:text-white hover:bg-white/10 rounded-xl transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                    aria-label="Log out of your account"
+                >
+                    <LogOut className="w-5 h-5 flex-shrink-0" aria-hidden="true" />
                     <motion.span
                         initial={false}
                         animate={{

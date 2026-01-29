@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import {
@@ -25,6 +26,8 @@ import {
     staggerContainer,
     staggerItem,
     formatCurrency,
+    SkeletonStats,
+    SkeletonCard,
 } from "@zora/ui-web";
 
 // Mock data
@@ -50,31 +53,43 @@ const statusColors = {
 } as const;
 
 export default function VendorDashboard() {
+    const [isLoading, setIsLoading] = useState(true);
+
+    // Simulate loading state
+    useEffect(() => {
+        const timer = setTimeout(() => setIsLoading(false), 1000);
+        return () => clearTimeout(timer);
+    }, []);
+
     return (
         <>
             <Header title="Dashboard" description="Welcome back, African Spice House" />
 
             <div className="p-4 sm:p-6 lg:p-8">
                 {/* Stats Grid */}
-                <motion.div
-                    variants={staggerContainer}
-                    initial="initial"
-                    animate="animate"
-                    className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8"
-                >
-                    {stats.map((stat, index) => (
-                        <motion.div key={stat.title} variants={staggerItem}>
-                            <StatsCard
-                                title={stat.title}
-                                value={stat.value}
-                                change={stat.change}
-                                icon={stat.icon}
-                                iconColor={stat.iconColor}
-                                iconBgColor={stat.iconBgColor}
-                            />
-                        </motion.div>
-                    ))}
-                </motion.div>
+                {isLoading ? (
+                    <SkeletonStats />
+                ) : (
+                    <motion.div
+                        variants={staggerContainer}
+                        initial="initial"
+                        animate="animate"
+                        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8"
+                    >
+                        {stats.map((stat, index) => (
+                            <motion.div key={stat.title} variants={staggerItem}>
+                                <StatsCard
+                                    title={stat.title}
+                                    value={stat.value}
+                                    change={stat.change}
+                                    icon={stat.icon}
+                                    iconColor={stat.iconColor}
+                                    iconBgColor={stat.iconBgColor}
+                                />
+                            </motion.div>
+                        ))}
+                    </motion.div>
+                )}
 
                 <div className="grid lg:grid-cols-3 gap-8">
                     {/* Recent Orders */}

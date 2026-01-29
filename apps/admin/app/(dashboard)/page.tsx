@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import {
@@ -32,6 +33,8 @@ import {
     staggerItem,
     formatCurrency,
     formatRelativeTime,
+    SkeletonStats,
+    SkeletonCard,
 } from "@zora/ui-web";
 
 // Mock data
@@ -73,24 +76,36 @@ const vendorApplications = [
 ];
 
 export default function AdminDashboard() {
+    const [isLoading, setIsLoading] = useState(true);
+
+    // Simulate loading state
+    useEffect(() => {
+        const timer = setTimeout(() => setIsLoading(false), 1000);
+        return () => clearTimeout(timer);
+    }, []);
+
     return (
         <>
             <Header title="Admin Dashboard" description="Platform overview and management" />
 
             <div className="p-4 sm:p-6 lg:p-8">
                 {/* Stats Grid */}
-                <motion.div
-                    variants={staggerContainer}
-                    initial="initial"
-                    animate="animate"
-                    className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8"
-                >
-                    {stats.map((stat) => (
-                        <motion.div key={stat.title} variants={staggerItem}>
-                            <StatsCard {...stat} />
-                        </motion.div>
-                    ))}
-                </motion.div>
+                {isLoading ? (
+                    <SkeletonStats />
+                ) : (
+                    <motion.div
+                        variants={staggerContainer}
+                        initial="initial"
+                        animate="animate"
+                        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8"
+                    >
+                        {stats.map((stat) => (
+                            <motion.div key={stat.title} variants={staggerItem}>
+                                <StatsCard {...stat} />
+                            </motion.div>
+                        ))}
+                    </motion.div>
+                )}
 
                 {/* Pending Items */}
                 <motion.div

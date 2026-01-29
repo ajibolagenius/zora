@@ -26,3 +26,25 @@ export {
     skeletonPulse,
     springNumber,
 } from "./lib/animations";
+
+// Shared Constants
+export {
+    ORDER_STATUS_CONFIG,
+    PRODUCT_STATUS_CONFIG,
+    VENDOR_STATUS_CONFIG,
+    CUSTOMER_STATUS_CONFIG,
+    PAYMENT_STATUS_CONFIG,
+    ORDER_NEXT_STATUS,
+    getInitials,
+    formatPhoneNumber,
+    DESIGN_COLORS,
+} from "./lib/constants";
+
+// Types
+export type {
+    OrderStatus,
+    ProductStatus,
+    VendorStatus,
+    CustomerStatus,
+    PaymentStatus,
+} from "./lib/constants";

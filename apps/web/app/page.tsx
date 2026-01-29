@@ -32,9 +32,9 @@ export default function Home() {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
     return (
-        <main className="min-h-screen bg-[#F8F7F5]">
+        <main id="main-content" className="min-h-screen bg-background-light">
             {/* Navigation */}
-            <nav className="fixed top-0 left-0 right-0 z-50 bg-[#F8F7F5]/80 backdrop-blur-md">
+            <nav className="fixed top-0 left-0 right-0 z-50 bg-background-light/80 backdrop-blur-md" role="navigation" aria-label="Main navigation">
                 <div className="container mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
                     {/* Logo */}
                     <Link href="/" className="flex items-center gap-2">
@@ -80,12 +80,15 @@ export default function Home() {
                         </Link>
                         <button
                             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                            className="lg:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors"
+                            className="lg:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+                            aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
+                            aria-expanded={mobileMenuOpen}
+                            aria-controls="mobile-menu"
                         >
                             {mobileMenuOpen ? (
-                                <X className="w-6 h-6 text-gray-700" />
+                                <X className="w-6 h-6 text-gray-700" aria-hidden="true" />
                             ) : (
-                                <Menu className="w-6 h-6 text-gray-700" />
+                                <Menu className="w-6 h-6 text-gray-700" aria-hidden="true" />
                             )}
                         </button>
                     </div>
@@ -93,7 +96,7 @@ export default function Home() {
 
                 {/* Mobile Menu */}
                 {mobileMenuOpen && (
-                    <div className="lg:hidden bg-white border-t border-gray-200 shadow-lg">
+                    <div id="mobile-menu" className="lg:hidden bg-white border-t border-gray-200 shadow-lg" role="menu" aria-label="Mobile navigation">
                         <div className="container mx-auto px-4 py-4 flex flex-col space-y-2">
                             <Link
                                 href="#features"
@@ -136,8 +139,8 @@ export default function Home() {
             </nav>
 
             {/* Hero Section */}
-            <section className="pt-28 pb-16 lg:pt-32 lg:pb-24 overflow-hidden">
-                <div className="container mx-auto px-6">
+            <section className="pt-28 pb-16 lg:pt-32 lg:pb-24 overflow-hidden" aria-labelledby="hero-heading">
+                <div className="container mx-auto px-4 sm:px-6">
                     <div className="grid lg:grid-cols-2 gap-12 lg:gap-8 items-center">
                         {/* Left Content */}
                         <div className="max-w-xl">
@@ -150,7 +153,7 @@ export default function Home() {
                             </div>
 
                             {/* Headline */}
-                            <h1 className="text-4xl sm:text-5xl lg:text-[56px] font-bold font-display leading-[1.1] text-gray-900 mb-6">
+                            <h1 id="hero-heading" className="text-4xl sm:text-5xl lg:text-display font-bold font-display leading-[1.1] text-gray-900 mb-6">
                                 Your home away{" "}
                                 <span className="relative inline-block">
                                     from home
@@ -222,7 +225,7 @@ export default function Home() {
                         <div className="relative h-[500px] lg:h-[580px]">
                             {/* Main App Screenshot */}
                             <div className="absolute top-8 right-0 lg:right-4 w-[260px] z-10">
-                                <div className="bg-[#221710] rounded-[2.5rem] p-2 shadow-2xl">
+                                <div className="bg-background-dark rounded-[2.5rem] p-2 shadow-2xl">
                                     <div className="rounded-[2rem] overflow-hidden">
                                         <Image
                                             src="/images/screenshots/home.png"
@@ -252,7 +255,7 @@ export default function Home() {
                             </div>
 
                             {/* Vendor Stats Card */}
-                            <div className="absolute top-44 left-0 lg:left-4 w-[180px] bg-green-600 rounded-xl shadow-lg p-4 z-20">
+                            <div className="absolute top-44 left-0 lg:left-4 w-[180px] bg-success rounded-xl shadow-lg p-4 z-20">
                                 <div className="flex items-center gap-2 mb-4">
                                     <ShoppingBag className="w-5 h-5 text-white/80" />
                                     <span className="text-sm font-medium text-white/80">Active Vendors</span>
@@ -350,7 +353,7 @@ export default function Home() {
             </section>
 
             {/* App Features Showcase */}
-            <section className="py-20 bg-[#F8F7F5]">
+            <section className="py-20 bg-background-light" aria-labelledby="features-showcase-heading">
                 <div className="container mx-auto px-6">
                     <div className="grid lg:grid-cols-2 gap-12 items-center">
                         {/* Left - Feature List */}
@@ -395,7 +398,7 @@ export default function Home() {
                         <div className="relative flex justify-center items-center">
                             <div className="relative">
                                 {/* Main Phone */}
-                                <div className="relative z-10 bg-[#221710] rounded-[2.5rem] p-2 shadow-2xl">
+                                <div className="relative z-10 bg-background-dark rounded-[2.5rem] p-2 shadow-2xl">
                                     <div className="rounded-[2rem] overflow-hidden w-[240px]">
                                         <Image
                                             src="/images/screenshots/explore.png"
@@ -407,7 +410,7 @@ export default function Home() {
                                     </div>
                                 </div>
                                 {/* Background Phone */}
-                                <div className="absolute -right-16 top-8 z-0 bg-[#221710] rounded-[2.5rem] p-2 shadow-xl opacity-60 rotate-6">
+                                <div className="absolute -right-16 top-8 z-0 bg-background-dark rounded-[2.5rem] p-2 shadow-xl opacity-60 rotate-6">
                                     <div className="rounded-[2rem] overflow-hidden w-[200px]">
                                         <Image
                                             src="/images/screenshots/cart.png"
@@ -538,7 +541,7 @@ export default function Home() {
 
                         {/* Right - Vendor App Preview (cropped to show top portion) */}
                         <div className="relative flex justify-center">
-                            <div className="bg-[#221710] rounded-t-[2.5rem] rounded-b-[1rem] p-2 pb-4 shadow-2xl">
+                            <div className="bg-background-dark rounded-t-[2.5rem] rounded-b-[1rem] p-2 pb-4 shadow-2xl">
                                 <div className="rounded-t-[2rem] rounded-b-lg overflow-hidden w-[260px] max-h-[580px]">
                                     <Image
                                         src="/images/screenshots/product_page.png"
@@ -555,10 +558,10 @@ export default function Home() {
             </section>
 
             {/* Download App Section */}
-            <section id="download" className="py-20 bg-[#F8F7F5]">
+            <section id="download" className="py-20 bg-background-light" aria-labelledby="download-heading">
                 <div className="container mx-auto px-6">
                     <div className="max-w-5xl mx-auto">
-                        <div className="bg-gradient-to-br from-[#221710] to-[#342418] rounded-3xl p-8 md:p-12 relative overflow-hidden">
+                        <div className="bg-gradient-to-br from-background-dark to-surface rounded-3xl p-6 sm:p-8 md:p-12 relative overflow-hidden">
                             {/* Background decoration */}
                             <div className="absolute top-0 right-0 w-64 h-64 bg-primary/20 rounded-full blur-3xl" />
                             <div className="absolute bottom-0 left-0 w-48 h-48 bg-secondary/20 rounded-full blur-3xl" />
@@ -619,7 +622,7 @@ export default function Home() {
                                 {/* App Preview */}
                                 <div className="hidden md:flex justify-center">
                                     <div className="relative">
-                                        <div className="bg-[#342418] rounded-[2.5rem] p-2 shadow-2xl border border-white/10">
+                                        <div className="bg-surface rounded-[2.5rem] p-2 shadow-2xl border border-white/10">
                                             <div className="rounded-[2rem] overflow-hidden w-[220px]">
                                                 <Image
                                                     src="/images/screenshots/home.png"
@@ -662,7 +665,7 @@ export default function Home() {
             </section>
 
             {/* Footer */}
-            <footer className="bg-[#221710] text-white py-16">
+            <footer className="bg-background-dark text-white py-16" role="contentinfo">
                 <div className="container mx-auto px-6">
                     <div className="grid md:grid-cols-5 gap-8 mb-12">
                         <div className="md:col-span-2">

@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { ArrowLeft, ArrowRight, Check, Building2, User, FileText, CreditCard, MapPin, Tag } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, Building2, User, FileText, CreditCard, MapPin, Tag, Upload } from "lucide-react";
+import { Button, Input, Card } from "@zora/ui-web";
 
 const steps = [
     { id: 1, name: "Business Info", icon: Building2 },
@@ -82,9 +83,8 @@ export default function VendorOnboardingPage() {
                             {steps.map((step) => (
                                 <div
                                     key={step.id}
-                                    className={`w-2 h-2 rounded-full transition-colors ${
-                                        currentStep >= step.id ? "bg-primary" : "bg-gray-300"
-                                    }`}
+                                    className={`w-2 h-2 rounded-full transition-colors ${currentStep >= step.id ? "bg-primary" : "bg-gray-300"
+                                        }`}
                                 />
                             ))}
                         </div>
@@ -100,10 +100,10 @@ export default function VendorOnboardingPage() {
                                     <div className="flex flex-col items-center">
                                         <div
                                             className={`w-10 h-10 lg:w-12 lg:h-12 rounded-full flex items-center justify-center ${currentStep > step.id
-                                                    ? "bg-green-500 text-white"
-                                                    : currentStep === step.id
-                                                        ? "bg-primary text-white"
-                                                        : "bg-gray-200 text-gray-500"
+                                                ? "bg-green-500 text-white"
+                                                : currentStep === step.id
+                                                    ? "bg-primary text-white"
+                                                    : "bg-gray-200 text-gray-500"
                                                 }`}
                                         >
                                             {currentStep > step.id ? (
@@ -114,8 +114,8 @@ export default function VendorOnboardingPage() {
                                         </div>
                                         <span
                                             className={`mt-2 text-xs font-medium text-center hidden lg:block ${currentStep >= step.id
-                                                    ? "text-foreground"
-                                                    : "text-muted-foreground"
+                                                ? "text-foreground"
+                                                : "text-muted-foreground"
                                                 }`}
                                         >
                                             {step.name}
@@ -135,28 +135,29 @@ export default function VendorOnboardingPage() {
                     {/* Form */}
                     <div className="bg-white rounded-xl sm:rounded-2xl shadow-lg p-4 sm:p-6 lg:p-8">
                         {currentStep === 1 && (
-                            <div className="space-y-6">
-                                <h2 className="text-xl font-semibold mb-4">Business Information</h2>
+                            <div className="space-y-6" role="group" aria-labelledby="step1-heading">
+                                <h2 id="step1-heading" className="text-xl font-semibold mb-4">Business Information</h2>
+                                <Input
+                                    label="Business Name *"
+                                    type="text"
+                                    value={formData.businessName}
+                                    onChange={(e) => updateFormData("businessName", e.target.value)}
+                                    placeholder="Enter your business name"
+                                    inputSize="lg"
+                                    required
+                                    aria-required="true"
+                                />
                                 <div>
-                                    <label className="block text-sm font-medium mb-2">
-                                        Business Name *
-                                    </label>
-                                    <input
-                                        type="text"
-                                        value={formData.businessName}
-                                        onChange={(e) => updateFormData("businessName", e.target.value)}
-                                        className="w-full px-4 py-3 rounded-xl border border-border focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none"
-                                        placeholder="Enter your business name"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium mb-2">
+                                    <label htmlFor="businessType" className="block text-sm font-medium text-gray-700 mb-1.5">
                                         Business Type *
                                     </label>
                                     <select
+                                        id="businessType"
                                         value={formData.businessType}
                                         onChange={(e) => updateFormData("businessType", e.target.value)}
-                                        className="w-full px-4 py-3 rounded-xl border border-border focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none"
+                                        className="w-full h-12 px-4 rounded-xl border border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none bg-white text-gray-900"
+                                        required
+                                        aria-required="true"
                                     >
                                         <option value="">Select business type</option>
                                         <option value="grocery">Grocery Store</option>
@@ -167,13 +168,14 @@ export default function VendorOnboardingPage() {
                                     </select>
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium mb-2">
+                                    <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1.5">
                                         Business Description
                                     </label>
                                     <textarea
+                                        id="description"
                                         value={formData.description}
                                         onChange={(e) => updateFormData("description", e.target.value)}
-                                        className="w-full px-4 py-3 rounded-xl border border-border focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none"
+                                        className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none bg-white text-gray-900"
                                         rows={4}
                                         placeholder="Tell us about your business and the products you sell..."
                                     />
@@ -182,86 +184,77 @@ export default function VendorOnboardingPage() {
                         )}
 
                         {currentStep === 2 && (
-                            <div className="space-y-6">
-                                <h2 className="text-xl font-semibold mb-4">Contact Details</h2>
+                            <div className="space-y-6" role="group" aria-labelledby="step2-heading">
+                                <h2 id="step2-heading" className="text-xl font-semibold mb-4">Contact Details</h2>
                                 <div className="grid md:grid-cols-2 gap-6">
-                                    <div>
-                                        <label className="block text-sm font-medium mb-2">Email *</label>
-                                        <input
-                                            type="email"
-                                            value={formData.email}
-                                            onChange={(e) => updateFormData("email", e.target.value)}
-                                            className="w-full px-4 py-3 rounded-xl border border-border focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none"
-                                            placeholder="business@example.com"
-                                        />
-                                    </div>
-                                    <div>
-                                        <label className="block text-sm font-medium mb-2">Phone *</label>
-                                        <input
-                                            type="tel"
-                                            value={formData.phone}
-                                            onChange={(e) => updateFormData("phone", e.target.value)}
-                                            className="w-full px-4 py-3 rounded-xl border border-border focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none"
-                                            placeholder="+44 7XXX XXXXXX"
-                                        />
-                                    </div>
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium mb-2">
-                                        Address Line 1 *
-                                    </label>
-                                    <input
-                                        type="text"
-                                        value={formData.addressLine1}
-                                        onChange={(e) => updateFormData("addressLine1", e.target.value)}
-                                        className="w-full px-4 py-3 rounded-xl border border-border focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none"
-                                        placeholder="Street address"
+                                    <Input
+                                        label="Email *"
+                                        type="email"
+                                        value={formData.email}
+                                        onChange={(e) => updateFormData("email", e.target.value)}
+                                        placeholder="business@example.com"
+                                        inputSize="lg"
+                                        required
+                                        aria-required="true"
+                                    />
+                                    <Input
+                                        label="Phone *"
+                                        type="tel"
+                                        value={formData.phone}
+                                        onChange={(e) => updateFormData("phone", e.target.value)}
+                                        placeholder="+44 7XXX XXXXXX"
+                                        inputSize="lg"
+                                        required
+                                        aria-required="true"
                                     />
                                 </div>
-                                <div>
-                                    <label className="block text-sm font-medium mb-2">
-                                        Address Line 2
-                                    </label>
-                                    <input
-                                        type="text"
-                                        value={formData.addressLine2}
-                                        onChange={(e) => updateFormData("addressLine2", e.target.value)}
-                                        className="w-full px-4 py-3 rounded-xl border border-border focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none"
-                                        placeholder="Apartment, suite, etc."
-                                    />
-                                </div>
+                                <Input
+                                    label="Address Line 1 *"
+                                    type="text"
+                                    value={formData.addressLine1}
+                                    onChange={(e) => updateFormData("addressLine1", e.target.value)}
+                                    placeholder="Street address"
+                                    inputSize="lg"
+                                    required
+                                    aria-required="true"
+                                />
+                                <Input
+                                    label="Address Line 2"
+                                    type="text"
+                                    value={formData.addressLine2}
+                                    onChange={(e) => updateFormData("addressLine2", e.target.value)}
+                                    placeholder="Apartment, suite, etc."
+                                    inputSize="lg"
+                                />
                                 <div className="grid md:grid-cols-3 gap-6">
-                                    <div>
-                                        <label className="block text-sm font-medium mb-2">City *</label>
-                                        <input
-                                            type="text"
-                                            value={formData.city}
-                                            onChange={(e) => updateFormData("city", e.target.value)}
-                                            className="w-full px-4 py-3 rounded-xl border border-border focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none"
-                                            placeholder="London"
-                                        />
-                                    </div>
-                                    <div>
-                                        <label className="block text-sm font-medium mb-2">
-                                            Postcode *
-                                        </label>
-                                        <input
-                                            type="text"
-                                            value={formData.postcode}
-                                            onChange={(e) => updateFormData("postcode", e.target.value)}
-                                            className="w-full px-4 py-3 rounded-xl border border-border focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none"
-                                            placeholder="SW1A 1AA"
-                                        />
-                                    </div>
-                                    <div>
-                                        <label className="block text-sm font-medium mb-2">Country</label>
-                                        <input
-                                            type="text"
-                                            value={formData.country}
-                                            disabled
-                                            className="w-full px-4 py-3 rounded-xl border border-border bg-gray-50"
-                                        />
-                                    </div>
+                                    <Input
+                                        label="City *"
+                                        type="text"
+                                        value={formData.city}
+                                        onChange={(e) => updateFormData("city", e.target.value)}
+                                        placeholder="London"
+                                        inputSize="lg"
+                                        required
+                                        aria-required="true"
+                                    />
+                                    <Input
+                                        label="Postcode *"
+                                        type="text"
+                                        value={formData.postcode}
+                                        onChange={(e) => updateFormData("postcode", e.target.value)}
+                                        placeholder="SW1A 1AA"
+                                        inputSize="lg"
+                                        required
+                                        aria-required="true"
+                                    />
+                                    <Input
+                                        label="Country"
+                                        type="text"
+                                        value={formData.country}
+                                        disabled
+                                        inputSize="lg"
+                                        className="bg-gray-50"
+                                    />
                                 </div>
                             </div>
                         )}
@@ -408,27 +401,31 @@ export default function VendorOnboardingPage() {
 
                         {/* Navigation Buttons */}
                         <div className="flex justify-between mt-8 pt-6 border-t border-border">
-                            <button
+                            <Button
+                                variant="ghost"
                                 onClick={handlePrevious}
                                 disabled={currentStep === 1}
-                                className="flex items-center gap-2 px-6 py-3 rounded-xl text-muted-foreground hover:text-foreground disabled:opacity-50 disabled:cursor-not-allowed"
+                                leftIcon={<ArrowLeft className="w-4 h-4" />}
+                                aria-label="Go to previous step"
                             >
-                                <ArrowLeft className="w-4 h-4" />
                                 Previous
-                            </button>
+                            </Button>
                             {currentStep < 6 ? (
-                                <button
+                                <Button
                                     onClick={handleNext}
-                                    className="flex items-center gap-2 bg-primary text-white px-6 py-3 rounded-xl font-semibold hover:bg-primary-dark transition-colors"
+                                    rightIcon={<ArrowRight className="w-4 h-4" />}
+                                    aria-label="Go to next step"
                                 >
                                     Next
-                                    <ArrowRight className="w-4 h-4" />
-                                </button>
+                                </Button>
                             ) : (
-                                <button className="flex items-center gap-2 bg-green-500 text-white px-6 py-3 rounded-xl font-semibold hover:bg-green-600 transition-colors">
+                                <Button
+                                    variant="success"
+                                    rightIcon={<Check className="w-4 h-4" />}
+                                    aria-label="Submit vendor application"
+                                >
                                     Submit Application
-                                    <Check className="w-4 h-4" />
-                                </button>
+                                </Button>
                             )}
                         </div>
                     </div>
