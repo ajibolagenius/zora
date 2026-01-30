@@ -6,7 +6,7 @@ import {
     ChartBar,
     TrendUp,
     TrendDown,
-    CurrencyDollar,
+    CurrencyGbp,
     ShoppingCart,
     Users,
     Package,
@@ -25,7 +25,7 @@ import {
 
 // Mock analytics data
 const overviewStats = [
-    { title: "Total Revenue", value: "£124,589", change: 12.5, icon: CurrencyDollar, color: "from-green-500 to-green-600" },
+    { title: "Total Revenue", value: "£124,589", change: 12.5, icon: CurrencyGbp, color: "from-green-500 to-green-600" },
     { title: "Total Orders", value: "3,847", change: 8.2, icon: ShoppingCart, color: "from-blue-500 to-blue-600" },
     { title: "Active Customers", value: "12,456", change: 15.3, icon: Users, color: "from-purple-500 to-purple-600" },
     { title: "Active Vendors", value: "128", change: 5.1, icon: Package, color: "from-orange-500 to-orange-600" },
@@ -265,9 +265,9 @@ export default function AnalyticsPage() {
                                 {recentActivity.map((activity, index) => (
                                     <div key={index} className="flex items-start gap-3">
                                         <div className={`w-2 h-2 rounded-full mt-2 ${activity.type === "order" ? "bg-blue-500" :
-                                                activity.type === "vendor" ? "bg-green-500" :
-                                                    activity.type === "review" ? "bg-yellow-500" :
-                                                        "bg-purple-500"
+                                            activity.type === "vendor" ? "bg-green-500" :
+                                                activity.type === "review" ? "bg-yellow-500" :
+                                                    "bg-purple-500"
                                             }`} />
                                         <div className="flex-1">
                                             <p className="text-sm text-gray-700">{activity.message}</p>

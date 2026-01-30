@@ -8,7 +8,7 @@ import {
     ShoppingCart,
     ChartBar,
     Storefront,
-    CurrencyDollar,
+    CurrencyGbp,
     Users,
     Clock,
     TrendUp,
@@ -92,7 +92,7 @@ export default function VendorDashboard() {
             {
                 title: "Today's Revenue",
                 value: formatCurrency(stats.todayRevenue),
-                icon: CurrencyDollar,
+                icon: CurrencyGbp,
                 iconColor: "text-green-600",
                 iconBgColor: "bg-green-100",
             },

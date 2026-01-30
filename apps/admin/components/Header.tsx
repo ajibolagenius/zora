@@ -4,12 +4,15 @@ import { Bell, MagnifyingGlass } from "@phosphor-icons/react";
 import { Avatar, AvatarFallback, AvatarImage, Input, Badge } from "@zora/ui-web";
 import { motion } from "framer-motion";
 
+import React from "react";
+
 interface HeaderProps {
     title: string;
     description?: string;
+    actions?: React.ReactNode;
 }
 
-export function Header({ title, description }: HeaderProps) {
+export function Header({ title, description, actions }: HeaderProps) {
     return (
         <motion.header
             initial={{ opacity: 0, y: -10 }}
@@ -22,6 +25,7 @@ export function Header({ title, description }: HeaderProps) {
                     <p className="text-slate-500 text-sm truncate hidden sm:block">{description}</p>
                 )}
             </div>
+            {actions && <div className="ml-4 flex items-center gap-3">{actions}</div>}
             <div className="flex items-center gap-2 sm:gap-4 ml-4">
                 <div className="hidden lg:block w-64">
                     <Input

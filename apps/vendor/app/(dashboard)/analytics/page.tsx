@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import {
     TrendUp,
     TrendDown,
-    CurrencyDollar,
+    CurrencyGbp,
     ShoppingCart,
     Users,
     Package,
@@ -64,7 +64,7 @@ export default function AnalyticsPage() {
             title: "Total Revenue",
             value: formatCurrency(34100),
             change: 12,
-            icon: CurrencyDollar,
+            icon: CurrencyGbp,
             iconColor: "text-green-600",
             iconBgColor: "bg-green-100",
         },

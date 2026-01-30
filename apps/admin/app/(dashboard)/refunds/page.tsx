@@ -8,7 +8,7 @@ import {
     CheckCircle,
     XCircle,
     Clock,
-    CurrencyDollar,
+    CurrencyGbp,
     Eye,
     Warning,
     CreditCard,
@@ -230,7 +230,7 @@ export default function RefundsPage() {
                     <Card className="bg-gradient-to-br from-orange-500 to-orange-600 text-white">
                         <div className="flex items-center gap-4">
                             <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
-                                <CurrencyDollar size={24} weight="duotone" />
+                                <CurrencyGbp size={24} weight="duotone" />
                             </div>
                             <div>
                                 <p className="text-white/80 text-sm">Pending Amount</p>

@@ -11,7 +11,7 @@ import {
     Phone,
     Calendar,
     ShoppingCart,
-    CurrencyDollar,
+    CurrencyGbp,
     Star,
     DotsThreeVertical,
     User,
@@ -136,7 +136,7 @@ export default function CustomersPage() {
         { label: "Total Customers", value: customers.length, icon: User, color: "bg-blue-100 text-blue-600" },
         { label: "Active", value: customers.filter(c => c.status === "active").length, icon: Star, color: "bg-green-100 text-green-600" },
         { label: "Total Orders", value: customers.reduce((sum, c) => sum + c.totalOrders, 0), icon: ShoppingCart, color: "bg-purple-100 text-purple-600" },
-        { label: "Total Revenue", value: formatCurrency(customers.reduce((sum, c) => sum + c.totalSpent, 0)), icon: CurrencyDollar, color: "bg-orange-100 text-orange-600" },
+        { label: "Total Revenue", value: formatCurrency(customers.reduce((sum, c) => sum + c.totalSpent, 0)), icon: CurrencyGbp, color: "bg-orange-100 text-orange-600" },
     ];
 
     const columns = [

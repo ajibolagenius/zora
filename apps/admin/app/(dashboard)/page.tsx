@@ -7,7 +7,7 @@ import {
     ShoppingCart,
     Users,
     Storefront,
-    CurrencyDollar,
+    CurrencyGbp,
     TrendUp,
     UserPlus,
     Star,
@@ -99,7 +99,7 @@ export default function AdminDashboard() {
                 title: "Total Revenue",
                 value: formatCurrency(stats.totalRevenue),
                 change: stats.revenueChange,
-                icon: CurrencyDollar,
+                icon: CurrencyGbp,
                 iconColor: "text-green-600",
                 iconBgColor: "bg-green-100",
             },
@@ -168,7 +168,7 @@ export default function AdminDashboard() {
             <Header
                 title="Admin Dashboard"
                 description="Platform overview and management"
-                action={
+                actions={
                     <Button
                         variant="outline"
                         size="sm"

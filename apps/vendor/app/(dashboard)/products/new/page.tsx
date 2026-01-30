@@ -11,7 +11,7 @@ import {
     Plus,
     Image as ImageIcon,
     Package,
-    CurrencyDollar,
+    CurrencyGbp,
     Tag,
     Stack,
     Info,
@@ -211,7 +211,7 @@ export default function NewProductPage() {
                             <Card>
                                 <CardHeader>
                                     <CardTitle className="flex items-center gap-2">
-                                        <CurrencyDollar size={20} weight="duotone" className="text-primary" />
+                                        <CurrencyGbp size={20} weight="duotone" className="text-primary" />
                                         Pricing
                                     </CardTitle>
                                 </CardHeader>

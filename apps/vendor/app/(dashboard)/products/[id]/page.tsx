@@ -17,7 +17,7 @@ import {
     Tag,
     MapPin,
     Scales,
-    CurrencyDollar,
+    CurrencyGbp,
     Stack,
 } from "@phosphor-icons/react";
 import { Header } from "../../../../components/Header";
@@ -194,7 +194,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                             <Card>
                                 <CardHeader>
                                     <CardTitle className="flex items-center gap-2">
-                                        <CurrencyDollar size={20} weight="duotone" className="text-primary" />
+                                        <CurrencyGbp size={20} weight="duotone" className="text-primary" />
                                         Pricing
                                     </CardTitle>
                                 </CardHeader>
@@ -239,10 +239,10 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                                         <div>
                                             <p className="text-sm text-gray-500 mb-1">Stock Quantity</p>
                                             <p className={`text-2xl font-bold ${(product.stock_quantity ?? 0) === 0
-                                                    ? "text-red-600"
-                                                    : (product.stock_quantity ?? 0) < 20
-                                                        ? "text-yellow-600"
-                                                        : "text-gray-900"
+                                                ? "text-red-600"
+                                                : (product.stock_quantity ?? 0) < 20
+                                                    ? "text-yellow-600"
+                                                    : "text-gray-900"
                                                 }`}>
                                                 {product.stock_quantity ?? 0} units
                                             </p>
