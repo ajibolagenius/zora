@@ -3,21 +3,21 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import {
-    Search,
-    Filter,
-    Download,
+    MagnifyingGlass,
+    Funnel,
+    DownloadSimple,
     Eye,
-    Mail,
+    Envelope,
     Phone,
     Calendar,
     ShoppingCart,
-    DollarSign,
+    CurrencyDollar,
     Star,
-    MoreVertical,
+    DotsThreeVertical,
     User,
     MapPin,
-    Ban,
-} from "lucide-react";
+    Prohibit,
+} from "@phosphor-icons/react";
 import { Header } from "../../../components/Header";
 import {
     Button,
@@ -136,7 +136,7 @@ export default function CustomersPage() {
         { label: "Total Customers", value: customers.length, icon: User, color: "bg-blue-100 text-blue-600" },
         { label: "Active", value: customers.filter(c => c.status === "active").length, icon: Star, color: "bg-green-100 text-green-600" },
         { label: "Total Orders", value: customers.reduce((sum, c) => sum + c.totalOrders, 0), icon: ShoppingCart, color: "bg-purple-100 text-purple-600" },
-        { label: "Total Revenue", value: formatCurrency(customers.reduce((sum, c) => sum + c.totalSpent, 0)), icon: DollarSign, color: "bg-orange-100 text-orange-600" },
+        { label: "Total Revenue", value: formatCurrency(customers.reduce((sum, c) => sum + c.totalSpent, 0)), icon: CurrencyDollar, color: "bg-orange-100 text-orange-600" },
     ];
 
     const columns = [
@@ -163,7 +163,7 @@ export default function CustomersPage() {
             header: "Location",
             render: (customer: typeof mockCustomers[0]) => (
                 <div className="flex items-center gap-1 text-slate-600">
-                    <MapPin className="w-4 h-4" />
+                    <MapPin size={16} weight="duotone" />
                     {customer.location}
                 </div>
             ),
@@ -215,7 +215,7 @@ export default function CustomersPage() {
                             setDetailsOpen(true);
                         }}
                     >
-                        <Eye className="w-4 h-4" />
+                        <Eye size={16} weight="duotone" />
                     </Button>
                 </div>
             ),
@@ -238,7 +238,7 @@ export default function CustomersPage() {
                         <motion.div key={stat.label} variants={staggerItem}>
                             <Card className="flex items-center gap-4">
                                 <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${stat.color}`}>
-                                    <stat.icon className="w-6 h-6" />
+                                    <stat.icon size={24} weight="duotone" />
                                 </div>
                                 <div>
                                     <p className="text-2xl font-bold text-slate-900">{stat.value}</p>
@@ -258,7 +258,7 @@ export default function CustomersPage() {
                                     placeholder="Search customers..."
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
-                                    leftIcon={<Search className="w-4 h-4" />}
+                                    leftIcon={<MagnifyingGlass size={16} weight="duotone" />}
                                 />
                             </div>
                             <Select value={selectedStatus} onValueChange={setSelectedStatus}>
@@ -273,7 +273,7 @@ export default function CustomersPage() {
                                 </SelectContent>
                             </Select>
                         </div>
-                        <Button variant="outline" leftIcon={<Download className="w-4 h-4" />}>
+                        <Button variant="outline" leftIcon={<DownloadSimple size={16} weight="duotone" />}>
                             Export Customers
                         </Button>
                     </div>
@@ -325,15 +325,15 @@ export default function CustomersPage() {
                                         <h4 className="font-medium text-slate-900 mb-3">Contact Information</h4>
                                         <div className="space-y-3">
                                             <div className="flex items-center gap-2 text-sm">
-                                                <Mail className="w-4 h-4 text-slate-400" />
+                                                <Envelope size={16} weight="duotone" className="text-slate-400" />
                                                 {selectedCustomer.email}
                                             </div>
                                             <div className="flex items-center gap-2 text-sm">
-                                                <Phone className="w-4 h-4 text-slate-400" />
+                                                <Phone size={16} weight="duotone" className="text-slate-400" />
                                                 {selectedCustomer.phone}
                                             </div>
                                             <div className="flex items-center gap-2 text-sm">
-                                                <MapPin className="w-4 h-4 text-slate-400" />
+                                                <MapPin size={16} weight="duotone" className="text-slate-400" />
                                                 {selectedCustomer.location}
                                             </div>
                                         </div>
@@ -363,14 +363,14 @@ export default function CustomersPage() {
                                 </div>
 
                                 <div className="flex gap-3 mt-6">
-                                    <Button variant="outline" leftIcon={<Mail className="w-4 h-4" />}>
+                                    <Button variant="outline" leftIcon={<Envelope size={16} weight="duotone" />}>
                                         Send Email
                                     </Button>
                                     {selectedCustomer.status !== "blocked" ? (
                                         <Button
                                             variant="outline"
                                             className="text-red-600 border-red-200 hover:bg-red-50"
-                                            leftIcon={<Ban className="w-4 h-4" />}
+                                            leftIcon={<Prohibit size={16} weight="duotone" />}
                                         >
                                             Block Customer
                                         </Button>

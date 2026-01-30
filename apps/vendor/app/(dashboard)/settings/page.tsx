@@ -3,22 +3,22 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import {
-    Settings,
+    Gear,
     User,
     Bell,
     Shield,
     CreditCard,
-    Trash2,
-    Save,
-    Mail,
+    Trash,
+    FloppyDisk,
+    Envelope,
     Phone,
     Lock,
     Eye,
-    EyeOff,
-    AlertTriangle,
+    EyeSlash,
+    Warning,
     Check,
-    Smartphone,
-} from "lucide-react";
+    DeviceMobile,
+} from "@phosphor-icons/react";
 import { Header } from "../../../components/Header";
 import { Card, Button, Badge } from "@zora/ui-web";
 
@@ -85,7 +85,7 @@ export default function SettingsPage() {
                                     : "bg-white text-gray-600 hover:bg-gray-50 border border-gray-200"
                                     }`}
                             >
-                                <tab.icon className="w-4 h-4" />
+                                <tab.icon size={16} weight="duotone" />
                                 {tab.label}
                             </button>
                         ))}
@@ -106,7 +106,7 @@ export default function SettingsPage() {
                                             Full Name
                                         </label>
                                         <div className="relative">
-                                            <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                                            <User size={20} weight="duotone" className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
                                             <input
                                                 type="text"
                                                 value={accountData.fullName}
@@ -120,7 +120,7 @@ export default function SettingsPage() {
                                             Email Address
                                         </label>
                                         <div className="relative">
-                                            <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                                            <Envelope size={20} weight="duotone" className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
                                             <input
                                                 type="email"
                                                 value={accountData.email}
@@ -134,7 +134,7 @@ export default function SettingsPage() {
                                             Phone Number
                                         </label>
                                         <div className="relative">
-                                            <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                                            <Phone size={20} weight="duotone" className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
                                             <input
                                                 type="tel"
                                                 value={accountData.phone}
@@ -148,7 +148,7 @@ export default function SettingsPage() {
                                     <Button
                                         onClick={handleSave}
                                         isLoading={isSaving}
-                                        leftIcon={<Save className="w-4 h-4" />}
+                                        leftIcon={<FloppyDisk size={16} weight="duotone" />}
                                     >
                                         Save Changes
                                     </Button>
@@ -220,7 +220,7 @@ export default function SettingsPage() {
 
                             <Card>
                                 <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                                    <Smartphone className="w-5 h-5" />
+                                    <DeviceMobile size={20} weight="duotone" />
                                     Push Notifications
                                 </h3>
                                 <div className="flex items-center justify-between">
@@ -257,7 +257,7 @@ export default function SettingsPage() {
                                             Current Password
                                         </label>
                                         <div className="relative">
-                                            <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                                            <Lock size={20} weight="duotone" className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
                                             <input
                                                 type={showPassword ? "text" : "password"}
                                                 value={passwordData.currentPassword}
@@ -269,7 +269,7 @@ export default function SettingsPage() {
                                                 onClick={() => setShowPassword(!showPassword)}
                                                 className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400"
                                             >
-                                                {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                                                {showPassword ? <EyeSlash size={20} weight="duotone" /> : <Eye size={20} weight="duotone" />}
                                             </button>
                                         </div>
                                     </div>
@@ -278,7 +278,7 @@ export default function SettingsPage() {
                                             New Password
                                         </label>
                                         <div className="relative">
-                                            <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                                            <Lock size={20} weight="duotone" className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
                                             <input
                                                 type={showPassword ? "text" : "password"}
                                                 value={passwordData.newPassword}
@@ -292,7 +292,7 @@ export default function SettingsPage() {
                                             Confirm New Password
                                         </label>
                                         <div className="relative">
-                                            <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                                            <Lock size={20} weight="duotone" className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
                                             <input
                                                 type={showPassword ? "text" : "password"}
                                                 value={passwordData.confirmPassword}
@@ -303,7 +303,7 @@ export default function SettingsPage() {
                                     </div>
                                 </div>
                                 <div className="mt-6">
-                                    <Button leftIcon={<Lock className="w-4 h-4" />}>
+                                    <Button leftIcon={<Lock size={16} weight="duotone" />}>
                                         Update Password
                                     </Button>
                                 </div>
@@ -319,7 +319,7 @@ export default function SettingsPage() {
                                     <Badge variant="warning">Not Enabled</Badge>
                                 </div>
                                 <div className="mt-4">
-                                    <Button variant="outline" leftIcon={<Shield className="w-4 h-4" />}>
+                                    <Button variant="outline" leftIcon={<Shield size={16} weight="duotone" />}>
                                         Set Up 2FA
                                     </Button>
                                 </div>
@@ -387,7 +387,7 @@ export default function SettingsPage() {
                                     </div>
                                 </div>
                                 <div className="mt-4">
-                                    <Button variant="outline" leftIcon={<CreditCard className="w-4 h-4" />}>
+                                    <Button variant="outline" leftIcon={<CreditCard size={16} weight="duotone" />}>
                                         Update Bank Details
                                     </Button>
                                 </div>
@@ -395,13 +395,13 @@ export default function SettingsPage() {
 
                             <Card className="border-red-200 bg-red-50">
                                 <h3 className="text-lg font-semibold text-red-900 mb-4 flex items-center gap-2">
-                                    <AlertTriangle className="w-5 h-5" />
+                                    <Warning size={20} weight="duotone" />
                                     Danger Zone
                                 </h3>
                                 <p className="text-red-700 mb-4">
                                     Once you delete your vendor account, there is no going back. Please be certain.
                                 </p>
-                                <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-100" leftIcon={<Trash2 className="w-4 h-4" />}>
+                                <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-100" leftIcon={<Trash size={16} weight="duotone" />}>
                                     Delete Vendor Account
                                 </Button>
                             </Card>

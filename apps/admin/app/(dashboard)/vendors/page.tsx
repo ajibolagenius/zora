@@ -4,22 +4,22 @@ import { useState, useMemo } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-    Search,
+    MagnifyingGlass,
     Eye,
     CheckCircle,
-    Store,
+    Storefront,
     MapPin,
     Star,
     Clock,
-    Mail,
+    Envelope,
     Phone,
-    ExternalLink,
+    ArrowSquareOut,
     UserCheck,
-    UserX,
+    UserMinus,
     FileText,
-    RefreshCw,
-    AlertCircle,
-} from "lucide-react";
+    ArrowsClockwise,
+    WarningCircle,
+} from "@phosphor-icons/react";
 import { Header } from "../../../components/Header";
 import {
     Button,
@@ -166,7 +166,7 @@ export default function VendorsPage() {
                     <div>
                         <div className="flex items-center gap-2">
                             <p className="font-medium text-slate-900">{vendor.shop_name}</p>
-                            {vendor.is_verified && <CheckCircle className="w-4 h-4 text-blue-500" />}
+                            {vendor.is_verified && <CheckCircle size={16} weight="duotone" className="text-blue-500" />}
                         </div>
                         <p className="text-xs text-slate-500">{vendor.slug}</p>
                     </div>
@@ -178,7 +178,7 @@ export default function VendorsPage() {
             header: "Location",
             render: (vendor: Vendor) => (
                 <div className="flex items-center gap-1 text-slate-600">
-                    <MapPin className="w-4 h-4" />
+                    <MapPin size={16} weight="duotone" />
                     {vendor.address || "N/A"}
                 </div>
             ),
@@ -189,7 +189,7 @@ export default function VendorsPage() {
             sortable: true,
             render: (vendor: Vendor) => (
                 <div className="flex items-center gap-1">
-                    <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
+                    <Star size={16} weight="fill" className="text-yellow-500" />
                     <span className="font-medium">{vendor.rating?.toFixed(1) || "N/A"}</span>
                     <span className="text-slate-400">({vendor.review_count || 0})</span>
                 </div>
@@ -218,7 +218,7 @@ export default function VendorsPage() {
             render: (vendor: Vendor) => (
                 <Link href={`/vendors/${vendor.id}`}>
                     <Button variant="ghost" size="icon" className="h-8 w-8">
-                        <Eye className="w-4 h-4" />
+                        <Eye size={16} weight="duotone" />
                     </Button>
                 </Link>
             ),
@@ -238,7 +238,7 @@ export default function VendorsPage() {
                         variant="outline"
                         size="sm"
                         onClick={handleRefresh}
-                        leftIcon={<RefreshCw className="w-4 h-4" />}
+                        leftIcon={<ArrowsClockwise size={16} weight="duotone" />}
                     >
                         Refresh
                         {realtimeStats.pendingVendorApplications > 0 && (
@@ -267,7 +267,7 @@ export default function VendorsPage() {
                                 placeholder="Search vendors..."
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
-                                leftIcon={<Search className="w-4 h-4" />}
+                                leftIcon={<MagnifyingGlass size={16} weight="duotone" />}
                             />
                         </div>
                     </div>
@@ -284,7 +284,7 @@ export default function VendorsPage() {
 
                         {vendorsError && (
                             <Card className="p-8 text-center">
-                                <AlertCircle className="w-12 h-12 mx-auto mb-4 text-red-500" />
+                                <WarningCircle size={48} weight="duotone" className="mx-auto mb-4 text-red-500" />
                                 <h3 className="text-lg font-semibold text-slate-900 mb-2">Failed to load vendors</h3>
                                 <p className="text-slate-500 mb-4">There was an error loading vendors.</p>
                                 <Button onClick={() => refetchVendors()}>Try Again</Button>
@@ -293,7 +293,7 @@ export default function VendorsPage() {
 
                         {!vendorsLoading && !vendorsError && filteredVendors.length === 0 && (
                             <EmptyState
-                                icon={Store}
+                                icon={Storefront}
                                 title="No vendors found"
                                 description={searchTerm ? "Try adjusting your search" : "Vendors will appear here"}
                             />
@@ -328,7 +328,7 @@ export default function VendorsPage() {
 
                         {applicationsError && (
                             <Card className="p-8 text-center">
-                                <AlertCircle className="w-12 h-12 mx-auto mb-4 text-red-500" />
+                                <WarningCircle size={48} weight="duotone" className="mx-auto mb-4 text-red-500" />
                                 <h3 className="text-lg font-semibold text-slate-900 mb-2">Failed to load applications</h3>
                                 <p className="text-slate-500 mb-4">There was an error loading applications.</p>
                                 <Button onClick={() => refetchApplications()}>Try Again</Button>
@@ -337,7 +337,7 @@ export default function VendorsPage() {
 
                         {!applicationsLoading && !applicationsError && (!applicationsData?.data || applicationsData.data.length === 0) && (
                             <EmptyState
-                                icon={Store}
+                                icon={Storefront}
                                 title="No pending applications"
                                 description="New vendor applications will appear here"
                             />
@@ -389,16 +389,16 @@ export default function VendorsPage() {
                                                             <div className="flex flex-wrap items-center gap-4 mt-2 text-sm text-slate-500">
                                                                 {app.business_address && (
                                                                     <span className="flex items-center gap-1">
-                                                                        <MapPin className="w-4 h-4" />
+                                                                        <MapPin size={16} weight="duotone" />
                                                                         {app.business_address}
                                                                     </span>
                                                                 )}
                                                                 <span className="flex items-center gap-1">
-                                                                    <Mail className="w-4 h-4" />
+                                                                    <Envelope size={16} weight="duotone" />
                                                                     {app.contact_email}
                                                                 </span>
                                                                 <span className="flex items-center gap-1">
-                                                                    <Clock className="w-4 h-4" />
+                                                                    <Clock size={16} weight="duotone" />
                                                                     {formatRelativeTime(new Date(app.created_at))}
                                                                 </span>
                                                             </div>
@@ -469,12 +469,12 @@ export default function VendorsPage() {
                                     <h4 className="font-medium text-slate-900 mb-3">Contact Details</h4>
                                     <Card padding="sm" className="space-y-3">
                                         <div className="flex items-center gap-2">
-                                            <Mail className="w-4 h-4 text-slate-400" />
+                                            <Envelope size={16} weight="duotone" className="text-slate-400" />
                                             <p className="text-sm">{selectedApplication.contact_email}</p>
                                         </div>
                                         {selectedApplication.contact_phone && (
                                             <div className="flex items-center gap-2">
-                                                <Phone className="w-4 h-4 text-slate-400" />
+                                                <Phone size={16} weight="duotone" className="text-slate-400" />
                                                 <p className="text-sm">{selectedApplication.contact_phone}</p>
                                             </div>
                                         )}
@@ -494,9 +494,9 @@ export default function VendorsPage() {
                                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                                         {selectedApplication.documents.map((doc, index) => (
                                             <Card key={index} padding="sm" className="flex items-center gap-2">
-                                                <FileText className="w-4 h-4 text-primary" />
+                                                <FileText size={16} weight="duotone" className="text-primary" />
                                                 <span className="text-sm truncate">{typeof doc === 'string' ? doc : 'Document'}</span>
-                                                <ExternalLink className="w-3 h-3 text-slate-400 ml-auto" />
+                                                <ArrowSquareOut size={12} weight="duotone" className="text-slate-400 ml-auto" />
                                             </Card>
                                         ))}
                                     </div>
@@ -520,7 +520,7 @@ export default function VendorsPage() {
                                 <Button
                                     variant="outline"
                                     className="text-red-600 border-red-200 hover:bg-red-50"
-                                    leftIcon={<UserX className="w-4 h-4" />}
+                                    leftIcon={<UserMinus size={16} weight="duotone" />}
                                     onClick={handleReject}
                                     loading={rejectApplicationMutation.isPending}
                                 >
@@ -528,7 +528,7 @@ export default function VendorsPage() {
                                 </Button>
                                 <Button
                                     variant="success"
-                                    leftIcon={<UserCheck className="w-4 h-4" />}
+                                    leftIcon={<UserCheck size={16} weight="duotone" />}
                                     onClick={handleApprove}
                                     loading={approveApplicationMutation.isPending}
                                 >

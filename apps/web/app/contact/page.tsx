@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
-import { Mail, Phone, MapPin, MessageSquare, Clock, Send, CheckCircle, ArrowUpRight } from "lucide-react";
+import { Envelope, Phone, MapPin, ChatCircle, Clock, PaperPlaneTilt, CheckCircle, ArrowSquareOut } from "@phosphor-icons/react";
 
 export default function ContactPage() {
     const [formState, setFormState] = useState<"idle" | "loading" | "success">("idle");
@@ -48,7 +48,7 @@ export default function ContactPage() {
                         {/* Contact Info Cards */}
                         <div className="col-span-6 lg:col-span-2 bg-white rounded-2xl p-4 border border-gray-100">
                             <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center mb-3">
-                                <Mail className="w-5 h-5 text-primary" />
+                                <Envelope size={20} weight="duotone" className="text-primary" />
                             </div>
                             <h3 className="font-semibold text-gray-900 text-sm mb-1">Email</h3>
                             <p className="text-xs text-gray-500">support@zoraapp.co.uk</p>
@@ -56,7 +56,7 @@ export default function ContactPage() {
 
                         <div className="col-span-6 lg:col-span-2 bg-white rounded-2xl p-4 border border-gray-100">
                             <div className="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center mb-3">
-                                <Phone className="w-5 h-5 text-green-600" />
+                                <Phone size={20} weight="duotone" className="text-green-600" />
                             </div>
                             <h3 className="font-semibold text-gray-900 text-sm mb-1">Phone</h3>
                             <p className="text-xs text-gray-500">+44 (0) 20 1234 5678</p>
@@ -64,7 +64,7 @@ export default function ContactPage() {
 
                         <div className="col-span-6 lg:col-span-2 bg-white rounded-2xl p-4 border border-gray-100">
                             <div className="w-10 h-10 bg-orange-100 rounded-xl flex items-center justify-center mb-3">
-                                <MapPin className="w-5 h-5 text-orange-600" />
+                                <MapPin size={20} weight="duotone" className="text-orange-600" />
                             </div>
                             <h3 className="font-semibold text-gray-900 text-sm mb-1">Location</h3>
                             <p className="text-xs text-gray-500">London, UK</p>
@@ -72,7 +72,7 @@ export default function ContactPage() {
 
                         <div className="col-span-6 lg:col-span-1 bg-white rounded-2xl p-4 border border-gray-100">
                             <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center mb-3">
-                                <Clock className="w-5 h-5 text-blue-600" />
+                                <Clock size={20} weight="duotone" className="text-blue-600" />
                             </div>
                             <h3 className="font-semibold text-gray-900 text-sm mb-1">Hours</h3>
                             <p className="text-xs text-gray-500">Mon-Fri 9-6</p>
@@ -83,7 +83,7 @@ export default function ContactPage() {
                             {formState === "success" ? (
                                 <div className="text-center py-8">
                                     <div className="w-14 h-14 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                                        <CheckCircle className="w-7 h-7 text-green-600" />
+                                        <CheckCircle size={28} weight="duotone" className="text-green-600" />
                                     </div>
                                     <h3 className="text-lg font-semibold text-gray-900 mb-2">Message Sent!</h3>
                                     <p className="text-sm text-gray-600 mb-4">We&apos;ll get back to you within 24 hours.</p>
@@ -162,7 +162,7 @@ export default function ContactPage() {
                                                 </>
                                             ) : (
                                                 <>
-                                                    Send Message <Send className="w-4 h-4" />
+                                                    Send Message <PaperPlaneTilt size={16} weight="duotone" />
                                                 </>
                                             )}
                                         </button>
@@ -174,14 +174,14 @@ export default function ContactPage() {
                         {/* FAQ Card */}
                         <div className="col-span-12 lg:col-span-4 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-2xl p-5 md:p-6">
                             <div className="flex items-center gap-2 mb-3">
-                                <MessageSquare className="w-5 h-5 text-blue-600" />
+                                <ChatCircle size={20} weight="duotone" className="text-blue-600" />
                                 <h3 className="font-semibold text-gray-900">Need Quick Answers?</h3>
                             </div>
                             <p className="text-sm text-gray-600 mb-4">
                                 Check out our FAQ section for answers to common questions about orders, vendors, and more.
                             </p>
                             <a href="#" className="text-primary font-medium text-sm hover:underline flex items-center gap-1">
-                                View FAQ <ArrowUpRight className="w-4 h-4" />
+                                View FAQ <ArrowSquareOut size={16} weight="duotone" />
                             </a>
                         </div>
 
@@ -203,7 +203,7 @@ export default function ContactPage() {
                                 Interested in partnering with Zora? Let&apos;s explore opportunities together.
                             </p>
                             <Link href="/vendor-onboarding" className="text-primary font-medium text-sm hover:underline flex items-center gap-1">
-                                Become a Partner <ArrowUpRight className="w-4 h-4" />
+                                Become a Partner <ArrowSquareOut size={16} weight="duotone" />
                             </Link>
                         </div>
 

@@ -3,18 +3,18 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import {
-    BarChart3,
-    TrendingUp,
-    TrendingDown,
-    DollarSign,
+    ChartBar,
+    TrendUp,
+    TrendDown,
+    CurrencyDollar,
     ShoppingCart,
     Users,
     Package,
     Calendar,
-    Download,
+    DownloadSimple,
     ArrowUpRight,
     Globe,
-} from "lucide-react";
+} from "@phosphor-icons/react";
 import { Header } from "../../../components/Header";
 import {
     Card,
@@ -25,7 +25,7 @@ import {
 
 // Mock analytics data
 const overviewStats = [
-    { title: "Total Revenue", value: "£124,589", change: 12.5, icon: DollarSign, color: "from-green-500 to-green-600" },
+    { title: "Total Revenue", value: "£124,589", change: 12.5, icon: CurrencyDollar, color: "from-green-500 to-green-600" },
     { title: "Total Orders", value: "3,847", change: 8.2, icon: ShoppingCart, color: "from-blue-500 to-blue-600" },
     { title: "Active Customers", value: "12,456", change: 15.3, icon: Users, color: "from-purple-500 to-purple-600" },
     { title: "Active Vendors", value: "128", change: 5.1, icon: Package, color: "from-orange-500 to-orange-600" },
@@ -83,7 +83,7 @@ export default function AnalyticsPage() {
                             <option value="90d">Last 90 days</option>
                             <option value="1y">Last year</option>
                         </select>
-                        <Button variant="outline" leftIcon={<Download className="w-4 h-4" />}>
+                        <Button variant="outline" leftIcon={<DownloadSimple size={16} weight="duotone" />}>
                             Export
                         </Button>
                     </div>
@@ -111,9 +111,9 @@ export default function AnalyticsPage() {
                                         <p className="text-2xl font-bold mt-1">{stat.value}</p>
                                         <div className="flex items-center gap-1 mt-2">
                                             {stat.change > 0 ? (
-                                                <TrendingUp className="w-4 h-4" />
+                                                <TrendUp size={16} weight="duotone" />
                                             ) : (
-                                                <TrendingDown className="w-4 h-4" />
+                                                <TrendDown size={16} weight="duotone" />
                                             )}
                                             <span className="text-sm">
                                                 {stat.change > 0 ? "+" : ""}{stat.change}%
@@ -121,7 +121,7 @@ export default function AnalyticsPage() {
                                         </div>
                                     </div>
                                     <div className="w-14 h-14 bg-white/20 rounded-xl flex items-center justify-center">
-                                        <stat.icon className="w-7 h-7" />
+                                        <stat.icon size={28} weight="duotone" />
                                     </div>
                                 </div>
                             </Card>
@@ -141,13 +141,13 @@ export default function AnalyticsPage() {
                             <div className="flex items-center justify-between mb-6">
                                 <h3 className="text-lg font-semibold text-gray-900">Revenue Overview</h3>
                                 <Badge variant="success">
-                                    <TrendingUp className="w-3 h-3 mr-1" />
+                                    <TrendUp size={12} weight="duotone" className="mr-1" />
                                     +12.5%
                                 </Badge>
                             </div>
                             <div className="h-64 bg-gray-50 rounded-xl flex items-center justify-center">
                                 <div className="text-center text-gray-500">
-                                    <BarChart3 className="w-12 h-12 mx-auto mb-2 text-gray-300" />
+                                    <ChartBar size={48} weight="duotone" className="mx-auto mb-2 text-gray-300" />
                                     <p>Revenue chart visualization</p>
                                     <p className="text-sm">Integration with Recharts pending</p>
                                 </div>
@@ -163,7 +163,7 @@ export default function AnalyticsPage() {
                     >
                         <Card>
                             <div className="flex items-center gap-2 mb-6">
-                                <Globe className="w-5 h-5 text-primary" />
+                                <Globe size={20} weight="duotone" className="text-primary" />
                                 <h3 className="text-lg font-semibold text-gray-900">Sales by Region</h3>
                             </div>
                             <div className="space-y-4">
@@ -198,7 +198,7 @@ export default function AnalyticsPage() {
                         <Card>
                             <div className="flex items-center justify-between mb-4">
                                 <h3 className="text-lg font-semibold text-gray-900">Top Products</h3>
-                                <Button variant="ghost" size="sm" rightIcon={<ArrowUpRight className="w-4 h-4" />}>
+                                <Button variant="ghost" size="sm" rightIcon={<ArrowUpRight size={16} weight="duotone" />}>
                                     View All
                                 </Button>
                             </div>
@@ -230,7 +230,7 @@ export default function AnalyticsPage() {
                         <Card>
                             <div className="flex items-center justify-between mb-4">
                                 <h3 className="text-lg font-semibold text-gray-900">Top Vendors</h3>
-                                <Button variant="ghost" size="sm" rightIcon={<ArrowUpRight className="w-4 h-4" />}>
+                                <Button variant="ghost" size="sm" rightIcon={<ArrowUpRight size={16} weight="duotone" />}>
                                     View All
                                 </Button>
                             </div>

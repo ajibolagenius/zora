@@ -4,36 +4,36 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-    LayoutDashboard,
+    SquaresFour,
     ShoppingCart,
     Users,
-    Store,
+    Storefront,
     Package,
     Star,
-    BarChart3,
-    Mail,
-    RefreshCw,
-    Settings,
-    LogOut,
-    ChevronLeft,
-    Menu,
+    ChartBar,
+    Envelope,
+    ArrowsClockwise,
+    Gear,
+    SignOut,
+    CaretLeft,
+    List,
     Shield,
     X,
-} from "lucide-react";
+} from "@phosphor-icons/react";
 import { cn } from "@zora/ui-web";
 import { useState, useEffect, useRef } from "react";
 
 const navItems = [
-    { name: "Dashboard", icon: LayoutDashboard, href: "/" },
+    { name: "Dashboard", icon: SquaresFour, href: "/" },
     { name: "Orders", icon: ShoppingCart, href: "/orders" },
     { name: "Customers", icon: Users, href: "/customers" },
-    { name: "Vendors", icon: Store, href: "/vendors" },
+    { name: "Vendors", icon: Storefront, href: "/vendors" },
     { name: "Products", icon: Package, href: "/products" },
     { name: "Reviews", icon: Star, href: "/reviews" },
-    { name: "Analytics", icon: BarChart3, href: "/analytics" },
-    { name: "Emails", icon: Mail, href: "/emails" },
-    { name: "Refunds", icon: RefreshCw, href: "/refunds" },
-    { name: "Settings", icon: Settings, href: "/settings" },
+    { name: "Analytics", icon: ChartBar, href: "/analytics" },
+    { name: "Emails", icon: Envelope, href: "/emails" },
+    { name: "Refunds", icon: ArrowsClockwise, href: "/refunds" },
+    { name: "Settings", icon: Gear, href: "/settings" },
 ];
 
 interface SidebarProps {
@@ -71,11 +71,11 @@ export function Sidebar({ mobileOpen = false, onMobileClose }: SidebarProps) {
                     aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
                     aria-expanded={!collapsed}
                 >
-                    {collapsed ? (
-                        <Menu className="w-5 h-5" aria-hidden="true" />
-                    ) : (
-                        <ChevronLeft className="w-5 h-5" aria-hidden="true" />
-                    )}
+{collapsed ? (
+                                        <List size={20} weight="duotone" aria-hidden="true" />
+                                    ) : (
+                                        <CaretLeft size={20} weight="duotone" aria-hidden="true" />
+                                    )}
                 </button>
                 {/* Mobile close button */}
                 <button
@@ -83,7 +83,7 @@ export function Sidebar({ mobileOpen = false, onMobileClose }: SidebarProps) {
                     className="p-2 rounded-lg hover:bg-white/10 transition-colors lg:hidden focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                     aria-label="Close navigation menu"
                 >
-                    <X className="w-5 h-5" aria-hidden="true" />
+                    <X size={20} weight="duotone" aria-hidden="true" />
                 </button>
             </div>
 
@@ -106,7 +106,7 @@ export function Sidebar({ mobileOpen = false, onMobileClose }: SidebarProps) {
                                     : "text-slate-400 hover:bg-white/10 hover:text-white"
                             )}
                         >
-                            <item.icon className="w-5 h-5 flex-shrink-0" />
+                            <item.icon size={20} weight="duotone" className="flex-shrink-0" />
                             <motion.span
                                 initial={false}
                                 animate={{
@@ -132,7 +132,7 @@ export function Sidebar({ mobileOpen = false, onMobileClose }: SidebarProps) {
             <div className="px-4 py-3 mx-3 mb-3 bg-slate-800 rounded-xl">
                 <div className="flex items-center gap-3">
                     <div className="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center">
-                        <Shield className="w-4 h-4 text-primary" />
+                        <Shield size={16} weight="duotone" className="text-primary" />
                     </div>
                     <motion.div
                         initial={false}
@@ -154,7 +154,7 @@ export function Sidebar({ mobileOpen = false, onMobileClose }: SidebarProps) {
                     className="flex items-center gap-3 px-4 py-3 w-full text-slate-400 hover:text-white hover:bg-white/10 rounded-xl transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                     aria-label="Log out of your account"
                 >
-                    <LogOut className="w-5 h-5 flex-shrink-0" aria-hidden="true" />
+                    <SignOut size={20} weight="duotone" className="flex-shrink-0" aria-hidden="true" />
                     <motion.span
                         initial={false}
                         animate={{

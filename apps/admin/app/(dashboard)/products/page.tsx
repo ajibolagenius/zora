@@ -4,16 +4,16 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import {
     Package,
-    Search,
-    Filter,
+    MagnifyingGlass,
+    Funnel,
     CheckCircle,
     XCircle,
     Eye,
-    MoreHorizontal,
-    AlertTriangle,
+    DotsThree,
+    Warning,
     Clock,
-    Store,
-} from "lucide-react";
+    Storefront,
+} from "@phosphor-icons/react";
 import { Header } from "../../../components/Header";
 import {
     Card,
@@ -41,7 +41,7 @@ const products = [
 const statusConfig = {
     pending: { label: "Pending Review", variant: "warning" as const, icon: Clock },
     approved: { label: "Approved", variant: "success" as const, icon: CheckCircle },
-    flagged: { label: "Flagged", variant: "error" as const, icon: AlertTriangle },
+    flagged: { label: "Flagged", variant: "error" as const, icon: Warning },
     rejected: { label: "Rejected", variant: "error" as const, icon: XCircle },
 };
 
@@ -73,7 +73,7 @@ export default function ProductModerationPage() {
             render: (product: typeof products[0]) => (
                 <div className="flex items-center gap-3">
                     <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center">
-                        <Package className="w-5 h-5 text-gray-400" />
+                        <Package size={20} weight="duotone" className="text-gray-400" />
                     </div>
                     <div>
                         <p className="font-medium text-gray-900">{product.name}</p>
@@ -87,7 +87,7 @@ export default function ProductModerationPage() {
             header: "Vendor",
             render: (product: typeof products[0]) => (
                 <div className="flex items-center gap-2">
-                    <Store className="w-4 h-4 text-gray-400" />
+                    <Storefront size={16} weight="duotone" className="text-gray-400" />
                     <span className="text-gray-700">{product.vendor}</span>
                 </div>
             ),
@@ -121,15 +121,15 @@ export default function ProductModerationPage() {
                         size="sm"
                         onClick={() => handleViewProduct(product)}
                     >
-                        <Eye className="w-4 h-4" />
+                        <Eye size={16} weight="duotone" />
                     </Button>
                     {product.status === "pending" && (
                         <>
                             <Button variant="ghost" size="sm" className="text-green-600 hover:text-green-700">
-                                <CheckCircle className="w-4 h-4" />
+                                <CheckCircle size={16} weight="duotone" />
                             </Button>
                             <Button variant="ghost" size="sm" className="text-red-600 hover:text-red-700">
-                                <XCircle className="w-4 h-4" />
+                                <XCircle size={16} weight="duotone" />
                             </Button>
                         </>
                     )}
@@ -155,7 +155,7 @@ export default function ProductModerationPage() {
                     <Card className="bg-gradient-to-br from-yellow-500 to-yellow-600 text-white">
                         <div className="flex items-center gap-4">
                             <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
-                                <Clock className="w-6 h-6" />
+                                <Clock size={24} weight="duotone" />
                             </div>
                             <div>
                                 <p className="text-white/80 text-sm">Pending Review</p>
@@ -166,7 +166,7 @@ export default function ProductModerationPage() {
                     <Card className="bg-gradient-to-br from-red-500 to-red-600 text-white">
                         <div className="flex items-center gap-4">
                             <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
-                                <AlertTriangle className="w-6 h-6" />
+                                <Warning size={24} weight="duotone" />
                             </div>
                             <div>
                                 <p className="text-white/80 text-sm">Flagged</p>
@@ -177,7 +177,7 @@ export default function ProductModerationPage() {
                     <Card className="bg-gradient-to-br from-green-500 to-green-600 text-white">
                         <div className="flex items-center gap-4">
                             <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
-                                <CheckCircle className="w-6 h-6" />
+                                <CheckCircle size={24} weight="duotone" />
                             </div>
                             <div>
                                 <p className="text-white/80 text-sm">Approved Today</p>
@@ -188,7 +188,7 @@ export default function ProductModerationPage() {
                     <Card className="bg-gradient-to-br from-blue-500 to-blue-600 text-white">
                         <div className="flex items-center gap-4">
                             <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
-                                <Package className="w-6 h-6" />
+                                <Package size={24} weight="duotone" />
                             </div>
                             <div>
                                 <p className="text-white/80 text-sm">Total Products</p>
@@ -206,7 +206,7 @@ export default function ProductModerationPage() {
                     className="flex flex-col sm:flex-row gap-4 mb-6"
                 >
                     <div className="relative flex-1">
-                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                        <MagnifyingGlass size={20} weight="duotone" className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
                         <input
                             type="text"
                             placeholder="Search products or vendors..."
@@ -255,7 +255,7 @@ export default function ProductModerationPage() {
                         <div className="space-y-6">
                             <div className="flex items-start gap-4">
                                 <div className="w-24 h-24 bg-gray-100 rounded-xl flex items-center justify-center">
-                                    <Package className="w-10 h-10 text-gray-400" />
+                                    <Package size={40} weight="duotone" className="text-gray-400" />
                                 </div>
                                 <div>
                                     <h3 className="text-lg font-semibold text-gray-900">{selectedProduct.name}</h3>
@@ -283,10 +283,10 @@ export default function ProductModerationPage() {
 
                             {selectedProduct.status === "pending" && (
                                 <div className="flex gap-3 pt-4 border-t">
-                                    <Button className="flex-1" leftIcon={<CheckCircle className="w-4 h-4" />}>
+                                    <Button className="flex-1" leftIcon={<CheckCircle size={16} weight="duotone" />}>
                                         Approve
                                     </Button>
-                                    <Button variant="outline" className="flex-1 text-red-600 border-red-300" leftIcon={<XCircle className="w-4 h-4" />}>
+                                    <Button variant="outline" className="flex-1 text-red-600 border-red-300" leftIcon={<XCircle size={16} weight="duotone" />}>
                                         Reject
                                     </Button>
                                 </div>

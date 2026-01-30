@@ -6,18 +6,18 @@ import { motion } from "framer-motion";
 import {
     ShoppingCart,
     Users,
-    Store,
-    DollarSign,
-    TrendingUp,
+    Storefront,
+    CurrencyDollar,
+    TrendUp,
     UserPlus,
     Star,
-    RefreshCw,
-    Mail,
-    AlertCircle,
+    ArrowsClockwise,
+    Envelope,
+    WarningCircle,
     CheckCircle,
     ArrowRight,
     Clock,
-} from "lucide-react";
+} from "@phosphor-icons/react";
 import { Header } from "../../components/Header";
 import {
     StatsCard,
@@ -99,7 +99,7 @@ export default function AdminDashboard() {
                 title: "Total Revenue",
                 value: formatCurrency(stats.totalRevenue),
                 change: stats.revenueChange,
-                icon: DollarSign,
+                icon: CurrencyDollar,
                 iconColor: "text-green-600",
                 iconBgColor: "bg-green-100",
             },
@@ -107,7 +107,7 @@ export default function AdminDashboard() {
                 title: "Active Vendors",
                 value: stats.activeVendors.toString(),
                 change: stats.vendorsChange,
-                icon: Store,
+                icon: Storefront,
                 iconColor: "text-purple-600",
                 iconBgColor: "bg-purple-100",
             },
@@ -143,14 +143,14 @@ export default function AdminDashboard() {
             {
                 type: "Refund Requests",
                 count: pendingItems.refundRequests,
-                icon: RefreshCw,
+                icon: ArrowsClockwise,
                 href: "/refunds",
                 color: "bg-red-100 text-red-600",
             },
             {
                 type: "Open Emails",
                 count: pendingItems.openEmails,
-                icon: Mail,
+                icon: Envelope,
                 href: "/emails",
                 color: "bg-purple-100 text-purple-600",
             },
@@ -173,7 +173,7 @@ export default function AdminDashboard() {
                         variant="outline"
                         size="sm"
                         onClick={handleRefresh}
-                        leftIcon={<RefreshCw className="w-4 h-4" />}
+                        leftIcon={<ArrowsClockwise size={16} weight="duotone" />}
                     >
                         Refresh
                     </Button>
@@ -214,7 +214,7 @@ export default function AdminDashboard() {
                                         <div
                                             className={`w-12 h-12 rounded-xl flex items-center justify-center ${item.color}`}
                                         >
-                                            <item.icon className="w-6 h-6" />
+                                            <item.icon size={24} weight="duotone" />
                                         </div>
                                         <div>
                                             <p className="text-2xl font-bold text-slate-900">{item.count}</p>
@@ -252,7 +252,7 @@ export default function AdminDashboard() {
                                     <Button
                                         variant="ghost"
                                         size="sm"
-                                        rightIcon={<ArrowRight className="w-4 h-4" />}
+                                        rightIcon={<ArrowRight size={16} weight="duotone" />}
                                     >
                                         View All
                                     </Button>
@@ -263,7 +263,7 @@ export default function AdminDashboard() {
                                     <div className="p-8 text-center text-slate-500">Loading orders...</div>
                                 ) : !recentOrders || recentOrders.length === 0 ? (
                                     <div className="p-8 text-center text-slate-500">
-                                        <ShoppingCart className="w-12 h-12 mx-auto mb-4 text-slate-300" />
+                                        <ShoppingCart size={48} weight="duotone" className="mx-auto mb-4 text-slate-300" />
                                         <p>No orders yet</p>
                                     </div>
                                 ) : (
@@ -340,7 +340,7 @@ export default function AdminDashboard() {
                                 <CardContent className="space-y-3">
                                     {(pendingItems?.vendorApplications ?? 0) > 0 && (
                                         <div className="flex items-start gap-3 p-3 bg-yellow-50 rounded-xl">
-                                            <AlertCircle className="w-5 h-5 text-yellow-600 mt-0.5 flex-shrink-0" />
+                                            <WarningCircle size={20} weight="duotone" className="text-yellow-600 mt-0.5 flex-shrink-0" />
                                             <div>
                                                 <p className="text-sm font-medium text-slate-900">
                                                     {pendingItems?.vendorApplications} vendors pending approval
@@ -350,7 +350,7 @@ export default function AdminDashboard() {
                                         </div>
                                     )}
                                     <div className="flex items-start gap-3 p-3 bg-green-50 rounded-xl">
-                                        <CheckCircle className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
+                                        <CheckCircle size={20} weight="duotone" className="text-green-600 mt-0.5 flex-shrink-0" />
                                         <div>
                                             <p className="text-sm font-medium text-slate-900">
                                                 {isConnected ? "All systems operational" : "Connecting..."}
@@ -414,7 +414,7 @@ export default function AdminDashboard() {
                                                         <p className="text-xs text-slate-500">{app.business_type}</p>
                                                     </div>
                                                     <div className="flex items-center gap-1 text-xs text-slate-400">
-                                                        <Clock className="w-3 h-3" />
+                                                        <Clock size={12} weight="duotone" />
                                                         {formatRelativeTime(new Date(app.created_at))}
                                                     </div>
                                                 </Link>
@@ -438,25 +438,25 @@ export default function AdminDashboard() {
                                 <CardContent className="grid grid-cols-2 gap-2">
                                     <Link href="/analytics">
                                         <div className="p-3 rounded-xl bg-blue-50 hover:bg-blue-100 transition-colors text-center cursor-pointer">
-                                            <TrendingUp className="w-5 h-5 text-blue-600 mx-auto mb-1" />
+                                            <TrendUp size={20} weight="duotone" className="text-blue-600 mx-auto mb-1" />
                                             <span className="text-xs font-medium text-blue-700">Analytics</span>
                                         </div>
                                     </Link>
                                     <Link href="/products">
                                         <div className="p-3 rounded-xl bg-purple-50 hover:bg-purple-100 transition-colors text-center cursor-pointer">
-                                            <Store className="w-5 h-5 text-purple-600 mx-auto mb-1" />
+                                            <Storefront size={20} weight="duotone" className="text-purple-600 mx-auto mb-1" />
                                             <span className="text-xs font-medium text-purple-700">Products</span>
                                         </div>
                                     </Link>
                                     <Link href="/settings">
                                         <div className="p-3 rounded-xl bg-gray-50 hover:bg-gray-100 transition-colors text-center cursor-pointer">
-                                            <AlertCircle className="w-5 h-5 text-gray-600 mx-auto mb-1" />
+                                            <WarningCircle size={20} weight="duotone" className="text-gray-600 mx-auto mb-1" />
                                             <span className="text-xs font-medium text-gray-700">Settings</span>
                                         </div>
                                     </Link>
                                     <Link href="/customers">
                                         <div className="p-3 rounded-xl bg-green-50 hover:bg-green-100 transition-colors text-center cursor-pointer">
-                                            <Users className="w-5 h-5 text-green-600 mx-auto mb-1" />
+                                            <Users size={20} weight="duotone" className="text-green-600 mx-auto mb-1" />
                                             <span className="text-xs font-medium text-green-700">Customers</span>
                                         </div>
                                     </Link>

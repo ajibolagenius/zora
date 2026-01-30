@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Store, Shield, Smartphone, ArrowRight, Home, ArrowUpRight } from "lucide-react";
+import { Storefront, Shield, DeviceMobile, ArrowRight, House, ArrowSquareOut } from "@phosphor-icons/react";
 
 export default function LoginGuidePage() {
     const vendorUrl = process.env.NEXT_PUBLIC_VENDOR_URL || "http://localhost:3001";
@@ -26,9 +26,9 @@ export default function LoginGuidePage() {
                     >
                         <div className="flex items-start justify-between">
                             <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center mb-4">
-                                <Store className="w-6 h-6" />
+                                <Storefront size={24} weight="duotone" />
                             </div>
-                            <ArrowRight className="w-5 h-5 opacity-50 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
+                            <ArrowRight size={20} weight="duotone" className="opacity-50 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
                         </div>
                         <h2 className="text-xl font-bold mb-2">Vendor Portal</h2>
                         <p className="text-white/80 text-sm">
@@ -43,9 +43,9 @@ export default function LoginGuidePage() {
                     >
                         <div className="flex items-start justify-between">
                             <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center mb-4">
-                                <Shield className="w-6 h-6" />
+                                <Shield size={24} weight="duotone" />
                             </div>
-                            <ArrowRight className="w-5 h-5 opacity-50 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
+                            <ArrowRight size={20} weight="duotone" className="opacity-50 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
                         </div>
                         <h2 className="text-xl font-bold mb-2">Admin Portal</h2>
                         <p className="text-white/80 text-sm">
@@ -58,7 +58,7 @@ export default function LoginGuidePage() {
                         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                             <div className="flex items-start gap-4">
                                 <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center flex-shrink-0">
-                                    <Smartphone className="w-6 h-6" />
+                                    <DeviceMobile size={24} weight="duotone" />
                                 </div>
                                 <div>
                                     <h2 className="text-xl font-bold mb-1">Shop with Zora</h2>
@@ -91,7 +91,7 @@ export default function LoginGuidePage() {
                             Join our growing community of African food vendors and reach thousands of customers.
                         </p>
                         <Link href="/vendor-onboarding" className="inline-flex items-center gap-2 bg-amber-500 text-white px-4 py-2 rounded-xl text-sm font-semibold hover:bg-amber-600 transition-colors">
-                            Apply to become a vendor <ArrowUpRight className="w-4 h-4" />
+                            Apply to become a vendor <ArrowSquareOut size={16} weight="duotone" />
                         </Link>
                     </div>
 
@@ -102,7 +102,7 @@ export default function LoginGuidePage() {
                             <p className="text-sm text-gray-500">Learn more about our platform and features.</p>
                         </div>
                         <Link href="/" className="flex items-center gap-2 text-primary font-medium text-sm hover:underline">
-                            <Home className="w-4 h-4" /> Home
+                            <House size={16} weight="duotone" /> Home
                         </Link>
                     </div>
                 </div>

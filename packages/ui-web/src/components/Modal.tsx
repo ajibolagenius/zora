@@ -3,7 +3,7 @@
 import * as React from "react";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { motion, AnimatePresence } from "framer-motion";
-import { X } from "lucide-react";
+import { X } from "@phosphor-icons/react";
 import { cn } from "../lib/utils";
 
 const Dialog = DialogPrimitive.Root;
@@ -63,7 +63,7 @@ const DialogContent = React.forwardRef<
             >
                 {children}
                 <DialogPrimitive.Close className="absolute right-4 top-4 rounded-lg p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors focus:outline-none focus:ring-2 focus:ring-primary/20">
-                    <X className="h-5 w-5" />
+                    <X size={20} weight="duotone" />
                     <span className="sr-only">Close</span>
                 </DialogPrimitive.Close>
             </motion.div>

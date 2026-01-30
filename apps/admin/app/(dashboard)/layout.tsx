@@ -1,9 +1,11 @@
 "use client";
+// Force HMR update
+
 
 import { useState } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Sidebar } from "../../components/Sidebar";
-import { Menu, Wifi, WifiOff, Bell } from "lucide-react";
+import { List, WifiHigh, WifiX, Bell } from "@phosphor-icons/react";
 import { AdminRealtimeProvider, useAdminRealtime } from "../../providers";
 import { useAuth } from "../../hooks";
 
@@ -30,7 +32,7 @@ function ConnectionIndicator() {
         <div className="flex items-center gap-3">
             {totalPending > 0 && (
                 <div className="flex items-center gap-1 bg-amber-100 text-amber-700 text-xs px-2 py-1 rounded-full">
-                    <Bell className="w-3 h-3" />
+                    <Bell size={12} weight="duotone" />
                     <span>{totalPending}</span>
                 </div>
             )}
@@ -40,9 +42,9 @@ function ConnectionIndicator() {
                 title={isConnected ? "Connected" : "Disconnected"}
             >
                 {isConnected ? (
-                    <Wifi className="w-3.5 h-3.5" />
+                    <WifiHigh size={14} weight="duotone" />
                 ) : (
-                    <WifiOff className="w-3.5 h-3.5" />
+                    <WifiX size={14} weight="duotone" />
                 )}
             </div>
         </div>
@@ -68,7 +70,7 @@ function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
                         aria-label="Open navigation menu"
                         aria-expanded={mobileMenuOpen}
                     >
-                        <Menu className="w-6 h-6 text-slate-600" aria-hidden="true" />
+                        <List size={24} weight="duotone" className="text-slate-600" aria-hidden="true" />
                     </button>
                     <span className="text-xl font-bold text-primary">ZORA</span>
                     <span className="text-xs bg-slate-700 px-2 py-0.5 rounded text-slate-300">Admin</span>

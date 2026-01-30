@@ -3,19 +3,19 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import {
-    Settings,
+    Gear,
     Globe,
     CreditCard,
     Truck,
     Bell,
     Shield,
     Palette,
-    Save,
+    FloppyDisk,
     ToggleLeft,
     Percent,
-    Mail,
+    Envelope,
     Clock,
-} from "lucide-react";
+} from "@phosphor-icons/react";
 import { Header } from "../../../components/Header";
 import { Card, Button, Badge } from "@zora/ui-web";
 
@@ -73,7 +73,7 @@ export default function SettingsPage() {
                     <Button
                         onClick={handleSave}
                         isLoading={isSaving}
-                        leftIcon={<Save className="w-4 h-4" />}
+                        leftIcon={<FloppyDisk size={16} weight="duotone" />}
                     >
                         Save Changes
                     </Button>
@@ -97,7 +97,7 @@ export default function SettingsPage() {
                                     : "bg-white text-gray-600 hover:bg-gray-50 border border-gray-200"
                                     }`}
                             >
-                                <tab.icon className="w-4 h-4" />
+                                <tab.icon size={16} weight="duotone" />
                                 {tab.label}
                             </button>
                         ))}
@@ -337,7 +337,7 @@ export default function SettingsPage() {
                                 <Card className="bg-red-50 border-red-200">
                                     <div className="flex items-start gap-4">
                                         <div className="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                                            <Shield className="w-5 h-5 text-red-600" />
+                                            <Shield size={20} weight="duotone" className="text-red-600" />
                                         </div>
                                         <div>
                                             <h4 className="font-medium text-red-900">Maintenance Mode Active</h4>

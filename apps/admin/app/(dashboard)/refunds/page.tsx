@@ -3,17 +3,17 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import {
-    RefreshCw,
-    Search,
+    ArrowsClockwise,
+    MagnifyingGlass,
     CheckCircle,
     XCircle,
     Clock,
-    DollarSign,
+    CurrencyDollar,
     Eye,
-    AlertTriangle,
+    Warning,
     CreditCard,
     Wallet,
-} from "lucide-react";
+} from "@phosphor-icons/react";
 import { Header } from "../../../components/Header";
 import {
     Card,
@@ -96,7 +96,7 @@ const refunds = [
 const statusConfig = {
     requested: { label: "Requested", variant: "warning" as const, icon: Clock },
     approved: { label: "Approved", variant: "info" as const, icon: CheckCircle },
-    processing: { label: "Processing", variant: "primary" as const, icon: RefreshCw },
+    processing: { label: "Processing", variant: "primary" as const, icon: ArrowsClockwise },
     completed: { label: "Completed", variant: "success" as const, icon: CheckCircle },
     rejected: { label: "Rejected", variant: "error" as const, icon: XCircle },
 };
@@ -185,15 +185,15 @@ export default function RefundsPage() {
                         size="sm"
                         onClick={() => handleViewRefund(refund)}
                     >
-                        <Eye className="w-4 h-4" />
+                        <Eye size={16} weight="duotone" />
                     </Button>
                     {refund.status === "requested" && (
                         <>
                             <Button variant="ghost" size="sm" className="text-green-600">
-                                <CheckCircle className="w-4 h-4" />
+                                <CheckCircle size={16} weight="duotone" />
                             </Button>
                             <Button variant="ghost" size="sm" className="text-red-600">
-                                <XCircle className="w-4 h-4" />
+                                <XCircle size={16} weight="duotone" />
                             </Button>
                         </>
                     )}
@@ -219,7 +219,7 @@ export default function RefundsPage() {
                     <Card className="bg-gradient-to-br from-yellow-500 to-yellow-600 text-white">
                         <div className="flex items-center gap-4">
                             <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
-                                <Clock className="w-6 h-6" />
+                                <Clock size={24} weight="duotone" />
                             </div>
                             <div>
                                 <p className="text-white/80 text-sm">Pending Requests</p>
@@ -230,7 +230,7 @@ export default function RefundsPage() {
                     <Card className="bg-gradient-to-br from-orange-500 to-orange-600 text-white">
                         <div className="flex items-center gap-4">
                             <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
-                                <DollarSign className="w-6 h-6" />
+                                <CurrencyDollar size={24} weight="duotone" />
                             </div>
                             <div>
                                 <p className="text-white/80 text-sm">Pending Amount</p>
@@ -241,7 +241,7 @@ export default function RefundsPage() {
                     <Card className="bg-gradient-to-br from-blue-500 to-blue-600 text-white">
                         <div className="flex items-center gap-4">
                             <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
-                                <RefreshCw className="w-6 h-6" />
+                                <ArrowsClockwise size={24} weight="duotone" />
                             </div>
                             <div>
                                 <p className="text-white/80 text-sm">Processing</p>
@@ -252,7 +252,7 @@ export default function RefundsPage() {
                     <Card className="bg-gradient-to-br from-green-500 to-green-600 text-white">
                         <div className="flex items-center gap-4">
                             <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
-                                <CheckCircle className="w-6 h-6" />
+                                <CheckCircle size={24} weight="duotone" />
                             </div>
                             <div>
                                 <p className="text-white/80 text-sm">Processed This Month</p>
@@ -270,7 +270,7 @@ export default function RefundsPage() {
                     className="flex flex-col sm:flex-row gap-4 mb-6"
                 >
                     <div className="relative flex-1">
-                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                        <MagnifyingGlass size={20} weight="duotone" className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
                         <input
                             type="text"
                             placeholder="Search refunds..."
@@ -374,7 +374,7 @@ export default function RefundsPage() {
                                                     : "border-gray-200 hover:border-gray-300"
                                                     }`}
                                             >
-                                                <CreditCard className={`w-6 h-6 mx-auto mb-2 ${refundType === "original" ? "text-primary" : "text-gray-400"}`} />
+                                                <CreditCard size={24} weight="duotone" className={`mx-auto mb-2 ${refundType === "original" ? "text-primary" : "text-gray-400"}`} />
                                                 <p className="font-medium">Original Payment</p>
                                                 <p className="text-xs text-gray-500">Refund to {selectedRefund.paymentMethod}</p>
                                             </button>
@@ -385,7 +385,7 @@ export default function RefundsPage() {
                                                     : "border-gray-200 hover:border-gray-300"
                                                     }`}
                                             >
-                                                <Wallet className={`w-6 h-6 mx-auto mb-2 ${refundType === "credit" ? "text-primary" : "text-gray-400"}`} />
+                                                <Wallet size={24} weight="duotone" className={`mx-auto mb-2 ${refundType === "credit" ? "text-primary" : "text-gray-400"}`} />
                                                 <p className="font-medium">Store Credit</p>
                                                 <p className="text-xs text-gray-500">Add to customer balance</p>
                                             </button>
@@ -393,10 +393,10 @@ export default function RefundsPage() {
                                     </div>
 
                                     <div className="flex gap-3 pt-4 border-t">
-                                        <Button className="flex-1" leftIcon={<CheckCircle className="w-4 h-4" />}>
+                                        <Button className="flex-1" leftIcon={<CheckCircle size={16} weight="duotone" />}>
                                             Approve Refund
                                         </Button>
-                                        <Button variant="outline" className="flex-1 text-red-600 border-red-300" leftIcon={<XCircle className="w-4 h-4" />}>
+                                        <Button variant="outline" className="flex-1 text-red-600 border-red-300" leftIcon={<XCircle size={16} weight="duotone" />}>
                                             Reject
                                         </Button>
                                     </div>

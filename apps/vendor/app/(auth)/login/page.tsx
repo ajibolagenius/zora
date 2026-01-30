@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { Store, Mail, Lock, Eye, EyeOff, ArrowRight } from "lucide-react";
+import { Storefront, Envelope, Lock, Eye, EyeSlash, ArrowRight } from "@phosphor-icons/react";
 import { Button, Input, Card } from "@zora/ui-web";
 import { useAuth } from "../../../hooks";
 
@@ -61,7 +61,7 @@ export default function VendorLoginPage() {
                         transition={{ type: "spring", stiffness: 200, damping: 15 }}
                         className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary mb-4"
                     >
-                        <Store className="w-8 h-8 text-white" />
+                        <Storefront size={32} weight="duotone" className="text-white" />
                     </motion.div>
                     <h1 className="text-3xl font-bold text-white mb-2">
                         Welcome back
@@ -89,7 +89,7 @@ export default function VendorLoginPage() {
                             placeholder="vendor@example.com"
                             value={formData.email}
                             onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                            leftIcon={<Mail className="w-4 h-4" />}
+                            leftIcon={<Envelope size={16} weight="duotone" />}
                             required
                         />
 
@@ -100,14 +100,14 @@ export default function VendorLoginPage() {
                                 placeholder="Enter your password"
                                 value={formData.password}
                                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                                leftIcon={<Lock className="w-4 h-4" />}
+                                leftIcon={<Lock size={16} weight="duotone" />}
                                 rightIcon={
                                     <button
                                         type="button"
                                         onClick={() => setShowPassword(!showPassword)}
                                         className="focus:outline-none"
                                     >
-                                        {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                                        {showPassword ? <EyeSlash size={16} weight="duotone" /> : <Eye size={16} weight="duotone" />}
                                     </button>
                                 }
                                 required
@@ -136,7 +136,7 @@ export default function VendorLoginPage() {
                             size="lg"
                             isLoading={isLoading}
                             loadingText="Signing in..."
-                            rightIcon={<ArrowRight className="w-4 h-4" />}
+                            rightIcon={<ArrowRight size={16} weight="duotone" />}
                         >
                             Sign in
                         </Button>

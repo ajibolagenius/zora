@@ -3,18 +3,18 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import {
-    Store,
+    Storefront,
     Camera,
     Globe,
     Clock,
     Phone,
-    Mail,
+    Envelope,
     MapPin,
-    Save,
-    Instagram,
-    Facebook,
-    ExternalLink,
-} from "lucide-react";
+    FloppyDisk,
+    InstagramLogo,
+    FacebookLogo,
+    ArrowSquareOut,
+} from "@phosphor-icons/react";
 import { Header } from "../../../components/Header";
 import { Card, Button, Badge, Avatar, AvatarFallback } from "@zora/ui-web";
 
@@ -72,7 +72,7 @@ export default function ShopProfilePage() {
                     <Button
                         onClick={handleSave}
                         isLoading={isSaving}
-                        leftIcon={<Save className="w-4 h-4" />}
+                        leftIcon={<FloppyDisk size={16} weight="duotone" />}
                     >
                         Save Changes
                     </Button>
@@ -91,7 +91,7 @@ export default function ShopProfilePage() {
                             <div className="relative h-48 bg-gradient-to-r from-primary to-primary-dark">
                                 <button className="absolute inset-0 flex items-center justify-center bg-black/20 opacity-0 hover:opacity-100 transition-opacity">
                                     <div className="flex items-center gap-2 bg-white px-4 py-2 rounded-lg shadow-lg">
-                                        <Camera className="w-5 h-5 text-gray-600" />
+                                        <Camera size={20} weight="duotone" className="text-gray-600" />
                                         <span className="text-sm font-medium text-gray-700">Change Cover</span>
                                     </div>
                                 </button>
@@ -105,7 +105,7 @@ export default function ShopProfilePage() {
                                             <AvatarFallback className="text-2xl">AS</AvatarFallback>
                                         </Avatar>
                                         <button className="absolute bottom-0 right-0 p-2 bg-white rounded-full shadow-md hover:bg-gray-50">
-                                            <Camera className="w-4 h-4 text-gray-600" />
+                                            <Camera size={16} weight="duotone" className="text-gray-600" />
                                         </button>
                                     </div>
                                     <div className="flex-1 pt-4 sm:pt-8">
@@ -128,7 +128,7 @@ export default function ShopProfilePage() {
                     >
                         <Card>
                             <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                                <Store className="w-5 h-5 text-primary" />
+                                <Storefront size={20} weight="duotone" className="text-primary" />
                                 Basic Information
                             </h3>
                             <div className="space-y-4">
@@ -197,7 +197,7 @@ export default function ShopProfilePage() {
                     >
                         <Card>
                             <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                                <Phone className="w-5 h-5 text-primary" />
+                                <Phone size={20} weight="duotone" className="text-primary" />
                                 Contact Information
                             </h3>
                             <div className="grid md:grid-cols-2 gap-4">
@@ -206,7 +206,7 @@ export default function ShopProfilePage() {
                                         Email Address
                                     </label>
                                     <div className="relative">
-                                        <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                                        <Envelope size={20} weight="duotone" className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
                                         <input
                                             type="email"
                                             value={formData.email}
@@ -220,7 +220,7 @@ export default function ShopProfilePage() {
                                         Phone Number
                                     </label>
                                     <div className="relative">
-                                        <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                                        <Phone size={20} weight="duotone" className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
                                         <input
                                             type="tel"
                                             value={formData.phone}
@@ -234,7 +234,7 @@ export default function ShopProfilePage() {
                                         Business Address
                                     </label>
                                     <div className="relative">
-                                        <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                                        <MapPin size={20} weight="duotone" className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
                                         <input
                                             type="text"
                                             value={formData.address}
@@ -248,7 +248,7 @@ export default function ShopProfilePage() {
                                         Website
                                     </label>
                                     <div className="relative">
-                                        <Globe className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                                        <Globe size={20} weight="duotone" className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
                                         <input
                                             type="url"
                                             value={formData.website}
@@ -269,7 +269,7 @@ export default function ShopProfilePage() {
                     >
                         <Card>
                             <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                                <Clock className="w-5 h-5 text-primary" />
+                                <Clock size={20} weight="duotone" className="text-primary" />
                                 Operating Hours
                             </h3>
                             <div className="space-y-3">
@@ -348,7 +348,7 @@ export default function ShopProfilePage() {
                     >
                         <Card>
                             <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                                <ExternalLink className="w-5 h-5 text-primary" />
+                                <ArrowSquareOut size={20} weight="duotone" className="text-primary" />
                                 Social Media
                             </h3>
                             <div className="grid md:grid-cols-2 gap-4">
@@ -357,7 +357,7 @@ export default function ShopProfilePage() {
                                         Instagram
                                     </label>
                                     <div className="relative">
-                                        <Instagram className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                                        <InstagramLogo size={20} weight="duotone" className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
                                         <input
                                             type="text"
                                             value={formData.socialLinks.instagram}
@@ -375,7 +375,7 @@ export default function ShopProfilePage() {
                                         Facebook
                                     </label>
                                     <div className="relative">
-                                        <Facebook className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                                        <FacebookLogo size={20} weight="duotone" className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
                                         <input
                                             type="text"
                                             value={formData.socialLinks.facebook}

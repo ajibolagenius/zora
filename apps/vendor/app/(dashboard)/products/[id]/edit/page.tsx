@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { use, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
@@ -14,9 +14,10 @@ import {
     CurrencyDollar,
     Tag,
     Stack,
-    Info,
+    FloppyDisk,
+    WarningCircle,
 } from "@phosphor-icons/react";
-import { Header } from "../../../../components/Header";
+import { Header } from "../../../../../components/Header";
 import {
     Button,
     Input,
@@ -29,12 +30,10 @@ import {
     SelectItem,
     SelectTrigger,
     SelectValue,
-    Tabs,
-    TabsList,
-    TabsTrigger,
-    TabsContent,
     Badge,
+    SkeletonCard,
 } from "@zora/ui-web";
+import { useAuth, useProductDetail, useUpdateProduct } from "../../../../../hooks";
 
 const categories = [
     { value: "spices", label: "Spices & Seasonings" },
@@ -55,9 +54,15 @@ const regions = [
     { value: "central", label: "Central Africa" },
 ];
 
-export default function NewProductPage() {
+export default function EditProductPage({ params }: { params: Promise<{ id: string }> }) {
+    const resolvedParams = use(params);
+    const productId = resolvedParams.id;
     const router = useRouter();
-    const [isSubmitting, setIsSubmitting] = useState(false);
+    const { vendor } = useAuth();
+
+    const { data: product, isLoading, isError } = useProductDetail(productId);
+    const updateProductMutation = useUpdateProduct();
+
     const [images, setImages] = useState<string[]>([]);
     const [formData, setFormData] = useState({
         name: "",
@@ -75,15 +80,42 @@ export default function NewProductPage() {
         tags: [] as string[],
     });
     const [newTag, setNewTag] = useState("");
+    const [hasChanges, setHasChanges] = useState(false);
+
+    // Populate form when product loads
+    useEffect(() => {
+        if (product) {
+            setFormData({
+                name: product.name || "",
+                sku: product.sku || "",
+                description: product.description || "",
+                price: product.price?.toString() || "",
+                compareAtPrice: product.compare_at_price?.toString() || "",
+                cost: product.cost_per_item?.toString() || "",
+                category: product.category || "",
+                region: product.region || "",
+                stock: product.stock_quantity?.toString() || "",
+                lowStockThreshold: product.low_stock_threshold?.toString() || "10",
+                weight: product.weight?.toString() || "",
+                weightUnit: product.weight_unit || "g",
+                tags: product.tags || [],
+            });
+            if (product.image_url) {
+                setImages([product.image_url]);
+            }
+        }
+    }, [product]);
 
     const updateField = (field: string, value: string) => {
         setFormData((prev) => ({ ...prev, [field]: value }));
+        setHasChanges(true);
     };
 
     const addTag = () => {
         if (newTag && !formData.tags.includes(newTag)) {
             setFormData((prev) => ({ ...prev, tags: [...prev.tags, newTag] }));
             setNewTag("");
+            setHasChanges(true);
         }
     };
 
@@ -92,25 +124,74 @@ export default function NewProductPage() {
             ...prev,
             tags: prev.tags.filter((t) => t !== tag),
         }));
+        setHasChanges(true);
     };
 
-    const handleSubmit = async (status: "draft" | "active") => {
-        setIsSubmitting(true);
-        // Simulate API call
-        await new Promise((resolve) => setTimeout(resolve, 1500));
-        setIsSubmitting(false);
-        router.push("/products");
+    const handleSubmit = async () => {
+        if (!product) return;
+
+        try {
+            await updateProductMutation.mutateAsync({
+                id: product.id,
+                name: formData.name,
+                sku: formData.sku || undefined,
+                description: formData.description || undefined,
+                price: parseFloat(formData.price) || 0,
+                compare_at_price: formData.compareAtPrice ? parseFloat(formData.compareAtPrice) : undefined,
+                cost_per_item: formData.cost ? parseFloat(formData.cost) : undefined,
+                category: formData.category || undefined,
+                region: formData.region || undefined,
+                stock_quantity: parseInt(formData.stock) || 0,
+                low_stock_threshold: parseInt(formData.lowStockThreshold) || 10,
+                weight: formData.weight ? parseFloat(formData.weight) : undefined,
+                weight_unit: formData.weightUnit || undefined,
+                tags: formData.tags.length > 0 ? formData.tags : undefined,
+                in_stock: parseInt(formData.stock) > 0,
+            });
+            router.push(`/products/${productId}`);
+        } catch (error) {
+            console.error("Failed to update product:", error);
+        }
     };
+
+    if (isLoading) {
+        return (
+            <>
+                <Header title="Edit Product" description="Loading..." />
+                <div className="p-8 max-w-5xl mx-auto">
+                    <SkeletonCard />
+                </div>
+            </>
+        );
+    }
+
+    if (isError || !product) {
+        return (
+            <>
+                <Header title="Edit Product" description="Error loading product" />
+                <div className="p-8 max-w-5xl mx-auto">
+                    <Card className="p-8 text-center">
+                        <WarningCircle size={48} weight="duotone" className="mx-auto mb-4 text-red-500" />
+                        <h3 className="text-lg font-semibold text-gray-900 mb-2">Product not found</h3>
+                        <p className="text-gray-500 mb-4">The product you're trying to edit doesn't exist.</p>
+                        <Link href="/products">
+                            <Button>Back to Products</Button>
+                        </Link>
+                    </Card>
+                </div>
+            </>
+        );
+    }
 
     return (
         <>
-            <Header title="Add New Product" description="Create a new product listing" />
+            <Header title="Edit Product" description={`Editing: ${product.name}`} />
 
-            <div className="p-8 max-w-5xl mx-auto">
+            <div className="p-4 sm:p-6 lg:p-8 max-w-5xl mx-auto">
                 {/* Back Button */}
-                <Link href="/products" className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-6">
+                <Link href={`/products/${productId}`} className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-6">
                     <ArrowLeft size={16} weight="duotone" />
-                    Back to Products
+                    Back to Product
                 </Link>
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
@@ -179,7 +260,10 @@ export default function NewProductPage() {
                                             >
                                                 <img src={img} alt="" className="w-full h-full object-cover" />
                                                 <button
-                                                    onClick={() => setImages(images.filter((_, i) => i !== index))}
+                                                    onClick={() => {
+                                                        setImages(images.filter((_, i) => i !== index));
+                                                        setHasChanges(true);
+                                                    }}
                                                     className="absolute top-2 right-2 p-1 bg-white rounded-full shadow opacity-0 group-hover:opacity-100 transition-opacity"
                                                 >
                                                     <X size={16} weight="duotone" />
@@ -220,6 +304,8 @@ export default function NewProductPage() {
                                         <Input
                                             label="Price"
                                             placeholder="0.00"
+                                            type="number"
+                                            step="0.01"
                                             value={formData.price}
                                             onChange={(e) => updateField("price", e.target.value)}
                                             leftIcon={<span className="text-gray-400">£</span>}
@@ -227,6 +313,8 @@ export default function NewProductPage() {
                                         <Input
                                             label="Compare at Price"
                                             placeholder="0.00"
+                                            type="number"
+                                            step="0.01"
                                             value={formData.compareAtPrice}
                                             onChange={(e) => updateField("compareAtPrice", e.target.value)}
                                             leftIcon={<span className="text-gray-400">£</span>}
@@ -235,6 +323,8 @@ export default function NewProductPage() {
                                         <Input
                                             label="Cost per Item"
                                             placeholder="0.00"
+                                            type="number"
+                                            step="0.01"
                                             value={formData.cost}
                                             onChange={(e) => updateField("cost", e.target.value)}
                                             leftIcon={<span className="text-gray-400">£</span>}
@@ -311,7 +401,7 @@ export default function NewProductPage() {
 
                     {/* Sidebar */}
                     <div className="space-y-6">
-                        {/* Status & Actions */}
+                        {/* Save Actions */}
                         <motion.div
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
@@ -321,20 +411,26 @@ export default function NewProductPage() {
                                 <CardContent className="space-y-4">
                                     <Button
                                         className="w-full"
-                                        onClick={() => handleSubmit("active")}
-                                        isLoading={isSubmitting}
-                                        loadingText="Publishing..."
+                                        onClick={handleSubmit}
+                                        isLoading={updateProductMutation.isPending}
+                                        loadingText="Saving..."
+                                        leftIcon={<FloppyDisk size={16} weight="duotone" />}
                                     >
-                                        Publish Product
+                                        Save Changes
                                     </Button>
-                                    <Button
-                                        variant="outline"
-                                        className="w-full"
-                                        onClick={() => handleSubmit("draft")}
-                                        disabled={isSubmitting}
-                                    >
-                                        Save as Draft
-                                    </Button>
+                                    <Link href={`/products/${productId}`} className="block">
+                                        <Button
+                                            variant="outline"
+                                            className="w-full"
+                                        >
+                                            Cancel
+                                        </Button>
+                                    </Link>
+                                    {hasChanges && (
+                                        <p className="text-xs text-yellow-600 text-center">
+                                            You have unsaved changes
+                                        </p>
+                                    )}
                                 </CardContent>
                             </Card>
                         </motion.div>

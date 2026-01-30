@@ -3,21 +3,21 @@
 import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-    Search,
+    MagnifyingGlass,
     Package,
     Clock,
     CheckCircle,
     Truck,
     XCircle,
-    ChevronRight,
+    CaretRight,
     Calendar,
     MapPin,
     Phone,
-    Mail,
+    Envelope,
     Printer,
-    RefreshCw,
-    AlertCircle,
-} from "lucide-react";
+    ArrowsClockwise,
+    WarningCircle,
+} from "@phosphor-icons/react";
 import { Header } from "../../../components/Header";
 import {
     Button,
@@ -159,7 +159,7 @@ export default function OrdersPage() {
                         variant="outline"
                         size="sm"
                         onClick={handleRefresh}
-                        leftIcon={<RefreshCw className="w-4 h-4" />}
+                        leftIcon={<ArrowsClockwise size={16} weight="duotone" />}
                     >
                         Refresh
                         {newOrdersCount > 0 && (
@@ -214,7 +214,7 @@ export default function OrdersPage() {
                                 placeholder="Search orders..."
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
-                                leftIcon={<Search className="w-4 h-4" />}
+                                leftIcon={<MagnifyingGlass size={16} weight="duotone" />}
                                 inputSize="sm"
                             />
                         </div>
@@ -233,7 +233,7 @@ export default function OrdersPage() {
                 {/* Error State */}
                 {isError && (
                     <Card className="p-8 text-center">
-                        <AlertCircle className="w-12 h-12 mx-auto mb-4 text-red-500" />
+                        <WarningCircle size={48} weight="duotone" className="mx-auto mb-4 text-red-500" />
                         <h3 className="text-lg font-semibold text-gray-900 mb-2">Failed to load orders</h3>
                         <p className="text-gray-500 mb-4">There was an error loading your orders.</p>
                         <Button onClick={() => refetch()}>Try Again</Button>
@@ -283,7 +283,7 @@ export default function OrdersPage() {
                                             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                                                 <div className="flex items-center gap-3 sm:gap-4">
                                                     <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center flex-shrink-0 ${status.color}`}>
-                                                        <StatusIcon className="w-5 h-5 sm:w-6 sm:h-6" />
+                                                        <StatusIcon size={24} weight="duotone" />
                                                     </div>
                                                     <div className="min-w-0">
                                                         <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
@@ -319,7 +319,7 @@ export default function OrdersPage() {
                                                                 {statusConfig[nextStatus]?.label || nextStatus}
                                                             </Button>
                                                         )}
-                                                        <ChevronRight className="w-5 h-5 text-gray-400 hidden sm:block" />
+                                                        <CaretRight size={20} weight="duotone" className="text-gray-400 hidden sm:block" />
                                                     </div>
                                                 </div>
                                             </div>
@@ -373,13 +373,13 @@ export default function OrdersPage() {
                                         </div>
                                         {selectedOrder.customer?.email && (
                                             <div className="flex items-center gap-2 text-sm text-gray-600">
-                                                <Mail className="w-4 h-4" />
+                                                <Envelope size={16} weight="duotone" />
                                                 {selectedOrder.customer.email}
                                             </div>
                                         )}
                                         {selectedOrder.customer?.phone && (
                                             <div className="flex items-center gap-2 text-sm text-gray-600">
-                                                <Phone className="w-4 h-4" />
+                                                <Phone size={16} weight="duotone" />
                                                 {selectedOrder.customer.phone}
                                             </div>
                                         )}
@@ -392,13 +392,13 @@ export default function OrdersPage() {
                                     <Card padding="sm" className="space-y-3">
                                         {selectedOrder.delivery_address && (
                                             <div className="flex items-start gap-2 text-sm text-gray-600">
-                                                <MapPin className="w-4 h-4 mt-0.5" />
+                                                <MapPin size={16} weight="duotone" className="mt-0.5" />
                                                 {selectedOrder.delivery_address}
                                             </div>
                                         )}
                                         {selectedOrder.estimated_delivery && (
                                             <div className="flex items-center gap-2 text-sm text-gray-600">
-                                                <Calendar className="w-4 h-4" />
+                                                <Calendar size={16} weight="duotone" />
                                                 Est. delivery: {new Date(selectedOrder.estimated_delivery).toLocaleDateString()}
                                             </div>
                                         )}
@@ -448,7 +448,7 @@ export default function OrdersPage() {
                             </div>
 
                             <DialogFooter>
-                                <Button variant="outline" leftIcon={<Printer className="w-4 h-4" />}>
+                                <Button variant="outline" leftIcon={<Printer size={16} weight="duotone" />}>
                                     Print Label
                                 </Button>
                                 {nextStatusMap[selectedOrder.status] && (

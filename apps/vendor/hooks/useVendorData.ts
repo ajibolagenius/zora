@@ -311,3 +311,35 @@ export function useDeleteProduct() {
         },
     });
 }
+
+// =============================================================================
+// Product Detail Hook
+// =============================================================================
+
+export function useProductDetail(productId: string | null) {
+    return useQuery({
+        queryKey: vendorQueryKeys.productDetail(productId || ''),
+        queryFn: async () => {
+            if (!productId) throw new Error('No product ID');
+            return productsService.getById(productId);
+        },
+        enabled: !!productId,
+        staleTime: 30 * 1000,
+    });
+}
+
+// =============================================================================
+// Order Detail Hook
+// =============================================================================
+
+export function useOrderDetail(orderId: string | null) {
+    return useQuery({
+        queryKey: vendorQueryKeys.orderDetail(orderId || ''),
+        queryFn: async () => {
+            if (!orderId) throw new Error('No order ID');
+            return ordersService.getById(orderId);
+        },
+        enabled: !!orderId,
+        staleTime: 30 * 1000,
+    });
+}

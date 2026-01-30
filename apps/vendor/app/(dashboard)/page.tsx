@@ -6,17 +6,17 @@ import { motion } from "framer-motion";
 import {
     Package,
     ShoppingCart,
-    BarChart3,
-    Store,
-    DollarSign,
+    ChartBar,
+    Storefront,
+    CurrencyDollar,
     Users,
     Clock,
-    TrendingUp,
+    TrendUp,
     ArrowRight,
     Plus,
     MapPin,
-    RefreshCw,
-} from "lucide-react";
+    ArrowsClockwise,
+} from "@phosphor-icons/react";
 import { Header } from "../../components/Header";
 import {
     StatsCard,
@@ -128,7 +128,7 @@ export default function VendorDashboard() {
                         variant="outline"
                         size="sm"
                         onClick={handleRefresh}
-                        leftIcon={<RefreshCw className="w-4 h-4" />}
+                        leftIcon={<ArrowsClockwise size={16} weight="duotone" />}
                     >
                         Refresh
                     </Button>
@@ -188,7 +188,7 @@ export default function VendorDashboard() {
                                     <Button
                                         variant="ghost"
                                         size="sm"
-                                        rightIcon={<ArrowRight className="w-4 h-4" />}
+                                        rightIcon={<ArrowRight size={16} weight="duotone" />}
                                     >
                                         View All
                                     </Button>
@@ -201,7 +201,7 @@ export default function VendorDashboard() {
                                     </div>
                                 ) : !recentOrders || recentOrders.length === 0 ? (
                                     <div className="p-8 text-center text-gray-500">
-                                        <ShoppingCart className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+                                        <ShoppingCart size={48} weight="duotone" className="mx-auto mb-4 text-gray-300" />
                                         <p>No orders yet</p>
                                         <p className="text-sm">
                                             Orders will appear here when customers place them
@@ -284,7 +284,7 @@ export default function VendorDashboard() {
                                         className="flex items-center gap-3 p-4 bg-primary/5 rounded-xl hover:bg-primary/10 transition-colors"
                                     >
                                         <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                                            <Plus className="w-5 h-5 text-primary" />
+                                            <Plus size={20} weight="duotone" className="text-primary" />
                                         </div>
                                         <div>
                                             <p className="font-medium text-gray-900">Add New Product</p>
@@ -301,7 +301,7 @@ export default function VendorDashboard() {
                                         className="flex items-center gap-3 p-4 bg-yellow-50 rounded-xl hover:bg-yellow-100 transition-colors"
                                     >
                                         <div className="w-10 h-10 rounded-lg bg-yellow-100 flex items-center justify-center">
-                                            <ShoppingCart className="w-5 h-5 text-yellow-600" />
+                                            <ShoppingCart size={20} weight="duotone" className="text-yellow-600" />
                                         </div>
                                         <div>
                                             <p className="font-medium text-gray-900">Pending Orders</p>
@@ -318,7 +318,7 @@ export default function VendorDashboard() {
                                         className="flex items-center gap-3 p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors"
                                     >
                                         <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center">
-                                            <Store className="w-5 h-5 text-gray-600" />
+                                            <Storefront size={20} weight="duotone" className="text-gray-600" />
                                         </div>
                                         <div>
                                             <p className="font-medium text-gray-900">
@@ -337,7 +337,7 @@ export default function VendorDashboard() {
                                         className="flex items-center gap-3 p-4 bg-blue-50 rounded-xl hover:bg-blue-100 transition-colors"
                                     >
                                         <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center">
-                                            <BarChart3 className="w-5 h-5 text-blue-600" />
+                                            <ChartBar size={20} weight="duotone" className="text-blue-600" />
                                         </div>
                                         <div>
                                             <p className="font-medium text-gray-900">View Analytics</p>
@@ -354,7 +354,7 @@ export default function VendorDashboard() {
                                         className="flex items-center gap-3 p-4 bg-green-50 rounded-xl hover:bg-green-100 transition-colors"
                                     >
                                         <div className="w-10 h-10 rounded-lg bg-green-100 flex items-center justify-center">
-                                            <MapPin className="w-5 h-5 text-green-600" />
+                                            <MapPin size={20} weight="duotone" className="text-green-600" />
                                         </div>
                                         <div>
                                             <p className="font-medium text-gray-900">Delivery Settings</p>

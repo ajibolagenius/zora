@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { motion } from "framer-motion";
-import { TrendingUp, TrendingDown, Minus, type LucideIcon } from "lucide-react";
+import { TrendUp, TrendDown, Minus, type Icon } from "@phosphor-icons/react";
 import { cn } from "../lib/utils";
 
 interface StatsCardProps {
@@ -10,7 +10,7 @@ interface StatsCardProps {
     value: string | number;
     change?: number;
     changeLabel?: string;
-    icon?: LucideIcon;
+    icon?: Icon;
     iconColor?: string;
     iconBgColor?: string;
     loading?: boolean;
@@ -56,7 +56,7 @@ export function StatsCard({
             <div className="flex items-center justify-between mb-4">
                 {Icon && (
                     <div className={cn("h-12 w-12 rounded-xl flex items-center justify-center", iconBgColor)}>
-                        <Icon className={cn("h-6 w-6", iconColor)} />
+                        <Icon size={24} weight="duotone" className={iconColor} />
                     </div>
                 )}
                 {trend && (
@@ -68,9 +68,9 @@ export function StatsCard({
                             trend === "neutral" && "text-gray-500"
                         )}
                     >
-                        {trend === "up" && <TrendingUp className="h-4 w-4" />}
-                        {trend === "down" && <TrendingDown className="h-4 w-4" />}
-                        {trend === "neutral" && <Minus className="h-4 w-4" />}
+                        {trend === "up" && <TrendUp size={16} weight="duotone" />}
+                        {trend === "down" && <TrendDown size={16} weight="duotone" />}
+                        {trend === "neutral" && <Minus size={16} weight="duotone" />}
                         <span>{change && change > 0 ? "+" : ""}{change}%</span>
                     </div>
                 )}

@@ -4,17 +4,17 @@ import { useState, useMemo } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import {
-    Search,
-    Download,
+    MagnifyingGlass,
+    DownloadSimple,
     Eye,
     Package,
     Clock,
     CheckCircle,
     Truck,
     XCircle,
-    RefreshCw,
-    AlertCircle,
-} from "lucide-react";
+    ArrowsClockwise,
+    WarningCircle,
+} from "@phosphor-icons/react";
 import { Header } from "../../../components/Header";
 import {
     Button,
@@ -240,7 +240,7 @@ export default function OrdersPage() {
                 <div className="flex items-center gap-1">
                     <Link href={`/orders/${order.id}`}>
                         <Button variant="ghost" size="icon" className="h-8 w-8">
-                            <Eye className="w-4 h-4" />
+                            <Eye size={16} weight="duotone" />
                         </Button>
                     </Link>
                     {order.payment_status === "paid" && order.status !== "cancelled" && (
@@ -253,7 +253,7 @@ export default function OrdersPage() {
                                 setRefundDialogOpen(true);
                             }}
                         >
-                            <RefreshCw className="w-4 h-4" />
+                            <ArrowsClockwise size={16} weight="duotone" />
                         </Button>
                     )}
                 </div>
@@ -271,7 +271,7 @@ export default function OrdersPage() {
                         variant="outline"
                         size="sm"
                         onClick={() => refetch()}
-                        leftIcon={<RefreshCw className="w-4 h-4" />}
+                        leftIcon={<ArrowsClockwise size={16} weight="duotone" />}
                     >
                         Refresh
                         {realtimeStats.pendingOrders > 0 && (
@@ -318,7 +318,7 @@ export default function OrdersPage() {
                                     placeholder="Search by order ID, customer, or vendor..."
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
-                                    leftIcon={<Search className="w-4 h-4" />}
+                                    leftIcon={<MagnifyingGlass size={16} weight="duotone" />}
                                 />
                             </div>
                             <Select value={selectedStatus} onValueChange={setSelectedStatus}>
@@ -338,7 +338,7 @@ export default function OrdersPage() {
                         </div>
                         {/* Actions Row */}
                         <div className="flex justify-end">
-                            <Button variant="outline" size="sm" leftIcon={<Download className="w-4 h-4" />}>
+                            <Button variant="outline" size="sm" leftIcon={<DownloadSimple size={16} weight="duotone" />}>
                                 Export Orders
                             </Button>
                         </div>
@@ -357,7 +357,7 @@ export default function OrdersPage() {
                 {/* Error State */}
                 {isError && (
                     <Card className="p-8 text-center">
-                        <AlertCircle className="w-12 h-12 mx-auto mb-4 text-red-500" />
+                        <WarningCircle size={48} weight="duotone" className="mx-auto mb-4 text-red-500" />
                         <h3 className="text-lg font-semibold text-slate-900 mb-2">Failed to load orders</h3>
                         <p className="text-slate-500 mb-4">There was an error loading orders.</p>
                         <Button onClick={() => refetch()}>Try Again</Button>

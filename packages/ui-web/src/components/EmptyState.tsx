@@ -2,12 +2,12 @@
 
 import * as React from "react";
 import { motion } from "framer-motion";
-import { Package, Search, Users, ShoppingCart, type LucideIcon } from "lucide-react";
+import { Package, MagnifyingGlass, Users, ShoppingCart, type Icon } from "@phosphor-icons/react";
 import { Button } from "./Button";
 import { cn } from "../lib/utils";
 
 interface EmptyStateProps {
-    icon?: LucideIcon;
+    icon?: Icon;
     title: string;
     description?: string;
     action?: {
@@ -46,7 +46,7 @@ export function EmptyState({
                 className="mb-6"
             >
                 <div className="h-20 w-20 rounded-full bg-gray-100 flex items-center justify-center">
-                    <Icon className="h-10 w-10 text-gray-400" />
+                    <Icon size={40} weight="duotone" className="text-gray-400" />
                 </div>
             </motion.div>
             <motion.h3

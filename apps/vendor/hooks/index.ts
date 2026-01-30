@@ -12,5 +12,15 @@ export {
     useCreateProduct,
     useUpdateProduct,
     useDeleteProduct,
+    useProductDetail,
+    useOrderDetail,
     vendorQueryKeys,
 } from './useVendorData';
+export {
+    useVendorConversations,
+    useVendorMessages,
+    useSendVendorMessage,
+    useMarkMessagesRead,
+    useVendorUnreadCount,
+    vendorMessagingQueryKeys,
+} from './useVendorMessaging';

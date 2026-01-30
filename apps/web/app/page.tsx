@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useState } from "react";
-import { ArrowUpRight, Star, ShoppingBag, TrendingUp, Truck, Globe, CreditCard, Menu, X, MapPin, Users, Shield, Zap, Heart, Package, ChevronDown } from "lucide-react";
+import { ArrowSquareOut, Star, Bag, TrendUp, Truck, Globe, CreditCard, List, X, MapPin, Users, Shield, Lightning, Heart, Package, CaretDown } from "@phosphor-icons/react";
 
 // Zora Logo Component
 const ZoraLogo = ({ className = "w-10 h-10" }: { className?: string }) => (
@@ -64,7 +64,7 @@ export default function Home() {
                             Get Started
                         </Link>
                         <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="md:hidden p-2 text-white hover:bg-white/10 rounded-lg">
-                            {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+                            {mobileMenuOpen ? <X size={20} weight="duotone" /> : <List size={20} weight="duotone" />}
                         </button>
                     </div>
                 </div>
@@ -125,7 +125,7 @@ export default function Home() {
                                     className="inline-flex items-center justify-center gap-2 bg-secondary hover:bg-secondary-dark text-gray-900 px-8 py-4 rounded-full text-base font-semibold transition-all shadow-lg shadow-secondary/25"
                                 >
                                     Download App
-                                    <ArrowUpRight className="w-5 h-5" />
+                                    <ArrowSquareOut size={20} weight="duotone" />
                                 </Link>
                                 <Link
                                     href="/vendor-onboarding"
@@ -148,7 +148,7 @@ export default function Home() {
                                     </span>
                                 </div>
                                 <div className="flex items-center gap-1.5">
-                                    <Star className="w-5 h-5 fill-secondary text-secondary" />
+                                    <Star size={20} weight="duotone" className="fill-secondary text-secondary" />
                                     <span className="text-sm font-semibold text-white">4.8</span>
                                     <span className="text-sm text-white/60">rating</span>
                                 </div>
@@ -169,7 +169,7 @@ export default function Home() {
                                 <div className="absolute -top-4 -left-16 sm:-left-24 bg-white rounded-2xl shadow-xl p-4 w-[140px] sm:w-[160px]">
                                     <div className="flex items-center gap-2 mb-2">
                                         <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
-                                            <TrendingUp className="w-4 h-4 text-green-600" />
+                                            <TrendUp size={16} weight="duotone" className="text-green-600" />
                                         </div>
                                         <span className="text-xs font-medium text-gray-500">Daily Orders</span>
                                     </div>
@@ -178,14 +178,14 @@ export default function Home() {
                                 </div>
 
                                 <div className="absolute top-1/3 -right-12 sm:-right-20 bg-gradient-to-br from-secondary to-yellow-500 rounded-2xl shadow-xl p-4 w-[130px]">
-                                    <ShoppingBag className="w-5 h-5 text-gray-900/70 mb-2" />
+                                    <Bag size={20} weight="duotone" className="text-gray-900/70 mb-2" />
                                     <div className="text-3xl font-bold text-gray-900">100+</div>
                                     <span className="text-xs text-gray-700">Vendors</span>
                                 </div>
 
                                 <div className="absolute -bottom-4 -left-8 sm:-left-16 bg-white rounded-2xl shadow-xl p-4 w-[150px]">
                                     <div className="flex items-center gap-2 mb-2">
-                                        <Truck className="w-5 h-5 text-blue-600" />
+                                        <Truck size={20} weight="duotone" className="text-blue-600" />
                                         <span className="text-xs font-medium text-gray-500">UK Wide</span>
                                     </div>
                                     <p className="text-xs text-gray-600">Fast delivery across the UK</p>
@@ -198,7 +198,7 @@ export default function Home() {
                 {/* Scroll Indicator */}
                 <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-white/50">
                     <span className="text-xs">Scroll to explore</span>
-                    <ChevronDown className="w-5 h-5 animate-bounce" />
+                    <CaretDown size={20} weight="duotone" className="animate-bounce" />
                 </div>
             </section>
 
@@ -211,7 +211,7 @@ export default function Home() {
                         <span className="text-xs text-gray-400 uppercase tracking-wider">Trusted Partners</span>
                         {["Stripe", "Klarna", "Clearpay"].map((partner) => (
                             <div key={partner} className="flex items-center gap-2 opacity-60 hover:opacity-100 transition-opacity">
-                                <CreditCard className="w-5 h-5 text-gray-400" />
+                                <CreditCard size={20} weight="duotone" className="text-gray-400" />
                                 <span className="text-sm font-semibold text-gray-600">{partner}</span>
                             </div>
                         ))}
@@ -229,7 +229,7 @@ export default function Home() {
                     <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
                         {regions.map((region) => (
                             <div key={region.name} className={`bg-gradient-to-br ${region.color} rounded-2xl p-4 md:p-5 text-white cursor-pointer hover:scale-[1.02] transition-transform`}>
-                                <Globe className="w-6 h-6 mb-2 opacity-80" />
+                                <Globe size={24} weight="duotone" className="mb-2 opacity-80" />
                                 <span className="font-semibold text-sm md:text-base">{region.name}</span>
                             </div>
                         ))}
@@ -247,13 +247,13 @@ export default function Home() {
                             <div className="space-y-3">
                                 {[
                                     { icon: Shield, text: "Verified Vendors", color: "bg-green-100 text-green-600" },
-                                    { icon: Zap, text: "Fast Checkout", color: "bg-yellow-100 text-yellow-600" },
+                                    { icon: Lightning, text: "Fast Checkout", color: "bg-yellow-100 text-yellow-600" },
                                     { icon: Heart, text: "Community First", color: "bg-pink-100 text-pink-600" },
                                     { icon: Package, text: "Quality Products", color: "bg-blue-100 text-blue-600" },
                                 ].map((item) => (
                                     <div key={item.text} className="flex items-center gap-3">
                                         <div className={`w-8 h-8 ${item.color} rounded-lg flex items-center justify-center`}>
-                                            <item.icon className="w-4 h-4" />
+                                            <item.icon size={16} weight="duotone" />
                                         </div>
                                         <span className="text-sm font-medium text-gray-700">{item.text}</span>
                                     </div>
@@ -271,7 +271,7 @@ export default function Home() {
                                 <span className="text-gray-400 text-sm">commission only</span>
                             </div>
                             <Link href="/vendors" className="inline-flex items-center gap-2 bg-secondary text-gray-900 px-4 py-2 rounded-full text-sm font-semibold hover:bg-secondary-dark transition-colors">
-                                Learn More <ArrowUpRight className="w-4 h-4" />
+                                Learn More <ArrowSquareOut size={16} weight="duotone" />
                             </Link>
                         </div>
 
@@ -364,7 +364,7 @@ export default function Home() {
                             <Link href="#" className="hover:text-white">Terms</Link>
                         </div>
                         <div className="flex items-center gap-2 text-sm text-gray-400">
-                            <MapPin className="w-4 h-4" />
+                            <MapPin size={16} weight="duotone" />
                             <span>United Kingdom</span>
                         </div>
                     </div>

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { Store, Mail, ArrowLeft, CheckCircle } from "lucide-react";
+import { Storefront, Envelope, ArrowLeft, CheckCircle } from "@phosphor-icons/react";
 import { Button, Input, Card } from "@zora/ui-web";
 
 export default function VendorForgotPasswordPage() {
@@ -44,7 +44,7 @@ export default function VendorForgotPasswordPage() {
                         transition={{ type: "spring", stiffness: 200, damping: 15 }}
                         className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary mb-4"
                     >
-                        <Store className="w-8 h-8 text-white" />
+                        <Storefront size={32} weight="duotone" className="text-white" />
                     </motion.div>
                     <h1 className="text-3xl font-bold text-white mb-2">
                         Reset Password
@@ -64,7 +64,7 @@ export default function VendorForgotPasswordPage() {
                             className="text-center py-6"
                         >
                             <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-green-100 mb-4">
-                                <CheckCircle className="w-8 h-8 text-green-600" />
+                                <CheckCircle size={32} weight="duotone" className="text-green-600" />
                             </div>
                             <h2 className="text-xl font-semibold text-gray-900 mb-2">
                                 Email Sent!
@@ -87,7 +87,7 @@ export default function VendorForgotPasswordPage() {
                                 </Button>
                                 <Link href="/login" className="block">
                                     <Button variant="ghost" className="w-full">
-                                        <ArrowLeft className="w-4 h-4 mr-2" />
+                                        <ArrowLeft size={16} weight="duotone" className="mr-2" />
                                         Back to sign in
                                     </Button>
                                 </Link>
@@ -111,7 +111,7 @@ export default function VendorForgotPasswordPage() {
                                 placeholder="vendor@example.com"
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
-                                leftIcon={<Mail className="w-4 h-4" />}
+                                leftIcon={<Envelope size={16} weight="duotone" />}
                                 required
                             />
 
@@ -129,7 +129,7 @@ export default function VendorForgotPasswordPage() {
                                 href="/login"
                                 className="flex items-center justify-center gap-2 text-sm text-gray-600 hover:text-primary transition-colors"
                             >
-                                <ArrowLeft className="w-4 h-4" />
+                                <ArrowLeft size={16} weight="duotone" />
                                 Back to sign in
                             </Link>
                         </form>

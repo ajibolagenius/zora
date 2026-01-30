@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { MapPin } from "lucide-react";
+import { MapPin } from "@phosphor-icons/react";
 import { ZoraLogo } from "./Header";
 
 export function Footer() {
@@ -90,7 +90,7 @@ export function Footer() {
                     </p>
                     <div className="flex items-center gap-6 text-sm text-gray-400">
                         <span className="flex items-center gap-2">
-                            <MapPin className="w-4 h-4" /> United Kingdom
+                            <MapPin size={16} weight="duotone" /> United Kingdom
                         </span>
                     </div>
                 </div>

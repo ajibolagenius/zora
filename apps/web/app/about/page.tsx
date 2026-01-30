@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
-import { Heart, Globe, Users, Target, ArrowUpRight, Sparkles, ShoppingBag, MapPin, Shield, Zap } from "lucide-react";
+import { Heart, Globe, Users, Target, ArrowSquareOut, Sparkle, Bag, MapPin, Shield, Lightning } from "@phosphor-icons/react";
 
 export default function AboutPage() {
     return (
@@ -31,13 +31,13 @@ export default function AboutPage() {
 
                         {/* Stats Cards */}
                         <div className="col-span-6 lg:col-span-2 bg-white rounded-2xl p-4 md:p-5 border border-gray-100 flex flex-col justify-center">
-                            <Globe className="w-8 h-8 text-primary mb-2" />
+                            <Globe size={32} weight="duotone" className="text-primary mb-2" />
                             <span className="text-2xl font-bold text-gray-900">5</span>
                             <span className="text-sm text-gray-500">African Regions</span>
                         </div>
 
                         <div className="col-span-6 lg:col-span-2 bg-white rounded-2xl p-4 md:p-5 border border-gray-100 flex flex-col justify-center">
-                            <Users className="w-8 h-8 text-secondary-dark mb-2" />
+                            <Users size={32} weight="duotone" className="text-secondary-dark mb-2" />
                             <span className="text-2xl font-bold text-gray-900">100+</span>
                             <span className="text-sm text-gray-500">Vendors</span>
                         </div>
@@ -62,12 +62,12 @@ export default function AboutPage() {
                             {[
                                 { icon: Heart, title: "Community First", color: "bg-pink-100 text-pink-600" },
                                 { icon: Target, title: "Authenticity", color: "bg-orange-100 text-orange-600" },
-                                { icon: Sparkles, title: "Cultural Pride", color: "bg-purple-100 text-purple-600" },
+                                { icon: Sparkle, title: "Cultural Pride", color: "bg-purple-100 text-purple-600" },
                                 { icon: Shield, title: "Trust & Quality", color: "bg-green-100 text-green-600" },
                             ].map((value) => (
                                 <div key={value.title} className="bg-white rounded-2xl p-4 border border-gray-100">
                                     <div className={`w-10 h-10 ${value.color} rounded-xl flex items-center justify-center mb-3`}>
-                                        <value.icon className="w-5 h-5" />
+                                        <value.icon size={20} weight="duotone" />
                                     </div>
                                     <span className="font-semibold text-sm text-gray-900">{value.title}</span>
                                 </div>
@@ -109,7 +109,7 @@ export default function AboutPage() {
                                 </div>
                                 <div className="flex gap-3">
                                     <Link href="#download" className="bg-secondary text-gray-900 px-5 py-2.5 rounded-full text-sm font-semibold hover:bg-secondary-dark transition-colors flex items-center gap-2">
-                                        Download App <ArrowUpRight className="w-4 h-4" />
+                                        Download App <ArrowSquareOut size={16} weight="duotone" />
                                     </Link>
                                     <Link href="/vendor-onboarding" className="bg-white/10 text-white px-5 py-2.5 rounded-full text-sm font-semibold hover:bg-white/20 transition-colors">
                                         Become a Vendor

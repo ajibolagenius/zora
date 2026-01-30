@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { Menu, X } from "lucide-react";
+import { List, X } from "@phosphor-icons/react";
 
 // Zora Logo Component
 export const ZoraLogo = ({ className = "w-10 h-10" }: { className?: string }) => (
@@ -80,9 +80,9 @@ export function Header({ variant = "light" }: HeaderProps) {
                         aria-expanded={mobileMenuOpen}
                     >
                         {mobileMenuOpen ? (
-                            <X className={`w-6 h-6 ${textClass}`} />
+                            <X size={24} weight="duotone" className={textClass} />
                         ) : (
-                            <Menu className={`w-6 h-6 ${textClass}`} />
+                            <List size={24} weight="duotone" className={textClass} />
                         )}
                     </button>
                 </div>

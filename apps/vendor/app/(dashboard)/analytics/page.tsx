@@ -3,15 +3,15 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import {
-    TrendingUp,
-    TrendingDown,
-    DollarSign,
+    TrendUp,
+    TrendDown,
+    CurrencyDollar,
     ShoppingCart,
     Users,
     Package,
     ArrowUpRight,
     Calendar,
-} from "lucide-react";
+} from "@phosphor-icons/react";
 import { Header } from "../../../components/Header";
 import {
     Card,
@@ -64,7 +64,7 @@ export default function AnalyticsPage() {
             title: "Total Revenue",
             value: formatCurrency(34100),
             change: 12,
-            icon: DollarSign,
+            icon: CurrencyDollar,
             iconColor: "text-green-600",
             iconBgColor: "bg-green-100",
         },
@@ -104,7 +104,7 @@ export default function AnalyticsPage() {
                     <h2 className="text-xl font-semibold text-gray-900">Overview</h2>
                     <Select value={timeRange} onValueChange={setTimeRange}>
                         <SelectTrigger className="w-40">
-                            <Calendar className="w-4 h-4 mr-2" />
+                            <Calendar size={16} weight="duotone" className="mr-2" />
                             <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
@@ -143,7 +143,7 @@ export default function AnalyticsPage() {
                                 <div className="flex items-center justify-between">
                                     <CardTitle>Revenue Overview</CardTitle>
                                     <Badge variant="success" className="gap-1">
-                                        <TrendingUp className="w-3 h-3" />
+                                        <TrendUp size={12} weight="duotone" />
                                         +12% vs last period
                                     </Badge>
                                 </div>
@@ -206,7 +206,7 @@ export default function AnalyticsPage() {
                                         <div className="flex items-center gap-2">
                                             <span className="font-semibold">{customerStats.newThisMonth}</span>
                                             <Badge variant="success" size="sm">
-                                                <ArrowUpRight className="w-3 h-3" />
+                                                <ArrowUpRight size={12} weight="duotone" />
                                             </Badge>
                                         </div>
                                     </div>
@@ -280,7 +280,7 @@ export default function AnalyticsPage() {
                                         <div className="text-right">
                                             <p className="font-semibold text-gray-900">{formatCurrency(product.revenue)}</p>
                                             <div className={`flex items-center justify-end gap-1 text-sm ${product.trend >= 0 ? "text-green-600" : "text-red-600"}`}>
-                                                {product.trend >= 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
+                                                {product.trend >= 0 ? <TrendUp size={12} weight="duotone" /> : <TrendDown size={12} weight="duotone" />}
                                                 {Math.abs(product.trend)}%
                                             </div>
                                         </div>

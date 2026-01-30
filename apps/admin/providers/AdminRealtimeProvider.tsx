@@ -76,6 +76,17 @@ export function AdminRealtimeProvider({
 }: AdminRealtimeProviderProps) {
     const queryClient = useQueryClient();
 
+    // Use refs for callbacks to prevent unnecessary re-subscriptions
+    const onNewOrderRef = useRef(onNewOrder);
+    const onNewApplicationRef = useRef(onNewApplication);
+    const onNewEmailThreadRef = useRef(onNewEmailThread);
+
+    useEffect(() => {
+        onNewOrderRef.current = onNewOrder;
+        onNewApplicationRef.current = onNewApplication;
+        onNewEmailThreadRef.current = onNewEmailThread;
+    }, [onNewOrder, onNewApplication, onNewEmailThread]);
+
     // Connection state from store
     const connectionStatus = useConnectionStore((s) => s.status);
     const initConnection = useConnectionStore((s) => s.initialize);
@@ -125,8 +136,8 @@ export function AdminRealtimeProvider({
         queryClient.invalidateQueries({ queryKey: ['admin', 'stats'] });
         queryClient.invalidateQueries({ queryKey: ['admin', 'pendingItems'] });
 
-        onNewOrder?.(order);
-    }, [queryClient, onNewOrder]);
+        onNewOrderRef.current?.(order);
+    }, [queryClient]);
 
     // Handle order update
     const handleOrderUpdate = useCallback(({ new: order }: { old: Order; new: Order }) => {
@@ -154,8 +165,8 @@ export function AdminRealtimeProvider({
         queryClient.invalidateQueries({ queryKey: ['admin', 'stats'] });
         queryClient.invalidateQueries({ queryKey: ['admin', 'vendors'] });
 
-        onNewApplication?.(application);
-    }, [queryClient, onNewApplication]);
+        onNewApplicationRef.current?.(application);
+    }, [queryClient]);
 
     // Handle vendor application update
     const handleApplicationUpdate = useCallback(({ new: application }: { old: VendorApplication; new: VendorApplication }) => {
@@ -181,8 +192,8 @@ export function AdminRealtimeProvider({
         queryClient.invalidateQueries({ queryKey: ['admin', 'emailThreads'] });
         queryClient.invalidateQueries({ queryKey: ['admin', 'pendingItems'] });
 
-        onNewEmailThread?.(thread);
-    }, [queryClient, onNewEmailThread]);
+        onNewEmailThreadRef.current?.(thread);
+    }, [queryClient]);
 
     // Handle email thread update
     const handleEmailThreadUpdate = useCallback(({ new: thread }: { old: EmailThread; new: EmailThread }) => {

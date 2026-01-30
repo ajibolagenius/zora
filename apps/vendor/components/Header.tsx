@@ -1,6 +1,6 @@
 "use client";
 
-import { Bell, Search } from "lucide-react";
+import { Bell, MagnifyingGlass } from "@phosphor-icons/react";
 import { Avatar, AvatarFallback, AvatarImage, Input } from "@zora/ui-web";
 import { motion } from "framer-motion";
 
@@ -27,14 +27,14 @@ export function Header({ title, description }: HeaderProps) {
                     <Input
                         placeholder="Search..."
                         inputSize="sm"
-                        leftIcon={<Search className="h-4 w-4" />}
+                        leftIcon={<MagnifyingGlass size={16} weight="duotone" />}
                     />
                 </div>
                 <button
                     className="relative p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
                     aria-label="Notifications"
                 >
-                    <Bell className="w-5 h-5" aria-hidden="true" />
+                    <Bell size={20} weight="duotone" aria-hidden="true" />
                     <span className="absolute top-1 right-1 w-2 h-2 bg-primary rounded-full" aria-label="New notifications available" />
                 </button>
                 <div className="flex items-center gap-2 sm:gap-3">

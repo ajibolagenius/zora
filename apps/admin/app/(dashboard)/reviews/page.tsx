@@ -4,16 +4,16 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import {
     Star,
-    Search,
+    MagnifyingGlass,
     CheckCircle,
     XCircle,
     Flag,
     Eye,
-    MessageSquare,
+    ChatCircle,
     ThumbsUp,
     ThumbsDown,
     User,
-} from "lucide-react";
+} from "@phosphor-icons/react";
 import { Header } from "../../../components/Header";
 import {
     Card,
@@ -103,7 +103,9 @@ const StarRating = ({ rating }: { rating: number }) => (
         {[1, 2, 3, 4, 5].map((star) => (
             <Star
                 key={star}
-                className={`w-4 h-4 ${star <= rating ? "fill-yellow-400 text-yellow-400" : "text-gray-300"}`}
+                size={16}
+                weight={star <= rating ? "fill" : "duotone"}
+                className={star <= rating ? "text-yellow-400" : "text-gray-300"}
             />
         ))}
     </div>
@@ -144,7 +146,7 @@ export default function ReviewsPage() {
                     <Card className="bg-gradient-to-br from-yellow-500 to-yellow-600 text-white">
                         <div className="flex items-center gap-4">
                             <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
-                                <MessageSquare className="w-6 h-6" />
+                                <ChatCircle size={24} weight="duotone" />
                             </div>
                             <div>
                                 <p className="text-white/80 text-sm">Pending Review</p>
@@ -155,7 +157,7 @@ export default function ReviewsPage() {
                     <Card className="bg-gradient-to-br from-red-500 to-red-600 text-white">
                         <div className="flex items-center gap-4">
                             <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
-                                <Flag className="w-6 h-6" />
+                                <Flag size={24} weight="duotone" />
                             </div>
                             <div>
                                 <p className="text-white/80 text-sm">Flagged</p>
@@ -166,7 +168,7 @@ export default function ReviewsPage() {
                     <Card className="bg-gradient-to-br from-blue-500 to-blue-600 text-white">
                         <div className="flex items-center gap-4">
                             <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
-                                <Star className="w-6 h-6" />
+                                <Star size={24} weight="duotone" />
                             </div>
                             <div>
                                 <p className="text-white/80 text-sm">Avg. Rating</p>
@@ -177,7 +179,7 @@ export default function ReviewsPage() {
                     <Card className="bg-gradient-to-br from-green-500 to-green-600 text-white">
                         <div className="flex items-center gap-4">
                             <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
-                                <CheckCircle className="w-6 h-6" />
+                                <CheckCircle size={24} weight="duotone" />
                             </div>
                             <div>
                                 <p className="text-white/80 text-sm">Total Reviews</p>
@@ -195,7 +197,7 @@ export default function ReviewsPage() {
                     className="flex flex-col sm:flex-row gap-4 mb-6"
                 >
                     <div className="relative flex-1">
-                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                        <MagnifyingGlass size={20} weight="duotone" className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
                         <input
                             type="text"
                             placeholder="Search reviews..."
@@ -248,7 +250,7 @@ export default function ReviewsPage() {
                                                     </Badge>
                                                     {review.reported && (
                                                         <Badge variant="error" size="sm">
-                                                            <Flag className="w-3 h-3 mr-1" />
+                                                            <Flag size={12} weight="duotone" className="mr-1" />
                                                             Reported
                                                         </Badge>
                                                     )}
@@ -263,7 +265,7 @@ export default function ReviewsPage() {
                                                 <p className="text-gray-700">{review.comment}</p>
                                                 <div className="flex items-center gap-4 mt-3 text-sm text-gray-500">
                                                     <span className="flex items-center gap-1">
-                                                        <ThumbsUp className="w-4 h-4" />
+                                                        <ThumbsUp size={16} weight="duotone" />
                                                         {review.helpful} helpful
                                                     </span>
                                                 </div>
@@ -280,17 +282,17 @@ export default function ReviewsPage() {
                                             }}
                                             className="flex-1"
                                         >
-                                            <Eye className="w-4 h-4 mr-1" />
+                                            <Eye size={16} weight="duotone" className="mr-1" />
                                             View
                                         </Button>
                                         {review.status === "pending" && (
                                             <>
                                                 <Button variant="ghost" size="sm" className="flex-1 text-green-600">
-                                                    <CheckCircle className="w-4 h-4 mr-1" />
+                                                    <CheckCircle size={16} weight="duotone" className="mr-1" />
                                                     Approve
                                                 </Button>
                                                 <Button variant="ghost" size="sm" className="flex-1 text-red-600">
-                                                    <XCircle className="w-4 h-4 mr-1" />
+                                                    <XCircle size={16} weight="duotone" className="mr-1" />
                                                     Reject
                                                 </Button>
                                             </>
@@ -303,7 +305,7 @@ export default function ReviewsPage() {
 
                     {filteredReviews.length === 0 && (
                         <Card className="text-center py-12">
-                            <MessageSquare className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+                            <ChatCircle size={48} weight="duotone" className="text-gray-300 mx-auto mb-4" />
                             <h3 className="text-lg font-medium text-gray-900 mb-2">No reviews found</h3>
                             <p className="text-gray-500">Try adjusting your search or filters</p>
                         </Card>

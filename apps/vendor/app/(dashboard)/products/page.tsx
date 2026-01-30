@@ -6,16 +6,16 @@ import Image from "next/image";
 import { motion } from "framer-motion";
 import {
     Plus,
-    Search,
+    MagnifyingGlass,
     Package,
-    Edit,
-    Trash2,
+    PencilSimple,
+    Trash,
     Eye,
-    Download,
-    Upload,
-    RefreshCw,
-    AlertCircle,
-} from "lucide-react";
+    DownloadSimple,
+    UploadSimple,
+    ArrowsClockwise,
+    WarningCircle,
+} from "@phosphor-icons/react";
 import { Header } from "../../../components/Header";
 import {
     Button,
@@ -135,7 +135,7 @@ export default function ProductsPage() {
                             />
                         ) : (
                             <div className="w-full h-full flex items-center justify-center">
-                                <Package className="w-6 h-6 text-gray-400" />
+                                <Package size={24} weight="duotone" className="text-gray-400" />
                             </div>
                         )}
                     </div>
@@ -210,12 +210,12 @@ export default function ProductsPage() {
                 <div className="flex items-center gap-1">
                     <Link href={`/products/${product.id}`}>
                         <Button variant="ghost" size="icon" className="h-8 w-8">
-                            <Eye className="w-4 h-4" />
+                            <Eye size={16} weight="duotone" />
                         </Button>
                     </Link>
                     <Link href={`/products/${product.id}/edit`}>
                         <Button variant="ghost" size="icon" className="h-8 w-8">
-                            <Edit className="w-4 h-4" />
+                            <PencilSimple size={16} weight="duotone" />
                         </Button>
                     </Link>
                     <Button
@@ -227,7 +227,7 @@ export default function ProductsPage() {
                             setDeleteDialogOpen(true);
                         }}
                     >
-                        <Trash2 className="w-4 h-4" />
+                        <Trash size={16} weight="duotone" />
                     </Button>
                 </div>
             ),
@@ -244,7 +244,7 @@ export default function ProductsPage() {
                         variant="outline"
                         size="sm"
                         onClick={() => refetch()}
-                        leftIcon={<RefreshCw className="w-4 h-4" />}
+                        leftIcon={<ArrowsClockwise size={16} weight="duotone" />}
                     >
                         Refresh
                     </Button>
@@ -268,7 +268,7 @@ export default function ProductsPage() {
                         <motion.div key={stat.label} variants={staggerItem}>
                             <Card className="flex items-center gap-4">
                                 <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${stat.color}`}>
-                                    <Package className="w-6 h-6" />
+                                    <Package size={24} weight="duotone" />
                                 </div>
                                 <div>
                                     <p className="text-2xl font-bold text-gray-900">{stat.value}</p>
@@ -289,7 +289,7 @@ export default function ProductsPage() {
                                     placeholder="Search products..."
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
-                                    leftIcon={<Search className="w-4 h-4" />}
+                                    leftIcon={<MagnifyingGlass size={16} weight="duotone" />}
                                 />
                             </div>
                             <div className="flex flex-wrap gap-2">
@@ -324,7 +324,7 @@ export default function ProductsPage() {
                             <Button
                                 variant="outline"
                                 size="sm"
-                                leftIcon={<Download className="w-4 h-4" />}
+                                leftIcon={<DownloadSimple size={16} weight="duotone" />}
                                 className="flex-1 sm:flex-none"
                             >
                                 <span className="hidden sm:inline">Export</span>
@@ -333,14 +333,14 @@ export default function ProductsPage() {
                             <Button
                                 variant="outline"
                                 size="sm"
-                                leftIcon={<Upload className="w-4 h-4" />}
+                                leftIcon={<UploadSimple size={16} weight="duotone" />}
                                 className="flex-1 sm:flex-none"
                             >
                                 <span className="hidden sm:inline">Import</span>
                                 <span className="sm:hidden">Import</span>
                             </Button>
                             <Link href="/products/new" className="flex-1 sm:flex-none">
-                                <Button size="sm" leftIcon={<Plus className="w-4 h-4" />} className="w-full">
+                                <Button size="sm" leftIcon={<Plus size={16} weight="duotone" />} className="w-full">
                                     <span className="hidden sm:inline">Add Product</span>
                                     <span className="sm:hidden">Add</span>
                                 </Button>
@@ -361,7 +361,7 @@ export default function ProductsPage() {
                 {/* Error State */}
                 {isError && (
                     <Card className="p-8 text-center">
-                        <AlertCircle className="w-12 h-12 mx-auto mb-4 text-red-500" />
+                        <WarningCircle size={48} weight="duotone" className="mx-auto mb-4 text-red-500" />
                         <h3 className="text-lg font-semibold text-gray-900 mb-2">Failed to load products</h3>
                         <p className="text-gray-500 mb-4">There was an error loading your products.</p>
                         <Button onClick={() => refetch()}>Try Again</Button>

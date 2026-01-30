@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { Shield, Mail, Lock, Eye, EyeOff, ArrowRight } from "lucide-react";
+import { Shield, Envelope, Lock, Eye, EyeSlash, ArrowRight } from "@phosphor-icons/react";
 import { Button, Input, Card } from "@zora/ui-web";
 import { useAuth } from "../../../hooks";
 
@@ -91,7 +91,7 @@ export default function AdminLoginPage() {
                         transition={{ type: "spring", stiffness: 200, damping: 15 }}
                         className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary mb-4"
                     >
-                        <Shield className="w-8 h-8 text-white" />
+                        <Shield size={32} weight="duotone" className="text-white" />
                     </motion.div>
                     <h1 className="text-3xl font-bold text-white mb-2">
                         Admin Portal
@@ -119,7 +119,7 @@ export default function AdminLoginPage() {
                             placeholder="admin@zoraapp.co.uk"
                             value={formData.email}
                             onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                            leftIcon={<Mail className="w-4 h-4" />}
+                            leftIcon={<Envelope size={16} weight="duotone" />}
                             required
                         />
 
@@ -130,14 +130,14 @@ export default function AdminLoginPage() {
                                 placeholder="Enter your password"
                                 value={formData.password}
                                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                                leftIcon={<Lock className="w-4 h-4" />}
+                                leftIcon={<Lock size={16} weight="duotone" />}
                                 rightIcon={
                                     <button
                                         type="button"
                                         onClick={() => setShowPassword(!showPassword)}
                                         className="focus:outline-none"
                                     >
-                                        {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                                        {showPassword ? <EyeSlash size={16} weight="duotone" /> : <Eye size={16} weight="duotone" />}
                                     </button>
                                 }
                                 required
@@ -166,7 +166,7 @@ export default function AdminLoginPage() {
                             size="lg"
                             isLoading={isLoading}
                             loadingText="Verifying..."
-                            rightIcon={<ArrowRight className="w-4 h-4" />}
+                            rightIcon={<ArrowRight size={16} weight="duotone" />}
                         >
                             Sign in
                         </Button>

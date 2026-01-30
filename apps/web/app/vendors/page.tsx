@@ -4,15 +4,15 @@ import Link from "next/link";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import {
-    ArrowUpRight, Check, ShoppingBag, BarChart3, Truck,
-    CreditCard, Users, Shield, Clock, Headphones, Globe, Store, TrendingUp, Zap
-} from "lucide-react";
+    ArrowSquareOut, Check, Bag, ChartBar, Truck,
+    CreditCard, Users, Shield, Clock, Headphones, Globe, Storefront, TrendUp, Lightning
+} from "@phosphor-icons/react";
 
 export default function VendorsPage() {
     const benefits = [
         { icon: Users, title: "Diaspora Customers", desc: "Reach thousands actively searching" },
-        { icon: Store, title: "Your Own Store", desc: "Beautiful, customizable page" },
-        { icon: BarChart3, title: "Analytics", desc: "Track sales & insights" },
+        { icon: Storefront, title: "Your Own Store", desc: "Beautiful, customizable page" },
+        { icon: ChartBar, title: "Analytics", desc: "Track sales & insights" },
         { icon: Truck, title: "Delivery Support", desc: "Flexible delivery options" },
         { icon: CreditCard, title: "Secure Payments", desc: "All major payment methods" },
         { icon: Headphones, title: "Dedicated Support", desc: "We help you grow" },
@@ -21,8 +21,8 @@ export default function VendorsPage() {
     const steps = [
         { num: "1", title: "Apply", desc: "Fill out our simple form", icon: Globe },
         { num: "2", title: "Get Verified", desc: "Review within 48 hours", icon: Shield },
-        { num: "3", title: "Set Up Shop", desc: "Add products & customize", icon: Store },
-        { num: "4", title: "Start Selling", desc: "Go live instantly", icon: TrendingUp },
+        { num: "3", title: "Set Up Shop", desc: "Add products & customize", icon: Storefront },
+        { num: "4", title: "Start Selling", desc: "Go live instantly", icon: TrendUp },
     ];
 
     const included = [
@@ -57,7 +57,7 @@ export default function VendorsPage() {
                                 </p>
                                 <div className="flex flex-wrap gap-3">
                                     <Link href="/vendor-onboarding" className="bg-secondary text-gray-900 px-5 py-2.5 rounded-full text-sm font-semibold hover:bg-secondary-dark transition-colors flex items-center gap-2">
-                                        Start Selling Today <ArrowUpRight className="w-4 h-4" />
+                                        Start Selling Today <ArrowSquareOut size={16} weight="duotone" />
                                     </Link>
                                     <Link href="/contact" className="bg-white/20 text-white px-5 py-2.5 rounded-full text-sm font-semibold hover:bg-white/30 transition-colors">
                                         Contact Sales
@@ -90,7 +90,7 @@ export default function VendorsPage() {
                         {benefits.map((benefit) => (
                             <div key={benefit.title} className="col-span-6 md:col-span-4 bg-white rounded-2xl p-4 border border-gray-100 hover:shadow-md transition-all">
                                 <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center mb-3">
-                                    <benefit.icon className="w-5 h-5 text-primary" />
+                                    <benefit.icon size={20} weight="duotone" className="text-primary" />
                                 </div>
                                 <h3 className="font-semibold text-gray-900 text-sm mb-1">{benefit.title}</h3>
                                 <p className="text-xs text-gray-500">{benefit.desc}</p>
@@ -100,7 +100,7 @@ export default function VendorsPage() {
                         {/* Pricing Card */}
                         <div className="col-span-12 md:col-span-6 bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl p-5 md:p-6 text-white">
                             <div className="flex items-center gap-2 mb-4">
-                                <Zap className="w-5 h-5 text-secondary" />
+                                <Lightning size={20} weight="duotone" className="text-secondary" />
                                 <span className="text-sm font-medium text-gray-400">Simple Pricing</span>
                             </div>
                             <div className="flex items-baseline gap-2 mb-2">
@@ -112,7 +112,7 @@ export default function VendorsPage() {
                                 {included.slice(0, 4).map((item) => (
                                     <div key={item} className="flex items-center gap-2">
                                         <div className="w-4 h-4 bg-secondary rounded-full flex items-center justify-center">
-                                            <Check className="w-2.5 h-2.5 text-gray-900" />
+                                            <Check size={10} weight="duotone" className="text-gray-900" />
                                         </div>
                                         <span className="text-sm text-gray-300">{item}</span>
                                     </div>
@@ -127,7 +127,7 @@ export default function VendorsPage() {
                                 {included.map((item) => (
                                     <div key={item} className="flex items-center gap-2">
                                         <div className="w-5 h-5 bg-green-100 rounded-full flex items-center justify-center">
-                                            <Check className="w-3 h-3 text-green-600" />
+                                            <Check size={12} weight="duotone" className="text-green-600" />
                                         </div>
                                         <span className="text-sm text-gray-600">{item}</span>
                                     </div>
@@ -143,7 +143,7 @@ export default function VendorsPage() {
                                     <div key={step.num} className="text-center">
                                         <div className="relative inline-block mb-3">
                                             <div className="w-14 h-14 bg-gray-100 rounded-2xl flex items-center justify-center">
-                                                <step.icon className="w-6 h-6 text-primary" />
+                                                <step.icon size={24} weight="duotone" className="text-primary" />
                                             </div>
                                             <div className="absolute -top-1 -right-1 w-6 h-6 bg-primary text-white rounded-full flex items-center justify-center text-xs font-bold">
                                                 {step.num}
@@ -166,7 +166,7 @@ export default function VendorsPage() {
                                     </p>
                                 </div>
                                 <Link href="/vendor-onboarding" className="bg-gray-900 text-white px-6 py-3 rounded-full text-sm font-semibold hover:bg-gray-800 transition-colors flex items-center gap-2 whitespace-nowrap">
-                                    Start Your Application <ArrowUpRight className="w-4 h-4" />
+                                    Start Your Application <ArrowSquareOut size={16} weight="duotone" />
                                 </Link>
                             </div>
                         </div>

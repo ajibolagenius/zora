@@ -2,11 +2,11 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { ArrowLeft, ArrowRight, Check, Building2, User, FileText, CreditCard, MapPin, Tag, Upload } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, Buildings, User, FileText, CreditCard, MapPin, Tag, Upload } from "@phosphor-icons/react";
 import { Button, Input, Card } from "@zora/ui-web";
 
 const steps = [
-    { id: 1, name: "Business Info", icon: Building2 },
+    { id: 1, name: "Business Info", icon: Buildings },
     { id: 2, name: "Contact Details", icon: User },
     { id: 3, name: "Documents", icon: FileText },
     { id: 4, name: "Bank Details", icon: CreditCard },
@@ -57,7 +57,7 @@ export default function VendorOnboardingPage() {
                         href="/"
                         className="text-xs sm:text-sm text-muted-foreground hover:text-foreground flex items-center gap-1 sm:gap-2"
                     >
-                        <ArrowLeft className="w-4 h-4" />
+                        <ArrowLeft size={16} weight="duotone" />
                         <span className="hidden sm:inline">Back to Home</span>
                         <span className="sm:hidden">Back</span>
                     </Link>
@@ -107,9 +107,9 @@ export default function VendorOnboardingPage() {
                                                 }`}
                                         >
                                             {currentStep > step.id ? (
-                                                <Check className="w-5 h-5 lg:w-6 lg:h-6" />
+                                                <Check size={20} weight="duotone" />
                                             ) : (
-                                                <step.icon className="w-5 h-5 lg:w-6 lg:h-6" />
+                                                <step.icon size={20} weight="duotone" />
                                             )}
                                         </div>
                                         <span
@@ -284,7 +284,7 @@ export default function VendorOnboardingPage() {
                                         className="border-2 border-dashed border-border rounded-xl p-6 text-center hover:border-primary transition-colors cursor-pointer"
                                     >
                                         <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                                            <FileText className="w-6 h-6 text-primary" />
+                                            <FileText size={24} weight="duotone" className="text-primary" />
                                         </div>
                                         <h3 className="font-semibold">{doc.name}</h3>
                                         <p className="text-sm text-muted-foreground mb-4">
@@ -405,7 +405,7 @@ export default function VendorOnboardingPage() {
                                 variant="ghost"
                                 onClick={handlePrevious}
                                 disabled={currentStep === 1}
-                                leftIcon={<ArrowLeft className="w-4 h-4" />}
+                                leftIcon={<ArrowLeft size={16} weight="duotone" />}
                                 aria-label="Go to previous step"
                             >
                                 Previous
@@ -413,7 +413,7 @@ export default function VendorOnboardingPage() {
                             {currentStep < 6 ? (
                                 <Button
                                     onClick={handleNext}
-                                    rightIcon={<ArrowRight className="w-4 h-4" />}
+                                    rightIcon={<ArrowRight size={16} weight="duotone" />}
                                     aria-label="Go to next step"
                                 >
                                     Next
@@ -421,7 +421,7 @@ export default function VendorOnboardingPage() {
                             ) : (
                                 <Button
                                     variant="success"
-                                    rightIcon={<Check className="w-4 h-4" />}
+                                    rightIcon={<Check size={16} weight="duotone" />}
                                     aria-label="Submit vendor application"
                                 >
                                     Submit Application

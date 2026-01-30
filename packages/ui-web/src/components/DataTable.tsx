@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronUp, ChevronDown, ChevronsUpDown, Search, Filter, MoreHorizontal } from "lucide-react";
+import { CaretUp, CaretDown, CaretUpDown, MagnifyingGlass } from "@phosphor-icons/react";
 import { cn } from "../lib/utils";
 import { Input } from "./Input";
 import { Button } from "./Button";
@@ -98,11 +98,11 @@ export function DataTable<T extends Record<string, unknown>>({
     };
 
     const getSortIcon = (key: string) => {
-        if (sortConfig?.key !== key) return <ChevronsUpDown className="h-4 w-4" />;
+        if (sortConfig?.key !== key) return <CaretUpDown size={16} weight="duotone" />;
         return sortConfig.direction === "asc" ? (
-            <ChevronUp className="h-4 w-4" />
+            <CaretUp size={16} weight="duotone" />
         ) : (
-            <ChevronDown className="h-4 w-4" />
+            <CaretDown size={16} weight="duotone" />
         );
     };
 
@@ -118,7 +118,7 @@ export function DataTable<T extends Record<string, unknown>>({
                             placeholder={searchPlaceholder}
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            leftIcon={<Search className="h-4 w-4" />}
+                            leftIcon={<MagnifyingGlass size={16} weight="duotone" />}
                             inputSize="sm"
                         />
                     </div>

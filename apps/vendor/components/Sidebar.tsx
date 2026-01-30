@@ -4,29 +4,32 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-    LayoutDashboard,
+    SquaresFour,
     Package,
     ShoppingCart,
-    BarChart3,
-    Store,
+    ChartBar,
+    Storefront,
     MapPin,
-    Settings,
-    LogOut,
-    ChevronLeft,
-    Menu,
+    Gear,
+    SignOut,
+    CaretLeft,
+    List,
     X,
-} from "lucide-react";
+    ChatCircle,
+} from "@phosphor-icons/react";
 import { cn } from "@zora/ui-web";
 import { useState, useEffect, useRef } from "react";
+import { useAuth, useVendorUnreadCount } from "../hooks";
 
 const navItems = [
-    { name: "Dashboard", icon: LayoutDashboard, href: "/" },
+    { name: "Dashboard", icon: SquaresFour, href: "/" },
     { name: "Products", icon: Package, href: "/products" },
     { name: "Orders", icon: ShoppingCart, href: "/orders" },
-    { name: "Analytics", icon: BarChart3, href: "/analytics" },
-    { name: "Shop Profile", icon: Store, href: "/shop" },
+    { name: "Messages", icon: ChatCircle, href: "/messages", showBadge: true },
+    { name: "Analytics", icon: ChartBar, href: "/analytics" },
+    { name: "Shop Profile", icon: Storefront, href: "/shop" },
     { name: "Coverage Area", icon: MapPin, href: "/coverage" },
-    { name: "Settings", icon: Settings, href: "/settings" },
+    { name: "Settings", icon: Gear, href: "/settings" },
 ];
 
 interface SidebarProps {
@@ -38,6 +41,8 @@ export function Sidebar({ mobileOpen = false, onMobileClose }: SidebarProps) {
     const pathname = usePathname();
     const [collapsed, setCollapsed] = useState(false);
     const prevPathnameRef = useRef(pathname);
+    const { vendor } = useAuth();
+    const { data: unreadCount } = useVendorUnreadCount(vendor?.id ?? null);
 
     // Close mobile menu when route changes (not when mobileOpen changes)
     useEffect(() => {
@@ -64,11 +69,11 @@ export function Sidebar({ mobileOpen = false, onMobileClose }: SidebarProps) {
                     aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
                     aria-expanded={!collapsed}
                 >
-                    {collapsed ? (
-                        <Menu className="w-5 h-5" aria-hidden="true" />
-                    ) : (
-                        <ChevronLeft className="w-5 h-5" aria-hidden="true" />
-                    )}
+{collapsed ? (
+                                        <List size={20} weight="duotone" aria-hidden="true" />
+                                    ) : (
+                                        <CaretLeft size={20} weight="duotone" aria-hidden="true" />
+                                    )}
                 </button>
                 {/* Mobile close button */}
                 <button
@@ -76,7 +81,7 @@ export function Sidebar({ mobileOpen = false, onMobileClose }: SidebarProps) {
                     className="p-2 rounded-lg hover:bg-white/10 transition-colors lg:hidden focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                     aria-label="Close navigation menu"
                 >
-                    <X className="w-5 h-5" aria-hidden="true" />
+                    <X size={20} weight="duotone" aria-hidden="true" />
                 </button>
             </div>
 
@@ -99,17 +104,23 @@ export function Sidebar({ mobileOpen = false, onMobileClose }: SidebarProps) {
                                     : "text-[#CBA990] hover:bg-white/10 hover:text-white"
                             )}
                         >
-                            <item.icon className="w-5 h-5 flex-shrink-0" />
+                            <item.icon size={20} weight="duotone" className="flex-shrink-0" />
                             <motion.span
                                 initial={false}
                                 animate={{
                                     opacity: collapsed ? 0 : 1,
                                     width: collapsed ? 0 : "auto"
                                 }}
-                                className="whitespace-nowrap overflow-hidden lg:block"
+                                className="whitespace-nowrap overflow-hidden lg:block flex-1"
                             >
                                 {item.name}
                             </motion.span>
+                            {/* Unread Badge for Messages */}
+                            {item.showBadge && unreadCount && unreadCount > 0 && !collapsed && (
+                                <span className="ml-auto bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full min-w-[20px] text-center">
+                                    {unreadCount > 99 ? '99+' : unreadCount}
+                                </span>
+                            )}
                             {/* Tooltip for collapsed state */}
                             {collapsed && (
                                 <div className="absolute left-full ml-2 px-2 py-1 bg-gray-900 text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-50 hidden lg:block">
@@ -127,7 +138,7 @@ export function Sidebar({ mobileOpen = false, onMobileClose }: SidebarProps) {
                     className="flex items-center gap-3 px-4 py-3 w-full text-[#CBA990] hover:text-white hover:bg-white/10 rounded-xl transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                     aria-label="Log out of your account"
                 >
-                    <LogOut className="w-5 h-5 flex-shrink-0" aria-hidden="true" />
+                    <SignOut size={20} weight="duotone" className="flex-shrink-0" aria-hidden="true" />
                     <motion.span
                         initial={false}
                         animate={{

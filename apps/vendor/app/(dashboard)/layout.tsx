@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Sidebar } from "../../components/Sidebar";
-import { Menu, Wifi, WifiOff } from "lucide-react";
+import { List, WifiHigh, WifiX } from "@phosphor-icons/react";
 import { VendorRealtimeProvider, useVendorRealtime } from "../../providers";
 import { useAuth } from "../../hooks";
 
@@ -34,9 +34,9 @@ function ConnectionIndicator() {
                 title={isConnected ? "Connected" : "Disconnected"}
             >
                 {isConnected ? (
-                    <Wifi className="w-3.5 h-3.5" />
+                    <WifiHigh size={14} weight="duotone" />
                 ) : (
-                    <WifiOff className="w-3.5 h-3.5" />
+                    <WifiX size={14} weight="duotone" />
                 )}
             </div>
         </div>
@@ -62,7 +62,7 @@ function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
                         aria-label="Open navigation menu"
                         aria-expanded={mobileMenuOpen}
                     >
-                        <Menu className="w-6 h-6 text-gray-600" aria-hidden="true" />
+                        <List size={24} weight="duotone" className="text-gray-600" aria-hidden="true" />
                     </button>
                     <span className="text-xl font-bold text-primary">ZORA</span>
                     <span className="text-xs bg-[#342418] px-2 py-0.5 rounded text-[#CBA990]">Vendor</span>

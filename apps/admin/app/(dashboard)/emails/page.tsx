@@ -3,21 +3,21 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import {
-    Mail,
-    Search,
+    Envelope,
+    MagnifyingGlass,
     Star,
     Archive,
-    Trash2,
-    Reply,
-    MoreHorizontal,
+    Trash,
+    ArrowBendUpLeft,
+    DotsThree,
     Paperclip,
-    Send,
+    PaperPlaneTilt,
     User,
     Clock,
     Tag,
-    Filter,
-    ChevronLeft,
-} from "lucide-react";
+    Funnel,
+    CaretLeft,
+} from "@phosphor-icons/react";
 import { Header } from "../../../components/Header";
 import {
     Card,
@@ -138,7 +138,7 @@ export default function EmailsPage() {
                     <Card className="bg-gradient-to-br from-blue-500 to-blue-600 text-white">
                         <div className="flex items-center gap-4">
                             <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
-                                <Mail className="w-6 h-6" />
+                                <Envelope size={24} weight="duotone" />
                             </div>
                             <div>
                                 <p className="text-white/80 text-sm">Total Threads</p>
@@ -149,7 +149,7 @@ export default function EmailsPage() {
                     <Card className="bg-gradient-to-br from-yellow-500 to-yellow-600 text-white">
                         <div className="flex items-center gap-4">
                             <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
-                                <Clock className="w-6 h-6" />
+                                <Clock size={24} weight="duotone" />
                             </div>
                             <div>
                                 <p className="text-white/80 text-sm">Open</p>
@@ -160,7 +160,7 @@ export default function EmailsPage() {
                     <Card className="bg-gradient-to-br from-red-500 to-red-600 text-white">
                         <div className="flex items-center gap-4">
                             <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
-                                <Star className="w-6 h-6" />
+                                <Star size={24} weight="duotone" />
                             </div>
                             <div>
                                 <p className="text-white/80 text-sm">Unread</p>
@@ -171,7 +171,7 @@ export default function EmailsPage() {
                     <Card className="bg-gradient-to-br from-green-500 to-green-600 text-white">
                         <div className="flex items-center gap-4">
                             <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
-                                <Send className="w-6 h-6" />
+                                <PaperPlaneTilt size={24} weight="duotone" />
                             </div>
                             <div>
                                 <p className="text-white/80 text-sm">Avg. Response</p>
@@ -192,7 +192,7 @@ export default function EmailsPage() {
                         <Card padding="none">
                             <div className="p-4 border-b">
                                 <div className="relative mb-3">
-                                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                                    <MagnifyingGlass size={16} weight="duotone" className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                                     <input
                                         type="text"
                                         placeholder="Search emails..."
@@ -275,7 +275,7 @@ export default function EmailsPage() {
                                             onClick={() => setSelectedThread(null)}
                                             className="lg:hidden p-2 -ml-2 rounded-lg hover:bg-gray-100"
                                         >
-                                            <ChevronLeft className="w-5 h-5" />
+                                            <CaretLeft size={20} weight="duotone" />
                                         </button>
                                         <div className="flex-1">
                                             <h3 className="font-semibold text-gray-900">{selectedThread.subject}</h3>
@@ -285,13 +285,13 @@ export default function EmailsPage() {
                                         </div>
                                         <div className="flex gap-2">
                                             <Button variant="ghost" size="sm">
-                                                <Star className="w-4 h-4" />
+                                                <Star size={16} weight="duotone" />
                                             </Button>
                                             <Button variant="ghost" size="sm">
-                                                <Archive className="w-4 h-4" />
+                                                <Archive size={16} weight="duotone" />
                                             </Button>
                                             <Button variant="ghost" size="sm" className="text-red-600">
-                                                <Trash2 className="w-4 h-4" />
+                                                <Trash size={16} weight="duotone" />
                                             </Button>
                                         </div>
                                     </div>
@@ -345,10 +345,10 @@ export default function EmailsPage() {
                                     <div className="flex items-center justify-between mt-3">
                                         <div className="flex gap-2">
                                             <Button variant="ghost" size="sm">
-                                                <Paperclip className="w-4 h-4" />
+                                                <Paperclip size={16} weight="duotone" />
                                             </Button>
                                         </div>
-                                        <Button leftIcon={<Send className="w-4 h-4" />}>
+                                        <Button leftIcon={<PaperPlaneTilt size={16} weight="duotone" />}>
                                             Send Reply
                                         </Button>
                                     </div>
@@ -357,7 +357,7 @@ export default function EmailsPage() {
                         ) : (
                             <Card className="h-full flex items-center justify-center text-center">
                                 <div>
-                                    <Mail className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                                    <Envelope size={64} weight="duotone" className="text-gray-300 mx-auto mb-4" />
                                     <h3 className="text-lg font-medium text-gray-900 mb-2">Select a conversation</h3>
                                     <p className="text-gray-500">Choose an email thread from the list to view and reply</p>
                                 </div>
