@@ -7,20 +7,24 @@ import { motion } from "framer-motion";
 interface HeaderProps {
     title: string;
     description?: string;
+    action?: React.ReactNode;
 }
 
-export function Header({ title, description }: HeaderProps) {
+export function Header({ title, description, action }: HeaderProps) {
     return (
         <motion.header
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             className="bg-white border-b border-gray-200 px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between sticky top-0 lg:top-0 z-30"
         >
-            <div className="min-w-0 flex-1">
-                <h1 className="text-xl sm:text-2xl font-bold font-display text-gray-900 truncate">{title}</h1>
-                {description && (
-                    <p className="text-gray-500 text-sm truncate hidden sm:block">{description}</p>
-                )}
+            <div className="flex items-center justify-between w-full">
+                <div className="min-w-0 flex-1">
+                    <h1 className="text-xl sm:text-2xl font-bold font-display text-gray-900 truncate">{title}</h1>
+                    {description && (
+                        <p className="text-gray-500 text-sm truncate hidden sm:block">{description}</p>
+                    )}
+                </div>
+                {action && <div className="ml-4">{action}</div>}
             </div>
             <div className="flex items-center gap-2 sm:gap-4 ml-4">
                 <div className="hidden lg:block w-64">

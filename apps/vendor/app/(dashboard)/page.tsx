@@ -92,7 +92,7 @@ export default function VendorDashboard() {
             {
                 title: "Today's Revenue",
                 value: formatCurrency(stats.todayRevenue),
-                icon: DollarSign,
+                icon: CurrencyDollar,
                 iconColor: "text-green-600",
                 iconBgColor: "bg-green-100",
             },
