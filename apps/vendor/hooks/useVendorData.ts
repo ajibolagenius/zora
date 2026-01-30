@@ -74,7 +74,7 @@ export function useVendorStats(vendorId: string | null) {
             // Fetch weekly orders
             const { data: weeklyOrdersData, error: weeklyError } = await supabase
                 .from('orders')
-                .select('id, total, status, created_at, delivered_at')
+                .select('id, total, status, created_at, actual_delivery')
                 .eq('vendor_id', vendorId)
                 .gte('created_at', weekAgoISO);
 
@@ -105,14 +105,14 @@ export function useVendorStats(vendorId: string | null) {
 
             // Calculate average fulfillment time
             const deliveredOrders = weeklyOrdersData?.filter(
-                (o) => o.status === 'delivered' && o.delivered_at && o.created_at
+                (o) => o.status === 'delivered' && o.actual_delivery && o.created_at
             ) || [];
 
             let avgFulfillmentTime = 'N/A';
             if (deliveredOrders.length > 0) {
                 const totalMinutes = deliveredOrders.reduce((sum, o) => {
                     const created = new Date(o.created_at).getTime();
-                    const delivered = new Date(o.delivered_at).getTime();
+                    const delivered = new Date(o.actual_delivery).getTime();
                     return sum + (delivered - created) / (1000 * 60);
                 }, 0);
                 const avgMinutes = totalMinutes / deliveredOrders.length;

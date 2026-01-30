@@ -43,7 +43,7 @@ export interface Order {
     created_at: string;
     updated_at?: string;
     estimated_delivery?: string;
-    delivered_at?: string;
+    actual_delivery?: string;
 }
 
 export interface CreateOrderInput {

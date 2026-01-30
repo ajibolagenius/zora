@@ -1,6 +1,4 @@
 "use client";
-// Force HMR update
-
 
 import { useState } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";

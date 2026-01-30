@@ -164,7 +164,7 @@ export const ordersService = {
         const updates: Partial<Order> = { status };
 
         if (status === 'delivered') {
-            updates.delivered_at = new Date().toISOString();
+            updates.actual_delivery = new Date().toISOString();
         }
 
         const { data, error } = await supabase

@@ -171,7 +171,7 @@ export interface Order {
   payment_intent_id?: string;
   created_at: string;
   estimated_delivery?: string;
-  delivered_at?: string;
+  actual_delivery?: string;
 }
 
 // Review Types

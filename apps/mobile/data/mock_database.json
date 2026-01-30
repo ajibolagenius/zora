@@ -12,7 +12,6 @@
     ],
     "created_at": "2026-01-24T00:00:00.000Z"
   },
-
   "users": [
     {
       "id": "usr_001",
@@ -62,7 +61,6 @@
       "created_at": "2023-01-01T00:00:00.000Z"
     }
   ],
-
   "vendors": [
     {
       "id": "vnd_001",
@@ -74,14 +72,25 @@
       "address": "45 Electric Avenue, Brixton, London SW9 8JX",
       "location": {
         "type": "Point",
-        "coordinates": [-0.1145, 51.4613]
+        "coordinates": [
+          -0.1145,
+          51.4613
+        ]
       },
       "coverage_radius_km": 15,
       "is_verified": true,
       "rating": 4.8,
       "review_count": 1247,
-      "cultural_specialties": ["West African", "Nigerian", "Ghanaian"],
-      "categories": ["Spices", "Grains", "Seasonings"],
+      "cultural_specialties": [
+        "West African",
+        "Nigerian",
+        "Ghanaian"
+      ],
+      "categories": [
+        "Spices",
+        "Grains",
+        "Seasonings"
+      ],
       "delivery_time_min": 20,
       "delivery_time_max": 30,
       "delivery_fee": 2.99,
@@ -100,14 +109,24 @@
       "address": "12 Peckham High Street, London SE15 5DT",
       "location": {
         "type": "Point",
-        "coordinates": [-0.0696, 51.4746]
+        "coordinates": [
+          -0.0696,
+          51.4746
+        ]
       },
       "coverage_radius_km": 20,
       "is_verified": true,
       "rating": 4.6,
       "review_count": 892,
-      "cultural_specialties": ["West African", "Nigerian"],
-      "categories": ["Fresh Produce", "Vegetables", "Imported Goods"],
+      "cultural_specialties": [
+        "West African",
+        "Nigerian"
+      ],
+      "categories": [
+        "Fresh Produce",
+        "Vegetables",
+        "Imported Goods"
+      ],
       "delivery_time_min": 45,
       "delivery_time_max": 55,
       "delivery_fee": 0.00,
@@ -126,14 +145,24 @@
       "address": "78 Dalston Lane, London E8 3AH",
       "location": {
         "type": "Point",
-        "coordinates": [-0.0752, 51.5478]
+        "coordinates": [
+          -0.0752,
+          51.5478
+        ]
       },
       "coverage_radius_km": 25,
       "is_verified": true,
       "rating": 5.0,
       "review_count": 156,
-      "cultural_specialties": ["Pan-African", "Natural Beauty"],
-      "categories": ["Haircare", "Skincare", "Beauty"],
+      "cultural_specialties": [
+        "Pan-African",
+        "Natural Beauty"
+      ],
+      "categories": [
+        "Haircare",
+        "Skincare",
+        "Beauty"
+      ],
       "delivery_time_min": 15,
       "delivery_time_max": 25,
       "delivery_fee": 1.99,
@@ -152,14 +181,25 @@
       "address": "234 Lewisham High Street, London SE13 6JG",
       "location": {
         "type": "Point",
-        "coordinates": [-0.0116, 51.4545]
+        "coordinates": [
+          -0.0116,
+          51.4545
+        ]
       },
       "coverage_radius_km": 30,
       "is_verified": true,
       "rating": 4.7,
       "review_count": 423,
-      "cultural_specialties": ["East African", "Kenyan", "Tanzanian"],
-      "categories": ["Textiles", "Fabrics", "Fashion"],
+      "cultural_specialties": [
+        "East African",
+        "Kenyan",
+        "Tanzanian"
+      ],
+      "categories": [
+        "Textiles",
+        "Fabrics",
+        "Fashion"
+      ],
       "delivery_time_min": 120,
       "delivery_time_max": 168,
       "delivery_fee": 4.99,
@@ -178,14 +218,24 @@
       "address": "56 Finsbury Park Road, London N4 2JX",
       "location": {
         "type": "Point",
-        "coordinates": [-0.1065, 51.5644]
+        "coordinates": [
+          -0.1065,
+          51.5644
+        ]
       },
       "coverage_radius_km": 20,
       "is_verified": true,
       "rating": 4.9,
       "review_count": 678,
-      "cultural_specialties": ["East African", "Ethiopian"],
-      "categories": ["Coffee", "Beverages", "Snacks"],
+      "cultural_specialties": [
+        "East African",
+        "Ethiopian"
+      ],
+      "categories": [
+        "Coffee",
+        "Beverages",
+        "Snacks"
+      ],
       "delivery_time_min": 30,
       "delivery_time_max": 45,
       "delivery_fee": 2.49,
@@ -204,14 +254,24 @@
       "address": "89 Golborne Road, London W10 5NL",
       "location": {
         "type": "Point",
-        "coordinates": [-0.2089, 51.5238]
+        "coordinates": [
+          -0.2089,
+          51.5238
+        ]
       },
       "coverage_radius_km": 18,
       "is_verified": true,
       "rating": 4.5,
       "review_count": 534,
-      "cultural_specialties": ["North African", "Moroccan"],
-      "categories": ["Spices", "Grains", "Preserved Foods"],
+      "cultural_specialties": [
+        "North African",
+        "Moroccan"
+      ],
+      "categories": [
+        "Spices",
+        "Grains",
+        "Preserved Foods"
+      ],
       "delivery_time_min": 25,
       "delivery_time_max": 40,
       "delivery_fee": 3.49,
@@ -230,14 +290,23 @@
       "address": "145 Wandsworth Bridge Road, London SW6 2TN",
       "location": {
         "type": "Point",
-        "coordinates": [-0.1859, 51.4686]
+        "coordinates": [
+          -0.1859,
+          51.4686
+        ]
       },
       "coverage_radius_km": 25,
       "is_verified": true,
       "rating": 4.8,
       "review_count": 312,
-      "cultural_specialties": ["South African"],
-      "categories": ["Meats", "Snacks", "Dried Foods"],
+      "cultural_specialties": [
+        "South African"
+      ],
+      "categories": [
+        "Meats",
+        "Snacks",
+        "Dried Foods"
+      ],
       "delivery_time_min": 35,
       "delivery_time_max": 50,
       "delivery_fee": 3.99,
@@ -247,7 +316,6 @@
       "created_at": "2023-11-12T00:00:00.000Z"
     }
   ],
-
   "categories": [
     {
       "id": "cat_001",
@@ -322,14 +390,20 @@
       "description": "African snacks and treats"
     }
   ],
-
   "regions": [
     {
       "id": "reg_001",
       "name": "West Africa",
       "slug": "west-africa",
       "image_url": "https://lh3.googleusercontent.com/aida-public/AB6AXuD_jR67qXgh-EaWszNByc0el5IgM11_Dzy_JEdnkvrzJWBfzifsBfDRkVeSfATB1Ci_ab89dJp2enwZ6N-PV9YkrSs7ZlocKBM_iLjHt_ciSw07PNaRLeyE4WpjO6vkLo2DcclMaojRq0u3t8CLEhtzUTrG-YPjBUdf0cY4FbzoNYkVPwroK32ni6epqMERzIm9hMulrtR_CO5gQzxTLZ0jsZqHKp4WwgG79W3ailVnykytgFNCSXW3pq-LENcFwk71ropQ-TWNlk8U",
-      "countries": ["Nigeria", "Ghana", "Senegal", "Ivory Coast", "Mali", "Cameroon"],
+      "countries": [
+        "Nigeria",
+        "Ghana",
+        "Senegal",
+        "Ivory Coast",
+        "Mali",
+        "Cameroon"
+      ],
       "description": "Jollof rice, suya, fufu, and the bold flavors of West Africa",
       "is_selected": true,
       "vendor_count": 45,
@@ -340,7 +414,13 @@
       "name": "East Africa",
       "slug": "east-africa",
       "image_url": "https://lh3.googleusercontent.com/aida-public/AB6AXuAARb1b5zJEk6GLJoVsfW08pktEJKngVK_jWyuMVIX0DB7LK28mMnsgY3gEF5-FduBTxVJx_VpoRenwxXpJ9_jJPbT8WHFzpboifBhjDOGm0ZUOQ3b3D3upcuesE4sD-hd-xg9ii7ysLDPesMWPDRWZSDuBC4G8sGSx9N4_71h5fGIKWSJQjfz8bpWpLJN35mz4YqSOZL5wpK6t7olKUesotdIYtc-vnyWqBqHlCh1ipXNrjBs7Sa3VJIF2KX01couKLuaJ6nW8_L-7",
-      "countries": ["Kenya", "Ethiopia", "Tanzania", "Uganda", "Rwanda"],
+      "countries": [
+        "Kenya",
+        "Ethiopia",
+        "Tanzania",
+        "Uganda",
+        "Rwanda"
+      ],
       "description": "Ethiopian coffee, injera, pilau, and East African traditions",
       "is_selected": false,
       "vendor_count": 32,
@@ -351,7 +431,13 @@
       "name": "North Africa",
       "slug": "north-africa",
       "image_url": "https://lh3.googleusercontent.com/aida-public/AB6AXuA9YzWdXZBf0-RfiaiAvtSSzW8b3-LzS-DQzAxa_oaXypefJbm_8gEWLNX1ZQSRrTTOHOmICXpZOy-CbQBKogsI02-JyuFV1B19yfo9D-NylVtZphGjTCx44NjDRMyssF1NpLNhGjjs059_N9rrSCgKXeH6oZb6jMWFF1_AqWbUBLYdrmCZpVBTidBJ7jGIncuCfXZxxoXGVsbZPrdyVfiYw6Y_DEHUwPwYdoMPPeL9_88uUYEnZqPn6ybn1Vrqo_HEyT94vw6Zr97A",
-      "countries": ["Morocco", "Egypt", "Tunisia", "Algeria", "Libya"],
+      "countries": [
+        "Morocco",
+        "Egypt",
+        "Tunisia",
+        "Algeria",
+        "Libya"
+      ],
       "description": "Tagines, couscous, harissa, and Mediterranean-African fusion",
       "is_selected": false,
       "vendor_count": 28,
@@ -362,7 +448,13 @@
       "name": "South Africa",
       "slug": "south-africa",
       "image_url": "https://lh3.googleusercontent.com/aida-public/AB6AXuAzttRu3N8GAHGr3uStWwXIP0Jve2qZKBT9BU6WijhcI4QZTlDrIla9jqFLy2N59X26-g145jklQdeQDJzVaMEjYFqn7yfuaXTjR3kcIKqMo6afCSlVYnKWkOsfI27-6u2AxbcZQDIJVgPVDovJ7FhCYKH2CEflDAFANJ_fiD9rk1QqNMYHU2poq_SMOyzdJSrW60UNrn6Q7uzMYX3yabEN0hp5zrhi98aO8Hb0-24vfblZyq-21MMBM-UJNVmRZsnQUlg3HHSFbfIx",
-      "countries": ["South Africa", "Botswana", "Zimbabwe", "Namibia", "Mozambique"],
+      "countries": [
+        "South Africa",
+        "Botswana",
+        "Zimbabwe",
+        "Namibia",
+        "Mozambique"
+      ],
       "description": "Biltong, bobotie, peri-peri, and South African braai culture",
       "is_selected": false,
       "vendor_count": 18,
@@ -373,14 +465,19 @@
       "name": "Central Africa",
       "slug": "central-africa",
       "image_url": "https://lh3.googleusercontent.com/aida-public/AB6AXuD5wfcmVK1mM-Ct9BZNTaSGWfhNJJohrcq8hfzAQa1XGwQjkcPZDbPRYh49heVWzddiNXzPD1Z7lm6Vz03_fVygyHN0kAg8ZFqEJbq1ZoikmKBTmK-Wk2r7mrlm5SBNcA8_QbYD2A5ruxh05ykUlJHSdYHnRaB6nH0oXZeSric4PmWQhvsyGukeKJDct7iNUG957pj0g-vd3a9vgw1DqKAa4snKbH-DOjA20tAmtPT81XWyvuJyrMdNndns7VdUxjsVAfXr-gO0sXnE",
-      "countries": ["DRC", "Congo", "Gabon", "Central African Republic", "Chad"],
+      "countries": [
+        "DRC",
+        "Congo",
+        "Gabon",
+        "Central African Republic",
+        "Chad"
+      ],
       "description": "Moambe, pondu, cassava dishes, and rainforest flavors",
       "is_selected": false,
       "vendor_count": 12,
       "product_count": 87
     }
   ],
-
   "products": [
     {
       "id": "prd_001",
@@ -396,7 +493,10 @@
         "https://lh3.googleusercontent.com/aida-public/AB6AXuCSTXrtnY1KRcIFzdwf0gp07sGWOAqbXsjIxeLQpAIrz2UTGPqv6hgPc05kGbJa1ZVTNDpFNPjkFP82wPEGSqQySw7k2GxVA1UzAEWE1DbfmKsNFY9MemAm1gC4Z-72iMUv_uLTDp9cIhRl25kHAwH4EwbH722eRAYUVI2jrtz8hmJjtIr5cJKNjierykD5cGCncYrvrmbT3riKMFiDpC0SbOWyUOditDmlXrV6ttZhwlcP-5Z7ndSmo6VrnAk_GnSSVvmlRo27SooO"
       ],
       "weight": "100g",
-      "certifications": ["organic", "top_rated"],
+      "certifications": [
+        "organic",
+        "top_rated"
+      ],
       "nutrition": {
         "calories": "250 kcal/100g",
         "protein": "8g",
@@ -425,7 +525,9 @@
         "https://lh3.googleusercontent.com/aida-public/AB6AXuBTDn8W2PfLdFSvLutTHtCQzqQ0E9-Z_Yri7CHzpMJcPbRDexOEzhv_4BJOn-cdIHDQPDlBS_STT_gLkv5iM0KNYMFDPdRL3gN8U78QK71pUqsUBKzRDbNsVdV98ZiyiaznH8r1bTg_4JBwlXE6b0nJ2w9-uVp7LUcYjeMUrEDitZdSyVGHb9vRVfCzQR7rJtwyGDwm2ovFat8n3liywdpm5aEAtyrAArGIM3zWQYvaHYEn8sLv36os7Duardgwj52UNeqkQi06n-IS"
       ],
       "weight": "250g",
-      "certifications": ["eco_friendly"],
+      "certifications": [
+        "eco_friendly"
+      ],
       "nutrition": {
         "calories": "580 kcal/100g",
         "protein": "25g",
@@ -454,7 +556,9 @@
         "https://lh3.googleusercontent.com/aida-public/AB6AXuCzdIvZEUnodRcTkwXX7aeWqZDinoYjhQgAzk9WhH-3Y-NpgjWI2PEQaZciHXQ8-aotdVYJ5pBFcNu_p7OT9Z2EYl-bH3oXPZljMXFBPRde-faPRGiNBmMwgghB1uBI3Ivz-LTOXZDsNn9hTLAbNb9Mi7riw2UFDaea7a1-nFtLtu1KFwhHSHx_ZeGm0DqWMGqEWVCDWTzxcaR4NoMNPLdfZVqvRJEUKtHEjICo1xhI8Q7-S8toQz74IICHIHiP8vceKX2Wip_mf4rv"
       ],
       "weight": "150g",
-      "certifications": ["organic"],
+      "certifications": [
+        "organic"
+      ],
       "nutrition": {
         "calories": "320 kcal/100g",
         "protein": "12g",
@@ -483,7 +587,10 @@
         "https://lh3.googleusercontent.com/aida-public/AB6AXuAIgDbBl8Z6mVSrQU02y9bMExkw5VxRNQyBRm6L48LqPlynWER9NizitR7CaTwQlSqIlMdwCVd_aRcZXwJT1m6JzV_dT2Sco8Tnu8vqq7MbLxxTAROtZWTOPWvfehmU2EUCySPBfkE6VOhkxlSRnLj4m6gz1kBX6U883aGlHTmpSrBopWzU0ofQLxMwbfn1eTEsNqxseM80xm4CGnVmwP4ORogCAPkPM0XbBPwiN5GUDm2nRK5X-86-ZG8LMDcSCQfolNpgyPjm6CJ7"
       ],
       "weight": "500g",
-      "certifications": ["organic", "top_rated"],
+      "certifications": [
+        "organic",
+        "top_rated"
+      ],
       "nutrition": {
         "calories": "590 kcal/100g",
         "protein": "30g",
@@ -541,7 +648,10 @@
         "https://lh3.googleusercontent.com/aida-public/AB6AXuC1EoA9jOb77DPOSElTE7PDgTW0UrKRrSy3J8qFzQWK55CaI9RRTAnXT3PIKp2elJhRqvuhHx1mKRNMA8ufSjmC5zLx_1Jvo4a29mLKI-KGsIiRNOiZicbYFPfcTJOH-K_rm9VtP3IUQ1K-Yf4HwKf3XKuejy7uXsRMeCYgfIW7ikAON5J3JzL8tvUuvMTBzjcMpkb2hoBQyd1Uf18gIbCfZ7Fb5nDP-MaYoccNh6eYSyKNngsjZ_kyQKkl1L-DxVPaiUd-khg5nURu"
       ],
       "weight": "200g",
-      "certifications": ["organic", "eco_friendly"],
+      "certifications": [
+        "organic",
+        "eco_friendly"
+      ],
       "nutrition": {
         "calories": "354 kcal/100g",
         "protein": "8g",
@@ -628,7 +738,9 @@
         "https://lh3.googleusercontent.com/aida-public/AB6AXuBM0z0Al4eHUoW9A1GIaXBbVGkIEjNG_AisXH-_1Z638uipvq_NUgpdiwnIH98sVwl-adj6LWxT9fEAALsu8OtEXbENr8H-iAIFAcS-t2YPo5nlr8Uz2ld4h897h78HNQ-TAXpq1daElfnXG_HY07zEI06h7etI58H_C-6kvYQlo_lafYTbEXaoAGLXatttJhKayGFbRdmy2yLBiaIgAaC9pogotuTFgENJlMjTjT_aE9MyEZTrCaPz27zPac8i3ocQQxDfrUeaO57u"
       ],
       "weight": "200g",
-      "certifications": ["organic"],
+      "certifications": [
+        "organic"
+      ],
       "nutrition": {
         "calories": "275 kcal/100g",
         "protein": "17g",
@@ -657,7 +769,9 @@
         "https://lh3.googleusercontent.com/aida-public/AB6AXuDRSPaOJ_APMPL_u9GGZwkRP3vW6MTFWJ7tCz_MKQ-i4HrNcGrhEJQ19sIgvH5F5odcsUgqySZWvX2kOkbrWWILz51eibi-8qJ31rsXy-hPrzdBb4KiUFWxqQry4s3mfkC8icYd__68aK1aXlOtKJREoFCIffVqL5Icl4WIymkIDnLpjzbKeKFQSycyVKTprCJfkIVzJfOQdr4d38pvOsfNGFLOjlT6mSR5n1uWIhurifKeT522YQMa9prWDORE_xRkR4vMV-5i30Pi"
       ],
       "weight": "500ml",
-      "certifications": ["organic"],
+      "certifications": [
+        "organic"
+      ],
       "nutrition": {
         "calories": "884 kcal/100ml",
         "protein": "0g",
@@ -686,7 +800,10 @@
         "https://lh3.googleusercontent.com/aida-public/AB6AXuDSbXtEbC-2JcflkgBfODzOXPk4y-dIGi6eCQgCT_OT-3MiLGdjdNcSSkTZdQHaYk6WJMHeBxVgiTci_qggXVw3tE8EpYPDRiFo5AN-HnypKQpLZyJqRpdQDGPVaHzqJKuF72kfi6bdcX_Y0x2PZU-Fs259ubU8Qy3ecXH0naMuLJ30MTV5zU9iCrEZPcTk8_cxMcGuxdNXHyKNrS_M89taOUxHWoAavVdEqMM_VNpHs7y8yLpfYvqeoW730P90-4XT3_o4FPOt3oK8"
       ],
       "weight": "250g",
-      "certifications": ["organic", "fair_trade"],
+      "certifications": [
+        "organic",
+        "fair_trade"
+      ],
       "nutrition": {
         "calories": "2 kcal/cup",
         "protein": "0.3g",
@@ -715,7 +832,9 @@
         "https://lh3.googleusercontent.com/aida-public/AB6AXuDTnbg5CBWKQBVjneFPlGNpNXTEpwOfbdGKww0RwyT97KV147gB9599FRdBsf9WDl_GPtUSkPTQewHBZ_Wvh4Uiy4vt59J2I1KpvfbcNibbOs46s1A3biCPTRvi9lcJGs4_avpFvsvZg82HftizvGamJqBmDXZQ7uOeGJkdHbC-ZIKApnHFRDIK8-MWpNL6075rtNkQOXdo8ch1AdYB1f6xS3EyvyHJdJE2K6jwvU2aabMLTp5G4jBFAkLuyVfgDlptnlHb0dM0z8sT"
       ],
       "weight": "3 yards",
-      "certifications": ["handmade"],
+      "certifications": [
+        "handmade"
+      ],
       "heritage_story": "Kente cloth originated with the Ashanti people of Ghana and has been woven for over 400 years.",
       "is_active": true,
       "is_featured": false,
@@ -738,7 +857,10 @@
         "https://lh3.googleusercontent.com/aida-public/AB6AXuAStqpAg-C-WNYGcCROOBmc3OS6ycx638hoZ8umjHE-giFAXiKk1nrw7tQFlG5MdlBlw-0zQcg_MTm2tFeXE-7SOvVF0rHy6EnI2ie492a57BUwcAaW0sBorGGb0eAs7eFrj-zZauQ_syQhaYmt12tQlyGM53ZD5-RSAciiO2VLtZJb8QVYWJQomUXbLRNrtN_E_g7_tNjezWgLAAeLTEX7moZKE5NeOW4xrN0-ITkSt-fJNLhvNN6NbujNI7jabxOtmU-erPLhuYFw"
       ],
       "weight": "250g",
-      "certifications": ["organic", "fair_trade"],
+      "certifications": [
+        "organic",
+        "fair_trade"
+      ],
       "heritage_story": "Shea butter has been used by African women for centuries. Ours is hand-crafted by women's cooperatives in Ghana.",
       "is_active": true,
       "is_featured": true,
@@ -761,7 +883,10 @@
         "https://lh3.googleusercontent.com/aida-public/AB6AXuDoyHvWoPgoLGO1_BlBhCVw--aWzXYQncwl7NCTqlnKcSYQnuCL_u_HEy3mlmc1fiZnCUp53pWqJiiWBTGCilulWUv2uXy34nxVK4mAK_oCocecjhBpG6j_MInknedn_uTRcXQ2LXkxn-k4NToMzSnegAOURoMwF9sIalcbF4yY0gp_-_wQY4Q-FcQqk_OQaeSqTJ4BREf43T4I4WlEEqFc0C0BVeFzZahRkAGa78Y_l07acg2XxjVsB5g1hqqp-9khgYlWSgPtyZET"
       ],
       "weight": "200g",
-      "certifications": ["organic", "handmade"],
+      "certifications": [
+        "organic",
+        "handmade"
+      ],
       "heritage_story": "Black soap has been made in West Africa for generations. Our recipe comes from traditional soap makers in Ghana.",
       "is_active": true,
       "is_featured": false,
@@ -784,7 +909,9 @@
         "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?w=800"
       ],
       "weight": "100g",
-      "certifications": ["organic"],
+      "certifications": [
+        "organic"
+      ],
       "nutrition": {
         "calories": "280 kcal/100g",
         "protein": "10g",
@@ -813,7 +940,9 @@
         "https://images.unsplash.com/photo-1607623814075-e51df1bdc82f?w=800"
       ],
       "weight": "100g",
-      "certifications": ["grass_fed"],
+      "certifications": [
+        "grass_fed"
+      ],
       "nutrition": {
         "calories": "250 kcal/100g",
         "protein": "55g",
@@ -842,7 +971,11 @@
         "https://lh3.googleusercontent.com/aida-public/AB6AXuAXKkYasDC6ykShUTMKlMHNQY6g2c6AGXMgQBxlpOmcS5wGdlKwisRTizi3i38mORnr5P4bvQkifio8UGtDpsQT6lMn6uAcurNq_Rc4yeZvTgleBidfFImGQUAMKdPZSCSx3TIYLE2naLAXzqph3gGISsgqmhSlgZVRq3D98sEgf6Zo28U4TOsWkRu_IvMqlA9UI6evPOWbIikmuTazkHLHsLZQeQMcqiTl_ahLBFMG_XQrhQeH6d1mKr-jf6OTCLIHuziJ0wWU4S6O"
       ],
       "weight": "5kg",
-      "certifications": ["organic", "top_rated", "eco_friendly"],
+      "certifications": [
+        "organic",
+        "top_rated",
+        "eco_friendly"
+      ],
       "nutrition": {
         "calories": "350 kcal/100g",
         "protein": "8.5g",
@@ -887,7 +1020,6 @@
       "created_at": "2024-03-15T00:00:00.000Z"
     }
   ],
-
   "banners": [
     {
       "id": "ban_001",
@@ -932,7 +1064,6 @@
       "end_date": "2024-01-22T23:59:59.000Z"
     }
   ],
-
   "orders": [
     {
       "id": "ord_29384",
@@ -1087,7 +1218,7 @@
       },
       "qr_code_token": "ZOR-28100-AMARA",
       "created_at": "2024-10-20T13:00:00.000Z",
-      "delivered_at": "2024-10-22T14:30:00.000Z",
+      "actual_delivery": "2024-10-22T14:30:00.000Z",
       "items": [
         {
           "id": "oi_005",
@@ -1155,7 +1286,6 @@
       ]
     }
   ],
-
   "cart": {
     "id": "cart_001",
     "user_id": "usr_001",
@@ -1211,7 +1341,6 @@
     "discount": 0,
     "updated_at": "2024-10-24T12:00:00.000Z"
   },
-
   "addresses": [
     {
       "id": "addr_001",
@@ -1244,7 +1373,6 @@
       "created_at": "2024-05-20T14:00:00.000Z"
     }
   ],
-
   "payment_methods": [
     {
       "id": "pm_001",
@@ -1269,7 +1397,6 @@
       "created_at": "2024-06-10T09:00:00.000Z"
     }
   ],
-
   "reviews": [
     {
       "id": "rev_001",
@@ -1332,7 +1459,6 @@
       "created_at": "2024-07-20T16:45:00.000Z"
     }
   ],
-
   "notifications": [
     {
       "id": "notif_001",
@@ -1395,7 +1521,6 @@
       "created_at": "2024-10-22T14:30:00.000Z"
     }
   ],
-
   "faqs": [
     {
       "id": "faq_001",
@@ -1446,7 +1571,6 @@
       "answer": "To become a Zora vendor, visit our vendor portal at vendors.zoraapp.co.uk. You'll need to provide business details, product information, and complete our verification process. We review applications within 5 business days."
     }
   ],
-
   "loyalty_tiers": [
     {
       "id": "tier_bronze",
@@ -1507,7 +1631,6 @@
       "color": "#E5E4E2"
     }
   ],
-
   "promo_codes": [
     {
       "id": "promo_001",
@@ -1553,7 +1676,6 @@
       "end_date": "2025-12-31T23:59:59.000Z"
     }
   ],
-
   "delivery_options": [
     {
       "id": "del_001",
@@ -1593,7 +1715,6 @@
       "icon": "storefront"
     }
   ],
-
   "dispute_reasons": [
     {
       "id": "dr_001",
@@ -1626,7 +1747,6 @@
       "description": "Other issues not listed above"
     }
   ],
-
   "locations": [
     {
       "id": "loc_001",
@@ -1634,7 +1754,11 @@
       "city": "London",
       "postcode_prefix": "SW9",
       "is_available": true,
-      "delivery_zones": ["zone_1", "zone_2", "zone_3"]
+      "delivery_zones": [
+        "zone_1",
+        "zone_2",
+        "zone_3"
+      ]
     },
     {
       "id": "loc_002",
@@ -1642,7 +1766,10 @@
       "city": "London",
       "postcode_prefix": "SE15",
       "is_available": true,
-      "delivery_zones": ["zone_2", "zone_3"]
+      "delivery_zones": [
+        "zone_2",
+        "zone_3"
+      ]
     },
     {
       "id": "loc_003",
@@ -1650,7 +1777,10 @@
       "city": "London",
       "postcode_prefix": "E8",
       "is_available": true,
-      "delivery_zones": ["zone_2", "zone_3"]
+      "delivery_zones": [
+        "zone_2",
+        "zone_3"
+      ]
     },
     {
       "id": "loc_004",
@@ -1658,7 +1788,10 @@
       "city": "London",
       "postcode_prefix": "SE13",
       "is_available": true,
-      "delivery_zones": ["zone_3", "zone_4"]
+      "delivery_zones": [
+        "zone_3",
+        "zone_4"
+      ]
     },
     {
       "id": "loc_005",
@@ -1666,10 +1799,12 @@
       "city": "London",
       "postcode_prefix": "N4",
       "is_available": true,
-      "delivery_zones": ["zone_2", "zone_3"]
+      "delivery_zones": [
+        "zone_2",
+        "zone_3"
+      ]
     }
   ],
-
   "cultural_interests": [
     {
       "id": "ci_001",
