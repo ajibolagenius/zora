@@ -332,7 +332,7 @@ class RealtimeManagerClass {
                 break;
             case 'CLOSED':
             case 'CHANNEL_ERROR':
-                console.error(`[Realtime] Channel ${channelId} error: ${status}`);
+                console.error(`[Realtime] Channel ${channelId} error: ${status}. Check RLS policies and table publication.`);
                 this.updateConnectionState('disconnected', new Error(`Channel ${status}`));
                 config.onError?.(new Error(`Channel ${status}`));
                 this.attemptReconnect(channelId);
