@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { View, ActivityIndicator, StyleSheet } from 'react-native';
-import { useRouter, useSegments } from 'expo-router';
+import { useRouter, useSegments, useRootNavigationState } from 'expo-router';
 import { useAuthStore } from '../../stores/authStore';
 import { Colors } from '../../constants/colors';
 
@@ -18,6 +18,7 @@ export function ProtectedRoute({ children, requireAuth = true }: ProtectedRouteP
   const { isAuthenticated, isLoading, checkAuth } = useAuthStore();
   const router = useRouter();
   const segments = useSegments();
+  const rootNavigationState = useRootNavigationState();
 
   // Check auth state on mount
   useEffect(() => {
@@ -29,13 +30,16 @@ export function ProtectedRoute({ children, requireAuth = true }: ProtectedRouteP
     if (!requireAuth) return;
 
     if (!isLoading && !isAuthenticated) {
+      const isNavigationReady = rootNavigationState?.key;
+      if (!isNavigationReady) return;
+
       // Only redirect if we're not already on an auth route
       const isAuthRoute = segments[0] === '(auth)';
       if (!isAuthRoute) {
         router.replace('/(auth)/login');
       }
     }
-  }, [isAuthenticated, isLoading, requireAuth, segments, router]);
+  }, [isAuthenticated, isLoading, requireAuth, segments, router, rootNavigationState]);
 
   // Show loading indicator while checking auth
   if (isLoading) {
