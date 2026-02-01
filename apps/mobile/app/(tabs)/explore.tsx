@@ -10,7 +10,7 @@ import {
     useWindowDimensions,
     ActivityIndicator,
 } from 'react-native';
-import { LazyImage, RatingDisplay } from '../../components/ui';
+import { LazyImage, RatingDisplay, Skeleton } from '../../components/ui';
 import MetaTags from '../../components/ui/MetaTags';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -27,7 +27,8 @@ import { Spacing, BorderRadius, Heights, Shadows, Gaps } from '../../constants/s
 import { FontSize, FontFamily } from '../../constants/typography';
 import { AnimationDuration, AnimationEasing } from '../../constants';
 import { vendorService as mockVendorService, type Vendor as MockVendor } from '../../services/mockDataService';
-import { vendorService as supabaseVendorService, type Vendor } from '../../services/supabaseService';
+import { vendorService as supabaseVendorService } from '../../services/supabaseService';
+import type { Vendor } from '../../services/supabaseService';
 import { realtimeService } from '../../services/realtimeService';
 import { isSupabaseConfigured } from '../../lib/supabase';
 import { getVendorRoute } from '../../lib/navigationHelpers';
@@ -263,11 +264,29 @@ export default function ExploreScreen() {
                     </Text>
                 </View>
 
-                {/* Vendors List */}
                 {loading ? (
-                    <View style={styles.loadingContainer}>
-                        <ActivityIndicator size="large" color={Colors.primary} />
-                    </View>
+                    <ScrollView
+                        style={styles.vendorsList}
+                        showsVerticalScrollIndicator={false}
+                        contentContainerStyle={styles.vendorsListContent}
+                    >
+                        {/* Vendor Card Skeletons */}
+                        {[1, 2, 3].map((i) => (
+                            <View key={i} style={styles.vendorCard}>
+                                <View style={styles.vendorImageContainer}>
+                                    <Skeleton width="100%" height="100%" />
+                                </View>
+                                <View style={styles.vendorInfo}>
+                                    <Skeleton width={150} height={20} style={{ marginBottom: 4 }} />
+                                    <Skeleton width={100} height={14} style={{ marginBottom: 8 }} />
+                                    <View style={{ flexDirection: 'row', gap: 8 }}>
+                                        <Skeleton width={40} height={14} />
+                                        <Skeleton width={60} height={14} />
+                                    </View>
+                                </View>
+                            </View>
+                        ))}
+                    </ScrollView>
                 ) : (
                     <ScrollView
                         style={styles.vendorsList}

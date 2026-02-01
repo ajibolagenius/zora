@@ -23,6 +23,7 @@ export { ProductCard } from './ProductCard';
 export { LazyImage } from './LazyImage';
 export { LazyAvatar } from './LazyAvatar';
 export { VendorCard } from './VendorCard';
+export * from './Skeleton';
 export { RegionCard } from './RegionCard';
 export { SearchBar } from './SearchBar';
 export { HeroBanner } from './HeroBanner';

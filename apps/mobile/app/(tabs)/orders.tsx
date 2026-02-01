@@ -33,7 +33,7 @@ import { Colors } from '../../constants/colors';
 import { Spacing, BorderRadius, Heights, Shadows } from '../../constants/spacing';
 import { FontSize, FontFamily } from '../../constants/typography';
 import { PlaceholderImages } from '../../constants';
-import { Button, LazyImage } from '../../components/ui';
+import { Button, LazyImage, Skeleton } from '../../components/ui';
 import { getProductRoute, getVendorRoute } from '../../lib/navigationHelpers';
 import { useOrderStore } from '../../stores/orderStore';
 import { useAuthStore } from '../../stores/authStore';
@@ -710,7 +710,42 @@ export default function OrdersTab() {
                 contentContainerStyle={styles.scrollContent}
                 showsVerticalScrollIndicator={false}
             >
-                {filteredOrders.length === 0 ? (
+                {isLoading ? (
+                    <View style={styles.ordersList}>
+                        {[1, 2, 3].map((i) => (
+                            <View key={i} style={styles.orderCard}>
+                                <View style={styles.orderCardHeader}>
+                                    <View>
+                                        <Skeleton width={100} height={20} style={{ marginBottom: 4 }} />
+                                        <Skeleton width={140} height={16} />
+                                    </View>
+                                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                                        <Skeleton width={80} height={24} borderRadius={12} style={{ marginRight: 8 }} />
+                                        <Skeleton width={20} height={20} borderRadius={10} />
+                                    </View>
+                                </View>
+                                <View style={styles.vendorSection}>
+                                    <View style={{ flexDirection: 'row', gap: -12 }}>
+                                        <Skeleton width={40} height={40} borderRadius={8} />
+                                        <Skeleton width={40} height={40} borderRadius={8} />
+                                        <Skeleton width={40} height={40} borderRadius={8} />
+                                    </View>
+                                    <View style={{ marginLeft: 16 }}>
+                                        <Skeleton width={120} height={20} style={{ marginBottom: 4 }} />
+                                        <Skeleton width={60} height={16} />
+                                    </View>
+                                </View>
+                                <View style={styles.orderFooter}>
+                                    <Skeleton width={60} height={24} />
+                                    <View style={{ flexDirection: 'row', gap: 8 }}>
+                                        <Skeleton width={80} height={32} borderRadius={16} />
+                                        <Skeleton width={100} height={32} borderRadius={16} />
+                                    </View>
+                                </View>
+                            </View>
+                        ))}
+                    </View>
+                ) : filteredOrders.length === 0 ? (
                     renderEmptyState()
                 ) : (
                     filteredOrders.map((order, index) => renderOrderCard(order, index))
@@ -736,6 +771,9 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         paddingHorizontal: Spacing.base,
         paddingVertical: Spacing.md,
+    },
+    ordersList: {
+        marginBottom: Spacing.lg,
     },
     headerButton: {
         width: 44,

@@ -268,6 +268,8 @@ export default function RootLayout() {
                     screenOptions={{
                         headerShown: false,
                         contentStyle: { backgroundColor: Colors.backgroundDark },
+                        animation: 'fade',
+                        gestureEnabled: true,
                     }}
                 />
             </ToastProvider>

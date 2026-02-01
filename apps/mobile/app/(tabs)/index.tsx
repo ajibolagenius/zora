@@ -27,7 +27,7 @@ import { Colors } from '../../constants/colors';
 import { Spacing, BorderRadius, Heights, Gaps, TouchTarget, ComponentDimensions } from '../../constants/spacing';
 import { FontSize, FontFamily } from '../../constants/typography';
 import { AnimationDuration, AnimationEasing } from '../../constants';
-import { FeaturedSlider, RegionCard, VendorCard, ProductCard } from '../../components/ui';
+import { FeaturedSlider, RegionCard, VendorCard, ProductCard, Skeleton } from '../../components/ui';
 import MetaTags from '../../components/ui/MetaTags';
 import { homeService, type HomeData } from '../../services/homeService';
 import { messagingService } from '../../services/messagingService';
@@ -48,7 +48,7 @@ export default function HomeScreen() {
   const router = useRouter();
   const { width: screenWidth } = useWindowDimensions();
   const productCardWidth = (screenWidth - 32 - PRODUCT_GAP) / 2; // 16px padding on each side
-  
+
   const [homeData, setHomeData] = useState<HomeData | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -74,7 +74,7 @@ export default function HomeScreen() {
   const { user } = useAuthStore();
   const unreadCount = useNotificationStore((state) => state.unreadCount);
   const [unreadMessagesCount, setUnreadMessagesCount] = useState(0);
-  
+
   // Get user's primary cultural region for personalized ranking
   const userRegion = user?.cultural_interests?.[0] || undefined;
 
@@ -99,19 +99,19 @@ export default function HomeScreen() {
         homeService.getHomeData(userRegion),
         user?.user_id ? homeService.getUserLocation(user.user_id) : Promise.resolve(null),
       ]);
-      
+
       // Randomize featured vendors
       const randomizedVendors = shuffleArray(data.featured_vendors);
-      
+
       // Randomize popular products
       const randomizedProducts = shuffleArray(data.popular_products);
-      
+
       setHomeData({
         ...data,
         featured_vendors: randomizedVendors,
         popular_products: randomizedProducts,
       });
-      
+
       // Initialize products list with randomized batch (deduplicated)
       const uniqueProducts = Array.from(
         new Map(randomizedProducts.map(p => [p.id, p])).values()
@@ -136,7 +136,7 @@ export default function HomeScreen() {
     try {
       setLoadingMore(true);
       const moreProducts = await homeService.getMoreProducts(userRegion, productOffset, 20);
-      
+
       if (moreProducts.length === 0) {
         setHasMoreProducts(false);
       } else {
@@ -150,7 +150,7 @@ export default function HomeScreen() {
           newProductsCount = newProducts.length; // Capture count for use outside updater
           return [...prev, ...newProducts];
         });
-        
+
         // Update offset AFTER setAllProducts (outside updater function to avoid side effects)
         // Use the captured count from the updater calculation
         setProductOffset((prev) => prev + newProductsCount);
@@ -174,16 +174,16 @@ export default function HomeScreen() {
       (updatedData) => {
         setHomeData((prev) => {
           if (!prev) return prev;
-          
+
           // Randomize vendors and products when updated
-          const updatedVendors = updatedData.featured_vendors 
+          const updatedVendors = updatedData.featured_vendors
             ? shuffleArray(updatedData.featured_vendors)
             : prev.featured_vendors;
-          
+
           const updatedProducts = updatedData.popular_products
             ? shuffleArray(updatedData.popular_products)
             : prev.popular_products;
-          
+
           return {
             ...prev,
             ...updatedData,
@@ -191,7 +191,7 @@ export default function HomeScreen() {
             popular_products: updatedProducts,
           };
         });
-        
+
         // If popular_products were updated, merge them with allProducts (deduplicated and randomized)
         if (updatedData.popular_products) {
           const randomizedNewProducts = shuffleArray(updatedData.popular_products);
@@ -254,7 +254,7 @@ export default function HomeScreen() {
   const handleAddToCart = useCallback((product: Product) => {
     // Map Product to cart Product format
     const imageUrls = product.images || (product.image_url ? [product.image_url] : []);
-    
+
     const cartProduct = {
       ...product,
       currency: product.currency || 'GBP',
@@ -311,7 +311,7 @@ export default function HomeScreen() {
   // Memoize product card render to prevent unnecessary re-renders
   const renderProductCard = useCallback((product: Product, index: number) => {
     return (
-      <View 
+      <View
         key={`product-${product.id}`}
         style={{
           width: productCardWidth,
@@ -341,9 +341,74 @@ export default function HomeScreen() {
   if (loading) {
     return (
       <SafeAreaView style={styles.container}>
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={Colors.primary} />
+        {/* Header Skeleton */}
+        <View style={styles.header}>
+          <Skeleton width={120} height={32} borderRadius={16} />
+          <View style={styles.headerIcons}>
+            <Skeleton width={32} height={32} borderRadius={16} />
+            <Skeleton width={32} height={32} borderRadius={16} />
+          </View>
         </View>
+
+        {/* Search Bar Skeleton */}
+        <View style={{ paddingHorizontal: Spacing.base, marginBottom: Spacing.md }}>
+          <Skeleton width="100%" height={Heights.input} borderRadius={Heights.input / 2} />
+        </View>
+
+        <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
+          {/* Banner Skeleton */}
+          <View style={{ paddingHorizontal: Spacing.base, marginBottom: Spacing.xl }}>
+            <Skeleton width="100%" height={200} borderRadius={BorderRadius.lg} />
+          </View>
+
+          {/* Shop by Region Skeleton */}
+          <View style={{ marginBottom: Spacing.xl }}>
+            <View style={styles.sectionHeader}>
+              <Skeleton width={150} height={24} />
+              <Skeleton width={50} height={16} />
+            </View>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: Spacing.base, gap: Spacing.md }}>
+              {[1, 2, 3, 4].map((i) => (
+                <Skeleton key={i} width={100} height={120} borderRadius={BorderRadius.md} />
+              ))}
+            </ScrollView>
+          </View>
+
+          {/* Featured Vendors Skeleton */}
+          <View style={{ marginBottom: Spacing.xl }}>
+            <View style={styles.sectionHeader}>
+              <Skeleton width={180} height={24} />
+              <Skeleton width={50} height={16} />
+            </View>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: Spacing.base, gap: Spacing.md }}>
+              {[1, 2, 3].map((i) => (
+                <View key={i} style={{ width: 220 }}>
+                  <Skeleton width="100%" height={120} borderRadius={BorderRadius.md} style={{ marginBottom: 8 }} />
+                  <Skeleton width="80%" height={16} style={{ marginBottom: 4 }} />
+                  <Skeleton width="50%" height={12} />
+                </View>
+              ))}
+            </ScrollView>
+          </View>
+
+          {/* Popular Products Skeleton */}
+          <View style={{ marginBottom: Spacing.xl }}>
+            <View style={styles.sectionHeader}>
+              <Skeleton width={160} height={24} />
+              <Skeleton width={50} height={16} />
+            </View>
+            <View style={styles.productsGrid}>
+              {[1, 2, 3, 4].map((i) => (
+                <View key={i} style={{ width: productCardWidth, marginBottom: PRODUCT_GAP, marginRight: i % 2 !== 0 ? PRODUCT_GAP : 0 }}>
+                  <Skeleton width="100%" height={productCardWidth} borderRadius={BorderRadius.md} style={{ marginBottom: 8 }} />
+                  <Skeleton width="90%" height={16} style={{ marginBottom: 4 }} />
+                  <Skeleton width="60%" height={16} style={{ marginBottom: 4 }} />
+                  <Skeleton width="40%" height={16} />
+                </View>
+              ))}
+            </View>
+          </View>
+        </ScrollView>
       </SafeAreaView>
     );
   }
@@ -363,14 +428,14 @@ export default function HomeScreen() {
       <View style={styles.stickyHeader}>
         {/* Header Row */}
         <View style={styles.header}>
-          <TouchableOpacity 
+          <TouchableOpacity
             style={styles.locationButton}
             onPress={handleLocationPress}
             activeOpacity={0.8}
           >
             <MapPin size={20} color={Colors.primary} weight="fill" />
             <Text style={styles.locationText}>
-              {userLocation 
+              {userLocation
                 ? `${userLocation.city}${userLocation.postcode ? `, ${userLocation.postcode}` : ''}`
                 : 'Brixton, London'
               }
@@ -378,7 +443,7 @@ export default function HomeScreen() {
             <CaretDown size={16} color={Colors.textMuted} weight="bold" />
           </TouchableOpacity>
           <View style={styles.headerIcons}>
-            <TouchableOpacity 
+            <TouchableOpacity
               style={styles.headerIconButton}
               onPress={handleMessagesPress}
               activeOpacity={0.8}
@@ -392,7 +457,7 @@ export default function HomeScreen() {
                 </View>
               )}
             </TouchableOpacity>
-            <TouchableOpacity 
+            <TouchableOpacity
               style={styles.headerIconButton}
               onPress={handleNotificationsPress}
               activeOpacity={0.8}
@@ -410,7 +475,7 @@ export default function HomeScreen() {
         </View>
 
         {/* Search Bar */}
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.searchContainer}
           onPress={() => router.push('/search')}
           activeOpacity={0.8}
@@ -451,7 +516,7 @@ export default function HomeScreen() {
         <Animated.View style={{ opacity: fadeAnim, transform: [{ translateY: slideAnim }] }}>
           {/* Featured Collection Slider */}
           {homeData?.banners && homeData.banners.length > 0 && (
-            <FeaturedSlider 
+            <FeaturedSlider
               banners={homeData.banners}
               onBannerPress={handleBannerPress}
               autoPlay={true}
@@ -536,11 +601,11 @@ export default function HomeScreen() {
               <Text style={styles.sectionTitle}>
                 {selectedRegion ? `Products from ${selectedRegion}` : 'Popular Products'}
               </Text>
-              <TouchableOpacity 
+              <TouchableOpacity
                 onPress={() => {
                   const regionSlug = selectedRegion?.toLowerCase().replace(/\s+/g, '-');
                   router.push(selectedRegion ? `/products?region=${regionSlug}` : '/products');
-                }} 
+                }}
                 activeOpacity={0.7}
               >
                 <Text style={styles.seeAllText}>See All</Text>
@@ -549,7 +614,7 @@ export default function HomeScreen() {
             <View style={styles.productsGrid}>
               {filteredProducts.map((product, index) => renderProductCard(product, index))}
             </View>
-            
+
             {/* Loading More Footer */}
             {loadingMore && hasMoreProducts && (
               <View style={styles.loadingFooterContainer}>
