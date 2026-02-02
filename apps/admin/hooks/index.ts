@@ -15,4 +15,5 @@ export {
     useApproveVendorApplication,
     useRejectVendorApplication,
     adminQueryKeys,
+    type VendorWithProductCount,
 } from './useAdminData';

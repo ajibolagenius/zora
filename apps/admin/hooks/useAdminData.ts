@@ -251,11 +251,36 @@ export function useAllOrders(params?: OrderQueryParams) {
 // All Vendors Hook (Admin)
 // =============================================================================
 
+export interface VendorWithProductCount extends Vendor {
+    product_count: number;
+}
+
 export function useAllVendors() {
     return useQuery({
         queryKey: adminQueryKeys.vendors(),
-        queryFn: async () => {
-            return vendorsService.getAll({ limit: 100 });
+        queryFn: async (): Promise<{ data: VendorWithProductCount[]; total: number; page: number; limit: number; hasMore: boolean }> => {
+            const supabase = createSupabaseClient();
+
+            // Fetch vendors with product count using a subquery
+            const { data: vendors, error, count } = await supabase
+                .from('vendors')
+                .select('*, products(count)', { count: 'exact' });
+
+            if (error) throw error;
+
+            // Transform the data to include product_count as a number
+            const vendorsWithCount: VendorWithProductCount[] = (vendors || []).map((vendor) => ({
+                ...vendor,
+                product_count: (vendor.products as { count: number }[])?.[0]?.count || 0,
+            }));
+
+            return {
+                data: vendorsWithCount,
+                total: count || 0,
+                page: 1,
+                limit: 100,
+                hasMore: false,
+            };
         },
         staleTime: 60 * 1000,
     });

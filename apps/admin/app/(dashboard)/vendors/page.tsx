@@ -52,6 +52,7 @@ import {
     useVendorApplications,
     useApproveVendorApplication,
     useRejectVendorApplication,
+    VendorWithProductCount,
 } from "../../../hooks";
 import { useAdminRealtime } from "../../../providers";
 import type { Vendor, VendorApplication } from "@zora/types";
@@ -198,8 +199,8 @@ export default function VendorsPage() {
         {
             key: "products",
             header: "Products",
-            render: (vendor: Vendor) => (
-                <span className="text-slate-600">{0}</span>
+            render: (vendor: VendorWithProductCount) => (
+                <span className="text-slate-600">{vendor.product_count ?? 0}</span>
             ),
         },
         {
