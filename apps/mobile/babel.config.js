@@ -7,6 +7,18 @@ module.exports = function (api) {
     ],
     plugins: [
       'react-native-reanimated/plugin',
+      [
+        'module-resolver',
+        {
+          root: ['.'],
+          alias: {
+            '@zora/api-client': '../../packages/api-client',
+            '@zora/types': '../../packages/types',
+            '@zora/design-tokens': '../../packages/design-tokens',
+            '@zora/ui-web': '../../packages/ui-web',
+          },
+        },
+      ],
     ],
   };
 };

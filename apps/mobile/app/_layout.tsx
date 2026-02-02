@@ -20,6 +20,7 @@ import {
 import { Colors } from '../constants/colors';
 import { QueryProvider } from '../providers/QueryProvider';
 import { ToastProvider } from '../components/ui';
+import { MobileRealtimeProvider } from '../providers/RealtimeProvider';
 import { useAuthStore } from '../stores/authStore';
 import { getSupabaseClient, isSupabaseConfigured } from '../lib/supabase';
 import '../global.css';
@@ -263,15 +264,17 @@ export default function RootLayout() {
     return (
         <QueryProvider>
             <ToastProvider>
-                <StatusBar style="light" />
-                <Stack
-                    screenOptions={{
-                        headerShown: false,
-                        contentStyle: { backgroundColor: Colors.backgroundDark },
-                        animation: 'fade',
-                        gestureEnabled: true,
-                    }}
-                />
+                <MobileRealtimeProvider>
+                    <StatusBar style="light" />
+                    <Stack
+                        screenOptions={{
+                            headerShown: false,
+                            contentStyle: { backgroundColor: Colors.backgroundDark },
+                            animation: 'fade',
+                            gestureEnabled: true,
+                        }}
+                    />
+                </MobileRealtimeProvider>
             </ToastProvider>
         </QueryProvider>
     );

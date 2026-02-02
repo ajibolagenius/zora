@@ -19,6 +19,16 @@ config.resolver.nodeModulesPaths = [
     path.resolve(monorepoRoot, 'node_modules'),
 ];
 
+// Force Metro to resolve specific packages to the project's root node_modules
+// This prevents "duplicate module" errors (especially for React)
+config.resolver.extraNodeModules = {
+    'react': path.resolve(projectRoot, 'node_modules/react'),
+    'react-native': path.resolve(projectRoot, 'node_modules/react-native'),
+    '@zora/api-client': path.resolve(monorepoRoot, 'packages/api-client'),
+    '@zora/types': path.resolve(monorepoRoot, 'packages/types'),
+    '@zora/design-tokens': path.resolve(monorepoRoot, 'packages/design-tokens'),
+};
+
 // Use a stable on-disk store (shared across web/android)
 const root = process.env.METRO_CACHE_ROOT || path.join(__dirname, '.metro-cache');
 config.cacheStores = [
@@ -56,6 +66,8 @@ config.resolver = {
     sourceExts: [...(config.resolver?.sourceExts || []), 'jsx', 'js', 'ts', 'tsx', 'json'],
     // Optimize asset extensions
     assetExts: config.resolver?.assetExts?.filter((ext) => ext !== 'svg') || [],
+    // Enable symlinks for monorepo support
+    // unstable_enableSymlinks: true, // Disabled in favor of extraNodeModules
 };
 
 // Apply NativeWind configuration

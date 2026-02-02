@@ -3,8 +3,9 @@
 import { useState } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Sidebar } from "../../components/Sidebar";
-import { List, WifiHigh, WifiX } from "@phosphor-icons/react";
+import { List } from "@phosphor-icons/react";
 import { VendorRealtimeProvider, useVendorRealtime } from "../../providers";
+import { ConnectionStatus } from "@zora/ui-web";
 import { useAuth } from "../../hooks";
 
 // Create a client
@@ -19,7 +20,7 @@ const queryClient = new QueryClient({
 
 // Connection status indicator component
 function ConnectionIndicator() {
-    const { isConnected, newOrdersCount } = useVendorRealtime();
+    const { connectionStatus, newOrdersCount } = useVendorRealtime();
 
     return (
         <div className="flex items-center gap-2">
@@ -28,17 +29,7 @@ function ConnectionIndicator() {
                     {newOrdersCount} new
                 </span>
             )}
-            <div
-                className={`flex items-center gap-1 text-xs ${isConnected ? "text-green-600" : "text-gray-400"
-                    }`}
-                title={isConnected ? "Connected" : "Disconnected"}
-            >
-                {isConnected ? (
-                    <WifiHigh size={14} weight="duotone" />
-                ) : (
-                    <WifiX size={14} weight="duotone" />
-                )}
-            </div>
+            <ConnectionStatus status={connectionStatus} />
         </div>
     );
 }

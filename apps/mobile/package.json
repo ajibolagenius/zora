@@ -24,6 +24,7 @@
     "@hookform/resolvers": "^5.2.2",
     "@react-native-async-storage/async-storage": "^2.2.0",
     "@react-native-community/netinfo": "^11.3.1",
+    "@zora/api-client": "file:../../packages/api-client",
     "@react-navigation/bottom-tabs": "^7.3.14",
     "@react-navigation/elements": "^2.3.14",
     "@react-navigation/native": "^7.1.28",
