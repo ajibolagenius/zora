@@ -34,7 +34,7 @@ class RealtimeManagerClass {
     /**
      * Subscribe to table changes
      */
-    subscribe<T = any>(config: SubscriptionConfig<T>): SubscriptionHandle {
+    subscribe<T extends Record<string, any> = any>(config: SubscriptionConfig<T>): SubscriptionHandle {
         const supabase = getSupabaseClient();
         const channelId = this.generateChannelId(config.table, config.filter);
 
@@ -58,7 +58,7 @@ class RealtimeManagerClass {
                     schema: config.schema || 'public',
                     table: config.table,
                     filter: config.filter,
-                },
+                } as any,
                 (payload: RealtimePostgresChangesPayload<T>) => {
                     this.handlePayload(payload, config);
                 }
@@ -82,7 +82,7 @@ class RealtimeManagerClass {
     /**
      * Subscribe to user-specific changes
      */
-    subscribeToUser<T = any>(
+    subscribeToUser<T extends Record<string, any> = any>(
         userId: string,
         table: RealtimeTable,
         callbacks: Pick<SubscriptionConfig<T>, 'onInsert' | 'onUpdate' | 'onDelete' | 'onError'>
@@ -97,7 +97,7 @@ class RealtimeManagerClass {
     /**
      * Subscribe to vendor-specific changes
      */
-    subscribeToVendor<T = any>(
+    subscribeToVendor<T extends Record<string, any> = any>(
         vendorId: string,
         table: RealtimeTable,
         callbacks: Pick<SubscriptionConfig<T>, 'onInsert' | 'onUpdate' | 'onDelete' | 'onError'>
@@ -112,7 +112,7 @@ class RealtimeManagerClass {
     /**
      * Subscribe to a specific order
      */
-    subscribeToOrder<T = any>(
+    subscribeToOrder<T extends Record<string, any> = any>(
         orderId: string,
         callbacks: Pick<SubscriptionConfig<T>, 'onUpdate' | 'onError'>
     ): SubscriptionHandle {
@@ -149,10 +149,10 @@ class RealtimeManagerClass {
                 callbacks?.onSync?.(state);
             })
             .on('presence', { event: 'join' }, ({ key, newPresences }) => {
-                callbacks?.onJoin?.(key, newPresences as PresenceUserInfo[]);
+                callbacks?.onJoin?.(key, newPresences as unknown as PresenceUserInfo[]);
             })
             .on('presence', { event: 'leave' }, ({ key, leftPresences }) => {
-                callbacks?.onLeave?.(key, leftPresences as PresenceUserInfo[]);
+                callbacks?.onLeave?.(key, leftPresences as unknown as PresenceUserInfo[]);
             })
             .subscribe(async (status) => {
                 if (status === 'SUBSCRIBED') {
@@ -291,7 +291,7 @@ class RealtimeManagerClass {
         return filter ? `${table}:${filter}` : `${table}:all`;
     }
 
-    private handlePayload<T>(
+    private handlePayload<T extends Record<string, any>>(
         payload: RealtimePostgresChangesPayload<T>,
         config: SubscriptionConfig<T>
     ): void {

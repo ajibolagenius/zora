@@ -11,7 +11,7 @@ import type { UseRealtimeOptions, RealtimeTable, SubscriptionHandle } from '../t
  * Hook for subscribing to realtime table changes
  * Automatically invalidates React Query cache on changes
  */
-export function useRealtimeSubscription<T = any>(options: UseRealtimeOptions<T>): void {
+export function useRealtimeSubscription<T extends Record<string, any> = any>(options: UseRealtimeOptions<T>): void {
     const {
         table,
         filter,
@@ -77,7 +77,7 @@ export function useRealtimeSubscription<T = any>(options: UseRealtimeOptions<T>)
 /**
  * Hook for subscribing to user-specific order updates
  */
-export function useOrdersRealtime<T = any>(
+export function useOrdersRealtime<T extends Record<string, any> = any>(
     userId: string,
     options?: Partial<Omit<UseRealtimeOptions<T>, 'table' | 'filter' | 'queryKey'>>
 ): void {
@@ -93,7 +93,7 @@ export function useOrdersRealtime<T = any>(
 /**
  * Hook for subscribing to vendor order updates
  */
-export function useVendorOrdersRealtime<T = any>(
+export function useVendorOrdersRealtime<T extends Record<string, any> = any>(
     vendorId: string,
     options?: Partial<Omit<UseRealtimeOptions<T>, 'table' | 'filter' | 'queryKey'>>
 ): void {
@@ -109,7 +109,7 @@ export function useVendorOrdersRealtime<T = any>(
 /**
  * Hook for subscribing to product updates
  */
-export function useProductsRealtime<T = any>(
+export function useProductsRealtime<T extends Record<string, any> = any>(
     vendorId?: string,
     options?: Partial<Omit<UseRealtimeOptions<T>, 'table' | 'filter' | 'queryKey'>>
 ): void {
@@ -125,7 +125,7 @@ export function useProductsRealtime<T = any>(
 /**
  * Hook for subscribing to user notifications
  */
-export function useNotificationsRealtime<T = any>(
+export function useNotificationsRealtime<T extends Record<string, any> = any>(
     userId: string,
     options?: Partial<Omit<UseRealtimeOptions<T>, 'table' | 'filter' | 'queryKey'>>
 ): void {
@@ -141,7 +141,7 @@ export function useNotificationsRealtime<T = any>(
 /**
  * Hook for subscribing to cart items
  */
-export function useCartRealtime<T = any>(
+export function useCartRealtime<T extends Record<string, any> = any>(
     userId: string,
     options?: Partial<Omit<UseRealtimeOptions<T>, 'table' | 'filter' | 'queryKey'>>
 ): void {
@@ -157,7 +157,7 @@ export function useCartRealtime<T = any>(
 /**
  * Hook for subscribing to vendor application updates
  */
-export function useVendorApplicationRealtime<T = any>(
+export function useVendorApplicationRealtime<T extends Record<string, any> = any>(
     applicationId: string,
     options?: Partial<Omit<UseRealtimeOptions<T>, 'table' | 'filter' | 'queryKey'>>
 ): void {
@@ -173,7 +173,7 @@ export function useVendorApplicationRealtime<T = any>(
 /**
  * Hook for subscribing to all vendor applications (admin)
  */
-export function useVendorApplicationsRealtime<T = any>(
+export function useVendorApplicationsRealtime<T extends Record<string, any> = any>(
     options?: Partial<Omit<UseRealtimeOptions<T>, 'table' | 'queryKey'>>
 ): void {
     useRealtimeSubscription({
@@ -187,7 +187,7 @@ export function useVendorApplicationsRealtime<T = any>(
 /**
  * Hook for subscribing to email thread updates
  */
-export function useEmailThreadsRealtime<T = any>(
+export function useEmailThreadsRealtime<T extends Record<string, any> = any>(
     options?: Partial<Omit<UseRealtimeOptions<T>, 'table' | 'queryKey'>>
 ): void {
     useRealtimeSubscription({
@@ -201,7 +201,7 @@ export function useEmailThreadsRealtime<T = any>(
 /**
  * Hook for subscribing to a specific order's updates
  */
-export function useOrderTrackingRealtime<T = any>(
+export function useOrderTrackingRealtime<T extends Record<string, any> = any>(
     orderId: string,
     options?: Partial<Omit<UseRealtimeOptions<T>, 'table' | 'filter' | 'queryKey'>>
 ): void {

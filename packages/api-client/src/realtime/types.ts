@@ -48,7 +48,7 @@ export interface ConnectionState {
 /**
  * Subscription configuration
  */
-export interface SubscriptionConfig<T = any> {
+export interface SubscriptionConfig<T extends Record<string, any> = any> {
     /** Table to subscribe to */
     table: RealtimeTable;
     /** Event type to listen for */
@@ -120,7 +120,7 @@ export type ChannelStatus =
 /**
  * Options for realtime hooks
  */
-export interface UseRealtimeOptions<T = any> {
+export interface UseRealtimeOptions<T extends Record<string, any> = any> {
     /** Table to subscribe to */
     table: RealtimeTable;
     /** Filter condition */

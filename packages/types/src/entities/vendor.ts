@@ -31,39 +31,4 @@ export interface Vendor {
     updated_at?: string;
 }
 
-export type VendorApplicationStatus = 'pending' | 'under_review' | 'approved' | 'rejected';
 
-export interface VendorApplication {
-    id: string;
-    user_id: string;
-    business_name: string;
-    business_type: string;
-    description?: string;
-    email: string;
-    phone: string;
-    address: {
-        line1: string;
-        line2?: string;
-        city: string;
-        postcode: string;
-        country: string;
-    };
-    documents?: {
-        business_registration?: string;
-        id_document?: string;
-        proof_of_address?: string;
-    };
-    bank_details?: {
-        account_name: string;
-        account_number: string;
-        sort_code: string;
-    };
-    coverage_areas?: string[];
-    product_categories: string[];
-    status: VendorApplicationStatus;
-    reviewed_by?: string;
-    reviewed_at?: string;
-    rejection_reason?: string;
-    created_at: string;
-    updated_at: string;
-}
