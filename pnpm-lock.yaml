@@ -205,6 +205,9 @@ importers:
       '@tanstack/react-query-persist-client':
         specifier: ^5.90.20
         version: 5.90.22(@tanstack/react-query@5.90.20(react@19.1.0))(react@19.1.0)
+      '@zora/api-client':
+        specifier: file:../../packages/api-client
+        version: file:packages/api-client(@types/react@19.1.17)(react@19.1.0)
       axios:
         specifier: ^1.13.2
         version: 1.13.4
@@ -537,9 +540,6 @@ importers:
       framer-motion:
         specifier: ^11.11.9
         version: 11.18.2(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
-      lucide-react:
-        specifier: ^0.454.0
-        version: 0.454.0(react@19.1.0)
       next:
         specifier: ^15.0.3
         version: 15.5.11(babel-plugin-react-compiler@1.0.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
@@ -708,9 +708,6 @@ importers:
       framer-motion:
         specifier: ^11.11.9
         version: 11.18.2(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
-      lucide-react:
-        specifier: ^0.454.0
-        version: 0.454.0(react@19.1.0)
       react:
         specifier: ^18.0.0 || ^19.0.0
         version: 19.1.0
@@ -2775,6 +2772,14 @@ packages:
   '@xmldom/xmldom@0.8.11':
     resolution: {integrity: sha512-cQzWCtO6C8TQiYl1ruKNn2U6Ao4o4WBBcbL61yJl84x+j5sOWWFU9X7DpND8XZG3daDppSsigMdfAIl2upQBRw==}
     engines: {node: '>=10.0.0'}
+
+  '@zora/api-client@file:packages/api-client':
+    resolution: {directory: packages/api-client, type: directory}
+    peerDependencies:
+      react: '>=18.0.0'
+    peerDependenciesMeta:
+      react:
+        optional: true
 
   abort-controller@3.0.0:
     resolution: {integrity: sha512-h8lQ8tacZYnR3vNQTgibj+tODHI5/+l06Au2Pcriv/Gmet0eaj4TwWH41sO9wnHDiQsEj19q0drzdWdeAHtweg==}
@@ -8751,6 +8756,19 @@ snapshots:
 
   '@xmldom/xmldom@0.8.11': {}
 
+  '@zora/api-client@file:packages/api-client(@types/react@19.1.17)(react@19.1.0)':
+    dependencies:
+      '@supabase/supabase-js': 2.93.3
+      '@zora/types': link:packages/types
+      zustand: 4.5.7(@types/react@19.1.17)(react@19.1.0)
+    optionalDependencies:
+      react: 19.1.0
+    transitivePeerDependencies:
+      - '@types/react'
+      - bufferutil
+      - immer
+      - utf-8-validate
+
   abort-controller@3.0.0:
     dependencies:
       event-target-shim: 5.0.1
@@ -12759,6 +12777,13 @@ snapshots:
       use-sync-external-store: 1.6.0(react@19.1.0)
     optionalDependencies:
       '@types/react': 18.3.27
+      react: 19.1.0
+
+  zustand@4.5.7(@types/react@19.1.17)(react@19.1.0):
+    dependencies:
+      use-sync-external-store: 1.6.0(react@19.1.0)
+    optionalDependencies:
+      '@types/react': 19.1.17
       react: 19.1.0
 
   zustand@5.0.10(@types/react@19.1.17)(react@19.1.0)(use-sync-external-store@1.6.0(react@19.1.0)):
