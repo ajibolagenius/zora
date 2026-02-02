@@ -169,7 +169,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                                                 <h2 className="text-2xl font-bold text-gray-900">{product.name}</h2>
                                                 <Badge variant={config.variant}>{config.label}</Badge>
                                             </div>
-                                            <p className="text-sm text-gray-500 mb-4">SKU: {product.sku || product.id.slice(0, 8)}</p>
+                                            <p className="text-sm text-gray-500 mb-4">ID: {product.id.slice(0, 8)}</p>
                                             <p className="text-gray-600 mb-4">{product.description || "No description provided."}</p>
 
                                             <div className="flex items-center gap-4">
@@ -204,16 +204,10 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                                             <p className="text-sm text-gray-500 mb-1">Current Price</p>
                                             <p className="text-2xl font-bold text-gray-900">{formatCurrency(product.price)}</p>
                                         </div>
-                                        {product.compare_at_price && (
+                                        {product.original_price && (
                                             <div>
                                                 <p className="text-sm text-gray-500 mb-1">Compare at Price</p>
-                                                <p className="text-xl text-gray-400 line-through">{formatCurrency(product.compare_at_price)}</p>
-                                            </div>
-                                        )}
-                                        {product.cost_per_item && (
-                                            <div>
-                                                <p className="text-sm text-gray-500 mb-1">Cost per Item</p>
-                                                <p className="text-xl text-gray-700">{formatCurrency(product.cost_per_item)}</p>
+                                                <p className="text-xl text-gray-400 line-through">{formatCurrency(product.original_price)}</p>
                                             </div>
                                         )}
                                     </div>
@@ -249,12 +243,12 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                                         </div>
                                         <div>
                                             <p className="text-sm text-gray-500 mb-1">Low Stock Threshold</p>
-                                            <p className="text-xl text-gray-700">{product.low_stock_threshold || 10} units</p>
+                                            <p className="text-xl text-gray-700">10 units</p>
                                         </div>
                                         {product.weight && (
                                             <div>
                                                 <p className="text-sm text-gray-500 mb-1">Weight</p>
-                                                <p className="text-xl text-gray-700">{product.weight} {product.weight_unit || 'g'}</p>
+                                                <p className="text-xl text-gray-700">{product.weight} {product.unit || 'g'}</p>
                                             </div>
                                         )}
                                         <div>
@@ -317,12 +311,12 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                                         <p className="text-sm text-gray-500 mb-1">Region</p>
                                         <p className="font-medium capitalize">{product.region || "Not specified"}</p>
                                     </div>
-                                    {product.tags && product.tags.length > 0 && (
+                                    {product.certifications && product.certifications.length > 0 && (
                                         <div>
-                                            <p className="text-sm text-gray-500 mb-2">Tags</p>
+                                            <p className="text-sm text-gray-500 mb-2">Certifications</p>
                                             <div className="flex flex-wrap gap-2">
-                                                {product.tags.map((tag: string) => (
-                                                    <Badge key={tag} variant="outline">{tag}</Badge>
+                                                {product.certifications.map((cert: string) => (
+                                                    <Badge key={cert} variant="outline">{cert}</Badge>
                                                 ))}
                                             </div>
                                         </div>
@@ -348,13 +342,13 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                                     <div className="flex justify-between">
                                         <span className="text-gray-500">Created</span>
                                         <span className="text-gray-900">
-                                            {new Date(product.created_at).toLocaleDateString()}
+                                            {product.created_at ? new Date(product.created_at).toLocaleDateString() : 'N/A'}
                                         </span>
                                     </div>
                                     <div className="flex justify-between">
                                         <span className="text-gray-500">Last Updated</span>
                                         <span className="text-gray-900">
-                                            {new Date(product.updated_at).toLocaleDateString()}
+                                            {product.updated_at ? new Date(product.updated_at).toLocaleDateString() : 'N/A'}
                                         </span>
                                     </div>
                                     <div className="flex justify-between">
@@ -384,7 +378,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                         <Button
                             variant="destructive"
                             onClick={handleDelete}
-                            loading={deleteProductMutation.isPending}
+                            isLoading={deleteProductMutation.isPending}
                         >
                             Delete
                         </Button>

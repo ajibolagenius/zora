@@ -85,7 +85,7 @@ export default function ProductsPage() {
         return productsData.data.filter((product) => {
             const matchesSearch =
                 product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                product.sku?.toLowerCase().includes(searchTerm.toLowerCase());
+                product.id.toLowerCase().includes(searchTerm.toLowerCase());
             const matchesCategory =
                 selectedCategory === "All" || product.category === selectedCategory;
             const productStatus = getProductStatus(product);
@@ -141,7 +141,7 @@ export default function ProductsPage() {
                     </div>
                     <div>
                         <p className="font-medium text-gray-900">{product.name}</p>
-                        <p className="text-sm text-gray-500">{product.sku || product.id.slice(0, 8)}</p>
+                        <p className="text-sm text-gray-500">{product.id.slice(0, 8)}</p>
                     </div>
                 </div>
             ),
@@ -419,7 +419,7 @@ export default function ProductsPage() {
                         <Button
                             variant="destructive"
                             onClick={handleDelete}
-                            loading={deleteProductMutation.isPending}
+                            isLoading={deleteProductMutation.isPending}
                         >
                             Delete
                         </Button>

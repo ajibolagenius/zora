@@ -68,7 +68,7 @@ export default function ShopProfilePage() {
             <Header
                 title="Shop Profile"
                 description="Manage your store information and branding"
-                actions={
+                action={
                     <Button
                         onClick={handleSave}
                         isLoading={isSaving}

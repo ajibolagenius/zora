@@ -87,20 +87,22 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
         if (product) {
             setFormData({
                 name: product.name || "",
-                sku: product.sku || "",
+                sku: "", // Not in Product type - keep for UI but don't read from product
                 description: product.description || "",
                 price: product.price?.toString() || "",
-                compareAtPrice: product.compare_at_price?.toString() || "",
-                cost: product.cost_per_item?.toString() || "",
+                compareAtPrice: product.original_price?.toString() || "",
+                cost: "", // Not in Product type
                 category: product.category || "",
                 region: product.region || "",
                 stock: product.stock_quantity?.toString() || "",
-                lowStockThreshold: product.low_stock_threshold?.toString() || "10",
-                weight: product.weight?.toString() || "",
-                weightUnit: product.weight_unit || "g",
-                tags: product.tags || [],
+                lowStockThreshold: "10", // Not in Product type
+                weight: product.weight || "",
+                weightUnit: product.unit || "g",
+                tags: product.certifications || [],
             });
-            if (product.image_url) {
+            if (product.images && product.images.length > 0) {
+                setImages(product.images);
+            } else if (product.image_url) {
                 setImages([product.image_url]);
             }
         }
@@ -134,19 +136,15 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
             await updateProductMutation.mutateAsync({
                 id: product.id,
                 name: formData.name,
-                sku: formData.sku || undefined,
                 description: formData.description || undefined,
                 price: parseFloat(formData.price) || 0,
-                compare_at_price: formData.compareAtPrice ? parseFloat(formData.compareAtPrice) : undefined,
-                cost_per_item: formData.cost ? parseFloat(formData.cost) : undefined,
+                original_price: formData.compareAtPrice ? parseFloat(formData.compareAtPrice) : undefined,
                 category: formData.category || undefined,
                 region: formData.region || undefined,
                 stock_quantity: parseInt(formData.stock) || 0,
-                low_stock_threshold: parseInt(formData.lowStockThreshold) || 10,
-                weight: formData.weight ? parseFloat(formData.weight) : undefined,
-                weight_unit: formData.weightUnit || undefined,
-                tags: formData.tags.length > 0 ? formData.tags : undefined,
-                in_stock: parseInt(formData.stock) > 0,
+                weight: formData.weight || undefined,
+                unit: formData.weightUnit || undefined,
+                certifications: formData.tags.length > 0 ? formData.tags : undefined,
             });
             router.push(`/products/${productId}`);
         } catch (error) {

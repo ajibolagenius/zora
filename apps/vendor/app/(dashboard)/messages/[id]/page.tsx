@@ -60,7 +60,7 @@ export default function ConversationPage({ params }: { params: Promise<{ id: str
 
     // Mark messages as read when conversation is opened
     useEffect(() => {
-        if (conversationId && vendor?.id && conversation?.unread_count_vendor > 0) {
+        if (conversationId && vendor?.id && (conversation?.unread_count_vendor ?? 0) > 0) {
             markReadMutation.mutate({ conversationId, vendorId: vendor.id });
         }
     }, [conversationId, vendor?.id, conversation?.unread_count_vendor]);
@@ -252,8 +252,8 @@ export default function ConversationPage({ params }: { params: Promise<{ id: str
                                             {/* Message Content */}
                                             <div
                                                 className={`max-w-[75%] px-4 py-2 rounded-2xl ${isVendor
-                                                        ? "bg-primary text-white rounded-br-sm"
-                                                        : "bg-white text-gray-900 rounded-bl-sm shadow-sm"
+                                                    ? "bg-primary text-white rounded-br-sm"
+                                                    : "bg-white text-gray-900 rounded-bl-sm shadow-sm"
                                                     }`}
                                             >
                                                 <p className="whitespace-pre-wrap break-words">{message.text}</p>
@@ -299,7 +299,7 @@ export default function ConversationPage({ params }: { params: Promise<{ id: str
                     <Button
                         onClick={handleSendMessage}
                         disabled={!messageText.trim() || sendMessageMutation.isPending}
-                        loading={sendMessageMutation.isPending}
+                        isLoading={sendMessageMutation.isPending}
                     >
                         <PaperPlaneTilt size={16} weight="duotone" />
                     </Button>

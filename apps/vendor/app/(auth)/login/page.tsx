@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
@@ -8,7 +8,7 @@ import { Storefront, Envelope, Lock, Eye, EyeSlash, ArrowRight } from "@phosphor
 import { Button, Input, Card } from "@zora/ui-web";
 import { useAuth } from "../../../hooks";
 
-export default function VendorLoginPage() {
+function LoginForm() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const redirect = searchParams.get("redirect") || "/";
@@ -165,3 +165,25 @@ export default function VendorLoginPage() {
         </div>
     );
 }
+
+function LoginFallback() {
+    return (
+        <div className="min-h-screen bg-gradient-to-br from-[#221710] to-[#3a2a1f] flex items-center justify-center p-4">
+            <div className="w-full max-w-md text-center">
+                <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary/50 mb-4 animate-pulse">
+                    <Storefront size={32} weight="duotone" className="text-white/50" />
+                </div>
+                <p className="text-[#CBA990]">Loading...</p>
+            </div>
+        </div>
+    );
+}
+
+export default function VendorLoginPage() {
+    return (
+        <Suspense fallback={<LoginFallback />}>
+            <LoginForm />
+        </Suspense>
+    );
+}
+

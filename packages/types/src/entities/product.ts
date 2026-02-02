@@ -12,6 +12,7 @@ export interface NutritionInfo {
 }
 
 export interface Product {
+    [key: string]: unknown;
     id: string;
     vendor_id: string;
     name: string;

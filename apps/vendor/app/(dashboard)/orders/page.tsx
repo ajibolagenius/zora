@@ -50,9 +50,11 @@ const statusConfig = {
     confirmed: { label: "Confirmed", variant: "info" as const, icon: CheckCircle, color: "text-blue-600 bg-blue-100" },
     preparing: { label: "Preparing", variant: "primary" as const, icon: Package, color: "text-purple-600 bg-purple-100" },
     ready: { label: "Ready", variant: "success" as const, icon: CheckCircle, color: "text-green-600 bg-green-100" },
+    ready_for_pickup: { label: "Ready for Pickup", variant: "success" as const, icon: CheckCircle, color: "text-green-600 bg-green-100" },
     out_for_delivery: { label: "Out for Delivery", variant: "info" as const, icon: Truck, color: "text-blue-600 bg-blue-100" },
     delivered: { label: "Delivered", variant: "success" as const, icon: CheckCircle, color: "text-green-600 bg-green-100" },
     cancelled: { label: "Cancelled", variant: "error" as const, icon: XCircle, color: "text-red-600 bg-red-100" },
+    refunded: { label: "Refunded", variant: "default" as const, icon: XCircle, color: "text-gray-600 bg-gray-100" },
 };
 
 const nextStatusMap: Record<string, OrderStatus> = {
@@ -63,7 +65,8 @@ const nextStatusMap: Record<string, OrderStatus> = {
     out_for_delivery: "delivered",
 };
 
-interface OrderWithDetails extends Order {
+interface OrderWithDetails extends Omit<Order, 'items'> {
+    [key: string]: unknown;
     customer?: {
         id: string;
         full_name: string;
@@ -309,7 +312,7 @@ export default function OrdersPage() {
                                                             <Button
                                                                 size="sm"
                                                                 className="text-xs sm:text-sm whitespace-nowrap"
-                                                                loading={updateStatusMutation.isPending}
+                                                                isLoading={updateStatusMutation.isPending}
                                                                 onClick={(e) => {
                                                                     e.stopPropagation();
                                                                     handleUpdateStatus(order.id, nextStatus);
@@ -393,7 +396,14 @@ export default function OrdersPage() {
                                         {selectedOrder.delivery_address && (
                                             <div className="flex items-start gap-2 text-sm text-gray-600">
                                                 <MapPin size={16} weight="duotone" className="mt-0.5" />
-                                                {selectedOrder.delivery_address}
+                                                <span>
+                                                    {[
+                                                        selectedOrder.delivery_address.line1,
+                                                        selectedOrder.delivery_address.line2,
+                                                        selectedOrder.delivery_address.city,
+                                                        selectedOrder.delivery_address.postcode,
+                                                    ].filter(Boolean).join(', ')}
+                                                </span>
                                             </div>
                                         )}
                                         {selectedOrder.estimated_delivery && (
@@ -453,7 +463,7 @@ export default function OrdersPage() {
                                 </Button>
                                 {nextStatusMap[selectedOrder.status] && (
                                     <Button
-                                        loading={updateStatusMutation.isPending}
+                                        isLoading={updateStatusMutation.isPending}
                                         onClick={() => {
                                             handleUpdateStatus(selectedOrder.id, nextStatusMap[selectedOrder.status]);
                                         }}
