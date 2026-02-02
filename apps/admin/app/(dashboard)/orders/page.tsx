@@ -64,7 +64,8 @@ const paymentStatusConfig = {
     refund_requested: { label: "Refund Requested", variant: "warning" as const },
 };
 
-interface OrderWithDetails extends Order {
+interface OrderWithDetails extends Omit<Order, 'items'> {
+    [key: string]: unknown;
     customer?: {
         id: string;
         full_name: string;
@@ -85,6 +86,7 @@ interface OrderWithDetails extends Order {
             image_url?: string;
         };
     }>;
+    payment_status?: 'pending' | 'paid' | 'failed' | 'refunded' | 'refund_requested';
 }
 
 export default function OrdersPage() {
@@ -266,7 +268,7 @@ export default function OrdersPage() {
             <Header
                 title="Orders"
                 description="Manage all platform orders"
-                action={
+                actions={
                     <Button
                         variant="outline"
                         size="sm"
@@ -417,7 +419,7 @@ export default function OrdersPage() {
                         <Button variant="outline" onClick={() => setRefundDialogOpen(false)}>
                             Cancel
                         </Button>
-                        <Button onClick={handleProcessRefund} loading={updateStatusMutation.isPending}>
+                        <Button onClick={handleProcessRefund} isLoading={updateStatusMutation.isPending}>
                             Process Refund
                         </Button>
                     </DialogFooter>

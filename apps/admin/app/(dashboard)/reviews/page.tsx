@@ -237,7 +237,7 @@ export default function ReviewsPage() {
                                 <div className="flex flex-col lg:flex-row gap-4">
                                     <div className="flex-1">
                                         <div className="flex items-start gap-4">
-                                            <Avatar size="md">
+                                            <Avatar size="default">
                                                 <AvatarFallback>
                                                     {review.customer.split(" ").map(n => n[0]).join("")}
                                                 </AvatarFallback>

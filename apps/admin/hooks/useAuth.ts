@@ -162,11 +162,7 @@ export function useAuth(): UseAuthReturn {
         setState((prev) => ({ ...prev, isLoading: true, error: null }));
 
         try {
-            const { user, error } = await authService.signIn(email, password);
-
-            if (error) {
-                throw new Error(error);
-            }
+            const { user } = await authService.signIn(email, password);
 
             if (!user) {
                 throw new Error('Sign in failed');

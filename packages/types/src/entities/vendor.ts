@@ -7,6 +7,7 @@ export interface OpeningHours {
 }
 
 export interface Vendor {
+    [key: string]: unknown;
     id: string;
     user_id?: string;
     name: string;

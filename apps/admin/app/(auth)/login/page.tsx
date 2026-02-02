@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
@@ -37,7 +37,7 @@ function getSafeRedirectUrl(url: string | null): string {
     return url;
 }
 
-export default function AdminLoginPage() {
+function LoginForm() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const redirect = getSafeRedirectUrl(searchParams.get("redirect"));
@@ -182,3 +182,32 @@ export default function AdminLoginPage() {
         </div>
     );
 }
+
+function LoginFallback() {
+    return (
+        <div className="min-h-screen bg-gradient-to-br from-slate-900 to-slate-800 flex items-center justify-center p-4">
+            <div className="w-full max-w-md">
+                <div className="text-center mb-8">
+                    <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary mb-4">
+                        <Shield size={32} weight="duotone" className="text-white" />
+                    </div>
+                    <h1 className="text-3xl font-bold text-white mb-2">
+                        Admin Portal
+                    </h1>
+                    <p className="text-slate-400">
+                        Loading...
+                    </p>
+                </div>
+            </div>
+        </div>
+    );
+}
+
+export default function AdminLoginPage() {
+    return (
+        <Suspense fallback={<LoginFallback />}>
+            <LoginForm />
+        </Suspense>
+    );
+}
+

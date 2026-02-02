@@ -104,7 +104,7 @@ export default function VendorsPage() {
         const searchLower = searchTerm.toLowerCase();
         return vendorsData.data.filter((vendor) => {
             return (
-                vendor.shop_name?.toLowerCase().includes(searchLower) ||
+                vendor.name?.toLowerCase().includes(searchLower) ||
                 vendor.slug?.toLowerCase().includes(searchLower)
             );
         });
@@ -156,16 +156,16 @@ export default function VendorsPage() {
                 <div className="flex items-center gap-3">
                     <Avatar size="default">
                         {vendor.logo_url ? (
-                            <img src={vendor.logo_url} alt={vendor.shop_name} className="w-full h-full object-cover" />
+                            <img src={vendor.logo_url} alt={vendor.name} className="w-full h-full object-cover" />
                         ) : (
                             <AvatarFallback className="bg-primary/10 text-primary">
-                                {vendor.shop_name?.split(" ").map((n) => n[0]).join("").slice(0, 2) || "??"}
+                                {vendor.name?.split(" ").map((n) => n[0]).join("").slice(0, 2) || "??"}
                             </AvatarFallback>
                         )}
                     </Avatar>
                     <div>
                         <div className="flex items-center gap-2">
-                            <p className="font-medium text-slate-900">{vendor.shop_name}</p>
+                            <p className="font-medium text-slate-900">{vendor.name}</p>
                             {vendor.is_verified && <CheckCircle size={16} weight="duotone" className="text-blue-500" />}
                         </div>
                         <p className="text-xs text-slate-500">{vendor.slug}</p>
@@ -199,7 +199,7 @@ export default function VendorsPage() {
             key: "products",
             header: "Products",
             render: (vendor: Vendor) => (
-                <span className="text-slate-600">{vendor.product_count || 0}</span>
+                <span className="text-slate-600">{0}</span>
             ),
         },
         {
@@ -233,7 +233,7 @@ export default function VendorsPage() {
             <Header
                 title="Vendors"
                 description="Manage vendors and applications"
-                action={
+                actions={
                     <Button
                         variant="outline"
                         size="sm"
@@ -387,15 +387,15 @@ export default function VendorsPage() {
                                                             </div>
                                                             <p className="text-sm text-slate-500">{app.business_type}</p>
                                                             <div className="flex flex-wrap items-center gap-4 mt-2 text-sm text-slate-500">
-                                                                {app.business_address && (
+                                                                {app.city && (
                                                                     <span className="flex items-center gap-1">
                                                                         <MapPin size={16} weight="duotone" />
-                                                                        {app.business_address}
+                                                                        {`${app.address_line_1}, ${app.city}`}
                                                                     </span>
                                                                 )}
                                                                 <span className="flex items-center gap-1">
                                                                     <Envelope size={16} weight="duotone" />
-                                                                    {app.contact_email}
+                                                                    {app.email}
                                                                 </span>
                                                                 <span className="flex items-center gap-1">
                                                                     <Clock size={16} weight="duotone" />
@@ -450,10 +450,10 @@ export default function VendorsPage() {
                                             <p className="text-xs text-slate-500">Business Type</p>
                                             <p className="font-medium">{selectedApplication.business_type}</p>
                                         </div>
-                                        {selectedApplication.business_address && (
+                                        {selectedApplication.city && (
                                             <div>
                                                 <p className="text-xs text-slate-500">Location</p>
-                                                <p className="font-medium">{selectedApplication.business_address}</p>
+                                                <p className="font-medium">{`${selectedApplication.address_line_1}, ${selectedApplication.city}, ${selectedApplication.postcode}`}</p>
                                             </div>
                                         )}
                                         {selectedApplication.description && (
@@ -470,12 +470,12 @@ export default function VendorsPage() {
                                     <Card padding="sm" className="space-y-3">
                                         <div className="flex items-center gap-2">
                                             <Envelope size={16} weight="duotone" className="text-slate-400" />
-                                            <p className="text-sm">{selectedApplication.contact_email}</p>
+                                            <p className="text-sm">{selectedApplication.email}</p>
                                         </div>
-                                        {selectedApplication.contact_phone && (
+                                        {selectedApplication.phone && (
                                             <div className="flex items-center gap-2">
                                                 <Phone size={16} weight="duotone" className="text-slate-400" />
-                                                <p className="text-sm">{selectedApplication.contact_phone}</p>
+                                                <p className="text-sm">{selectedApplication.phone}</p>
                                             </div>
                                         )}
                                         <div>
@@ -488,16 +488,18 @@ export default function VendorsPage() {
                                 </div>
                             </div>
 
-                            {selectedApplication.documents && selectedApplication.documents.length > 0 && (
+                            {selectedApplication.documents && Object.keys(selectedApplication.documents).length > 0 && (
                                 <div>
                                     <h4 className="font-medium text-slate-900 mb-3">Submitted Documents</h4>
                                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                                        {selectedApplication.documents.map((doc, index) => (
-                                            <Card key={index} padding="sm" className="flex items-center gap-2">
-                                                <FileText size={16} weight="duotone" className="text-primary" />
-                                                <span className="text-sm truncate">{typeof doc === 'string' ? doc : 'Document'}</span>
-                                                <ArrowSquareOut size={12} weight="duotone" className="text-slate-400 ml-auto" />
-                                            </Card>
+                                        {Object.entries(selectedApplication.documents).map(([key, url]: [string, string | undefined], index: number) => (
+                                            url && (
+                                                <Card key={index} padding="sm" className="flex items-center gap-2">
+                                                    <FileText size={16} weight="duotone" className="text-primary" />
+                                                    <span className="text-sm truncate">{key.replace(/_/g, ' ')}</span>
+                                                    <ArrowSquareOut size={12} weight="duotone" className="text-slate-400 ml-auto" />
+                                                </Card>
+                                            )
                                         ))}
                                     </div>
                                 </div>
@@ -522,7 +524,7 @@ export default function VendorsPage() {
                                     className="text-red-600 border-red-200 hover:bg-red-50"
                                     leftIcon={<UserMinus size={16} weight="duotone" />}
                                     onClick={handleReject}
-                                    loading={rejectApplicationMutation.isPending}
+                                    isLoading={rejectApplicationMutation.isPending}
                                 >
                                     Reject
                                 </Button>
@@ -530,7 +532,7 @@ export default function VendorsPage() {
                                     variant="success"
                                     leftIcon={<UserCheck size={16} weight="duotone" />}
                                     onClick={handleApprove}
-                                    loading={approveApplicationMutation.isPending}
+                                    isLoading={approveApplicationMutation.isPending}
                                 >
                                     Approve Vendor
                                 </Button>
