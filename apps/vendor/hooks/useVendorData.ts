@@ -154,7 +154,7 @@ export function useRecentOrders(vendorId: string | null, limit = 5) {
                 .from('orders')
                 .select(`
                     *,
-                    customer:profiles(id, full_name, email, avatar_url)
+                    customer:profiles!orders_user_id_fkey(id, full_name, email, avatar_url)
                 `)
                 .eq('vendor_id', vendorId)
                 .order('created_at', { ascending: false })
@@ -185,8 +185,8 @@ export function useVendorOrders(vendorId: string | null, params?: OrderQueryPara
                 .from('orders')
                 .select(`
                     *,
-                    customer:profiles(id, full_name, email, avatar_url),
-                    items:order_items(*, product:products(id, name, image_url))
+                    customer:profiles!orders_user_id_fkey(id, full_name, email, avatar_url),
+                    order_items:order_items(*, product:products(id, name, image_url))
                 `, { count: 'exact' })
                 .eq('vendor_id', vendorId)
                 .order('created_at', { ascending: false });
@@ -203,8 +203,22 @@ export function useVendorOrders(vendorId: string | null, params?: OrderQueryPara
 
             if (error) throw error;
 
+            // Map the data to match Order interface
+            const mappedData = data?.map((order: any) => ({
+                ...order,
+                items: order.order_items?.map((item: any) => ({
+                    product_id: item.product_id,
+                    vendor_id: order.vendor_id,
+                    name: item.product_name || item.product?.name,
+                    image_url: item.product?.image_url,
+                    price: item.product_price,
+                    quantity: item.quantity,
+                    variant: item.variant
+                })) || order.items
+            }));
+
             return {
-                data: data || [],
+                data: mappedData || [],
                 total: count || 0,
                 page,
                 limit,
