@@ -169,6 +169,10 @@ When `EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY` is not configured, all API calls run i
      - Subscribes to `orders` updates for that particular `id` via `realtimeService`
    - Clears the cart (`clearCart()`)
    - Navigates to `/order-confirmation?orderId=<createdOrder.id>` (or falls back to the synthetic `paymentData.orderId` if creation fails)
+   
+   > **Note on Tracking:**
+   > Automated tracking IDs are **NOT** generated at this stage. Tracking references are added manually by the Zora Admin during the delivery booking process (see [Delivery Process](./DELIVERY_PROCESS.md)).
+   > The `orderId` used here is internal to Zora and not a courier tracking number.
 
 5. **On failure:**
    - Shows a generic "Payment Failed/Error" alert and leaves state unchanged
@@ -201,7 +205,7 @@ When `EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY` is not configured, all API calls run i
 | Stylized delivery card     | Visual confirmation                                                            |
 
 **Primary Actions:**
-- "Track Order" → `/order-tracking/{trackingId}`
+- "Track Order" → `/order-tracking/{orderId}` (Uses internal Order ID initially)
 - "Continue Shopping" → `/(tabs)`
 
 ---
