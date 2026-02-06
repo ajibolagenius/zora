@@ -36,7 +36,7 @@ export function HeroSection() {
                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-white/5 rounded-full blur-3xl" />
             </div>
 
-            <div className="relative z-10 container mx-auto px-4 sm:px-6 flex items-center justify-center pt-24 sm:pt-32 pb-16 lg:pt-40 lg:pb-20">
+            <div className="relative z-10 container mx-auto px-4 sm:px-6 flex items-center justify-center pt-32 sm:pt-40 lg:pt-48 pb-16 lg:pb-20">
                 <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center max-w-6xl">
                     {/* Left Content */}
                     <div className="text-center lg:text-left order-2 lg:order-1">

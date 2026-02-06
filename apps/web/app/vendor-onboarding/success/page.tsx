@@ -36,7 +36,7 @@ export default function VendorOnboardingSuccessPage() {
                             <span className="relative inline-block mt-2">
                                 Submitted Successfully!
                                 <svg className="absolute -bottom-2 left-0 w-full" viewBox="0 0 200 12" fill="none">
-                                    <path d="M2 8.5C50 2.5 150 2.5 198 8.5" stroke="#FACC15" strokeWidth="4" strokeLinecap="round" />
+                                    <path d="M2 8.5C50 2.5 150 2.5 198 8.5" stroke="#FACC15" strokeWidth="3" strokeLinecap="round" />
                                 </svg>
                             </span>
                         </h1>

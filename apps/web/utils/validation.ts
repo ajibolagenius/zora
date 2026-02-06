@@ -6,33 +6,25 @@ export const validateEmail = (email: string): boolean => {
 };
 
 export const validatePhone = (phone: string): boolean => {
+    // Accept all phone numbers - just check if it's not empty and has some basic format
     const cleanedPhone = phone.replace(/\s/g, '');
 
-    // Support multiple formats:
-    // 1. UK mobile: +447XXXXXXXXX or 07XXXXXXXXX
-    // 2. UK landline: +4420XXXXXXXXX or 020XXXXXXXXX
-    // 3. International formats (for vendors with foreign numbers)
-    const ukMobileRegex = /^(\+44|0)7\d{9}$/;
-    const ukLandlineRegex = /^(\+44|0)(1|2)\d{9,10}$/;
-    const internationalRegex = /^\+\d{10,15}$/;
-
-    return ukMobileRegex.test(cleanedPhone) ||
-        ukLandlineRegex.test(cleanedPhone) ||
-        internationalRegex.test(cleanedPhone);
+    // Basic validation: at least 6 characters and contains at least one digit
+    return cleanedPhone.length >= 6 && /\d/.test(cleanedPhone);
 };
 
 export const getPhoneFormatHint = (phone: string): string => {
     const cleanedPhone = phone.replace(/\s/g, '');
 
-    if (/^(\+44|0)7\d{9}$/.test(cleanedPhone)) {
-        return 'UK mobile number format: +44 7XXX XXXXXX or 07XXX XXXXXX';
-    } else if (/^(\+44|0)(1|2)\d{9,10}$/.test(cleanedPhone)) {
-        return 'UK landline format: +44 20XXX XXXX or 020XXX XXXX';
-    } else if (/^\+\d{10,15}$/.test(cleanedPhone)) {
-        return 'International format: +[country code] [number]';
+    if (cleanedPhone.length === 0) {
+        return 'Enter any phone number';
+    } else if (cleanedPhone.length < 6) {
+        return 'Phone number must be at least 6 characters';
+    } else if (!/\d/.test(cleanedPhone)) {
+        return 'Phone number must contain at least one digit';
     }
 
-    return 'Enter a valid phone number';
+    return 'Phone number format accepted';
 };
 
 export const validatePostcode = (postcode: string): boolean => {
@@ -89,7 +81,7 @@ export const validateStep = (step: number, data: VendorOnboardingData): FormVali
             if (!data.phone.trim()) {
                 errors.push({ field: 'phone', message: 'Phone number is required' });
             } else if (!validatePhone(data.phone)) {
-                errors.push({ field: 'phone', message: 'Please enter a valid phone number (UK mobile/landline or international)' });
+                errors.push({ field: 'phone', message: 'Please enter a valid phone number (minimum 6 characters with at least one digit)' });
             }
 
             if (!data.addressLine1.trim()) {

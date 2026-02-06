@@ -171,7 +171,7 @@ export default function VendorOnboardingPage() {
                     <div className="absolute bottom-20 right-10 w-96 h-96 bg-white/10 rounded-full blur-3xl" />
                 </div>
 
-                <div className="relative z-10 container mx-auto px-4 sm:px-6 min-h-[40vh] sm:min-h-[50vh] flex items-center justify-center">
+                <div className="relative z-10 container mx-auto px-4 sm:px-6 min-h-[40vh] sm:min-h-[50vh] flex items-center justify-center pt-24 sm:pt-32 lg:pt-40">
                     <div className="text-center max-w-4xl">
                         <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm border border-white/30 text-white text-xs font-medium px-3 sm:px-4 py-1.5 sm:py-2 rounded-full mb-4 sm:mb-6">
                             <span className="w-2 h-2 bg-secondary rounded-full animate-pulse" />
@@ -180,7 +180,7 @@ export default function VendorOnboardingPage() {
 
                         <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black font-display text-white leading-[1.1] mb-4 sm:mb-6">
                             Become a
-                            <span className="relative inline-block mt-2">
+                            <span className="relative inline-block mt-2 ml-2">
                                 Zora Vendor
                                 <svg className="absolute -bottom-2 left-0 w-full" viewBox="0 0 200 12" fill="none">
                                     <path d="M2 8.5C50 2.5 150 2.5 198 8.5" stroke="#FACC15" strokeWidth="4" strokeLinecap="round" />
@@ -283,7 +283,7 @@ export default function VendorOnboardingPage() {
                                         </Button>
                                     ) : (
                                         <Button
-                                            variant="success"
+                                            variant="default"
                                             onClick={handleSubmit}
                                             disabled={formState.isSubmitting}
                                             rightIcon={formState.isSubmitting ? undefined : <Check size={16} weight="duotone" />}

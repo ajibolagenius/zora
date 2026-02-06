@@ -995,6 +995,16 @@ Use this checklist when implementing or reviewing screens:
 - **Visual Hierarchy**: Clear progression from primary to secondary actions
 - **Responsive Design**: Mobile-first approach throughout
 
+### Header Spacing Guidelines
+- **Fixed Header Height**: ~96px total (48px FreeDeliveryBanner + 48px Navigation)
+- **Hero Section Top Padding**: `pt-24 sm:pt-32 lg:pt-40` to account for fixed header
+- **Landing Page Hero**: `pt-32 sm:pt-40 lg:pt-48` (extra padding for emphasis)
+- **Responsive Breakpoints**:
+  - Mobile: `pt-24` (96px)
+  - Tablet: `pt-32` (128px)
+  - Desktop: `pt-40` (160px)
+- **Auth Pages**: No fixed header, standard `py-20 sm:py-24` spacing
+
 ---
 
 ## File References
