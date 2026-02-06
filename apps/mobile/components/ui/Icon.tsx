@@ -20,7 +20,7 @@ const phosphorIconMap: Record<string, keyof typeof PhosphorIcons> = {
   'profile': 'User',
   'account': 'User',
   'account-outline': 'User',
-  
+
   // Common Actions
   'search': 'MagnifyingGlass',
   'magnify': 'MagnifyingGlass',
@@ -36,7 +36,7 @@ const phosphorIconMap: Record<string, keyof typeof PhosphorIcons> = {
   'chevron-up': 'CaretUp',
   'chevron-left': 'CaretLeft',
   'chevron-right': 'CaretRight',
-  
+
   // Features
   'heart': 'Heart',
   'heart-outline': 'Heart',
@@ -52,7 +52,7 @@ const phosphorIconMap: Record<string, keyof typeof PhosphorIcons> = {
   'truck-delivery-outline': 'Truck',
   'qrcode': 'QrCode',
   'qrcode-scan': 'QrCode',
-  
+
   // Products & Shopping
   'basket': 'Basket',
   'bag': 'Bag',
@@ -63,7 +63,7 @@ const phosphorIconMap: Record<string, keyof typeof PhosphorIcons> = {
   'receipt': 'Receipt',
   'credit-card': 'CreditCard',
   'wallet': 'Wallet',
-  
+
   // User & Settings
   'settings': 'Gear',
   'cog': 'Gear',
@@ -77,13 +77,13 @@ const phosphorIconMap: Record<string, keyof typeof PhosphorIcons> = {
   'eye-outline': 'Eye',
   'eye-off': 'EyeSlash',
   'eye-off-outline': 'EyeSlash',
-  
+
   // Social
   'google': 'GoogleLogo',
   'apple': 'AppleLogo',
   'facebook': 'FacebookLogo',
   'share': 'ShareNetwork',
-  
+
   // Categories
   'food': 'CookingPot',
   'pot-steam': 'CookingPot',
@@ -94,7 +94,7 @@ const phosphorIconMap: Record<string, keyof typeof PhosphorIcons> = {
   'flower': 'Flower',
   'fire': 'Fire',
   'diamond-stone': 'Diamond',
-  
+
   // Misc
   'information': 'Info',
   'help-circle': 'Question',
@@ -140,30 +140,31 @@ export const Icon: React.FC<IconProps> = ({
 }) => {
   // Determine the icon weight based on focused state
   const iconWeight: IconWeight = focused ? 'fill' : weight;
-  
+
   // Check if we have a Phosphor mapping for this icon
   const phosphorName = phosphorIconMap[name] || phosphorIconMap[name.replace('-outline', '')];
-  
+
   if (phosphorName && PhosphorIcons[phosphorName]) {
+    // eslint-disable-next-line import/namespace
     const PhosphorIcon = PhosphorIcons[phosphorName] as React.ComponentType<any>;
     return (
       <View style={style}>
-        <PhosphorIcon 
-          size={size} 
-          color={color} 
+        <PhosphorIcon
+          size={size}
+          color={color}
           weight={iconWeight}
         />
       </View>
     );
   }
-  
+
   // Fallback to MaterialCommunityIcons
   return (
     <View style={style}>
-      <MaterialCommunityIcons 
-        name={name as any} 
-        size={size} 
-        color={color} 
+      <MaterialCommunityIcons
+        name={name as any}
+        size={size}
+        color={color}
       />
     </View>
   );

@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -426,9 +427,11 @@ export default function OrdersPage() {
                                                 <div key={item.id} className="flex items-center justify-between p-4">
                                                     <div className="flex items-center gap-3">
                                                         {item.product?.image_url ? (
-                                                            <img
+                                                            <Image
                                                                 src={item.product.image_url}
-                                                                alt={item.product.name}
+                                                                alt={item.product.name || "Product"}
+                                                                width={48}
+                                                                height={48}
                                                                 className="w-12 h-12 rounded-lg object-cover"
                                                             />
                                                         ) : (

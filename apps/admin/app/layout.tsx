@@ -6,6 +6,8 @@ export const metadata: Metadata = {
     description: "Manage the Zora African Market platform",
 };
 
+import { AdminProviders } from "../providers";
+
 export default function RootLayout({
     children,
 }: Readonly<{
@@ -21,7 +23,9 @@ export default function RootLayout({
                 >
                     Skip to main content
                 </a>
-                {children}
+                <AdminProviders>
+                    {children}
+                </AdminProviders>
             </body>
         </html>
     );

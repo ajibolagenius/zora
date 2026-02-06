@@ -10,3 +10,5 @@ export {
     useAdminConnectionStatus,
     useBroadcastAnnouncement,
 } from './AdminRealtimeProvider';
+
+export { AdminProviders } from './AdminProviders';

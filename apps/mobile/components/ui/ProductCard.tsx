@@ -195,6 +195,8 @@ export const ProductCard: React.FC<ProductCardProps> = React.memo(({
     );
 });
 
+ProductCard.displayName = 'ProductCard';
+
 const styles = StyleSheet.create({
     container: {
         backgroundColor: Colors.cardDark,

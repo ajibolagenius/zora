@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { motion } from "framer-motion";
 import {
     ArrowLeft,
@@ -177,7 +178,13 @@ export default function NewProductPage() {
                                                 key={index}
                                                 className="relative aspect-square rounded-xl overflow-hidden bg-gray-100 group"
                                             >
-                                                <img src={img} alt="" className="w-full h-full object-cover" />
+                                                <Image
+                                                    src={img}
+                                                    alt="Product image"
+                                                    fill
+                                                    className="object-cover"
+                                                    sizes="(max-width: 768px) 50vw, 25vw"
+                                                />
                                                 <button
                                                     onClick={() => setImages(images.filter((_, i) => i !== index))}
                                                     className="absolute top-2 right-2 p-1 bg-white rounded-full shadow opacity-0 group-hover:opacity-100 transition-opacity"

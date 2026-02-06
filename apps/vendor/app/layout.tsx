@@ -6,6 +6,8 @@ export const metadata: Metadata = {
     description: "Manage your Zora store - products, orders, and analytics",
 };
 
+import { VendorProviders } from "../providers";
+
 export default function RootLayout({
     children,
 }: Readonly<{
@@ -21,7 +23,9 @@ export default function RootLayout({
                 >
                     Skip to main content
                 </a>
-                {children}
+                <VendorProviders>
+                    {children}
+                </VendorProviders>
             </body>
         </html>
     );

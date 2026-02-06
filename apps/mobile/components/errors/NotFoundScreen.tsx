@@ -116,7 +116,7 @@ export default function NotFoundScreen({
         {/* Help Text */}
         <View style={styles.helpContainer}>
           <Text style={styles.helpText}>
-            If you believe this is an error, please contact support or try searching for what you're looking for.
+            If you believe this is an error, please contact support or try searching for what you&apos;re looking for.
           </Text>
         </View>
       </ScrollView>

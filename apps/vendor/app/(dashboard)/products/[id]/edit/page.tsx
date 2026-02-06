@@ -3,6 +3,7 @@
 import { use, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { motion } from "framer-motion";
 import {
     ArrowLeft,
@@ -171,7 +172,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
                     <Card className="p-8 text-center">
                         <WarningCircle size={48} weight="duotone" className="mx-auto mb-4 text-red-500" />
                         <h3 className="text-lg font-semibold text-gray-900 mb-2">Product not found</h3>
-                        <p className="text-gray-500 mb-4">The product you're trying to edit doesn't exist.</p>
+                        <p className="text-gray-500 mb-4">The product you&apos;re trying to edit doesn&apos;t exist.</p>
                         <Link href="/products">
                             <Button>Back to Products</Button>
                         </Link>
@@ -256,7 +257,13 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
                                                 key={index}
                                                 className="relative aspect-square rounded-xl overflow-hidden bg-gray-100 group"
                                             >
-                                                <img src={img} alt="" className="w-full h-full object-cover" />
+                                                <Image
+                                                    src={img}
+                                                    alt="Product image"
+                                                    fill
+                                                    className="object-cover"
+                                                    sizes="(max-width: 768px) 50vw, 25vw"
+                                                />
                                                 <button
                                                     onClick={() => {
                                                         setImages(images.filter((_, i) => i !== index));

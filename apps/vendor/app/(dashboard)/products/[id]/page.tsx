@@ -91,7 +91,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                     <Card className="p-8 text-center">
                         <WarningCircle size={48} weight="duotone" className="mx-auto mb-4 text-red-500" />
                         <h3 className="text-lg font-semibold text-gray-900 mb-2">Product not found</h3>
-                        <p className="text-gray-500 mb-4">The product you're looking for doesn't exist or you don't have access to it.</p>
+                        <p className="text-gray-500 mb-4">The product you&apos;re looking for doesn&apos;t exist or you don&apos;t have access to it.</p>
                         <Link href="/products">
                             <Button>Back to Products</Button>
                         </Link>
@@ -368,7 +368,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                     <DialogHeader>
                         <DialogTitle>Delete Product</DialogTitle>
                         <DialogDescription>
-                            Are you sure you want to delete "{product.name}"? This action cannot be undone.
+                            Are you sure you want to delete &quot;{product.name}&quot;? This action cannot be undone.
                         </DialogDescription>
                     </DialogHeader>
                     <DialogFooter>

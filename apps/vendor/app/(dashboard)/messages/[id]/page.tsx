@@ -63,7 +63,7 @@ export default function ConversationPage({ params }: { params: Promise<{ id: str
         if (conversationId && vendor?.id && (conversation?.unread_count_vendor ?? 0) > 0) {
             markReadMutation.mutate({ conversationId, vendorId: vendor.id });
         }
-    }, [conversationId, vendor?.id, conversation?.unread_count_vendor]);
+    }, [conversationId, vendor?.id, conversation?.unread_count_vendor, markReadMutation]);
 
     // Scroll to bottom when messages change
     useEffect(() => {
@@ -126,7 +126,7 @@ export default function ConversationPage({ params }: { params: Promise<{ id: str
                     <Card className="p-8 text-center">
                         <WarningCircle size={48} weight="duotone" className="mx-auto mb-4 text-red-500" />
                         <h3 className="text-lg font-semibold text-gray-900 mb-2">Conversation not found</h3>
-                        <p className="text-gray-500 mb-4">This conversation doesn't exist or you don't have access to it.</p>
+                        <p className="text-gray-500 mb-4">This conversation doesn&apos;t exist or you don&apos;t have access to it.</p>
                         <Link href="/messages">
                             <Button>Back to Messages</Button>
                         </Link>

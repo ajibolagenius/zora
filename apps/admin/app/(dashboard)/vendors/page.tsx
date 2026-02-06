@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import {
     MagnifyingGlass,
@@ -157,7 +158,13 @@ export default function VendorsPage() {
                 <div className="flex items-center gap-3">
                     <Avatar size="default">
                         {vendor.logo_url ? (
-                            <img src={vendor.logo_url} alt={vendor.name} className="w-full h-full object-cover" />
+                            <Image
+                                src={vendor.logo_url}
+                                alt={vendor.name}
+                                fill
+                                className="object-cover"
+                                sizes="40px"
+                            />
                         ) : (
                             <AvatarFallback className="bg-primary/10 text-primary">
                                 {vendor.name?.split(" ").map((n) => n[0]).join("").slice(0, 2) || "??"}
