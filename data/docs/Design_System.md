@@ -948,6 +948,37 @@ Use this checklist when implementing or reviewing screens:
 
 ---
 
+## Auth Login Page
+
+### Hero Section
+- **Background**: Gradient from primary to primary-darker with blur elements
+- **Typography**: `text-3xl sm:text-4xl lg:text-5xl` for headings
+- **Badge**: Inline flex with backdrop blur and border
+- **Container**: `max-w-4xl` centered content
+
+### Portal Cards
+- **Layout**: `grid md:grid-cols-2 gap-6 lg:gap-8`
+- **Card Design**:
+  - Gradient backgrounds (amber-orange for vendor, slate for admin)
+  - `rounded-3xl` corners
+  - `p-6 sm:p-8` padding
+  - Hover effects with `hover:shadow-2xl` and `hover:scale-[1.02]`
+- **Icons**: `w-14 h-14` with `bg-white/20` background
+- **Typography**: `text-2xl sm:text-3xl font-bold` for headings
+
+### Mobile App Section
+- **Layout**: `flex flex-col lg:flex-row` with gap
+- **Background**: Primary gradient
+- **Buttons**: White background with rounded corners
+- **Responsive**: Stacked on mobile, side-by-side on desktop
+
+### Additional Options
+- **Grid**: `md:grid-cols-2 gap-6` for vendor and home cards
+- **Vendor Card**: Amber theme with icon and CTA button
+- **Home Card**: Clean white design with navigation link
+
+---
+
 ## File References
 
 ### Web Components
@@ -956,6 +987,10 @@ Use this checklist when implementing or reviewing screens:
 | `apps/web/app/page.tsx` | Landing page |
 | `apps/web/app/about/page.tsx` | About page |
 | `apps/web/app/features/page.tsx` | Features page |
+| `apps/web/app/vendors/page.tsx` | Vendors page |
+| `apps/web/app/contact/page.tsx` | Contact page |
+| `apps/web/app/vendor-onboarding/page.tsx` | Vendor onboarding page |
+| `apps/web/app/(auth)/login/page.tsx` | Auth login page |
 | `components/landing/Navigation.tsx` | Shared navigation |
 | `components/landing/HeroSection.tsx` | Landing hero |
 | `components/landing/Footer.tsx` | Shared footer |

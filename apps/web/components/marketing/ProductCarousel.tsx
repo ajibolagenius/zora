@@ -141,9 +141,9 @@ export function ProductCarousel() {
                             >
                                 {/* Product Image */}
                                 <div className="aspect-square bg-gray-100 relative overflow-hidden">
-                                    {product.image_urls && product.image_urls.length > 0 ? (
+                                    {product.images && product.images.length > 0 ? (
                                         <img
-                                            src={product.image_urls[0]}
+                                            src={product.images[0]}
                                             alt={product.name}
                                             className="w-full h-full object-cover"
                                             onError={(e) => {
@@ -163,7 +163,7 @@ export function ProductCarousel() {
                                     <h3 className="font-semibold text-text-dark mb-1 line-clamp-1">
                                         {product.name}
                                     </h3>
-                                    <p className="text-xs text-gray-500 mb-2">{product.vendor?.shop_name || 'Local Vendor'}</p>
+                                    <p className="text-xs text-gray-500 mb-2">{product.vendor?.name ?? 'Local Vendor'}</p>
 
                                     {/* Rating */}
                                     <div className="flex items-center gap-1 mb-2">
