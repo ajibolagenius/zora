@@ -31,7 +31,7 @@ const getInitialData = (): VendorOnboardingData => ({
 
 const loadSavedData = (): VendorOnboardingData | null => {
     if (typeof window === 'undefined') return null;
-    
+
     try {
         const saved = localStorage.getItem(STORAGE_KEY);
         if (saved) {
@@ -73,7 +73,7 @@ export const useVendorOnboardingForm = () => {
                         idDocument: null,
                         proofOfAddress: null,
                     };
-                    
+
                     localStorage.setItem(STORAGE_KEY, JSON.stringify(dataToSave));
                     setFormState(prev => ({ ...prev, isSaved: true }));
                 } catch (error) {
@@ -88,7 +88,7 @@ export const useVendorOnboardingForm = () => {
     const updateField = useCallback((field: string, value: any) => {
         setFormState(prev => {
             const newData = { ...prev.data };
-            
+
             // Handle nested field updates
             if (field.includes('.')) {
                 const [parent, child] = field.split('.');
@@ -105,11 +105,13 @@ export const useVendorOnboardingForm = () => {
             } else {
                 (newData as any)[field] = value;
             }
-            
+
+            // Clear errors for this field (handle both dotted and leaf field names)
+            const fieldToClear = field.includes('.') ? field.split('.')[1] : field;
             return {
                 ...prev,
                 data: newData,
-                errors: prev.errors.filter(error => error.field !== field),
+                errors: prev.errors.filter(error => error.field !== fieldToClear),
                 submitError: null,
             };
         });

@@ -1,6 +1,7 @@
 import { User, MapPin } from '@phosphor-icons/react';
 import { Input } from '@zora/ui-web';
 import type { VendorOnboardingData } from '@/types/vendor-onboarding';
+import { getPhoneFormatHint } from '@/utils/validation';
 
 interface ContactDetailsStepProps {
     data: VendorOnboardingData;
@@ -16,7 +17,7 @@ export function ContactDetailsStep({ data, updateField, getFieldError, hasFieldE
                 <User size={24} weight="duotone" className="text-primary" />
                 Contact Details
             </h2>
-            
+
             <div className="grid md:grid-cols-2 gap-6">
                 <div>
                     <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1.5">
@@ -38,7 +39,7 @@ export function ContactDetailsStep({ data, updateField, getFieldError, hasFieldE
                         </p>
                     )}
                 </div>
-                
+
                 <div>
                     <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1.5">
                         Phone Number <span className="text-red-500" aria-label="required">*</span>
@@ -48,7 +49,7 @@ export function ContactDetailsStep({ data, updateField, getFieldError, hasFieldE
                         type="tel"
                         value={data.phone}
                         onChange={(e) => updateField('phone', e.target.value)}
-                        placeholder="+44 7XXX XXXXXX"
+                        placeholder="+44 7XXX XXXXXX or international number"
                         className={`w-full ${hasFieldError('phone') ? 'border-red-500' : ''}`}
                         aria-required="true"
                         aria-describedby={hasFieldError('phone') ? 'phone-error phone-help' : 'phone-help'}
@@ -59,7 +60,7 @@ export function ContactDetailsStep({ data, updateField, getFieldError, hasFieldE
                         </p>
                     )}
                     <p id="phone-help" className="mt-1 text-sm text-gray-500">
-                        UK mobile number only
+                        {getPhoneFormatHint(data.phone) || 'UK mobile/landline or international number accepted'}
                     </p>
                 </div>
             </div>
@@ -69,7 +70,7 @@ export function ContactDetailsStep({ data, updateField, getFieldError, hasFieldE
                     <MapPin size={20} weight="duotone" className="text-primary" />
                     Business Address
                 </h3>
-                
+
                 <div>
                     <label htmlFor="addressLine1" className="block text-sm font-medium text-gray-700 mb-1.5">
                         Address Line 1 <span className="text-red-500" aria-label="required">*</span>
@@ -129,7 +130,7 @@ export function ContactDetailsStep({ data, updateField, getFieldError, hasFieldE
                             </p>
                         )}
                     </div>
-                    
+
                     <div>
                         <label htmlFor="postcode" className="block text-sm font-medium text-gray-700 mb-1.5">
                             Postcode <span className="text-red-500" aria-label="required">*</span>
@@ -150,7 +151,7 @@ export function ContactDetailsStep({ data, updateField, getFieldError, hasFieldE
                             </p>
                         )}
                     </div>
-                    
+
                     <div>
                         <label htmlFor="country" className="block text-sm font-medium text-gray-700 mb-1.5">
                             Country

@@ -951,31 +951,49 @@ Use this checklist when implementing or reviewing screens:
 ## Auth Login Page
 
 ### Hero Section
-- **Background**: Gradient from primary to primary-darker with blur elements
-- **Typography**: `text-3xl sm:text-4xl lg:text-5xl` for headings
-- **Badge**: Inline flex with backdrop blur and border
+- **Background**: Gradient from primary to primary-darker with minimal blur elements
+- **Typography**: `text-3xl sm:text-4xl lg:text-5xl` for main heading
 - **Container**: `max-w-4xl` centered content
+- **Spacing**: `py-20 sm:py-24` with `mb-8` for heading, `mb-12` for description
+- **Content**: Essential information only - "Choose Your Portal" and brief description
 
-### Portal Cards
-- **Layout**: `grid md:grid-cols-2 gap-6 lg:gap-8`
+### Portal Options
+- **Layout**: `grid md:grid-cols-2 gap-8` with `max-w-4xl` container
 - **Card Design**:
   - Gradient backgrounds (amber-orange for vendor, slate for admin)
   - `rounded-3xl` corners
-  - `p-6 sm:p-8` padding
+  - `p-8` generous padding
   - Hover effects with `hover:shadow-2xl` and `hover:scale-[1.02]`
-- **Icons**: `w-14 h-14` with `bg-white/20` background
+- **Icons**: `w-16 h-16` with `bg-white/20` background
 - **Typography**: `text-2xl sm:text-3xl font-bold` for headings
+- **Content**: Concise descriptions focusing on core functionality
 
 ### Mobile App Section
-- **Layout**: `flex flex-col lg:flex-row` with gap
-- **Background**: Primary gradient
-- **Buttons**: White background with rounded corners
+- **Layout**: Full-width section with `max-w-4xl` container
+- **Background**: Primary gradient with `rounded-3xl` corners
+- **Content Layout**: `flex flex-col lg:flex-row` with gap
+- **Typography**: `text-xl sm:text-2xl font-bold` for heading
+- **Buttons**: White background with rounded corners and responsive sizing
+- **Icons**: Small SVG icons (4x4) for app stores
 - **Responsive**: Stacked on mobile, side-by-side on desktop
 
 ### Additional Options
-- **Grid**: `md:grid-cols-2 gap-6` for vendor and home cards
-- **Vendor Card**: Amber theme with icon and CTA button
-- **Home Card**: Clean white design with navigation link
+- **Layout**: `grid md:grid-cols-2 gap-6` with `max-w-4xl` container
+- **Vendor Card**:
+  - Amber theme with `bg-amber-50` background
+  - Icon integration with `w-12 h-12` amber background
+  - CTA button with `bg-amber-500` and responsive padding
+- **Home Card**:
+  - Clean white design with border
+  - Navigation link with hover underline effect
+  - Icon integration for visual consistency
+
+### Design Balance
+- **No Header**: Removed navigation and free delivery banner for focus
+- **Essential Footer**: Only basic footer included
+- **Comprehensive Content**: Portal selection, mobile app, and additional options
+- **Visual Hierarchy**: Clear progression from primary to secondary actions
+- **Responsive Design**: Mobile-first approach throughout
 
 ---
 

@@ -70,7 +70,7 @@ export class VendorOnboardingService {
             }
 
             const result = await response.json();
-            
+
             return {
                 success: true,
                 message: result.message || 'Application submitted successfully!',
@@ -79,10 +79,45 @@ export class VendorOnboardingService {
 
         } catch (error) {
             console.error('Vendor application submission error:', error);
-            
+
             return {
                 success: false,
                 message: error instanceof Error ? error.message : 'Failed to submit application. Please try again.',
+                errors: error instanceof Error ? [error.message] : ['Unknown error occurred'],
+            };
+        }
+    }
+
+    /**
+     * Process application on server side (for the API route)
+     */
+    static async processApplication(data: any): Promise<SubmissionResponse> {
+        try {
+            // In a real implementation, this would:
+            // 1. Validate all data
+            // 2. Store files in secure storage (S3, etc.)
+            // 3. Save application to database
+            // 4. Send confirmation emails
+            // 5. Trigger admin notification
+
+            // For now, simulate successful processing
+            const applicationId = `APP-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+
+            // Simulate processing delay
+            await new Promise(resolve => setTimeout(resolve, 1000));
+
+            return {
+                success: true,
+                message: 'Application submitted successfully! We will review your application within 2-3 business days.',
+                applicationId,
+            };
+
+        } catch (error) {
+            console.error('Error processing vendor application:', error);
+
+            return {
+                success: false,
+                message: 'Failed to process application. Please try again.',
                 errors: error instanceof Error ? [error.message] : ['Unknown error occurred'],
             };
         }
@@ -143,10 +178,10 @@ export class VendorOnboardingService {
         try {
             // In a real implementation, this would call an API endpoint
             await new Promise(resolve => setTimeout(resolve, 500)); // Simulate API delay
-            
+
             // Mock check - in real app, this would check against database
             const isAvailable = !email.includes('taken@example.com');
-            
+
             return {
                 available: isAvailable,
                 message: isAvailable ? 'Email is available' : 'This email is already registered',
