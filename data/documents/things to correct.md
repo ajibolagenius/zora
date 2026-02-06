@@ -6,18 +6,6 @@ The client requirements primarily target the **web application** (`apps/web`) wh
 
 ---
 
-## 0. Cross-Application Updates
-
-### 0.1 Logo Replacement ❌
-- **Task**: Replace current logo assets across all applications ❌
-- **Files to Update**:
-  - `apps/web/public/` ❌
-  - `apps/admin/app/` ❌
-  - `apps/vendor/app/` ❌
-  - `apps/mobile/assets/` ❌
-  - Shared components in `packages/shared/` ❌
-- **Deliverable**: New logo assets in multiple formats (SVG, PNG, ICO) for responsive scaling ❌
-
 ---
 
 ## 1. Web Application (`apps/web`) - Primary Focus
