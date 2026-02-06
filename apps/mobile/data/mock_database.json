@@ -1550,7 +1550,7 @@
       "id": "faq_005",
       "category": "Payments",
       "question": "What payment methods do you accept?",
-      "answer": "We accept all major credit and debit cards (Visa, Mastercard, Amex), Apple Pay, Google Pay, and Klarna (buy now, pay later). All payments are securely processed through Stripe."
+      "answer": "We accept all major credit and debit cards (Visa, Mastercard, Amex), Apple Pay, and Google Pay. All payments are securely processed through Stripe."
     },
     {
       "id": "faq_006",

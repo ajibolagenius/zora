@@ -1,6 +1,6 @@
 # Zora African Market - Design System
 
-> Comprehensive design principles for visual consistency across all screens
+> Comprehensive design principles for visual consistency across web and mobile platforms
 
 ---
 
@@ -11,15 +11,17 @@
 3. [Typography](#typography)
 4. [Motion & Animation](#motion--animation)
 5. [Layout & Spacing](#layout--spacing)
-6. [Headers](#headers)
-7. [Bottom Navigation](#bottom-navigation)
-8. [Cards](#cards)
-9. [Buttons](#buttons)
-10. [Inputs & Forms](#inputs--forms)
-11. [Pills, Tags & Badges](#pills-tags--badges)
-12. [Icons](#icons)
-13. [States](#states)
-14. [Shadows & Elevation](#shadows--elevation)
+6. [Responsive Design](#responsive-design)
+7. [Navigation Components](#navigation-components)
+8. [Hero Sections](#hero-sections)
+9. [Cards](#cards)
+10. [Buttons](#buttons)
+11. [Forms & Inputs](#forms--inputs)
+12. [Pills, Tags & Badges](#pills-tags--badges)
+13. [Icons](#icons)
+14. [States](#states)
+15. [Shadows & Elevation](#shadows--elevation)
+16. [Component Library](#component-library)
 
 ---
 
@@ -28,16 +30,19 @@
 ### Core Principles
 
 1. **Premium African Aesthetic** - Warm, rich tones that evoke African heritage
-2. **Dark Mode First** - Primary interface is dark with warm brown undertones
-3. **Outline Over Fill** - Pills, tags, and secondary elements prefer outlined styles
-4. **Subtle Elegance** - Minimal shadows, soft borders, refined spacing
-5. **Consistent Motion** - Unified animation timing and easing across all interactions
+2. **Modern Web-First Design** - Gradient backgrounds, flowing layouts, component-based architecture
+3. **Mobile-First Responsiveness** - Optimized for all screen sizes with proper breakpoints
+4. **Component Consistency** - Shared components across landing, about, and features pages
+5. **Subtle Elegance** - Minimal shadows, soft borders, refined spacing
+6. **Consistent Motion** - Unified animation timing and easing across all interactions
 
 ### Visual Identity
 
-- **Warmth**: Deep warm brown backgrounds (`#221710`) instead of cold blacks
+- **Warmth**: Deep warm brown backgrounds (`#221710`) and gradient overlays
 - **Accent Colors**: Zora Red (`#CC0000`) for actions, Zora Yellow (`#FFCC00`) for prices/highlights
+- **Modern Gradients**: `from-primary to-primary-dark` for hero sections
 - **Cultural Subtlety**: African-inspired geometric patterns used sparingly
+- **Web Aesthetics**: Blur effects, backdrop filters, and modern UI patterns
 
 ---
 
@@ -47,26 +52,31 @@
 
 | Token | Hex | Usage |
 |-------|-----|-------|
-| `primary` | `#CC0000` | Buttons, CTAs, active states, links |
+| `primary` | `#CC0000` | Buttons, CTAs, active states, links, gradients |
 | `primaryDark` | `#A30000` | Hover/pressed states |
-| `secondary` | `#FFCC00` | Prices, ratings, accents, highlights |
+| `secondary` | `#FFCC00` | Prices, ratings, accents, highlights, underlines |
 | `secondaryDark` | `#E6B800` | Hover/pressed states |
 
 ### Background Colors
 
 | Token | Hex | Usage |
 |-------|-----|-------|
-| `backgroundDark` | `#221710` | Main app background |
-| `cardDark` | `#342418` | Cards, elevated surfaces |
-| `backgroundLight` | `#F8F7F5` | Light mode (future) |
+| `backgroundDark` | `#221710` | Mobile app background |
+| `cardDark` | `#342418` | Mobile app cards, elevated surfaces |
+| `backgroundLight` | `#F8F7F5` | Web pages, light mode sections |
+| `white` | `#FFFFFF` | Web cards, text on dark backgrounds |
+| `gray-50` | `#F9FAFB` | Web section backgrounds |
 
 ### Text Colors
 
 | Token | Hex | Usage |
 |-------|-----|-------|
-| `textPrimary` | `#FFFFFF` | Primary text, headings |
-| `textSecondary` | `#CBA990` | Labels, placeholders |
+| `textPrimary` | `#FFFFFF` | Primary text on dark backgrounds |
+| `textSecondary` | `#CBA990` | Labels, placeholders, muted text |
 | `textMuted` | `#CBA990` | Captions, hints, disabled |
+| `textDark` | `#111827` | Primary text on light backgrounds |
+| `textGray` | `#6B7280` | Secondary text on light backgrounds |
+| `textLight` | `#9CA3AF` | Muted text on light backgrounds |
 
 ### Status Colors
 
@@ -90,25 +100,26 @@
 
 ### Font Families
 
-| Purpose | Font | Weights |
-|---------|------|---------|
-| Headlines & Display | **Montserrat** | Regular, Medium, SemiBold, Bold, ExtraBold |
-| Body & UI | **Poppins** | Regular, Medium, SemiBold, Bold |
+| Purpose | Font | Weights | Usage |
+|---------|------|---------|-------|
+| Headlines & Display | **Inter** (web) / **Montserrat** (mobile) | Regular, Medium, SemiBold, Bold, ExtraBold | Hero sections, major headings |
+| Body & UI | **Inter** (web) / **Poppins** (mobile) | Regular, Medium, SemiBold, Bold | Body text, UI elements |
+| Display Font | **Custom Font Display** | Bold, Black | Special headings, branding |
 
 ### Type Scale
 
-| Token | Size | Usage |
-|-------|------|-------|
-| `display` | 56px | Splash screens, hero sections |
-| `h1` | 28px | Screen titles |
-| `h2` | 24px | Section headings |
-| `h3` | 20px | Card titles |
-| `h4` | 18px | Subsection labels |
-| `bodyLarge` | 18px | Lead paragraphs |
-| `body` | 16px | Standard content |
-| `small` | 14px | Secondary text, descriptions |
-| `caption` | 12px | Captions, metadata |
-| `tiny` | 10px | Badges, overlines |
+| Token | Mobile Size | Web Size | Usage |
+|-------|-------------|----------|-------|
+| `display` | 56px | 64-96px | Hero sections, splash screens |
+| `h1` | 28px | 32-48px | Page titles, hero headings |
+| `h2` | 24px | 24-40px | Section headings |
+| `h3` | 20px | 20-32px | Card titles, subsections |
+| `h4` | 18px | 18-24px | Subsection labels |
+| `bodyLarge` | 18px | 18-20px | Lead paragraphs, descriptions |
+| `body` | 16px | 16px | Standard content |
+| `small` | 14px | 14px | Secondary text, descriptions |
+| `caption` | 12px | 12px | Captions, metadata |
+| `tiny` | 10px | 10px | Badges, overlines |
 
 ### Letter Spacing
 
@@ -183,107 +194,261 @@ const createBounce = (value, delay) => Animated.loop(
 
 ### Spacing Scale
 
-| Token | Value | Usage |
-|-------|-------|-------|
-| `xs` | 4px | Tight gaps, badge padding |
-| `sm` | 8px | Icon gaps, inline spacing |
-| `md` | 12px | Card padding, section gaps |
-| `base` | 16px | Standard padding, margins |
-| `lg` | 20px | Section spacing |
-| `xl` | 24px | Large gaps, screen padding |
-| `2xl` | 32px | Major section separators |
-| `3xl` | 40px | Hero spacing |
+| Token | Value | Mobile Usage | Web Usage |
+|-------|-------|-------------|----------|
+| `xs` | 4px | Tight gaps, badge padding | Tight gaps, badge padding |
+| `sm` | 8px | Icon gaps, inline spacing | Icon gaps, inline spacing |
+| `md` | 12px | Card padding, section gaps | Card padding, section gaps |
+| `base` | 16px | Standard padding, margins | Standard padding, margins |
+| `lg` | 20px | Section spacing | Section spacing |
+| `xl` | 24px | Large gaps, screen padding | Large gaps, screen padding |
+| `2xl` | 32px | Major section separators | Major section separators |
+| `3xl` | 40px | Hero spacing | Hero spacing |
+| `4xl` | 64px | Page sections | Page sections |
 
 ### Screen Padding
 
+#### Mobile
 - **Horizontal**: 16px (base)
 - **Top**: Safe area + 8px
 - **Bottom**: Safe area + tab bar height (70px)
 
+#### Web
+- **Horizontal**: 16px (mobile), 24px (tablet), 32px+ (desktop)
+- **Section Padding**: 64px vertical (mobile), 96px (desktop)
+- **Container Max-Width**: 6xl (1024px), 7xl (1280px) for hero sections
+
 ---
 
-## Headers
+## Responsive Design
 
-### Transparent Header (Default)
+### Breakpoint System
 
-Used on most screens - no background, content scrolls beneath.
+| Breakpoint | Min Width | Usage |
+|------------|-----------|-------|
+| `mobile` | 0px | Base styles, mobile-first |
+| `sm` | 640px | Small tablets, large phones |
+| `md` | 768px | Tablets, small desktops |
+| `lg` | 1024px | Desktops, large tablets |
+| `xl` | 1280px | Large desktops |
+| `2xl` | 1536px | Extra large displays |
+
+### Responsive Typography
+
+```css
+/* Mobile-first approach */
+.text-responsive {
+  font-size: 1rem;     /* 16px - mobile */
+  line-height: 1.5rem;
+}
+
+@media (min-width: 640px) {
+  .text-responsive {
+    font-size: 1.125rem; /* 18px - sm */
+  }
+}
+
+@media (min-width: 1024px) {
+  .text-responsive {
+    font-size: 1.25rem;  /* 20px - lg */
+  }
+}
+```
+
+### Responsive Grid Patterns
+
+| Pattern | Mobile | Tablet | Desktop |
+|---------|--------|---------|----------|
+| **Hero Grid** | 1 column | 1 column | 2 columns |
+| **Feature Cards** | 1 column | 2 columns | 3 columns |
+| **Stats Grid** | 2 columns | 2 columns | 4 columns |
+| **Vendor Tools** | 1 column | 2 columns | 4 columns |
+
+### Responsive Component Sizing
+
+| Element | Mobile | Tablet | Desktop |
+|---------|--------|---------|----------|
+| **Button Height** | 40px | 44px | 48px |
+| **Icon Size** | 16-20px | 20-24px | 24-32px |
+| **Card Padding** | 16px | 20px | 24px |
+| **Section Spacing** | 48px | 64px | 96px |
+
+---
+
+## Navigation Components
+
+### Web Navigation Bar
 
 ```typescript
-// Style specification
+// Shared Navigation Component
 {
-  position: 'absolute',
+  position: 'fixed',
+  top: 48px, // Account for FreeDeliveryBanner
+  left: 0,
+  right: 0,
+  zIndex: 40,
+  backgroundColor: 'transparent',
+  transition: 'all 300ms ease',
+}
+
+// Scrolled State
+{
+  backgroundColor: 'rgba(255, 255, 255, 0.95)',
+  backdropFilter: 'blur(12px)',
+  boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+}
+```
+
+#### Navigation Elements
+
+| Element | Style | Mobile | Desktop |
+|---------|-------|--------|----------|
+| **Logo** | ZoraLogo component | 40px | 40px |
+| **Nav Links** | Pills in backdrop blur | Mobile menu | Inline flex |
+| **CTA Button** | Secondary yellow | Full width | Standard |
+| **Mobile Menu** | Slide-down panel | Hamburger | Hidden |
+
+#### Navigation States
+
+- **Default**: Transparent with white text
+- **Scrolled**: White background with dark text
+- **Mobile Menu**: Full-width panel with backdrop
+
+### Free Delivery Banner
+
+```typescript
+{
+  position: 'fixed',
   top: 0,
   left: 0,
   right: 0,
-  zIndex: 10,
-  flexDirection: 'row',
-  alignItems: 'center',
-  justifyContent: 'space-between',
-  paddingHorizontal: 16,
-  paddingTop: safeAreaTop + 8,
-  backgroundColor: 'transparent', // KEY: No background
+  zIndex: 50,
+  backgroundColor: '#CC0000',
+  padding: '8px 16px',
+  textAlign: 'center',
+  color: 'white',
+  fontSize: '14px',
+  fontWeight: '600',
 }
-```
-
-### Header Components
-
-| Element | Style |
-|---------|-------|
-| **Back Button** | 44×44px, rounded full, `rgba(0,0,0,0.4)` background |
-| **Title** | Montserrat Bold, 20px, white, centered or left-aligned |
-| **Action Icons** | 44×44px touch target, 24px icon, `duotone` weight |
-
-### Header with Actions (e.g., Vendor Storefront)
-
-```
-[←]                                    [🔍] [🛒]
 ```
 
 ---
 
-## Bottom Navigation
+## Hero Sections
 
-### Floating Tab Bar
+### Standard Hero Pattern
 
 ```typescript
 {
-  position: 'absolute',
-  bottom: 0,
-  left: 0,
-  right: 0,
-  backgroundColor: 'rgba(31, 22, 16, 0.95)', // Semi-transparent warm brown
-  paddingTop: 8,
-  paddingBottom: safeAreaBottom || 8,
+  position: 'relative',
+  minHeight: '85vh', // Landing page
+  minHeight: '60vh', // About/Features pages
+  background: 'linear-gradient(135deg, #CC0000, #A30000)',
+  overflow: 'hidden',
 }
 ```
 
-### Tab Items
+#### Background Elements
 
-| State | Icon Weight | Color | Label |
-|-------|-------------|-------|-------|
-| **Inactive** | `duotone` | `#505050` | Same color |
-| **Active** | `fill` | `#CC0000` | Same color |
+- **Blur Circles**: Large, semi-transparent colored circles
+- **Positions**: Top-left, bottom-right, center
+- **Colors**: Secondary/20, white/10, white/5
+- **Effects**: `blur-3xl` for smooth gradients
 
-### Tab Layout
+#### Hero Content Structure
 
-- 5 tabs: Home, Explore, Orders, Cart, Profile
-- Icon: 26px
-- Label: 12px (caption), Poppins Medium
-- Badge (cart): 18px circle, primary red, positioned top-right of icon
+```typescript
+{
+  position: 'relative',
+  zIndex: 10,
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  padding: '96px 16px', // pt-24 pb-16
+}
+```
+
+#### Hero Elements
+
+| Element | Mobile | Tablet | Desktop |
+|---------|--------|---------|----------|
+| **Badge** | xs font, px-3 py-1.5 | sm font, px-4 py-2 | sm font, px-4 py-2 |
+| **Heading** | text-4xl | text-5xl | text-6xl-xl |
+| **Description** | text-lg | text-xl | text-2xl |
+| **Buttons** | Mobile stack | Flex row | Flex row |
+| **Trust Indicators** | gap-6 | gap-8 | gap-8 |
+
+#### Landing Page Hero (with App Preview)
+
+```typescript
+// Grid Layout
+{
+  display: 'grid',
+  gridTemplateColumns: '1fr',
+  gap: '2rem',
+  alignItems: 'center',
+}
+
+// Desktop (lg+)
+{
+  gridTemplateColumns: '1fr 1fr',
+  gap: '3rem',
+}
+
+// Mobile Order: Content -> App Preview
+// Desktop Order: Content -> App Preview
+```
+
+#### App Preview Elements
+
+| Element | Mobile | Tablet | Desktop |
+|---------|--------|---------|----------|
+| **Phone Width** | 200px | 240px | 280px |
+| **Phone Height** | 460px | 520px | 560px |
+| **Floating Cards** | 120px width | 140px width | 160px width |
+| **Card Padding** | 12px | 16px | 16px |
 
 ---
 
 ## Cards
 
-### Product Card
+### Web Feature Cards
+
+```typescript
+// Standard Feature Card
+{
+  backgroundColor: '#FFFFFF',
+  borderRadius: '16px',
+  border: '1px solid rgba(0, 0, 0, 0.05)',
+  padding: '16px', // Mobile
+  padding: '24px', // Desktop
+  textAlign: 'center',
+  transition: 'all 300ms ease',
+  hover: {
+    boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
+    transform: 'translateY(-2px)',
+  }
+}
+```
+
+#### Feature Card Elements
+
+| Element | Mobile | Desktop |
+|---------|--------|----------|
+| **Icon Container** | 48px | 64px |
+| **Icon Size** | 24px | 32px |
+| **Title** | text-base | text-lg |
+| **Description** | text-sm | text-base |
+| **Padding** | p-4 | p-6 |
+
+### Mobile Product Card
 
 ```typescript
 {
   backgroundColor: '#342418',
-  borderRadius: 12,              // BorderRadius.lg
-  borderWidth: 0,                // No border by default
+  borderRadius: 12,
+  borderWidth: 0,
   overflow: 'hidden',
-  // Shadow
   shadowColor: '#221710',
   shadowOffset: { width: 0, height: 2 },
   shadowOpacity: 0.08,
@@ -337,36 +502,75 @@ Used on most screens - no background, content scrolls beneath.
 
 ## Buttons
 
-### Primary Button
+### Primary Button (Web)
 
 ```typescript
+{
+  backgroundColor: '#CC0000',
+  color: '#111827',
+  padding: '12px 24px', // Mobile
+  padding: '16px 32px', // Desktop
+  borderRadius: '9999px', // Full rounded
+  fontWeight: '700',
+  fontSize: '16px', // Mobile
+  fontSize: '18px', // Desktop
+  transition: 'all 300ms ease',
+  hover: {
+    backgroundColor: '#A30000',
+    transform: 'translateY(-1px)',
+  }
+}
+```
+
+### Secondary Button (Web)
+
+```typescript
+{
+  backgroundColor: 'rgba(255, 255, 255, 0.1)',
+  color: '#FFFFFF',
+  border: '1px solid rgba(255, 255, 255, 0.3)',
+  backdropFilter: 'blur(8px)',
+  padding: '12px 24px', // Mobile
+  padding: '16px 32px', // Desktop
+  borderRadius: '9999px',
+  fontWeight: '600',
+  fontSize: '16px', // Mobile
+  fontSize: '18px', // Desktop
+  transition: 'all 300ms ease',
+  hover: {
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+  }
+}
+```
+
+### Button Sizes
+
+| Size | Height | Font Size | Padding | Usage |
+|------|--------|-----------|---------|-------|
+| `sm` | 40px | 14px | 16px | Small CTAs |
+| `md` | 48px | 16px | 20px | Standard |
+| `lg` | 56px | 16px | 24px | Hero sections |
+
+### Mobile App Buttons
+
+```typescript
+// Primary (Mobile)
 {
   height: 48,
   borderRadius: 12,
   backgroundColor: '#CC0000',
   paddingHorizontal: 20,
 }
-```
 
-### Secondary/Outline Button
-
-```typescript
+// Secondary/Outline (Mobile)
 {
   height: 48,
   borderRadius: 12,
   backgroundColor: 'transparent',
-  borderWidth: 1.5,              // Thin outline
+  borderWidth: 1.5,
   borderColor: '#CC0000',
 }
 ```
-
-### Button Sizes
-
-| Size | Height | Font Size | Padding |
-|------|--------|-----------|---------|
-| `sm` | 36px | 14px | 16px |
-| `md` | 48px | 16px | 20px |
-| `lg` | 56px | 16px | 24px |
 
 ### Icon Button
 
@@ -659,39 +863,115 @@ Always use `#221710` (backgroundDark) as shadow color for cohesive warm appearan
 
 ---
 
-## Component Checklist
+## Component Library
+
+### Shared Components
+
+| Component | Location | Purpose | Props |
+|-----------|----------|---------|-------|
+| **Navigation** | `@/components/landing/Navigation` | Main site navigation | Scrolled state, mobile menu |
+| **HeroSection** | `@/components/landing/HeroSection` | Landing page hero | App preview, screenshots |
+| **Footer** | `@/components/landing/Footer` | Site footer | Links, social |
+| **ZoraLogo** | `@/components/landing/ZoraLogo` | Brand logo | Size, className |
+| **FreeDeliveryBanner** | `@/components/marketing/FreeDeliveryBanner` | Top banner | Fixed positioning |
+
+### Landing Page Components
+
+| Component | Location | Purpose |
+|-----------|----------|---------|
+| **ValueProposition** | `@/components/landing/ValueProposition` | Main value props |
+| **FeaturesGrid** | `@/components/landing/FeaturesGrid` | Feature showcase |
+| **HowItWorks** | `@/components/landing/HowItWorks` | Process explanation |
+| **Testimonials** | `@/components/landing/Testimonials` | Customer reviews |
+| **MobileAppPromo** | `@/components/landing/MobileAppPromo` | App download CTA |
+
+### Marketing Components
+
+| Component | Location | Purpose |
+|-----------|----------|---------|
+| **ProductCarousel** | `@/components/marketing/ProductCarousel` | Featured products |
+
+### Page Structure
+
+```typescript
+// Standard Page Layout
+<main className="min-h-screen bg-background-light">
+  <FreeDeliveryBanner />
+  <Navigation />
+  {/* Page Content */}
+  <Footer />
+</main>
+
+// Hero Section Pattern
+<section id="hero-section" className="relative min-h-[60vh] bg-gradient-to-br from-primary to-primary-dark overflow-hidden">
+  {/* Background Elements */}
+  <div className="absolute inset-0">
+    <div className="absolute top-20 left-10 w-72 h-72 bg-secondary/20 rounded-full blur-3xl" />
+    <div className="absolute bottom-20 right-10 w-96 h-96 bg-white/10 rounded-full blur-3xl" />
+  </div>
+  {/* Content */}
+</section>
+
+// Content Section Pattern
+<section className="py-12 sm:py-16 px-4 bg-white">
+  <div className="container mx-auto max-w-6xl">
+    {/* Section Content */}
+  </div>
+</section>
+```
+
+---
+
+## Implementation Checklist
 
 Use this checklist when implementing or reviewing screens:
 
+### Web Pages
+- [ ] **Structure**: FreeDeliveryBanner → Navigation → Content → Footer
+- [ ] **Hero Section**: Gradient background, blur elements, responsive typography
+- [ ] **Navigation**: Shared component with scroll state handling
+- [ ] **Responsiveness**: Mobile-first with sm/lg/xl breakpoints
+- [ ] **Typography**: Inter font family, responsive sizing
+- [ ] **Colors**: Primary red, secondary yellow, proper contrast
+- [ ] **Spacing**: Consistent padding/margins using scale
+- [ ] **Components**: Use shared components where possible
+
+### Mobile App
 - [ ] **Background**: Uses `#221710` (backgroundDark)
 - [ ] **Header**: Transparent/backgroundless with proper safe area padding
 - [ ] **Bottom Nav**: Floating tab bar with duotone/fill icons
 - [ ] **Cards**: 12px radius, `#342418` background, subtle shadow
 - [ ] **Buttons**: 12px radius, proper height (48px default)
 - [ ] **Inputs**: 8px radius, subtle border, proper focus state
-- [ ] **Pills/Tags**: Outline style preferred, filled only for badges
-- [ ] **Icons**: Phosphor Duotone, correct sizes
-- [ ] **States**: Proper press feedback (0.8 opacity)
 - [ ] **Typography**: Montserrat for headings, Poppins for body
 - [ ] **Animation**: Consistent timing (300ms) and easing
-- [ ] **Spacing**: Using design tokens, not arbitrary values
 
 ---
 
 ## File References
 
+### Web Components
+| File | Purpose |
+|------|---------|
+| `apps/web/app/page.tsx` | Landing page |
+| `apps/web/app/about/page.tsx` | About page |
+| `apps/web/app/features/page.tsx` | Features page |
+| `components/landing/Navigation.tsx` | Shared navigation |
+| `components/landing/HeroSection.tsx` | Landing hero |
+| `components/landing/Footer.tsx` | Shared footer |
+| `components/marketing/FreeDeliveryBanner.tsx` | Top banner |
+
+### Mobile Components (Future)
 | File | Purpose |
 |------|---------|
 | `constants/colors.ts` | Color tokens |
 | `constants/typography.ts` | Font families, sizes, weights |
 | `constants/spacing.ts` | Spacing, border radius, shadows |
-| `constants/componentStyles.ts` | Pre-built component styles |
 | `components/ui/Button.tsx` | Button component |
 | `components/ui/Input.tsx` | Input component |
-| `components/ui/Badge.tsx` | Badge component |
 | `components/ui/ProductCard.tsx` | Product card component |
 | `components/ui/FloatingTabBar.tsx` | Bottom navigation |
 
 ---
 
-*Last updated: January 2026*
+*Last updated: February 2026 - Web Implementation*

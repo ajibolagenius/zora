@@ -1,7 +1,7 @@
 {
   "name": "zora",
   "version": "1.0.0",
-  "private": true,
+  "private": false,
   "scripts": {
     "dev": "turbo dev",
     "dev:mobile": "turbo dev --filter=@zora/mobile",
@@ -10,7 +10,7 @@
     "dev:admin": "turbo dev --filter=@zora/admin",
     "build": "turbo build",
     "build:web": "turbo build --filter=@zora/web",
-    "build:vendor": "turbo build --filter=@zora/vendor",
+    "build:vendor": "turbo build --filter=@zora/admin",
     "build:admin": "turbo build --filter=@zora/admin",
     "lint": "turbo lint",
     "type-check": "turbo type-check",

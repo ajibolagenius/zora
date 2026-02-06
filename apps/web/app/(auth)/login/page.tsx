@@ -1,16 +1,87 @@
 "use client";
 
 import Link from "next/link";
+import { useState, useEffect } from "react";
 import { Storefront, Shield, DeviceMobile, ArrowRight, House, ArrowSquareOut } from "@phosphor-icons/react";
 
 export default function LoginGuidePage() {
-    const vendorUrl = process.env.NEXT_PUBLIC_VENDOR_URL || "http://localhost:3001";
-    const adminUrl = process.env.NEXT_PUBLIC_ADMIN_URL || "http://localhost:3002";
+    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+    const [scrolled, setScrolled] = useState(false);
+
+    // Handle scroll effect for header contrast
+    useEffect(() => {
+        const handleScroll = () => {
+            const scrollPosition = window.scrollY;
+            const heroSection = document.getElementById('hero-section');
+
+            if (heroSection) {
+                const heroBottom = heroSection.offsetTop + heroSection.offsetHeight;
+                setScrolled(scrollPosition > heroBottom - 100); // Change before reaching white section
+            }
+        };
+
+        window.addEventListener('scroll', handleScroll);
+        handleScroll(); // Check initial position
+
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, []);
 
     return (
         <div className="min-h-screen bg-gray-50 py-8 px-4">
+            {/* Navigation - Transparent overlay with contrast */}
+            <nav className={`fixed top-12 left-0 right-0 z-40 transition-all duration-300 ${scrolled ? 'bg-white/95 backdrop-blur-md shadow-lg' : ''}`}>
+                <div className="container mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
+                    <Link href="/" className="flex items-center gap-2">
+                        <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+                            <span className="text-white font-bold text-lg">Z</span>
+                        </div>
+                        <span className={`text-xl font-bold font-display transition-colors duration-300 ${scrolled ? 'text-text-dark' : 'text-white'}`}>Zora</span>
+                    </Link>
+
+                    <div className="hidden md:flex items-center gap-1 bg-white/10 backdrop-blur-md rounded-full p-1 border border-white/20">
+                        {["Home", "Features", "Vendors", "Contact"].map((item) => (
+                            <Link
+                                key={item}
+                                href={item === "Home" ? "/" : `/${item.toLowerCase()}`}
+                                className={`px-4 py-1.5 text-sm font-medium rounded-full transition-all duration-300 ${scrolled ? 'text-gray-600 hover:text-primary hover:bg-white' : 'text-white/80 hover:text-white hover:bg-white/10'}`}
+                            >
+                                {item}
+                            </Link>
+                        ))}
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                        <Link href="/login" className={`hidden sm:inline-flex text-sm font-medium px-3 py-1.5 transition-colors duration-300 ${scrolled ? 'text-gray-600 hover:text-primary' : 'text-white/80 hover:text-white'}`}>
+                            Sign In
+                        </Link>
+                        <Link href="/#download" className="bg-secondary hover:bg-secondary-dark text-gray-900 px-4 py-2 rounded-full text-sm font-semibold transition-colors flex items-center gap-2">
+                            Download App <ArrowSquareOut size={16} weight="duotone" />
+                        </Link>
+                        <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className={`md:hidden p-2 rounded-lg transition-colors ${scrolled ? 'text-gray-600 hover:bg-gray-100' : 'text-white hover:bg-white/10'}`}>
+                            <div className="w-6 h-0.5 bg-current" />
+                            <div className="w-6 h-0.5 bg-current" />
+                            <div className="w-6 h-0.5 bg-current" />
+                        </button>
+                    </div>
+                </div>
+
+                {mobileMenuOpen && (
+                    <div className={`md:hidden border-t p-4 transition-colors duration-300 ${scrolled ? 'bg-white border-gray-200' : 'bg-background-dark/95 border-white/10'}`}>
+                        {["Home", "Features", "Vendors", "Contact", "Sign In"].map((item) => (
+                            <Link
+                                key={item}
+                                href={item === "Home" ? "/" : item === "Sign In" ? "/login" : `/${item.toLowerCase()}`}
+                                onClick={() => setMobileMenuOpen(false)}
+                                className={`block px-4 py-2 rounded-lg transition-colors ${scrolled ? 'text-gray-600 hover:text-primary hover:bg-gray-50' : 'text-white/80 hover:text-white hover:bg-white/10'}`}
+                            >
+                                {item}
+                            </Link>
+                        ))}
+                    </div>
+                )}
+            </nav>
+
             <div className="container mx-auto max-w-5xl">
-                {/* Header */}
                 <div className="text-center mb-8">
                     <Link href="/" className="text-3xl font-bold font-display text-primary">ZORA</Link>
                     <h1 className="text-2xl md:text-3xl font-bold mt-6 text-gray-900">Where would you like to go?</h1>
@@ -21,7 +92,7 @@ export default function LoginGuidePage() {
                 <div className="grid grid-cols-12 gap-3 md:gap-4">
                     {/* Vendor Portal Card */}
                     <a
-                        href={`${vendorUrl}/login`}
+                        href={`${process.env.NEXT_PUBLIC_VENDOR_URL || "http://localhost:3001"}/login`}
                         className="col-span-12 md:col-span-6 bg-gradient-to-br from-amber-500 to-orange-600 rounded-2xl p-5 md:p-6 text-white hover:scale-[1.02] transition-transform cursor-pointer group"
                     >
                         <div className="flex items-start justify-between">
@@ -38,7 +109,7 @@ export default function LoginGuidePage() {
 
                     {/* Admin Portal Card */}
                     <a
-                        href={`${adminUrl}/login`}
+                        href={`${process.env.NEXT_PUBLIC_ADMIN_URL || "http://localhost:3002"}/login`}
                         className="col-span-12 md:col-span-6 bg-gradient-to-br from-slate-700 to-slate-900 rounded-2xl p-5 md:p-6 text-white hover:scale-[1.02] transition-transform cursor-pointer group"
                     >
                         <div className="flex items-start justify-between">
@@ -56,16 +127,11 @@ export default function LoginGuidePage() {
                     {/* Mobile App Card */}
                     <div className="col-span-12 bg-gradient-to-br from-primary to-primary-dark rounded-2xl p-5 md:p-6 text-white">
                         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                            <div className="flex items-start gap-4">
-                                <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center flex-shrink-0">
-                                    <DeviceMobile size={24} weight="duotone" />
-                                </div>
-                                <div>
-                                    <h2 className="text-xl font-bold mb-1">Shop with Zora</h2>
-                                    <p className="text-white/80 text-sm">
-                                        Download our mobile app to browse products, place orders, and track deliveries.
-                                    </p>
-                                </div>
+                            <div>
+                                <h2 className="text-xl font-bold mb-2">Shop with Zora</h2>
+                                <p className="text-white/80 text-sm">
+                                    Download our mobile app to browse products, place orders, and track deliveries.
+                                </p>
                             </div>
                             <div className="flex gap-2">
                                 <a href="#" className="bg-white text-gray-900 px-4 py-2 rounded-xl text-sm font-semibold hover:bg-gray-100 transition-colors flex items-center gap-2">

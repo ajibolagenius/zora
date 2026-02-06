@@ -86,20 +86,15 @@ export const PricingConstants = {
  * Minimum and maximum amounts for different payment methods
  */
 export const PaymentLimits = {
-    // Pay Later (Klarna/Clearpay)
-    payLater: {
-        minAmount: 10,
-        maxAmount: 1000,
+    // Card Payments
+    card: {
+        minAmount: 1,
+        maxAmount: 2000,
     },
-    // Pay in 3
-    payIn3: {
-        minAmount: 35,
+    // Digital Wallets
+    digitalWallet: {
+        minAmount: 1,
         maxAmount: 1000,
-    },
-    // Financing
-    financing: {
-        minAmount: 99,
-        maxAmount: 10000,
     },
     // Standard payment methods (Stripe, etc.)
     standard: {

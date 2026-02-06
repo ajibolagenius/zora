@@ -1,223 +1,173 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
-import { Header } from "@/components/Header";
-import { Footer } from "@/components/Footer";
 import { Envelope, Phone, MapPin, ChatCircle, Clock, PaperPlaneTilt, CheckCircle, ArrowSquareOut } from "@phosphor-icons/react";
+import { Navigation } from "@/components/landing/Navigation";
+import { Footer } from "@/components/landing/Footer";
+import { FreeDeliveryBanner } from "@/components/marketing/FreeDeliveryBanner";
 
 export default function ContactPage() {
-    const [formState, setFormState] = useState<"idle" | "loading" | "success">("idle");
-    const [formData, setFormData] = useState({
-        name: "",
-        email: "",
-        subject: "",
-        message: "",
-    });
-
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setFormState("loading");
-        await new Promise(resolve => setTimeout(resolve, 1500));
-        setFormState("success");
-        setFormData({ name: "", email: "", subject: "", message: "" });
-    };
 
     return (
-        <main className="min-h-screen bg-gray-50">
-            <Header />
+        <main className="min-h-screen bg-background-light">
+            {/* Free Delivery Banner - Fixed at top */}
+            <FreeDeliveryBanner />
 
-            {/* Bento Grid Content */}
-            <section className="pt-24 pb-8 px-4">
-                <div className="container mx-auto max-w-7xl">
-                    <div className="grid grid-cols-12 gap-3 md:gap-4">
-                        {/* Hero Card */}
-                        <div className="col-span-12 lg:col-span-5 bg-gradient-to-br from-primary via-primary to-primary-dark rounded-3xl p-6 md:p-8 text-white relative overflow-hidden">
-                            <div className="absolute top-0 right-0 w-48 h-48 bg-white/10 rounded-full blur-3xl" />
-                            <div className="relative z-10">
-                                <span className="inline-block bg-white/20 text-xs font-semibold px-3 py-1 rounded-full mb-4">Get in Touch</span>
-                                <h1 className="text-2xl md:text-3xl font-bold font-display leading-tight mb-4">
-                                    We&apos;d Love to Hear from You
-                                </h1>
-                                <p className="text-white/80 text-sm">
-                                    Have a question, feedback, or need help? Our team is here to assist you.
-                                </p>
+            {/* Navigation */}
+            <Navigation />
+
+            {/* Hero Section */}
+            <section id="hero-section" className="relative min-h-[60vh] sm:min-h-[70vh] bg-gradient-to-br from-primary to-primary-dark overflow-hidden">
+                {/* Background Elements */}
+                <div className="absolute inset-0">
+                    <div className="absolute top-20 left-10 w-72 h-72 bg-secondary/20 rounded-full blur-3xl" />
+                    <div className="absolute bottom-20 right-10 w-96 h-96 bg-white/10 rounded-full blur-3xl" />
+                </div>
+
+                <div className="relative z-10 container mx-auto px-4 sm:px-6 min-h-[60vh] sm:min-h-[70vh] flex items-center justify-center">
+                    <div className="text-center max-w-4xl">
+                        <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm border border-white/30 text-white text-xs font-medium px-3 sm:px-4 py-1.5 sm:py-2 rounded-full mb-4 sm:mb-6">
+                            <span className="w-2 h-2 bg-secondary rounded-full animate-pulse" />
+                            Get in Touch
+                        </div>
+
+                        <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black font-display text-white leading-[1.1] mb-4 sm:mb-6">
+                            We&apos;d Love to Hear
+                            <span className="relative inline-block mt-2">
+                                from You
+                                <svg className="absolute -bottom-2 left-0 w-full" viewBox="0 0 200 12" fill="none">
+                                    <path d="M2 8.5C50 2.5 150 2.5 198 8.5" stroke="#FACC15" strokeWidth="4" strokeLinecap="round" />
+                                </svg>
+                            </span>
+                        </h1>
+
+                        <p className="text-lg sm:text-xl lg:text-2xl text-white/90 mb-6 sm:mb-8 max-w-3xl mx-auto leading-relaxed">
+                            Have a question, feedback, or need help? Our team is here to assist you every step of the way.
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            {/* Contact Info Section */}
+            <section className="py-12 sm:py-16 px-4 bg-white">
+                <div className="container mx-auto max-w-6xl">
+                    <div className="text-center mb-8 sm:mb-12">
+                        <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold font-display text-gray-900 mb-4 sm:mb-6">Ways to Reach Us</h2>
+                        <p className="text-base sm:text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed">
+                            Choose the most convenient way to get in touch with our team
+                        </p>
+                    </div>
+                    <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+                        <div className="bg-white border border-gray-100 rounded-2xl p-4 sm:p-6 text-center hover:shadow-lg transition-shadow">
+                            <div className="w-12 h-12 sm:w-16 sm:h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-3 sm:mb-4">
+                                <Envelope size={24} weight="duotone" className="text-primary" />
                             </div>
+                            <h3 className="font-bold text-base sm:text-lg text-gray-900 mb-2">Email</h3>
+                            <p className="text-sm sm:text-base text-gray-600">support@zoraapp.co.uk</p>
                         </div>
-
-                        {/* Contact Info Cards */}
-                        <div className="col-span-6 lg:col-span-2 bg-white rounded-2xl p-4 border border-gray-100">
-                            <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center mb-3">
-                                <Envelope size={20} weight="duotone" className="text-primary" />
+                        <div className="bg-white border border-gray-100 rounded-2xl p-4 sm:p-6 text-center hover:shadow-lg transition-shadow">
+                            <div className="w-12 h-12 sm:w-16 sm:h-16 bg-green-100 rounded-2xl flex items-center justify-center mx-auto mb-3 sm:mb-4">
+                                <Phone size={24} weight="duotone" className="text-green-600" />
                             </div>
-                            <h3 className="font-semibold text-gray-900 text-sm mb-1">Email</h3>
-                            <p className="text-xs text-gray-500">support@zoraapp.co.uk</p>
+                            <h3 className="font-bold text-base sm:text-lg text-gray-900 mb-2">Phone</h3>
+                            <p className="text-sm sm:text-base text-gray-600">+44 (0) 20 1234 5678</p>
                         </div>
-
-                        <div className="col-span-6 lg:col-span-2 bg-white rounded-2xl p-4 border border-gray-100">
-                            <div className="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center mb-3">
-                                <Phone size={20} weight="duotone" className="text-green-600" />
+                        <div className="bg-white border border-gray-100 rounded-2xl p-4 sm:p-6 text-center hover:shadow-lg transition-shadow">
+                            <div className="w-12 h-12 sm:w-16 sm:h-16 bg-orange-100 rounded-2xl flex items-center justify-center mx-auto mb-3 sm:mb-4">
+                                <MapPin size={24} weight="duotone" className="text-orange-600" />
                             </div>
-                            <h3 className="font-semibold text-gray-900 text-sm mb-1">Phone</h3>
-                            <p className="text-xs text-gray-500">+44 (0) 20 1234 5678</p>
+                            <h3 className="font-bold text-base sm:text-lg text-gray-900 mb-2">Location</h3>
+                            <p className="text-sm sm:text-base text-gray-600">London, UK</p>
                         </div>
-
-                        <div className="col-span-6 lg:col-span-2 bg-white rounded-2xl p-4 border border-gray-100">
-                            <div className="w-10 h-10 bg-orange-100 rounded-xl flex items-center justify-center mb-3">
-                                <MapPin size={20} weight="duotone" className="text-orange-600" />
+                        <div className="bg-white border border-gray-100 rounded-2xl p-4 sm:p-6 text-center hover:shadow-lg transition-shadow">
+                            <div className="w-12 h-12 sm:w-16 sm:h-16 bg-blue-100 rounded-2xl flex items-center justify-center mx-auto mb-3 sm:mb-4">
+                                <Clock size={24} weight="duotone" className="text-blue-600" />
                             </div>
-                            <h3 className="font-semibold text-gray-900 text-sm mb-1">Location</h3>
-                            <p className="text-xs text-gray-500">London, UK</p>
+                            <h3 className="font-bold text-base sm:text-lg text-gray-900 mb-2">Hours</h3>
+                            <p className="text-sm sm:text-base text-gray-600">Mon-Fri 9-6</p>
                         </div>
+                    </div>
+                </div>
+            </section>
 
-                        <div className="col-span-6 lg:col-span-1 bg-white rounded-2xl p-4 border border-gray-100">
-                            <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center mb-3">
-                                <Clock size={20} weight="duotone" className="text-blue-600" />
-                            </div>
-                            <h3 className="font-semibold text-gray-900 text-sm mb-1">Hours</h3>
-                            <p className="text-xs text-gray-500">Mon-Fri 9-6</p>
+            {/* Contact Form Section */}
+            <section className="py-12 sm:py-16 px-4 bg-gray-50">
+                <div className="container mx-auto max-w-4xl">
+                    <div className="bg-white border border-gray-100 rounded-3xl p-6 sm:p-8">
+                        <div className="text-center mb-6 sm:mb-8">
+                            <h2 className="text-2xl sm:text-3xl font-bold font-display text-gray-900 mb-4">Send Us a Message</h2>
+                            <p className="text-base sm:text-lg text-gray-600 leading-relaxed">
+                                Our contact form is currently under maintenance. Please reach out to us via email at support@zoraapp.co.uk.
+                            </p>
                         </div>
-
-                        {/* Contact Form */}
-                        <div className="col-span-12 lg:col-span-8 bg-white rounded-2xl p-5 md:p-6 border border-gray-100">
-                            {formState === "success" ? (
-                                <div className="text-center py-8">
-                                    <div className="w-14 h-14 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                                        <CheckCircle size={28} weight="duotone" className="text-green-600" />
-                                    </div>
-                                    <h3 className="text-lg font-semibold text-gray-900 mb-2">Message Sent!</h3>
-                                    <p className="text-sm text-gray-600 mb-4">We&apos;ll get back to you within 24 hours.</p>
-                                    <button onClick={() => setFormState("idle")} className="text-primary font-medium text-sm hover:underline">
-                                        Send another message
-                                    </button>
-                                </div>
-                            ) : (
-                                <>
-                                    <h2 className="font-bold text-gray-900 mb-4">Send Us a Message</h2>
-                                    <form onSubmit={handleSubmit} className="space-y-4">
-                                        <div className="grid md:grid-cols-2 gap-4">
-                                            <div>
-                                                <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">Name</label>
-                                                <input
-                                                    type="text"
-                                                    id="name"
-                                                    required
-                                                    value={formData.name}
-                                                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                                                    className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none text-sm"
-                                                    placeholder="Your name"
-                                                />
-                                            </div>
-                                            <div>
-                                                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                                                <input
-                                                    type="email"
-                                                    id="email"
-                                                    required
-                                                    value={formData.email}
-                                                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                                                    className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none text-sm"
-                                                    placeholder="you@example.com"
-                                                />
-                                            </div>
-                                        </div>
-                                        <div>
-                                            <label htmlFor="subject" className="block text-sm font-medium text-gray-700 mb-1">Subject</label>
-                                            <select
-                                                id="subject"
-                                                required
-                                                value={formData.subject}
-                                                onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
-                                                className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none text-sm"
-                                            >
-                                                <option value="">Select a topic</option>
-                                                <option value="general">General Inquiry</option>
-                                                <option value="order">Order Support</option>
-                                                <option value="vendor">Vendor Inquiry</option>
-                                                <option value="partnership">Partnership</option>
-                                                <option value="feedback">Feedback</option>
-                                            </select>
-                                        </div>
-                                        <div>
-                                            <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-1">Message</label>
-                                            <textarea
-                                                id="message"
-                                                required
-                                                rows={4}
-                                                value={formData.message}
-                                                onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                                                className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none text-sm resize-none"
-                                                placeholder="How can we help you?"
-                                            />
-                                        </div>
-                                        <button
-                                            type="submit"
-                                            disabled={formState === "loading"}
-                                            className="w-full bg-primary hover:bg-primary-dark text-white px-6 py-3 rounded-xl font-semibold text-sm transition-colors flex items-center justify-center gap-2 disabled:opacity-70"
-                                        >
-                                            {formState === "loading" ? (
-                                                <>
-                                                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                                                    Sending...
-                                                </>
-                                            ) : (
-                                                <>
-                                                    Send Message <PaperPlaneTilt size={16} weight="duotone" />
-                                                </>
-                                            )}
-                                        </button>
-                                    </form>
-                                </>
-                            )}
+                        <div className="text-center">
+                            <Link href="mailto:support@zoraapp.co.uk" className="inline-flex items-center justify-center gap-2 bg-primary hover:bg-primary-dark text-white px-6 sm:px-8 py-3 sm:py-4 rounded-full text-base sm:text-lg font-bold transition-all">
+                                <Envelope size={20} weight="duotone" className="sm:w-5 sm:h-5" />
+                                Email Us Directly
+                            </Link>
                         </div>
+                    </div>
+                </div>
+            </section>
 
-                        {/* FAQ Card */}
-                        <div className="col-span-12 lg:col-span-4 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-2xl p-5 md:p-6">
-                            <div className="flex items-center gap-2 mb-3">
+            {/* Support Options Section */}
+            <section className="py-12 sm:py-16 px-4 bg-white">
+                <div className="container mx-auto max-w-6xl">
+                    <div className="text-center mb-8 sm:mb-12">
+                        <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold font-display text-gray-900 mb-4 sm:mb-6">Need More Help?</h2>
+                        <p className="text-base sm:text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed">
+                            Explore our support options and resources
+                        </p>
+                    </div>
+                    <div className="grid md:grid-cols-3 gap-4 sm:gap-6">
+                        <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100 rounded-2xl p-4 sm:p-6">
+                            <div className="flex items-center gap-2 mb-3 sm:mb-4">
                                 <ChatCircle size={20} weight="duotone" className="text-blue-600" />
-                                <h3 className="font-semibold text-gray-900">Need Quick Answers?</h3>
+                                <h3 className="font-bold text-base sm:text-lg text-gray-900">Quick Answers</h3>
                             </div>
-                            <p className="text-sm text-gray-600 mb-4">
+                            <p className="text-sm sm:text-base text-gray-600 mb-4 leading-relaxed">
                                 Check out our FAQ section for answers to common questions about orders, vendors, and more.
                             </p>
                             <a href="#" className="text-primary font-medium text-sm hover:underline flex items-center gap-1">
                                 View FAQ <ArrowSquareOut size={16} weight="duotone" />
                             </a>
                         </div>
-
-                        {/* Vendor Support Card */}
-                        <div className="col-span-12 md:col-span-6 lg:col-span-4 bg-gradient-to-br from-amber-100 to-orange-100 rounded-2xl p-5 md:p-6">
-                            <h3 className="font-semibold text-gray-900 mb-2">Vendor Support</h3>
-                            <p className="text-sm text-gray-600 mb-3">
+                        <div className="bg-gradient-to-br from-amber-50 to-orange-50 border border-orange-100 rounded-2xl p-4 sm:p-6">
+                            <h3 className="font-bold text-base sm:text-lg text-gray-900 mb-3 sm:mb-4">Vendor Support</h3>
+                            <p className="text-sm sm:text-base text-gray-600 mb-4 leading-relaxed">
                                 Existing vendor or interested in selling? We have dedicated support for you.
                             </p>
-                            <p className="text-sm text-gray-700">
+                            <p className="text-sm sm:text-base text-gray-700">
                                 <strong>Email:</strong> vendors@zoraapp.co.uk
                             </p>
                         </div>
-
-                        {/* Partnership Card */}
-                        <div className="col-span-12 md:col-span-6 lg:col-span-4 bg-gradient-to-br from-green-100 to-emerald-100 rounded-2xl p-5 md:p-6">
-                            <h3 className="font-semibold text-gray-900 mb-2">Partnerships</h3>
-                            <p className="text-sm text-gray-600 mb-3">
+                        <div className="bg-gradient-to-br from-green-50 to-emerald-50 border border-green-100 rounded-2xl p-4 sm:p-6">
+                            <h3 className="font-bold text-base sm:text-lg text-gray-900 mb-3 sm:mb-4">Partnerships</h3>
+                            <p className="text-sm sm:text-base text-gray-600 mb-4 leading-relaxed">
                                 Interested in partnering with Zora? Let&apos;s explore opportunities together.
                             </p>
                             <Link href="/vendor-onboarding" className="text-primary font-medium text-sm hover:underline flex items-center gap-1">
                                 Become a Partner <ArrowSquareOut size={16} weight="duotone" />
                             </Link>
                         </div>
+                    </div>
+                </div>
+            </section>
 
-                        {/* Social Card */}
-                        <div className="col-span-12 lg:col-span-4 bg-background-dark rounded-2xl p-5 md:p-6 text-white">
-                            <h3 className="font-semibold mb-3">Follow Us</h3>
-                            <p className="text-sm text-gray-400 mb-4">Stay connected for updates, tips, and community news.</p>
-                            <div className="flex gap-3">
-                                {["Twitter", "Instagram", "Facebook"].map((social) => (
-                                    <a key={social} href="#" className="bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors">
-                                        {social}
-                                    </a>
-                                ))}
-                            </div>
+            {/* Social Section */}
+            <section className="py-12 sm:py-16 px-4 bg-gray-50">
+                <div className="container mx-auto max-w-4xl text-center">
+                    <div className="bg-gradient-to-br from-primary to-primary-dark rounded-3xl p-6 sm:p-8 md:p-12 text-white">
+                        <h3 className="text-xl sm:text-2xl lg:text-3xl font-bold font-display mb-4">Stay Connected</h3>
+                        <p className="text-base sm:text-lg text-white/90 mb-6 sm:mb-8 max-w-2xl mx-auto leading-relaxed">
+                            Follow us on social media for updates, tips, and community news.
+                        </p>
+                        <div className="flex flex-wrap gap-3 justify-center">
+                            {["Twitter", "Instagram", "Facebook"].map((social) => (
+                                <a key={social} href="#" className="bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/20 px-4 sm:px-6 py-2 sm:py-3 rounded-lg text-sm sm:text-base font-medium transition-all">
+                                    {social}
+                                </a>
+                            ))}
                         </div>
                     </div>
                 </div>
