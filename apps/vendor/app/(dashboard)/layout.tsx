@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Sidebar } from "../../components/Sidebar";
+import { ZoraLogo } from "../../components/ZoraLogo";
 import { List } from "@phosphor-icons/react";
 import { VendorRealtimeProvider, useVendorRealtime } from "../../providers";
 import { ConnectionStatus } from "@zora/ui-web";
@@ -55,7 +56,7 @@ function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
                     >
                         <List size={24} weight="duotone" className="text-gray-600" aria-hidden="true" />
                     </button>
-                    <span className="text-xl font-bold text-primary">ZORA</span>
+                    <ZoraLogo className="w-8 h-8" outlineColor="#000" />
                     <span className="text-xs bg-[#342418] px-2 py-0.5 rounded text-[#CBA990]">Vendor</span>
                     <div className="ml-auto">
                         <ConnectionIndicator />

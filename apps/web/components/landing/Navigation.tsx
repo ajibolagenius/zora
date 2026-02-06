@@ -31,7 +31,7 @@ export function Navigation() {
         <nav className={`fixed top-12 left-0 right-0 z-40 transition-all duration-300 ${scrolled ? 'bg-white/95 backdrop-blur-md shadow-lg' : ''}`} id="main-nav">
             <div className="container mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
                 <Link href="/" className="flex items-center gap-2">
-                    <ZoraLogo className="w-9 h-9" />
+                    <ZoraLogo className="w-9 h-9" outlineColor={scrolled ? "#000" : "#fff"} />
                     <span className={`text-xl font-bold font-display transition-colors duration-300 ${scrolled ? 'text-text-dark' : 'text-white'}`}>Zora</span>
                 </Link>
 

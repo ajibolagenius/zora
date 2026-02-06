@@ -21,6 +21,7 @@ import {
     X,
 } from "@phosphor-icons/react";
 import { cn } from "@zora/ui-web";
+import { ZoraLogo } from "./ZoraLogo";
 import { useState, useEffect, useRef } from "react";
 
 const navItems = [
@@ -61,7 +62,7 @@ export function Sidebar({ mobileOpen = false, onMobileClose }: SidebarProps) {
             {/* Header */}
             <div className="p-4 flex items-center justify-between border-b border-white/10">
                 <Link href="/" className="flex items-center gap-2 overflow-hidden">
-                    <span className="text-2xl font-bold text-primary">ZORA</span>
+                    <ZoraLogo className="w-8 h-8" outlineColor="#fff" />
                     <span className="text-xs bg-slate-700 px-2 py-0.5 rounded text-slate-300 hidden lg:inline">Admin</span>
                 </Link>
                 {/* Desktop collapse button */}
@@ -71,11 +72,11 @@ export function Sidebar({ mobileOpen = false, onMobileClose }: SidebarProps) {
                     aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
                     aria-expanded={!collapsed}
                 >
-{collapsed ? (
-                                        <List size={20} weight="duotone" aria-hidden="true" />
-                                    ) : (
-                                        <CaretLeft size={20} weight="duotone" aria-hidden="true" />
-                                    )}
+                    {collapsed ? (
+                        <List size={20} weight="duotone" aria-hidden="true" />
+                    ) : (
+                        <CaretLeft size={20} weight="duotone" aria-hidden="true" />
+                    )}
                 </button>
                 {/* Mobile close button */}
                 <button

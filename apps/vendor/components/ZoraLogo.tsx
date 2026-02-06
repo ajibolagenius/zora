@@ -1,8 +1,8 @@
-export const ZoraLogo = ({
-    className = "w-10 h-10",
-    outlineColor = "#fff"
-}: {
-    className?: string;
+export const ZoraLogo = ({ 
+    className = "w-10 h-10", 
+    outlineColor = "#000" 
+}: { 
+    className?: string; 
     outlineColor?: string;
 }) => (
     <svg className={className} viewBox="0 0 156 179" xmlns="http://www.w3.org/2000/svg" fillRule="evenodd" clipRule="evenodd" strokeMiterlimit="1.5">
