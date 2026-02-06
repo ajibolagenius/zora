@@ -9,6 +9,7 @@ import { Testimonials } from "@/components/landing/Testimonials";
 import { FreeDeliveryBanner } from "@/components/marketing/FreeDeliveryBanner";
 import { Navigation } from "@/components/landing/Navigation";
 import { HeroSection } from "@/components/landing/HeroSection";
+import { DeliveryPartnersBanner } from "@/components/landing/DeliveryPartnersBanner";
 import { Footer } from "@/components/landing/Footer";
 
 
@@ -24,6 +25,9 @@ export default function Home() {
 
             {/* Hero Section */}
             <HeroSection />
+
+            {/* Delivery Partners Banner */}
+            <DeliveryPartnersBanner />
 
             {/* Value Proposition Section */}
             <ValueProposition />
