@@ -6,25 +6,53 @@ export const validateEmail = (email: string): boolean => {
 };
 
 export const validatePhone = (phone: string): boolean => {
-    // Accept all phone numbers - just check if it's not empty and has some basic format
     const cleanedPhone = phone.replace(/\s/g, '');
 
-    // Basic validation: at least 6 characters and contains at least one digit
-    return cleanedPhone.length >= 6 && /\d/.test(cleanedPhone);
+    // UK Mobile numbers: 07xxx xxxxxx or +447xxx xxxxxx
+    const ukMobileRegex = /^(07[1-9]\d{8}|(\+44|0)7[1-9]\d{8})$/;
+
+    // UK Landline numbers: 01xxx xxxxxx, 02xxx xxxxxx, or +441xxx xxxxxx, +442xxx xxxxxx
+    const ukLandlineRegex = /^(01[0-9]{8,9}|02[0-9]{9}|(\+44|0)1[0-9]{8,9}|(\+44|0)2[0-9]{9})$/;
+
+    // International numbers: +[country code][number], minimum 10 digits total
+    const internationalRegex = /^\+\d{9,14}$/;
+
+    // UK special numbers (0800, 0844, etc.)
+    const ukSpecialRegex = /^(0800\d{6}|084[0-9]\d{6}|087[0-9]\d{6}|090[0-9]\d{6}|03[0-9]\d{8}|(\+44|0)800\d{6}|(\+44|0)84[0-9]\d{6}|(\+44|0)87[0-9]\d{6}|(\+44|0)90[0-9]\d{6}|(\+44|0)3[0-9]\d{8})$/;
+
+    return ukMobileRegex.test(cleanedPhone) ||
+        ukLandlineRegex.test(cleanedPhone) ||
+        internationalRegex.test(cleanedPhone) ||
+        ukSpecialRegex.test(cleanedPhone);
 };
 
 export const getPhoneFormatHint = (phone: string): string => {
     const cleanedPhone = phone.replace(/\s/g, '');
 
     if (cleanedPhone.length === 0) {
-        return 'Enter any phone number';
-    } else if (cleanedPhone.length < 6) {
-        return 'Phone number must be at least 6 characters';
-    } else if (!/\d/.test(cleanedPhone)) {
-        return 'Phone number must contain at least one digit';
+        return 'Enter a UK mobile, landline, or international number';
     }
 
-    return 'Phone number format accepted';
+    // Check if it starts with proper UK format
+    if (cleanedPhone.startsWith('07') && cleanedPhone.length === 11) {
+        return 'UK mobile format accepted';
+    } else if (cleanedPhone.startsWith('+447') && cleanedPhone.length === 13) {
+        return 'UK mobile format accepted';
+    } else if (cleanedPhone.startsWith('01') && cleanedPhone.length >= 10) {
+        return 'UK landline format accepted';
+    } else if (cleanedPhone.startsWith('02') && cleanedPhone.length >= 10) {
+        return 'UK landline format accepted';
+    } else if (cleanedPhone.startsWith('+44') && cleanedPhone.length >= 12) {
+        return 'UK number with country code accepted';
+    } else if (cleanedPhone.startsWith('+') && cleanedPhone.length >= 10) {
+        return 'International format accepted';
+    } else if (cleanedPhone.startsWith('0800') || cleanedPhone.startsWith('084') ||
+        cleanedPhone.startsWith('087') || cleanedPhone.startsWith('090') ||
+        cleanedPhone.startsWith('03')) {
+        return 'UK special rate number format accepted';
+    }
+
+    return 'Please enter a valid UK phone number (e.g., 07xxx xxxxxx or +44 7xxx xxxxxx)';
 };
 
 export const validatePostcode = (postcode: string): boolean => {
@@ -81,7 +109,7 @@ export const validateStep = (step: number, data: VendorOnboardingData): FormVali
             if (!data.phone.trim()) {
                 errors.push({ field: 'phone', message: 'Phone number is required' });
             } else if (!validatePhone(data.phone)) {
-                errors.push({ field: 'phone', message: 'Please enter a valid phone number (minimum 6 characters with at least one digit)' });
+                errors.push({ field: 'phone', message: 'Please enter a valid UK phone number (e.g., 07xxx xxxxxx, 01xxx xxxxxx, or +44 7xxx xxxxxx)' });
             }
 
             if (!data.addressLine1.trim()) {

@@ -49,7 +49,7 @@ export function ContactDetailsStep({ data, updateField, getFieldError, hasFieldE
                         type="tel"
                         value={data.phone}
                         onChange={(e) => updateField('phone', e.target.value)}
-                        placeholder="Enter any phone number"
+                        placeholder="e.g., 07xxx xxxxxx or +44 7xxx xxxxxx"
                         className={`w-full ${hasFieldError('phone') ? 'border-red-500' : ''}`}
                         aria-required="true"
                         aria-describedby={hasFieldError('phone') ? 'phone-error phone-help' : 'phone-help'}
@@ -60,7 +60,7 @@ export function ContactDetailsStep({ data, updateField, getFieldError, hasFieldE
                         </p>
                     )}
                     <p id="phone-help" className="mt-1 text-sm text-gray-500">
-                        {getPhoneFormatHint(data.phone) || 'Enter any phone number (minimum 6 characters)'}
+                        {getPhoneFormatHint(data.phone) || 'Enter a UK mobile, landline, or international number'}
                     </p>
                 </div>
             </div>
