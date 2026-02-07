@@ -6,9 +6,7 @@ import {
     ScrollView,
     TouchableOpacity,
     Animated,
-    Easing,
     useWindowDimensions,
-    ActivityIndicator,
 } from 'react-native';
 import { LazyImage, RatingDisplay, Skeleton } from '../../components/ui';
 import MetaTags from '../../components/ui/MetaTags';
@@ -19,12 +17,10 @@ import {
     Storefront,
     ForkKnife,
     ListBullets,
-    MapPin,
-    Clock,
 } from 'phosphor-react-native';
 import { FlashList } from '@shopify/flash-list';
 import { Colors } from '../../constants/colors';
-import { Spacing, BorderRadius, Heights, Shadows, Gaps } from '../../constants/spacing';
+import { Spacing, BorderRadius, Shadows, Gaps } from '../../constants/spacing';
 import { FontSize, FontFamily } from '../../constants/typography';
 import { AnimationDuration, AnimationEasing } from '../../constants';
 import { vendorService as mockVendorService, type Vendor as MockVendor } from '../../services/mockDataService';
@@ -130,7 +126,7 @@ export default function ExploreScreen() {
                 }),
             ]).start();
         }
-    }, [loading]);
+    }, [fadeAnim, loading, slideAnim]);
 
     const handleVendorPress = (vendorId: string) => {
         // Find vendor from current list
