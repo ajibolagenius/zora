@@ -1,46 +1,36 @@
-"use client";
-
-import { useState, useEffect } from "react";
 import { Star, Quotes } from "@phosphor-icons/react";
-import { TestimonialsService, type Testimonial } from "@/services/testimonials";
-import { useTestimonialUpdates } from "@/providers/RealtimeProvider";
-import { DynamicStats } from "./DynamicStats";
 
 export function Testimonials() {
-    const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
-    const [loading, setLoading] = useState(true);
-
-    useEffect(() => {
-        const fetchTestimonials = async () => {
-            try {
-                const testimonialsData = await TestimonialsService.getApproved(4);
-                setTestimonials(testimonialsData);
-            } catch (error) {
-                console.error('Error fetching testimonials:', error);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchTestimonials();
-    }, []);
-
-    // Listen for real-time testimonial updates
-    useTestimonialUpdates((payload) => {
-        console.log('Testimonial update received:', payload);
-
-        // Refresh testimonials when there are changes
-        const refreshTestimonials = async () => {
-            try {
-                const testimonialsData = await TestimonialsService.getApproved(4);
-                setTestimonials(testimonialsData);
-            } catch (error) {
-                console.error('Failed to refresh testimonials:', error);
-            }
-        };
-
-        refreshTestimonials();
-    });
+    const testimonials = [
+        {
+            name: "Amara O.",
+            location: "London",
+            rating: 5,
+            comment: "Finally, a platform that brings authentic African products right to my doorstep! The quality is amazing and I love supporting local vendors.",
+            product: "Nigerian groceries"
+        },
+        {
+            name: "Kwame A.",
+            location: "Manchester",
+            rating: 5,
+            comment: "Zora has made it so easy to connect with my roots. The delivery is fast and the products remind me of home.",
+            product: "Ghanaian foods"
+        },
+        {
+            name: "Fatima K.",
+            location: "Birmingham",
+            rating: 5,
+            comment: "As a busy professional, I appreciate how convenient Zora is. Great prices, authentic products, and excellent customer service!",
+            product: "East African spices"
+        },
+        {
+            name: "David M.",
+            location: "Leeds",
+            rating: 5,
+            comment: "The variety of products is impressive! I've discovered so many new items and the quality is consistently excellent.",
+            product: "Various African products"
+        }
+    ];
 
     const renderStars = (rating: number) => {
         return Array.from({ length: 5 }).map((_, index) => (
@@ -52,31 +42,6 @@ export function Testimonials() {
             />
         ));
     };
-
-    if (loading) {
-        return (
-            <section className="py-16 px-4 bg-background-light">
-                <div className="container mx-auto max-w-7xl">
-                    <div className="text-center mb-12">
-                        <div className="h-10 bg-gray-200 rounded w-1/3 mx-auto mb-4"></div>
-                        <div className="h-6 bg-gray-200 rounded w-2/3 mx-auto"></div>
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                        {Array.from({ length: 4 }).map((_, index) => (
-                            <div key={index} className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 animate-pulse">
-                                <div className="h-4 bg-gray-200 rounded w-1/2 mb-4"></div>
-                                <div className="space-y-2">
-                                    <div className="h-3 bg-gray-200 rounded"></div>
-                                    <div className="h-3 bg-gray-200 rounded"></div>
-                                    <div className="h-3 bg-gray-200 rounded w-3/4"></div>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            </section>
-        );
-    }
 
     return (
         <section className="py-16 px-4 bg-background-light">
@@ -93,7 +58,7 @@ export function Testimonials() {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                     {testimonials.map((testimonial, index) => (
                         <div
-                            key={testimonial.id}
+                            key={index}
                             className="bg-white p-6 rounded-2xl shadow-sm hover:shadow-md transition-shadow border border-gray-100 relative"
                         >
                             {/* Quote Icon */}
@@ -115,22 +80,44 @@ export function Testimonials() {
                             <div className="flex items-center justify-between">
                                 <div>
                                     <div className="font-semibold text-text-dark text-sm">
-                                        {testimonial.customer_name}
+                                        {testimonial.name}
                                     </div>
                                     <div className="text-xs text-gray-500">
-                                        {testimonial.customer_location}
+                                        {testimonial.location}
                                     </div>
                                 </div>
                                 <div className="text-xs text-primary font-medium">
-                                    {testimonial.product_category}
+                                    {testimonial.product}
                                 </div>
                             </div>
                         </div>
                     ))}
                 </div>
 
-                {/* Dynamic Stats Section */}
-                <DynamicStats />
+                {/* Stats Section */}
+                <div className="mt-12 bg-white rounded-2xl p-8 border border-gray-100">
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+                        <div>
+                            <div className="text-3xl font-bold text-primary mb-1">4.8</div>
+                            <div className="text-sm text-gray-600">Average Rating</div>
+                            <div className="flex justify-center gap-1 mt-1">
+                                {renderStars(5)}
+                            </div>
+                        </div>
+                        <div>
+                            <div className="text-3xl font-bold text-primary mb-1">2K+</div>
+                            <div className="text-sm text-gray-600">Happy Customers</div>
+                        </div>
+                        <div>
+                            <div className="text-3xl font-bold text-primary mb-1">5K+</div>
+                            <div className="text-sm text-gray-600">Products Sold</div>
+                        </div>
+                        <div>
+                            <div className="text-3xl font-bold text-primary mb-1">100+</div>
+                            <div className="text-sm text-gray-600">Verified Vendors</div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </section>
     );
