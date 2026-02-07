@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { ArrowLeft, ArrowRight, Star } from "@phosphor-icons/react";
 import { productsService } from "@zora/api-client";
+import { useProductUpdates } from "@/providers/RealtimeProvider";
 import type { Product } from "@zora/types";
 
 export function ProductCarousel() {
@@ -35,6 +36,28 @@ export function ProductCarousel() {
 
         fetchProducts();
     }, []);
+
+    // Listen for real-time product updates
+    useProductUpdates((payload) => {
+        console.log('Product update received:', payload);
+
+        // Refresh products when there are changes
+        const refreshProducts = async () => {
+            try {
+                const response = await productsService.getAll({
+                    limit: 12,
+                    sortBy: 'created_at',
+                    sortOrder: 'desc'
+                });
+                const activeProducts = response.data?.filter(product => product.is_active) || [];
+                setProducts(activeProducts);
+            } catch (error) {
+                console.error('Failed to refresh products:', error);
+            }
+        };
+
+        refreshProducts();
+    });
 
     // Auto-scroll functionality
     useEffect(() => {

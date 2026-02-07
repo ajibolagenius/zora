@@ -35,8 +35,7 @@ export default function Home() {
             {/* Features Grid */}
             <FeaturesGrid />
 
-            {/* Product Carousel - Commented Out */}
-            {/*
+            {/* Product Carousel - Now Active */}
             <section className="py-12 px-4 bg-white">
                 <div className="container mx-auto max-w-7xl">
                     <div className="text-center mb-8">
@@ -46,7 +45,6 @@ export default function Home() {
                     <ProductCarousel />
                 </div>
             </section>
-            */}
 
             {/* How It Works */}
             <HowItWorks />
