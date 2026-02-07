@@ -19,6 +19,8 @@ import {
     List,
     Shield,
     X,
+    Truck,
+    ClipboardText,
 } from "@phosphor-icons/react";
 import { cn } from "@zora/ui-web";
 import { ZoraLogo } from "./ZoraLogo";
@@ -27,8 +29,10 @@ import { useState, useEffect, useRef } from "react";
 const navItems = [
     { name: "Dashboard", icon: SquaresFour, href: "/" },
     { name: "Orders", icon: ShoppingCart, href: "/orders" },
+    { name: "Delivery", icon: Truck, href: "/delivery" },
     { name: "Customers", icon: Users, href: "/customers" },
     { name: "Vendors", icon: Storefront, href: "/vendors" },
+    { name: "Requests", icon: ClipboardText, href: "/vendors/applications" },
     { name: "Products", icon: Package, href: "/products" },
     { name: "Reviews", icon: Star, href: "/reviews" },
     { name: "Analytics", icon: ChartBar, href: "/analytics" },
