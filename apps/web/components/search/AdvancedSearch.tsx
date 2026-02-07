@@ -1,15 +1,15 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-    Search,
+    MagnifyingGlass,
     X,
     Clock,
     TrendUp,
-    Filter,
-    ChevronDown,
-    Sparkles,
+    Funnel,
+    CaretDown,
+    Sparkle,
     ArrowRight,
-} from 'lucide-react';
+} from '@phosphor-icons/react';
 import { useAdvancedSearch, useSearchPerformance } from '../../hooks/useAdvancedSearch';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
@@ -154,7 +154,7 @@ export function AdvancedSearch({
             {/* Search Input */}
             <div className="relative">
                 <div className="relative flex items-center">
-                    <Search className="absolute left-3 h-5 w-5 text-muted-foreground" />
+                    <MagnifyingGlass className="absolute left-3 h-5 w-5 text-muted-foreground" />
                     <Input
                         ref={inputRef}
                         type="text"
@@ -213,7 +213,7 @@ export function AdvancedSearch({
                                         onClick={() => setShowFiltersDropdown(!showFiltersDropdown)}
                                         className="text-sm text-muted-foreground hover:text-foreground"
                                     >
-                                        <Filter className="h-4 w-4 inline mr-1" />
+                                        <Funnel className="h-4 w-4 inline mr-1" />
                                         {showFiltersDropdown ? 'Hide' : 'Show'}
                                     </button>
                                 </div>
@@ -270,7 +270,7 @@ export function AdvancedSearch({
                         {showSuggestions && suggestions.length > 0 && (
                             <div className="p-4 border-b">
                                 <div className="flex items-center mb-2">
-                                    <Sparkles className="h-4 w-4 mr-2 text-primary" />
+                                    <Sparkle className="h-4 w-4 mr-2 text-primary" />
                                     <h3 className="font-semibold text-sm">Suggestions</h3>
                                 </div>
                                 <div className="space-y-1">

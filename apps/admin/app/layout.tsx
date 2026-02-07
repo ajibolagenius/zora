@@ -15,7 +15,7 @@ export default function RootLayout({
 }>) {
     return (
         <html lang="en">
-            <body className="antialiased">
+            <body className="antialiased" suppressHydrationWarning>
                 {/* Skip to content link for keyboard navigation */}
                 <a
                     href="#main-content"
