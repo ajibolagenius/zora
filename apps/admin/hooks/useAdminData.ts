@@ -203,6 +203,22 @@ export function useVendorApplications(status?: string) {
 }
 
 // =============================================================================
+// Order Detail Hook (Admin)
+// =============================================================================
+
+export function useOrderDetail(orderId: string | null) {
+    return useQuery({
+        queryKey: adminQueryKeys.orderDetail(orderId || ''),
+        queryFn: async () => {
+            if (!orderId) throw new Error('No order ID');
+            return ordersService.getById(orderId);
+        },
+        enabled: !!orderId,
+        staleTime: 30 * 1000,
+    });
+}
+
+// =============================================================================
 // All Orders Hook (Admin)
 // =============================================================================
 

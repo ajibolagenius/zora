@@ -14,6 +14,7 @@ export {
     useUpdateOrderStatus,
     useApproveVendorApplication,
     useRejectVendorApplication,
+    useOrderDetail,
     adminQueryKeys,
     type VendorWithProductCount,
 } from './useAdminData';
