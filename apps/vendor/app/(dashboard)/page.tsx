@@ -1,66 +1,32 @@
 "use client";
 
 import { useMemo } from "react";
-import Link from "next/link";
 import { motion } from "framer-motion";
 import {
     Package,
     ShoppingCart,
-    ChartBar,
-    Storefront,
-    CurrencyGbp,
-    Users,
     Clock,
-    TrendUp,
-    ArrowRight,
-    Plus,
-    MapPin,
     ArrowsClockwise,
+    CurrencyGbp,
 } from "@phosphor-icons/react";
 import { Header } from "../../components/Header";
 import {
     StatsCard,
-    Card,
     Button,
-    Badge,
-    Avatar,
-    AvatarFallback,
     staggerContainer,
     staggerItem,
     formatCurrency,
     SkeletonStats,
-    SkeletonCard,
 } from "@zora/ui-web";
 import { useAuth, useVendorStats, useRecentOrders } from "../../hooks";
 import { useVendorRealtime } from "../../providers";
-
-const statusColors = {
-    pending: "warning",
-    confirmed: "info",
-    preparing: "primary",
-    ready: "success",
-    out_for_delivery: "info",
-    delivered: "success",
-    cancelled: "error",
-} as const;
-
-function formatTimeAgo(dateString: string): string {
-    const date = new Date(dateString);
-    const now = new Date();
-    const diffMs = now.getTime() - date.getTime();
-    const diffMins = Math.floor(diffMs / (1000 * 60));
-    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
-    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-
-    if (diffMins < 1) return "Just now";
-    if (diffMins < 60) return `${diffMins} min ago`;
-    if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? "s" : ""} ago`;
-    return `${diffDays} day${diffDays > 1 ? "s" : ""} ago`;
-}
+import { RevenueChart } from "../../components/dashboard/RevenueChart";
+import { RecentOrders } from "../../components/dashboard/RecentOrders";
+import { QuickActions } from "../../components/dashboard/QuickActions";
 
 export default function VendorDashboard() {
     const { vendor, isLoading: authLoading } = useAuth();
-    const { newOrdersCount, isConnected } = useVendorRealtime();
+    const { newOrdersCount } = useVendorRealtime();
 
     // Fetch real data
     const {
@@ -70,9 +36,8 @@ export default function VendorDashboard() {
     } = useVendorStats(vendor?.id ?? null);
 
     const {
-        data: recentOrders,
-        isLoading: ordersLoading,
         refetch: refetchOrders,
+        isLoading: ordersLoading,
     } = useRecentOrders(vendor?.id ?? null, 5);
 
     const isLoading = authLoading || statsLoading || ordersLoading;
@@ -135,7 +100,7 @@ export default function VendorDashboard() {
                 }
             />
 
-            <div className="p-4 sm:p-6 lg:p-8">
+            <div className="p-4 sm:p-6 lg:p-8 space-y-6">
                 {/* Stats Grid */}
                 {isLoading ? (
                     <SkeletonStats />
@@ -144,7 +109,7 @@ export default function VendorDashboard() {
                         variants={staggerContainer}
                         initial="initial"
                         animate="animate"
-                        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8"
+                        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
                     >
                         {statsCards.map((stat) => (
                             <motion.div key={stat.title} variants={staggerItem}>
@@ -161,246 +126,38 @@ export default function VendorDashboard() {
                     </motion.div>
                 )}
 
-                <div className="grid lg:grid-cols-3 gap-8">
-                    {/* Recent Orders */}
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.2 }}
-                        className="lg:col-span-2"
-                    >
-                        <Card padding="none">
-                            <div className="p-6 border-b border-gray-100 flex items-center justify-between">
-                                <div>
-                                    <h2 className="text-lg font-semibold text-gray-900">
-                                        Recent Orders
-                                        {newOrdersCount > 0 && (
-                                            <Badge variant="error" size="sm" className="ml-2">
-                                                {newOrdersCount} new
-                                            </Badge>
-                                        )}
-                                    </h2>
-                                    <p className="text-sm text-gray-500">
-                                        Latest orders requiring attention
-                                    </p>
-                                </div>
-                                <Link href="/orders">
-                                    <Button
-                                        variant="ghost"
-                                        size="sm"
-                                        rightIcon={<ArrowRight size={16} weight="duotone" />}
-                                    >
-                                        View All
-                                    </Button>
-                                </Link>
-                            </div>
-                            <div className="divide-y divide-gray-100">
-                                {ordersLoading ? (
-                                    <div className="p-8 text-center text-gray-500">
-                                        Loading orders...
-                                    </div>
-                                ) : !recentOrders || recentOrders.length === 0 ? (
-                                    <div className="p-8 text-center text-gray-500">
-                                        <ShoppingCart size={48} weight="duotone" className="mx-auto mb-4 text-gray-300" />
-                                        <p>No orders yet</p>
-                                        <p className="text-sm">
-                                            Orders will appear here when customers place them
-                                        </p>
-                                    </div>
-                                ) : (
-                                    recentOrders.map((order, index) => (
-                                        <motion.div
-                                            key={order.id}
-                                            initial={{ opacity: 0, x: -20 }}
-                                            animate={{ opacity: 1, x: 0 }}
-                                            transition={{ delay: 0.1 * index }}
-                                            className="p-4 hover:bg-gray-50 transition-colors cursor-pointer"
-                                        >
-                                            <Link href={`/orders/${order.id}`}>
-                                                <div className="flex items-center justify-between">
-                                                    <div className="flex items-center gap-4">
-                                                        <Avatar size="sm">
-                                                            <AvatarFallback>
-                                                                {(order as any).customer?.full_name
-                                                                    ?.split(" ")
-                                                                    .map((n: string) => n[0])
-                                                                    .join("") || "?"}
-                                                            </AvatarFallback>
-                                                        </Avatar>
-                                                        <div>
-                                                            <p className="font-medium text-gray-900">
-                                                                {(order as any).customer?.full_name || "Customer"}
-                                                            </p>
-                                                            <p className="text-sm text-gray-500">
-                                                                {order.order_number || order.id.slice(0, 8)} •{" "}
-                                                                {(order as any).items?.length || 0} items
-                                                            </p>
-                                                        </div>
-                                                    </div>
-                                                    <div className="text-right">
-                                                        <p className="font-semibold text-gray-900">
-                                                            {formatCurrency(order.total || 0)}
-                                                        </p>
-                                                        <div className="flex items-center gap-2 justify-end mt-1">
-                                                            <Badge
-                                                                variant={
-                                                                    statusColors[
-                                                                    order.status as keyof typeof statusColors
-                                                                    ] || "default"
-                                                                }
-                                                                size="sm"
-                                                            >
-                                                                {order.status?.replace(/_/g, " ")}
-                                                            </Badge>
-                                                            <span className="text-xs text-gray-400">
-                                                                {formatTimeAgo(order.created_at)}
-                                                            </span>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </Link>
-                                        </motion.div>
-                                    ))
-                                )}
-                            </div>
-                        </Card>
-                    </motion.div>
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    {/* Main Content Area (Chart + Orders) */}
+                    <div className="lg:col-span-2 space-y-6">
+                        {/* Revenue Chart */}
+                        <motion.div
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.2 }}
+                        >
+                            <RevenueChart />
+                        </motion.div>
 
-                    {/* Quick Actions */}
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.3 }}
-                    >
-                        <Card>
-                            <h2 className="text-lg font-semibold text-gray-900 mb-4">
-                                Quick Actions
-                            </h2>
-                            <div className="space-y-3">
-                                <Link href="/products/new" className="block">
-                                    <motion.div
-                                        whileHover={{ scale: 1.02, x: 4 }}
-                                        whileTap={{ scale: 0.98 }}
-                                        className="flex items-center gap-3 p-4 bg-primary/5 rounded-xl hover:bg-primary/10 transition-colors"
-                                    >
-                                        <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                                            <Plus size={20} weight="duotone" className="text-primary" />
-                                        </div>
-                                        <div>
-                                            <p className="font-medium text-gray-900">Add New Product</p>
-                                            <p className="text-xs text-gray-500">
-                                                List a new item for sale
-                                            </p>
-                                        </div>
-                                    </motion.div>
-                                </Link>
-                                <Link href="/orders?status=pending" className="block">
-                                    <motion.div
-                                        whileHover={{ scale: 1.02, x: 4 }}
-                                        whileTap={{ scale: 0.98 }}
-                                        className="flex items-center gap-3 p-4 bg-yellow-50 rounded-xl hover:bg-yellow-100 transition-colors"
-                                    >
-                                        <div className="w-10 h-10 rounded-lg bg-yellow-100 flex items-center justify-center">
-                                            <ShoppingCart size={20} weight="duotone" className="text-yellow-600" />
-                                        </div>
-                                        <div>
-                                            <p className="font-medium text-gray-900">Pending Orders</p>
-                                            <p className="text-xs text-gray-500">
-                                                {stats?.pendingOrders || 0} orders awaiting action
-                                            </p>
-                                        </div>
-                                    </motion.div>
-                                </Link>
-                                <Link href="/shop" className="block">
-                                    <motion.div
-                                        whileHover={{ scale: 1.02, x: 4 }}
-                                        whileTap={{ scale: 0.98 }}
-                                        className="flex items-center gap-3 p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors"
-                                    >
-                                        <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center">
-                                            <Storefront size={20} weight="duotone" className="text-gray-600" />
-                                        </div>
-                                        <div>
-                                            <p className="font-medium text-gray-900">
-                                                Update Shop Profile
-                                            </p>
-                                            <p className="text-xs text-gray-500">
-                                                Edit your store details
-                                            </p>
-                                        </div>
-                                    </motion.div>
-                                </Link>
-                                <Link href="/analytics" className="block">
-                                    <motion.div
-                                        whileHover={{ scale: 1.02, x: 4 }}
-                                        whileTap={{ scale: 0.98 }}
-                                        className="flex items-center gap-3 p-4 bg-blue-50 rounded-xl hover:bg-blue-100 transition-colors"
-                                    >
-                                        <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center">
-                                            <ChartBar size={20} weight="duotone" className="text-blue-600" />
-                                        </div>
-                                        <div>
-                                            <p className="font-medium text-gray-900">View Analytics</p>
-                                            <p className="text-xs text-gray-500">
-                                                Track your performance
-                                            </p>
-                                        </div>
-                                    </motion.div>
-                                </Link>
-                                <Link href="/settings" className="block">
-                                    <motion.div
-                                        whileHover={{ scale: 1.02, x: 4 }}
-                                        whileTap={{ scale: 0.98 }}
-                                        className="flex items-center gap-3 p-4 bg-green-50 rounded-xl hover:bg-green-100 transition-colors"
-                                    >
-                                        <div className="w-10 h-10 rounded-lg bg-green-100 flex items-center justify-center">
-                                            <MapPin size={20} weight="duotone" className="text-green-600" />
-                                        </div>
-                                        <div>
-                                            <p className="font-medium text-gray-900">Delivery Settings</p>
-                                            <p className="text-xs text-gray-500">
-                                                Configure delivery options
-                                            </p>
-                                        </div>
-                                    </motion.div>
-                                </Link>
-                            </div>
-                        </Card>
+                        {/* Recent Orders */}
+                        <motion.div
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.3 }}
+                        >
+                            <RecentOrders />
+                        </motion.div>
+                    </div>
 
-                        {/* Performance Summary */}
-                        <Card className="mt-6">
-                            <h2 className="text-lg font-semibold text-gray-900 mb-4">
-                                This Week
-                            </h2>
-                            <div className="space-y-4">
-                                <div className="flex items-center justify-between">
-                                    <span className="text-sm text-gray-600">Orders Completed</span>
-                                    <span className="font-semibold text-gray-900">
-                                        {stats?.weeklyOrders || 0}
-                                    </span>
-                                </div>
-                                <div className="w-full bg-gray-100 rounded-full h-2">
-                                    <motion.div
-                                        initial={{ width: 0 }}
-                                        animate={{
-                                            width: `${Math.min(
-                                                ((stats?.weeklyOrders || 0) / 50) * 100,
-                                                100
-                                            )}%`,
-                                        }}
-                                        transition={{ duration: 1, delay: 0.5 }}
-                                        className="bg-green-500 h-2 rounded-full"
-                                    />
-                                </div>
-                                <div className="flex items-center justify-between">
-                                    <span className="text-sm text-gray-600">Weekly Revenue</span>
-                                    <span className="font-semibold text-gray-900">
-                                        {formatCurrency(stats?.weeklyRevenue || 0)}
-                                    </span>
-                                </div>
-                            </div>
-                        </Card>
-                    </motion.div>
+                    {/* Sidebar Area (Quick Actions + Summary) */}
+                    <div className="space-y-6">
+                        <motion.div
+                            initial={{ opacity: 0, x: 20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: 0.4 }}
+                        >
+                            <QuickActions />
+                        </motion.div>
+                    </div>
                 </div>
             </div>
         </>
