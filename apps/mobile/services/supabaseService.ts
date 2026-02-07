@@ -14,6 +14,7 @@ import type { Vendor as MockVendor, Product as MockProduct } from './mockDataSer
 import { encodeProductSlug } from '../lib/slugUtils';
 import { Platform } from 'react-native';
 import { getVendorImagesWithFallback } from '../lib/vendorImageUtils';
+import { qrCodeGenerator } from './qrCodeService';
 
 /**
  * Safely gets the Supabase client's from method
@@ -761,7 +762,7 @@ export const orderService = {
     const { data, error } = await fromMethod('orders')
       .insert({
         ...orderData,
-        qr_code: `QR_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        qr_code: qrCodeGenerator.generateOrderQR(orderData.id || `temp_${Date.now()}`),
       })
       .select()
       .single();
@@ -826,15 +827,52 @@ export const orderService = {
   },
 
   verifyQRCode: async (qrCode: string): Promise<Order | null> => {
+    let searchCode = qrCode;
+    let orderIdFromQr = null;
+
+    // Check if it's a Zora Market URL and extract ID
+    if (qrCode.startsWith('zoramarket://')) {
+      try {
+        const url = qrCode.replace('zoramarket://', '');
+        const [path] = url.split('?');
+        const [type, id] = path.split('/');
+
+        if (type === 'order' && id) {
+          orderIdFromQr = id;
+        }
+      } catch (e) {
+        console.warn('Failed to parse QR URI in service:', e);
+      }
+    }
+
     if (!isSupabaseConfigured()) {
-      return (mockDatabase.orders as any[])?.find(o => o.qr_code === qrCode || o.qr_code_token === qrCode) || null;
+      return (mockDatabase.orders as any[])?.find(o =>
+        o.qr_code === qrCode ||
+        o.qr_code_token === qrCode ||
+        (orderIdFromQr && o.id === orderIdFromQr)
+      ) || null;
     }
 
     const fromMethod = await getSupabaseFrom();
     if (!fromMethod) {
-      return (mockDatabase.orders as any[])?.find(o => o.qr_code === qrCode || o.qr_code_token === qrCode) || null;
+      return (mockDatabase.orders as any[])?.find(o =>
+        o.qr_code === qrCode ||
+        o.qr_code_token === qrCode ||
+        (orderIdFromQr && o.id === orderIdFromQr)
+      ) || null;
     }
 
+    // If we extracted an ID, try fetching by ID directly first (most reliable)
+    if (orderIdFromQr) {
+      const { data } = await fromMethod('orders')
+        .select('*')
+        .eq('id', orderIdFromQr)
+        .single();
+
+      if (data) return data;
+    }
+
+    // Fallback to strict code match
     const { data } = await fromMethod('orders')
       .select('*')
       .eq('qr_code', qrCode)

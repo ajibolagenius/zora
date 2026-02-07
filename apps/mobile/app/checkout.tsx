@@ -199,7 +199,24 @@ export default function CheckoutScreen() {
     }, [loading]);
 
     const handleContinue = () => {
-        router.push('/payment');
+        // Find the selected address object
+        const addressToPass = addresses.find(a => a.id === selectedAddress);
+
+        // Find selected date and time
+        const dateOption = dates[selectedDate];
+        const timeSlotOption = TIME_SLOTS.find(t => t.id === selectedTimeSlot);
+
+        const params = {
+            deliveryMode: activeTab,
+            address: addressToPass ? JSON.stringify(addressToPass) : undefined,
+            date: dateOption ? JSON.stringify(dateOption) : undefined,
+            timeSlot: timeSlotOption ? JSON.stringify(timeSlotOption) : undefined,
+        };
+
+        router.push({
+            pathname: '/payment',
+            params
+        });
     };
 
     const estimatedTotal = total || 124.50;

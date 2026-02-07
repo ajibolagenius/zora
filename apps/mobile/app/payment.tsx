@@ -12,7 +12,7 @@ import {
     Easing,
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import {
     ArrowLeft,
     ArrowRight,
@@ -40,6 +40,13 @@ type PaymentMethodType = 'card' | 'apple_pay' | 'google_pay';
 
 export default function PaymentScreen() {
     const router = useRouter();
+    // Get params from router
+    const params = useLocalSearchParams();
+    const deliveryMode = (params.deliveryMode as string) || 'delivery';
+    const addressParam = params.address ? JSON.parse(params.address as string) : null;
+    const dateParam = params.date ? JSON.parse(params.date as string) : null;
+    const timeSlotParam = params.timeSlot ? JSON.parse(params.timeSlot as string) : null;
+
     const insets = useSafeAreaInsets();
     const { items, subtotal, total, deliveryFee, serviceFee, discount, clearCart } = useCartStore();
     const { user } = useAuthStore();
@@ -93,7 +100,12 @@ export default function PaymentScreen() {
                     quantity: item.quantity,
                     price: item.product?.price || 0,
                 })),
-                shippingAddress: {
+                shippingAddress: addressParam ? {
+                    line1: addressParam.address,
+                    city: 'London', // In real app, parse this from address string
+                    postalCode: '',
+                    country: 'GB',
+                } : {
                     line1: '123 Zora Lane, Apartment 4B',
                     city: 'London',
                     postalCode: 'SE1 7PB',
@@ -152,10 +164,10 @@ export default function PaymentScreen() {
                             items: items.map(item => ({
                                 product_id: item.product_id,
                                 vendor_id: item.vendor_id,
-                                name: item.product?.name || item.name || 'Unknown Product',
-                                image_url: item.product?.image_url || item.product?.image_urls?.[0] || '',
+                                name: item.product?.name || 'Unknown Product',
+                                image_url: item.product?.image_url || item.product?.images?.[0] || '',
                                 quantity: item.quantity,
-                                price: item.product?.price || item.price || 0,
+                                price: item.product?.price || 0,
                             })),
                             subtotal: subtotal || 0,
                             delivery_fee: deliveryFee || 0,
@@ -163,12 +175,25 @@ export default function PaymentScreen() {
                             discount: discount || (useZoraCredit ? zoraCredit : 0),
                             total: finalTotal,
                             payment_method: selectedMethod === 'card' ? 'card' : selectedMethod,
-                            delivery_address: {
-                                // Default address - in production, get from user's saved addresses
+                            delivery_address: addressParam ? {
+                                id: addressParam.id,
+                                user_id: user.user_id,
+                                label: addressParam.label || 'Delivery Address',
+                                line1: addressParam.line1 || addressParam.address || '',
+                                line2: addressParam.line2,
+                                city: addressParam.city || 'London',
+                                postcode: addressParam.postcode || 'SE1 7PB',
+                                country: addressParam.country || 'GB',
+                                is_default: !!addressParam.is_default
+                            } : {
+                                id: 'temp_addr_' + Date.now(),
+                                user_id: user.user_id,
+                                label: 'Home',
                                 line1: '123 Zora Lane',
                                 city: 'London',
-                                postalCode: 'SE1 7PB',
+                                postcode: 'SE1 7PB',
                                 country: 'GB',
+                                is_default: false
                             },
                         };
 
@@ -258,6 +283,7 @@ export default function PaymentScreen() {
             name: 'Credit or Debit Card',
             subtitle: undefined,
             available: true,
+            bgColor: undefined as string | undefined, // Fix missing property type
         },
         ...(applePayMethod
             ? [
@@ -266,6 +292,7 @@ export default function PaymentScreen() {
                     name: 'Apple Pay',
                     subtitle: undefined,
                     available: applePayMethod.available,
+                    bgColor: '#000000',
                 },
             ]
             : []),
@@ -276,6 +303,7 @@ export default function PaymentScreen() {
                     name: 'Google Pay',
                     subtitle: undefined,
                     available: googlePayMethod.available,
+                    bgColor: '#FFFFFF',
                 },
             ]
             : []),

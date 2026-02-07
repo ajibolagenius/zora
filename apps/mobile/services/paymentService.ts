@@ -58,14 +58,14 @@ export const stripeService = {
       console.warn('Stripe is not configured. Payment will use mock mode.');
       return false;
     }
-    
+
     // In a real app, you would initialize the Stripe SDK here
     // import { initStripe } from '@stripe/stripe-react-native';
     // await initStripe({ publishableKey: STRIPE_PUBLISHABLE_KEY });
-    
+
     return true;
   },
-  
+
   // Create a payment intent (should call your backend)
   createPaymentIntent: async (data: OrderPaymentData): Promise<PaymentIntent> => {
     if (!isStripeConfigured()) {
@@ -78,7 +78,7 @@ export const stripeService = {
         status: 'requires_payment_method',
       };
     }
-    
+
     // In production, call your backend to create the payment intent
     // const response = await fetch('/api/payments/create-intent', {
     //   method: 'POST',
@@ -86,17 +86,17 @@ export const stripeService = {
     //   body: JSON.stringify(data),
     // });
     // return response.json();
-    
+
     // Mock for demo
     return {
       id: `pi_${Date.now()}`,
-      clientSecret: `pi_${Date.now()}_secret_${Math.random().toString(36).substr(2, 9)}`,
+      clientSecret: `pi_${Date.now()}_secret_${data.orderId}_${Math.random().toString(36).substr(2, 9)}`,
       amount: Math.round(data.amount * 100),
       currency: data.currency,
       status: 'requires_payment_method',
     };
   },
-  
+
   // Confirm card payment
   confirmCardPayment: async (
     clientSecret: string,
@@ -115,14 +115,14 @@ export const stripeService = {
         paymentIntentId: clientSecret.split('_secret_')[0],
       };
     }
-    
+
     // In production, use the Stripe SDK
     // import { confirmPayment } from '@stripe/stripe-react-native';
     // const { paymentIntent, error } = await confirmPayment(clientSecret, {
     //   paymentMethodType: 'Card',
     //   paymentMethodData: { billingDetails: {} },
     // });
-    
+
     // Mock for demo
     await new Promise(resolve => setTimeout(resolve, 1500));
     return {
@@ -130,7 +130,7 @@ export const stripeService = {
       paymentIntentId: clientSecret.split('_secret_')[0],
     };
   },
-  
+
   // Apple Pay
   confirmApplePay: async (
     clientSecret: string,
@@ -139,7 +139,7 @@ export const stripeService = {
     if (Platform.OS !== 'ios') {
       return { success: false, error: 'Apple Pay is only available on iOS' };
     }
-    
+
     if (!isStripeConfigured()) {
       await new Promise(resolve => setTimeout(resolve, 1000));
       return {
@@ -147,17 +147,17 @@ export const stripeService = {
         paymentIntentId: clientSecret.split('_secret_')[0],
       };
     }
-    
+
     // In production, use Stripe Apple Pay
     // import { presentApplePay, confirmApplePayPayment } from '@stripe/stripe-react-native';
-    
+
     await new Promise(resolve => setTimeout(resolve, 1000));
     return {
       success: true,
       paymentIntentId: clientSecret.split('_secret_')[0],
     };
   },
-  
+
   // Google Pay
   confirmGooglePay: async (
     clientSecret: string
@@ -165,7 +165,7 @@ export const stripeService = {
     if (Platform.OS !== 'android') {
       return { success: false, error: 'Google Pay is only available on Android' };
     }
-    
+
     if (!isStripeConfigured()) {
       await new Promise(resolve => setTimeout(resolve, 1000));
       return {
@@ -173,10 +173,10 @@ export const stripeService = {
         paymentIntentId: clientSecret.split('_secret_')[0],
       };
     }
-    
+
     // In production, use Stripe Google Pay
     // import { presentGooglePay, confirmGooglePayPayment } from '@stripe/stripe-react-native';
-    
+
     await new Promise(resolve => setTimeout(resolve, 1000));
     return {
       success: true,
@@ -204,7 +204,7 @@ export const paymentService = {
         description: 'Visa, Mastercard, Amex',
       },
     ];
-    
+
     // Apple Pay (iOS only)
     if (Platform.OS === 'ios') {
       methods.push({
@@ -212,9 +212,10 @@ export const paymentService = {
         name: 'Apple Pay',
         icon: 'apple',
         available: true,
+        description: 'Apple Pay',
       });
     }
-    
+
     // Google Pay (Android only)
     if (Platform.OS === 'android') {
       methods.push({
@@ -222,12 +223,13 @@ export const paymentService = {
         name: 'Google Pay',
         icon: 'google',
         available: true,
+        description: 'Google Pay',
       });
     }
-    
+
     return methods;
   },
-  
+
   // Process payment with selected method
   processPayment: async (
     method: PaymentMethod,
@@ -238,15 +240,15 @@ export const paymentService = {
       case 'card':
         const paymentIntent = await stripeService.createPaymentIntent(data);
         return stripeService.confirmCardPayment(paymentIntent.clientSecret, paymentDetails);
-        
+
       case 'apple_pay':
         const appleIntent = await stripeService.createPaymentIntent(data);
         return stripeService.confirmApplePay(appleIntent.clientSecret, 'Zora African Market');
-        
+
       case 'google_pay':
         const googleIntent = await stripeService.createPaymentIntent(data);
         return stripeService.confirmGooglePay(googleIntent.clientSecret);
-        
+
       default:
         return { success: false, error: 'Invalid payment method' };
     }
