@@ -2,9 +2,11 @@
 
 // User Types
 export interface User {
-  user_id: string;
+  id: string;
+  user_id?: string; // Supabase auth ID
   email: string;
   name: string;
+  full_name?: string;
   picture?: string;
   phone?: string;
   membership_tier: 'bronze' | 'silver' | 'gold' | 'platinum';
@@ -12,7 +14,7 @@ export interface User {
   loyalty_points: number;
   referral_code?: string;
   cultural_interests: string[];
-  created_at: string;
+  created_at?: string;
 }
 
 // Address Types
@@ -40,10 +42,13 @@ export interface OpeningHours {
 export interface Vendor {
   id: string;
   name: string;
+  shop_name?: string; // Alias for name, used in some legacy components
   description: string;
   cover_image: string;
+  cover_image_url?: string; // Alias for cover_image
   logo_url: string;
   category: string;
+  categories?: string[];
   regions: string[];
   rating: number;
   review_count: number;
@@ -51,11 +56,16 @@ export interface Vendor {
   tag?: string;
   distance?: string;
   delivery_time: string;
+  delivery_time_min?: number;
+  delivery_time_max?: number;
   delivery_fee: number;
   min_order: number;
   address?: string;
   opening_hours: OpeningHours[];
   is_open: boolean;
+  status?: string;
+  statusColor?: string;
+  cultural_specialties?: string[];
 }
 
 // Product Types
@@ -172,6 +182,29 @@ export interface Order {
   created_at: string;
   estimated_delivery?: string;
   actual_delivery?: string;
+  qr_code?: string;
+}
+
+export interface PromoCode {
+  id: string;
+  code: string;
+  discount_type: 'percentage' | 'fixed' | 'free_delivery';
+  type?: 'percentage' | 'fixed' | 'free_delivery'; // Alias for discount_type
+  discount_value: number;
+  value?: number; // Alias for discount_value
+  min_order_amount?: number;
+  min_order?: number; // Alias for min_order_amount
+  max_discount_amount?: number;
+  start_date?: string;
+  valid_from?: string; // Alias for start_date
+  end_date?: string;
+  valid_until?: string; // Alias for end_date
+  is_active: boolean;
+  created_at?: string;
+  usage_limit?: number;
+  max_uses?: number; // Alias for usage_limit
+  usage_count: number;
+  current_uses?: number; // Alias for usage_count
 }
 
 // Review Types
@@ -180,11 +213,17 @@ export interface Review {
   user_id: string;
   user_name: string;
   user_picture?: string;
+  user_avatar?: string; // Alias for user_picture
   product_id?: string;
   vendor_id?: string;
   rating: number;
   comment: string;
+  content?: string; // Alias for comment
+  title?: string;
   created_at: string;
+  helpful_count?: number;
+  verified_purchase?: boolean;
+  images?: string[];
 }
 
 // Region Types

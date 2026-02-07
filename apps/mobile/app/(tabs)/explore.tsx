@@ -61,27 +61,43 @@ export default function ExploreScreen() {
     const [vendors, setVendors] = useState<ReturnType<typeof transformVendorForDisplay>[]>([]);
     const [loading, setLoading] = useState(true);
 
+    const [page, setPage] = useState(1);
+    const [hasMore, setHasMore] = useState(true);
+    const [isFetchingMore, setIsFetchingMore] = useState(false);
+
     // Animation values
     const fadeAnim = useRef(new Animated.Value(0)).current;
     const slideAnim = useRef(new Animated.Value(30)).current;
 
-    const fetchVendors = async () => {
+    const fetchVendors = async (pageNumber = 1) => {
         try {
-            setLoading(true);
-            let vendorData: MockVendor[];
+            if (pageNumber === 1) setLoading(true);
+            else setIsFetchingMore(true);
 
-            if (isSupabaseConfigured()) {
-                vendorData = (await supabaseVendorService.getAll()) as unknown as MockVendor[];
+            // supabaseVendorService handles both real and mock data with pagination now
+            const vendorData = (await supabaseVendorService.getAll({ page: pageNumber, limit: 20 })) as unknown as MockVendor[];
+            const transformedVendors = vendorData.map(transformVendorForDisplay);
+
+            if (pageNumber === 1) {
+                setVendors(transformedVendors);
             } else {
-                vendorData = mockVendorService.getAll();
+                setVendors(prev => [...prev, ...transformedVendors]);
             }
 
-            const transformedVendors = vendorData.map(transformVendorForDisplay);
-            setVendors(transformedVendors);
+            // If we got fewer items than requested, we've reached the end
+            setHasMore(vendorData.length >= 20);
+            setPage(pageNumber);
         } catch (error) {
             console.error('Error fetching vendors:', error);
         } finally {
             setLoading(false);
+            setIsFetchingMore(false);
+        }
+    };
+
+    const loadMoreVendors = () => {
+        if (!isFetchingMore && hasMore) {
+            fetchVendors(page + 1);
         }
     };
 
@@ -92,9 +108,20 @@ export default function ExploreScreen() {
         const unsubscribers: (() => void)[] = [];
 
         if (isSupabaseConfigured()) {
-            realtimeService.subscribeToTable('vendors', '*', async () => {
-                // Refresh vendors when database changes
-                await fetchVendors();
+            realtimeService.subscribeToTable('vendors', '*', (payload: any) => {
+                if (payload.eventType === 'UPDATE') {
+                    // Optimistically update the specific vendor in the list
+                    // This prevents a full re-fetch which is expensive
+                    setVendors(prev => prev.map(v =>
+                        v.id === payload.new.id
+                            ? transformVendorForDisplay(payload.new as MockVendor)
+                            : v
+                    ));
+                } else if (payload.eventType === 'INSERT' || payload.eventType === 'DELETE') {
+                    // For inserts/deletes, we might need to refresh, but let's be conservative
+                    // and only refresh if it's substantial, or maybe just ignore for now to avoid jumping UI
+                    // Optionally, we could show a "New vendors available" toast
+                }
             }).then((unsub) => {
                 if (unsub) unsubscribers.push(unsub);
             });
@@ -291,6 +318,8 @@ export default function ExploreScreen() {
                             estimatedItemSize={100}
                             showsVerticalScrollIndicator={false}
                             contentContainerStyle={styles.vendorsListContent}
+                            onEndReached={loadMoreVendors}
+                            onEndReachedThreshold={0.5}
                             renderItem={({ item: vendor }) => (
                                 <TouchableOpacity
                                     key={vendor.id}
