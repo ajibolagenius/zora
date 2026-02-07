@@ -337,10 +337,11 @@ export function useUpdateOrderStatus() {
         }) => {
             return ordersService.updateStatus(orderId, status);
         },
-        onSuccess: () => {
+        onSuccess: (_, variables) => {
             queryClient.invalidateQueries({ queryKey: ['admin', 'orders'] });
             queryClient.invalidateQueries({ queryKey: ['admin', 'recentOrders'] });
             queryClient.invalidateQueries({ queryKey: ['admin', 'stats'] });
+            queryClient.invalidateQueries({ queryKey: ['admin', 'order', variables.orderId] });
         },
     });
 }

@@ -11,7 +11,7 @@ import {
     Clock,
     CheckCircle,
 } from "@phosphor-icons/react";
-import { Header } from "../../components/Header";
+import { Header } from "../../../components/Header";
 import {
     Button,
     Card,
@@ -26,9 +26,9 @@ import {
     AvatarFallback,
     EmptyState,
 } from "@zora/ui-web";
-import { DeliveryStats } from "../../components/delivery/DeliveryStats";
-import { CourierBookingDialog } from "../../components/orders/CourierBookingDialog";
-import { useAllOrders, useUpdateOrderStatus } from "../../hooks/useAdminData";
+import { DeliveryStats } from "../../../components/delivery/DeliveryStats";
+import { CourierBookingDialog } from "../../../components/orders/CourierBookingDialog";
+import { useAllOrders, useUpdateOrderStatus } from "../../../hooks/useAdminData";
 import { Order, OrderStatus } from "@zora/types";
 
 export default function DeliveryPage() {
@@ -205,13 +205,15 @@ export default function DeliveryPage() {
 
                 <Tabs value={activeTab} onValueChange={setActiveTab}>
                     <TabsList className="mb-6">
-                        <TabsTrigger value="ready_for_pickup" icon={<Package size={16} />}>
+                        <TabsTrigger value="ready_for_pickup" className="gap-2">
+                            <Package size={16} />
                             Ready for Pickup
                             {stats.readyForPickup > 0 && (
                                 <Badge variant="primary" size="sm" className="ml-2">{stats.readyForPickup}</Badge>
                             )}
                         </TabsTrigger>
-                        <TabsTrigger value="in_transit" icon={<Truck size={16} />}>
+                        <TabsTrigger value="in_transit" className="gap-2">
+                            <Truck size={16} />
                             In Transit
                             {stats.inTransit > 0 && (
                                 <Badge variant="info" size="sm" className="ml-2">{stats.inTransit}</Badge>

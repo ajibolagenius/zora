@@ -285,11 +285,17 @@ export default function AdminOrderDetailPage() {
                                     <p className="font-medium text-gray-900">
                                         {(order as any).vendor?.shop_name || "Unknown Vendor"}
                                     </p>
-                                    <Link href={`/vendors/${(order as any).vendor?.id}`}>
-                                        <Button variant="link" size="sm" className="h-auto p-0 mt-1">
-                                            View Vendor
-                                        </Button>
-                                    </Link>
+                                    {(order as any).vendor?.id ? (
+                                        <Link href={`/vendors/${(order as any).vendor?.id}`}>
+                                            <Button variant="link" size="sm" className="h-auto p-0 mt-1">
+                                                View Vendor
+                                            </Button>
+                                        </Link>
+                                    ) : (
+                                        <span className="text-xs text-gray-400 mt-1 block">
+                                            Vendor details unavailable
+                                        </span>
+                                    )}
                                 </div>
                             </div>
                         </Card>
