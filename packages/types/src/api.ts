@@ -44,7 +44,7 @@ export interface FilterParams {
 export type ProductQueryParams = PaginationParams & SortParams & FilterParams;
 
 export interface OrderQueryParams extends PaginationParams {
-    status?: string;
+    status?: string | string[];
     startDate?: string;
     endDate?: string;
 }
