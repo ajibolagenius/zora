@@ -5,7 +5,6 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Colors } from '../../constants/colors';
 
 import { PHOSPHOR_ICON_MAP } from '@zora/shared';
-// ... (imports)
 
 // Map of common icon names to Phosphor icon components
 // Moved to @zora/shared
@@ -47,9 +46,9 @@ export const Icon: React.FC<IconProps> = ({
   // Check if we have a Phosphor mapping for this icon
   const phosphorName = PHOSPHOR_ICON_MAP[name] || PHOSPHOR_ICON_MAP[name.replace('-outline', '')];
 
-  if (phosphorName && PhosphorIcons[phosphorName]) {
+  if (phosphorName && (PhosphorIcons as any)[phosphorName]) {
     // eslint-disable-next-line import/namespace
-    const PhosphorIcon = PhosphorIcons[phosphorName] as React.ComponentType<any>;
+    const PhosphorIcon = (PhosphorIcons as any)[phosphorName] as React.ComponentType<any>;
     return (
       <View style={style}>
         <PhosphorIcon

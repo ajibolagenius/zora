@@ -226,9 +226,6 @@ export function QRDisplay({ data, type, title, size = 200, className, showAction
         return <div className="text-gray-500">Unknown or invalid QR code type</div>;
     };
 
-    // ... render return block stays mostly the same but just replace usage of logic ...
-    // Wait, the ReplacementContent must encompass the whole file or strict block.
-    // I'll replace the whole file content to be safe and clean.
 
     return (
         <div className={cn("inline-block", className)}>
