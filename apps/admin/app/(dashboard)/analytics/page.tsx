@@ -14,6 +14,7 @@ import {
     DownloadSimple,
     ArrowUpRight,
     Globe,
+    WarningCircle,
 } from "@phosphor-icons/react";
 import { Header } from "../../../components/Header";
 import {
@@ -21,50 +22,80 @@ import {
     Button,
     Badge,
     formatCurrency,
+    SkeletonCard,
+    EmptyState,
 } from "@zora/ui-web";
-
-// Mock analytics data
-const overviewStats = [
-    { title: "Total Revenue", value: "£124,589", change: 12.5, icon: CurrencyGbp, color: "from-green-500 to-green-600" },
-    { title: "Total Orders", value: "3,847", change: 8.2, icon: ShoppingCart, color: "from-blue-500 to-blue-600" },
-    { title: "Active Customers", value: "12,456", change: 15.3, icon: Users, color: "from-purple-500 to-purple-600" },
-    { title: "Active Vendors", value: "128", change: 5.1, icon: Package, color: "from-orange-500 to-orange-600" },
-];
-
-const topProducts = [
-    { name: "Jollof Rice Spice Mix", sales: 1234, revenue: 7398.66 },
-    { name: "Suya Pepper Blend", sales: 987, revenue: 6400.63 },
-    { name: "Palm Oil (1L)", sales: 856, revenue: 7695.44 },
-    { name: "Egusi Seeds (500g)", sales: 743, revenue: 3707.57 },
-    { name: "Plantain Chips", sales: 698, revenue: 2436.02 },
-];
-
-const topVendors = [
-    { name: "African Spice House", orders: 456, revenue: 12345.67 },
-    { name: "Nigerian Delights", orders: 389, revenue: 10234.56 },
-    { name: "West African Foods", orders: 312, revenue: 8765.43 },
-    { name: "Lagos Street Food", orders: 287, revenue: 7654.32 },
-    { name: "Mama Africa Store", orders: 234, revenue: 6543.21 },
-];
-
-const regionStats = [
-    { region: "West Africa", percentage: 45, color: "bg-orange-500" },
-    { region: "East Africa", percentage: 25, color: "bg-green-500" },
-    { region: "North Africa", percentage: 15, color: "bg-blue-500" },
-    { region: "Southern Africa", percentage: 10, color: "bg-purple-500" },
-    { region: "Central Africa", percentage: 5, color: "bg-pink-500" },
-];
-
-const recentActivity = [
-    { type: "order", message: "New order #ORD-4523 from Sarah J.", time: "2 min ago" },
-    { type: "vendor", message: "Lagos Kitchen joined the platform", time: "15 min ago" },
-    { type: "review", message: "5-star review on Jollof Spice Mix", time: "32 min ago" },
-    { type: "order", message: "Order #ORD-4522 delivered", time: "1 hour ago" },
-    { type: "milestone", message: "Revenue milestone: £100K this month!", time: "2 hours ago" },
-];
+import { useSystemAnalytics } from "../../../hooks";
 
 export default function AnalyticsPage() {
     const [dateRange, setDateRange] = useState("7d");
+    const { data: analytics, isLoading, isError, refetch } = useSystemAnalytics(dateRange);
+
+    if (isLoading) {
+        return (
+            <>
+                <Header title="Analytics" description="Platform performance insights" />
+                <div className="p-4 sm:p-6 lg:p-8 space-y-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                        {[1, 2, 3, 4].map((i) => (
+                            <SkeletonCard key={i} />
+                        ))}
+                    </div>
+                    <SkeletonCard />
+                </div>
+            </>
+        );
+    }
+
+    if (isError || !analytics) {
+        return (
+            <>
+                <Header title="Analytics" description="Platform performance insights" />
+                <div className="p-4 sm:p-6 lg:p-8">
+                    <EmptyState
+                        icon={WarningCircle}
+                        title="Failed to load analytics"
+                        description="There was a problem loading the analytics data. Please try again."
+                        action={{
+                            label: "Retry",
+                            onClick: () => refetch()
+                        }}
+                    />
+                </div>
+            </>
+        );
+    }
+
+    const overviewStats = [
+        {
+            title: "Total Revenue",
+            value: formatCurrency(analytics.overview.totalRevenue),
+            change: analytics.overview.revenueChange,
+            icon: CurrencyGbp,
+            color: "from-green-500 to-green-600"
+        },
+        {
+            title: "Total Orders",
+            value: analytics.overview.totalOrders.toLocaleString(),
+            change: analytics.overview.ordersChange,
+            icon: ShoppingCart,
+            color: "from-blue-500 to-blue-600"
+        },
+        {
+            title: "Active Customers",
+            value: analytics.overview.activeCustomers.toLocaleString(),
+            change: analytics.overview.customersChange,
+            icon: Users,
+            color: "from-purple-500 to-purple-600"
+        },
+        {
+            title: "Active Vendors",
+            value: analytics.overview.activeVendors.toLocaleString(),
+            change: analytics.overview.vendorsChange,
+            icon: Package,
+            color: "from-orange-500 to-orange-600"
+        },
+    ];
 
     return (
         <>
@@ -142,7 +173,7 @@ export default function AnalyticsPage() {
                                 <h3 className="text-lg font-semibold text-gray-900">Revenue Overview</h3>
                                 <Badge variant="success">
                                     <TrendUp size={12} weight="duotone" className="mr-1" />
-                                    +12.5%
+                                    +{analytics.overview.revenueChange}%
                                 </Badge>
                             </div>
                             <div className="h-64 bg-gray-50 rounded-xl flex items-center justify-center">
@@ -167,7 +198,7 @@ export default function AnalyticsPage() {
                                 <h3 className="text-lg font-semibold text-gray-900">Sales by Region</h3>
                             </div>
                             <div className="space-y-4">
-                                {regionStats.map((region) => (
+                                {analytics.regionStats.map((region) => (
                                     <div key={region.region}>
                                         <div className="flex justify-between text-sm mb-1">
                                             <span className="text-gray-700">{region.region}</span>
@@ -203,7 +234,7 @@ export default function AnalyticsPage() {
                                 </Button>
                             </div>
                             <div className="space-y-4">
-                                {topProducts.map((product, index) => (
+                                {analytics.topProducts.map((product, index) => (
                                     <div key={product.name} className="flex items-center justify-between">
                                         <div className="flex items-center gap-3">
                                             <span className="w-6 h-6 bg-gray-100 rounded-full flex items-center justify-center text-xs font-medium text-gray-600">
@@ -235,7 +266,7 @@ export default function AnalyticsPage() {
                                 </Button>
                             </div>
                             <div className="space-y-4">
-                                {topVendors.map((vendor, index) => (
+                                {analytics.topVendors.map((vendor, index) => (
                                     <div key={vendor.name} className="flex items-center justify-between">
                                         <div className="flex items-center gap-3">
                                             <span className="w-6 h-6 bg-primary/10 rounded-full flex items-center justify-center text-xs font-medium text-primary">
@@ -262,7 +293,7 @@ export default function AnalyticsPage() {
                         <Card>
                             <h3 className="text-lg font-semibold text-gray-900 mb-4">Recent Activity</h3>
                             <div className="space-y-4">
-                                {recentActivity.map((activity, index) => (
+                                {analytics.recentActivity.map((activity, index) => (
                                     <div key={index} className="flex items-start gap-3">
                                         <div className={`w-2 h-2 rounded-full mt-2 ${activity.type === "order" ? "bg-blue-500" :
                                             activity.type === "vendor" ? "bg-green-500" :

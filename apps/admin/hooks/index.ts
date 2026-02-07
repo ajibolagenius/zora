@@ -18,3 +18,4 @@ export {
     adminQueryKeys,
     type VendorWithProductCount,
 } from './useAdminData';
+export { useSystemAnalytics, type SystemAnalytics } from './useSystemAnalytics';
