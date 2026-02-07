@@ -73,7 +73,7 @@ export default function DashboardLayout({
 }: {
     children: React.ReactNode;
 }) {
-    const { vendor, isLoading } = useAuth();
+    const { vendor, user, isLoading } = useAuth();
 
     if (isLoading) {
         return (
@@ -87,6 +87,7 @@ export default function DashboardLayout({
         <QueryClientProvider client={queryClient}>
             <VendorRealtimeProvider
                 vendorId={vendor?.id ?? null}
+                userId={user?.id ?? null}
                 enabled={!!vendor?.id}
                 onNewOrder={(order) => {
                     console.log("[Vendor] New order received:", order.id);

@@ -50,6 +50,8 @@ interface VendorRealtimeProviderProps {
     children: React.ReactNode;
     /** Vendor ID to subscribe to */
     vendorId: string | null;
+    /** User ID to subscribe to notifications */
+    userId: string | null;
     /** Whether realtime is enabled */
     enabled?: boolean;
     /** Callback when new order is received */
@@ -61,6 +63,7 @@ interface VendorRealtimeProviderProps {
 export function VendorRealtimeProvider({
     children,
     vendorId,
+    userId,
     enabled = true,
     onNewOrder,
     onProductUpdate,
@@ -173,15 +176,18 @@ export function VendorRealtimeProvider({
         });
 
         // Subscribe to notifications
-        const notificationsSub = RealtimeManager.subscribe({
-            table: 'notifications',
-            filter: `user_id=eq.${vendorId}`,
-            onInsert: () => {
-                queryClient.invalidateQueries({ queryKey: ['vendor', 'notifications'] });
-            },
-        });
+        let notificationsSub: SubscriptionHandle | null = null;
+        if (userId) {
+            notificationsSub = RealtimeManager.subscribe({
+                table: 'notifications',
+                filter: `user_id=eq.${userId}`,
+                onInsert: () => {
+                    queryClient.invalidateQueries({ queryKey: ['vendor', 'notifications'] });
+                },
+            });
+        }
 
-        subscriptionsRef.current = [ordersSub, productsSub, notificationsSub];
+        subscriptionsRef.current = [ordersSub, productsSub, ...(notificationsSub ? [notificationsSub] : [])];
 
         // Cleanup
         return () => {
@@ -192,6 +198,7 @@ export function VendorRealtimeProvider({
     }, [
         enabled,
         vendorId,
+        userId,
         handleNewOrder,
         handleOrderUpdate,
         handleProductUpdate,

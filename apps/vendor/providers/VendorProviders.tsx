@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { VendorRealtimeProvider } from './VendorRealtimeProvider';
-import { useVendorId } from '../hooks/useAuth';
+import { useAuth, useVendorId } from '../hooks/useAuth';
 
 export function VendorProviders({ children }: { children: React.ReactNode }) {
     // Create a client for the provider
@@ -23,10 +23,11 @@ export function VendorProviders({ children }: { children: React.ReactNode }) {
 
     // Get vendor ID for realtime subscriptions
     const vendorId = useVendorId();
+    const { user } = useAuth();
 
     return (
         <QueryClientProvider client={queryClient}>
-            <VendorRealtimeProvider vendorId={vendorId}>
+            <VendorRealtimeProvider vendorId={vendorId} userId={user?.id ?? null}>
                 {children}
             </VendorRealtimeProvider>
         </QueryClientProvider>
