@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useRef, useMemo, useCallback } from 'react';
+import { FlashList } from '@shopify/flash-list';
 import {
     View,
     Text,
@@ -56,7 +57,7 @@ export default function HomeScreen() {
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedRegion, setSelectedRegion] = useState<string | null>(null);
     const [userLocation, setUserLocation] = useState<{ city: string; postcode: string } | null>(null);
-    const [allProducts, setAllProducts] = useState<any[]>([]);
+    const [allProducts, setAllProducts] = useState<Product[]>([]);
     const [loadingMore, setLoadingMore] = useState(false);
     const [hasMoreProducts, setHasMoreProducts] = useState(true);
     const [productOffset, setProductOffset] = useState(0);
@@ -309,110 +310,147 @@ export default function HomeScreen() {
             : allProducts;
     }, [allProducts, selectedRegion]);
 
-    // Memoize product card render to prevent unnecessary re-renders
-    const renderProductCard = useCallback((product: Product, index: number) => {
+    const renderProductItem = useCallback(({ item, index }: { item: Product; index: number }) => {
+        // Calculate margin for the right column items
+        const isRightColumn = index % 2 !== 0;
+
         return (
             <View
-                key={`product-${product.id}`}
                 style={{
                     width: productCardWidth,
-                    marginRight: index % 2 === 0 ? PRODUCT_GAP : 0,
+                    marginLeft: isRightColumn ? PRODUCT_GAP : 0,
                     marginBottom: PRODUCT_GAP,
                 }}
             >
                 <ProductCard
                     product={{
-                        ...product,
-                        description: product.description || undefined,
+                        ...item,
+                        description: item.description || undefined,
                     } as any}
-                    onPress={() => handleProductPress(product)}
-                    onAddToCart={() => handleAddToCart(product)}
+                    onPress={() => handleProductPress(item)}
+                    onAddToCart={() => handleAddToCart(item)}
                 />
             </View>
         );
     }, [productCardWidth, handleProductPress, handleAddToCart]);
 
-    // Fetch unread messages count
-    useEffect(() => {
-        if (user?.user_id && isSupabaseConfigured()) {
-            messagingService.getUnreadCount(user.user_id).then(setUnreadMessagesCount);
-        }
-    }, [user?.user_id]);
-
-    if (loading) {
+    const ListHeader = useMemo(() => {
         return (
-            <SafeAreaView style={styles.container}>
-                {/* Header Skeleton */}
-                <View style={styles.header}>
-                    <Skeleton width={120} height={32} borderRadius={16} />
-                    <View style={styles.headerIcons}>
-                        <Skeleton width={32} height={32} borderRadius={16} />
-                        <Skeleton width={32} height={32} borderRadius={16} />
+            <>
+                {/* Featured Collection Slider */}
+                {homeData?.banners && homeData.banners.length > 0 && (
+                    <FeaturedSlider
+                        banners={homeData.banners}
+                        onBannerPress={handleBannerPress}
+                        autoPlay={true}
+                        autoPlayInterval={5000}
+                    />
+                )}
+
+                {/* Shop by Region */}
+                <View style={styles.section}>
+                    <View style={styles.sectionHeader}>
+                        <Text style={styles.sectionTitle}>Shop by Region</Text>
+                        <TouchableOpacity onPress={() => router.push('/regions')} activeOpacity={0.7}>
+                            <Text style={styles.seeAllText}>See All</Text>
+                        </TouchableOpacity>
                     </View>
+                    <ScrollView
+                        horizontal
+                        showsHorizontalScrollIndicator={false}
+                        contentContainerStyle={styles.regionsContainer}
+                    >
+                        {homeData?.regions.map((region) => {
+                            const getRegionImage = (slug: string): string => {
+                                if (region.image_url) return region.image_url;
+                                const imageMap: Record<string, string> = {
+                                    'west-africa': CommonImages.westAfrica,
+                                    'east-africa': CommonImages.eastAfrica,
+                                    'southern-africa': CommonImages.southernAfrica,
+                                    'central-africa': CommonImages.centralAfrica,
+                                    'north-africa': CommonImages.northAfrica,
+                                };
+                                return imageMap[slug] || CommonImages.westAfrica;
+                            };
+
+                            return (
+                                <RegionCard
+                                    key={region.id}
+                                    region={{
+                                        id: region.id,
+                                        name: region.name,
+                                        image_url: getRegionImage(region.slug || region.id),
+                                        description: region.description || undefined,
+                                    }}
+                                    selected={selectedRegion === region.name}
+                                    onPress={() => handleRegionPress({ name: region.name })}
+                                />
+                            );
+                        })}
+                    </ScrollView>
                 </View>
 
-                {/* Search Bar Skeleton */}
-                <View style={{ paddingHorizontal: Spacing.base, marginBottom: Spacing.md }}>
-                    <Skeleton width="100%" height={Heights.input} borderRadius={Heights.input / 2} />
+                {/* Featured Vendors */}
+                <View style={styles.section}>
+                    <View style={styles.sectionHeader}>
+                        <Text style={styles.sectionTitle}>Featured Vendors</Text>
+                        <TouchableOpacity onPress={() => router.push('/vendors')} activeOpacity={0.7}>
+                            <Text style={styles.seeAllText}>See All</Text>
+                        </TouchableOpacity>
+                    </View>
+                    <ScrollView
+                        horizontal
+                        showsHorizontalScrollIndicator={false}
+                        contentContainerStyle={styles.vendorsContainer}
+                    >
+                        {homeData?.featured_vendors.map((vendor) => (
+                            <VendorCard
+                                key={vendor.id}
+                                vendor={{
+                                    ...vendor,
+                                    description: vendor.description || undefined,
+                                } as any}
+                                variant="carousel"
+                                onPress={() => handleVendorPress(vendor)}
+                            />
+                        ))}
+                    </ScrollView>
                 </View>
 
-                <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
-                    {/* Banner Skeleton */}
-                    <View style={{ paddingHorizontal: Spacing.base, marginBottom: Spacing.xl }}>
-                        <Skeleton width="100%" height={200} borderRadius={BorderRadius.lg} />
-                    </View>
-
-                    {/* Shop by Region Skeleton */}
-                    <View style={{ marginBottom: Spacing.xl }}>
-                        <View style={styles.sectionHeader}>
-                            <Skeleton width={150} height={24} />
-                            <Skeleton width={50} height={16} />
-                        </View>
-                        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: Spacing.base, gap: Spacing.md }}>
-                            {[1, 2, 3, 4].map((i) => (
-                                <Skeleton key={i} width={100} height={120} borderRadius={BorderRadius.md} />
-                            ))}
-                        </ScrollView>
-                    </View>
-
-                    {/* Featured Vendors Skeleton */}
-                    <View style={{ marginBottom: Spacing.xl }}>
-                        <View style={styles.sectionHeader}>
-                            <Skeleton width={180} height={24} />
-                            <Skeleton width={50} height={16} />
-                        </View>
-                        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: Spacing.base, gap: Spacing.md }}>
-                            {[1, 2, 3].map((i) => (
-                                <View key={i} style={{ width: 220 }}>
-                                    <Skeleton width="100%" height={120} borderRadius={BorderRadius.md} style={{ marginBottom: 8 }} />
-                                    <Skeleton width="80%" height={16} style={{ marginBottom: 4 }} />
-                                    <Skeleton width="50%" height={12} />
-                                </View>
-                            ))}
-                        </ScrollView>
-                    </View>
-
-                    {/* Popular Products Skeleton */}
-                    <View style={{ marginBottom: Spacing.xl }}>
-                        <View style={styles.sectionHeader}>
-                            <Skeleton width={160} height={24} />
-                            <Skeleton width={50} height={16} />
-                        </View>
-                        <View style={styles.productsGrid}>
-                            {[1, 2, 3, 4].map((i) => (
-                                <View key={i} style={{ width: productCardWidth, marginBottom: PRODUCT_GAP, marginRight: i % 2 !== 0 ? PRODUCT_GAP : 0 }}>
-                                    <Skeleton width="100%" height={productCardWidth} borderRadius={BorderRadius.md} style={{ marginBottom: 8 }} />
-                                    <Skeleton width="90%" height={16} style={{ marginBottom: 4 }} />
-                                    <Skeleton width="60%" height={16} style={{ marginBottom: 4 }} />
-                                    <Skeleton width="40%" height={16} />
-                                </View>
-                            ))}
-                        </View>
-                    </View>
-                </ScrollView>
-            </SafeAreaView>
+                {/* Popular Products Header */}
+                <View style={styles.sectionHeader}>
+                    <Text style={styles.sectionTitle}>
+                        {selectedRegion ? `Products from ${selectedRegion}` : 'Popular Products'}
+                    </Text>
+                    <TouchableOpacity
+                        onPress={() => {
+                            const regionSlug = selectedRegion?.toLowerCase().replace(/\s+/g, '-');
+                            router.push(selectedRegion ? `/products?region=${regionSlug}` : '/products');
+                        }}
+                        activeOpacity={0.7}
+                    >
+                        <Text style={styles.seeAllText}>See All</Text>
+                    </TouchableOpacity>
+                </View>
+            </>
         );
-    }
+    }, [homeData, selectedRegion, handleBannerPress, handleRegionPress, handleVendorPress, router]);
+
+    const ListFooter = useCallback(() => {
+        if (loadingMore && hasMoreProducts) {
+            return (
+                <View style={styles.loadingFooterContainer}>
+                    <View style={[styles.loadingFooter, { backgroundColor: loadingColor + '20' }]}>
+                        <ActivityIndicator size="small" color={loadingColor} />
+                        <Text style={[styles.loadingFooterText, { color: loadingColor }]}>
+                            Loading more products...
+                        </Text>
+                    </View>
+                </View>
+            );
+        }
+        return <View style={{ height: Heights.section }} />;
+    }, [loadingMore, hasMoreProducts, loadingColor]);
 
     return (
         <SafeAreaView style={styles.container} edges={['top']}>
@@ -496,146 +534,28 @@ export default function HomeScreen() {
                 </TouchableOpacity>
             </View>
 
-            {/* Scrollable Content */}
-            <ScrollView
-                style={styles.scrollView}
-                contentContainerStyle={styles.scrollContent}
-                showsVerticalScrollIndicator={false}
-                refreshControl={
-                    <RefreshControl
-                        refreshing={refreshing}
-                        onRefresh={onRefresh}
-                        tintColor={Colors.primary}
-                    />
-                }
-                onScroll={(event) => {
-                    const { layoutMeasurement, contentOffset, contentSize } = event.nativeEvent;
-                    const paddingToBottom = Heights.section;
-                    if (layoutMeasurement.height + contentOffset.y >= contentSize.height - paddingToBottom) {
-                        loadMoreProducts();
-                    }
-                }}
-                scrollEventThrottle={400}
-            >
-                <Animated.View style={{ opacity: fadeAnim, transform: [{ translateY: slideAnim }] }}>
-                    {/* Featured Collection Slider */}
-                    {homeData?.banners && homeData.banners.length > 0 && (
-                        <FeaturedSlider
-                            banners={homeData.banners}
-                            onBannerPress={handleBannerPress}
-                            autoPlay={true}
-                            autoPlayInterval={5000}
+            <Animated.View style={{ flex: 1, opacity: fadeAnim, transform: [{ translateY: slideAnim }] }}>
+                {/* @ts-ignore - FlashList types are correct but TS is complaining about estimatedItemSize */}
+                <FlashList<Product>
+                    data={filteredProducts}
+                    renderItem={renderProductItem}
+                    estimatedItemSize={280}
+                    numColumns={2}
+                    ListHeaderComponent={ListHeader}
+                    ListFooterComponent={ListFooter}
+                    contentContainerStyle={styles.scrollContent}
+                    showsVerticalScrollIndicator={false}
+                    onEndReached={loadMoreProducts}
+                    onEndReachedThreshold={0.5}
+                    refreshControl={
+                        <RefreshControl
+                            refreshing={refreshing}
+                            onRefresh={onRefresh}
+                            tintColor={Colors.primary}
                         />
-                    )}
-
-                    {/* Shop by Region */}
-                    <View style={styles.section}>
-                        <View style={styles.sectionHeader}>
-                            <Text style={styles.sectionTitle}>Shop by Region</Text>
-                            <TouchableOpacity onPress={() => router.push('/regions')} activeOpacity={0.7}>
-                                <Text style={styles.seeAllText}>See All</Text>
-                            </TouchableOpacity>
-                        </View>
-                        <ScrollView
-                            horizontal
-                            showsHorizontalScrollIndicator={false}
-                            contentContainerStyle={styles.regionsContainer}
-                        >
-                            {homeData?.regions.map((region) => {
-                                // Get fallback image from CommonImages based on slug
-                                const getRegionImage = (slug: string): string => {
-                                    if (region.image_url) return region.image_url;
-                                    const imageMap: Record<string, string> = {
-                                        'west-africa': CommonImages.westAfrica,
-                                        'east-africa': CommonImages.eastAfrica,
-                                        'southern-africa': CommonImages.southernAfrica,
-                                        'central-africa': CommonImages.centralAfrica,
-                                        'north-africa': CommonImages.northAfrica,
-                                    };
-                                    return imageMap[slug] || CommonImages.westAfrica;
-                                };
-
-                                return (
-                                    <RegionCard
-                                        key={region.id}
-                                        region={{
-                                            id: region.id,
-                                            name: region.name,
-                                            image_url: getRegionImage(region.slug || region.id),
-                                            description: region.description || undefined,
-                                        }}
-                                        selected={selectedRegion === region.name}
-                                        onPress={() => handleRegionPress({ name: region.name })}
-                                    />
-                                );
-                            })}
-                        </ScrollView>
-                    </View>
-
-                    {/* Featured Vendors */}
-                    <View style={styles.section}>
-                        <View style={styles.sectionHeader}>
-                            <Text style={styles.sectionTitle}>Featured Vendors</Text>
-                            <TouchableOpacity onPress={() => router.push('/vendors')} activeOpacity={0.7}>
-                                <Text style={styles.seeAllText}>See All</Text>
-                            </TouchableOpacity>
-                        </View>
-                        <ScrollView
-                            horizontal
-                            showsHorizontalScrollIndicator={false}
-                            contentContainerStyle={styles.vendorsContainer}
-                        >
-                            {homeData?.featured_vendors.map((vendor) => (
-                                <VendorCard
-                                    key={vendor.id}
-                                    vendor={{
-                                        ...vendor,
-                                        description: vendor.description || undefined,
-                                    } as any}
-                                    variant="carousel"
-                                    onPress={() => handleVendorPress(vendor)}
-                                />
-                            ))}
-                        </ScrollView>
-                    </View>
-
-                    {/* Popular Products */}
-                    <View style={styles.section}>
-                        <View style={styles.sectionHeader}>
-                            <Text style={styles.sectionTitle}>
-                                {selectedRegion ? `Products from ${selectedRegion}` : 'Popular Products'}
-                            </Text>
-                            <TouchableOpacity
-                                onPress={() => {
-                                    const regionSlug = selectedRegion?.toLowerCase().replace(/\s+/g, '-');
-                                    router.push(selectedRegion ? `/products?region=${regionSlug}` : '/products');
-                                }}
-                                activeOpacity={0.7}
-                            >
-                                <Text style={styles.seeAllText}>See All</Text>
-                            </TouchableOpacity>
-                        </View>
-                        <View style={styles.productsGrid}>
-                            {filteredProducts.map((product, index) => renderProductCard(product, index))}
-                        </View>
-
-                        {/* Loading More Footer */}
-                        {loadingMore && hasMoreProducts && (
-                            <View style={styles.loadingFooterContainer}>
-                                <View style={[styles.loadingFooter, { backgroundColor: loadingColor + '20' }]}>
-                                    <ActivityIndicator size="small" color={loadingColor} />
-                                    <Text style={[styles.loadingFooterText, { color: loadingColor }]}>
-                                        Loading more products...
-                                    </Text>
-                                </View>
-                            </View>
-                        )}
-                    </View>
-
-                    {/* Bottom padding for tab bar */}
-                    <View style={{ height: Heights.section }} />
-                </Animated.View>
-            </ScrollView>
+                    }
+                />
+            </Animated.View>
         </SafeAreaView>
     );
 }
