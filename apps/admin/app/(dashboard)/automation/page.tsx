@@ -21,6 +21,7 @@ import {
     CaretUp,
     CaretLeft,
     CaretRight,
+    Activity,
 } from "@phosphor-icons/react";
 import { Header } from "../../../components/Header";
 import {

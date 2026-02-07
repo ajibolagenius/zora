@@ -21,6 +21,7 @@ import {
     X,
     Truck,
     ClipboardText,
+    Robot,
 } from "@phosphor-icons/react";
 import { cn } from "@zora/ui-web";
 import { ZoraLogo } from "./ZoraLogo";
@@ -37,6 +38,7 @@ const navItems = [
     { name: "Reviews", icon: Star, href: "/reviews" },
     { name: "Analytics", icon: ChartBar, href: "/analytics" },
     { name: "Emails", icon: Envelope, href: "/emails" },
+    { name: "Automation", icon: Robot, href: "/automation" },
     { name: "Refunds", icon: ArrowsClockwise, href: "/refunds" },
     { name: "Settings", icon: Gear, href: "/settings" },
 ];

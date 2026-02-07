@@ -4,108 +4,11 @@ import * as PhosphorIcons from 'phosphor-react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Colors } from '../../constants/colors';
 
+import { PHOSPHOR_ICON_MAP } from '@zora/shared';
+// ... (imports)
+
 // Map of common icon names to Phosphor icon components
-const phosphorIconMap: Record<string, keyof typeof PhosphorIcons> = {
-  // Navigation
-  'home': 'House',
-  'home-outline': 'House',
-  'explore': 'Compass',
-  'compass': 'Compass',
-  'compass-outline': 'Compass',
-  'orders': 'ClipboardText',
-  'clipboard-text': 'ClipboardText',
-  'clipboard-text-outline': 'ClipboardText',
-  'cart': 'ShoppingCart',
-  'cart-outline': 'ShoppingCart',
-  'profile': 'User',
-  'account': 'User',
-  'account-outline': 'User',
-
-  // Common Actions
-  'search': 'MagnifyingGlass',
-  'magnify': 'MagnifyingGlass',
-  'filter': 'Funnel',
-  'tune': 'Sliders',
-  'plus': 'Plus',
-  'minus': 'Minus',
-  'close': 'X',
-  'check': 'Check',
-  'arrow-left': 'ArrowLeft',
-  'arrow-right': 'ArrowRight',
-  'chevron-down': 'CaretDown',
-  'chevron-up': 'CaretUp',
-  'chevron-left': 'CaretLeft',
-  'chevron-right': 'CaretRight',
-
-  // Features
-  'heart': 'Heart',
-  'heart-outline': 'Heart',
-  'star': 'Star',
-  'star-outline': 'Star',
-  'bell': 'Bell',
-  'bell-outline': 'Bell',
-  'map-marker': 'MapPin',
-  'location': 'MapPin',
-  'clock': 'Clock',
-  'clock-outline': 'Clock',
-  'truck-delivery': 'Truck',
-  'truck-delivery-outline': 'Truck',
-  'qrcode': 'QrCode',
-  'qrcode-scan': 'QrCode',
-
-  // Products & Shopping
-  'basket': 'Basket',
-  'bag': 'Bag',
-  'tag': 'Tag',
-  'percent': 'Percent',
-  'gift': 'Gift',
-  'package': 'Package',
-  'receipt': 'Receipt',
-  'credit-card': 'CreditCard',
-  'wallet': 'Wallet',
-
-  // User & Settings
-  'settings': 'Gear',
-  'cog': 'Gear',
-  'logout': 'SignOut',
-  'login': 'SignIn',
-  'email': 'Envelope',
-  'email-outline': 'Envelope',
-  'lock': 'Lock',
-  'lock-outline': 'Lock',
-  'eye': 'Eye',
-  'eye-outline': 'Eye',
-  'eye-off': 'EyeSlash',
-  'eye-off-outline': 'EyeSlash',
-
-  // Social
-  'google': 'GoogleLogo',
-  'apple': 'AppleLogo',
-  'facebook': 'FacebookLogo',
-  'share': 'ShareNetwork',
-
-  // Categories
-  'food': 'CookingPot',
-  'pot-steam': 'CookingPot',
-  'leaf': 'Leaf',
-  'coffee': 'Coffee',
-  'tshirt-crew': 'TShirt',
-  'palette': 'Palette',
-  'flower': 'Flower',
-  'fire': 'Fire',
-  'diamond-stone': 'Diamond',
-
-  // Misc
-  'information': 'Info',
-  'help-circle': 'Question',
-  'phone': 'Phone',
-  'camera': 'Camera',
-  'image': 'Image',
-  'trash': 'Trash',
-  'pencil': 'Pencil',
-  'edit': 'PencilSimple',
-  'crosshairs-gps': 'Crosshair',
-};
+// Moved to @zora/shared
 
 type IconWeight = 'duotone' | 'regular' | 'bold' | 'fill' | 'light' | 'thin';
 
@@ -142,7 +45,7 @@ export const Icon: React.FC<IconProps> = ({
   const iconWeight: IconWeight = focused ? 'fill' : weight;
 
   // Check if we have a Phosphor mapping for this icon
-  const phosphorName = phosphorIconMap[name] || phosphorIconMap[name.replace('-outline', '')];
+  const phosphorName = PHOSPHOR_ICON_MAP[name] || PHOSPHOR_ICON_MAP[name.replace('-outline', '')];
 
   if (phosphorName && PhosphorIcons[phosphorName]) {
     // eslint-disable-next-line import/namespace

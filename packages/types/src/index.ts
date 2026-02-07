@@ -8,3 +8,6 @@ export * from './common';
 
 // API types
 export * from './api';
+
+// QR types
+export * from './qr';

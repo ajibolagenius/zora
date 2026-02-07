@@ -256,3 +256,9 @@ export const SUCCESS_MESSAGES = {
     PRODUCT_ADDED_TO_CART: 'Product added to cart.',
     PRODUCT_REMOVED_FROM_CART: 'Product removed from cart.',
 } as const;
+
+// ============================================
+// ICONS
+// ============================================
+
+export * from './icons';

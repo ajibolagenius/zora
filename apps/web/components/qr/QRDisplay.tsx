@@ -1,31 +1,23 @@
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
 import {
     QrCode,
     Download,
     Share,
     Copy,
     Check,
-    X,
-    Calendar,
-    MapPin,
-    Users,
-    ShoppingCart,
     Tag,
     Package,
-    CaretDown,
-    CaretUp,
-    CaretLeft,
-    CaretRight,
+    Users,
+    ShoppingCart
 } from '@phosphor-icons/react';
 import { Button } from '../ui/Button';
 import { Card, CardContent } from '../ui/Card';
-import { Badge } from '../ui/Badge';
 import { cn } from '../../lib/utils';
+import { QRData, QRCodeType } from '@zora/types';
 
 interface QRDisplayProps {
-    data: any;
-    type: 'order' | 'product' | 'vendor' | 'coupon';
+    data: QRData;
+    type: QRCodeType;
     title?: string;
     size?: number;
     className?: string;
@@ -75,7 +67,7 @@ export function QRDisplay({ data, type, title, size = 200, className, showAction
             case 'order': return ShoppingCart;
             case 'product': return Package;
             case 'vendor': return Users;
-            case 'coupon': return Tag;
+            case 'promo': return Tag;
             default: return QrCode;
         }
     };
@@ -85,125 +77,158 @@ export function QRDisplay({ data, type, title, size = 200, className, showAction
             case 'order': return 'text-blue-600 bg-blue-100';
             case 'product': return 'text-green-600 bg-green-100';
             case 'vendor': return 'text-purple-600 bg-purple-100';
-            case 'coupon': return 'text-orange-600 bg-orange-100';
+            case 'promo': return 'text-orange-600 bg-orange-100';
             default: return 'text-gray-600 bg-gray-100';
         }
     };
 
     const formatData = () => {
-        switch (type) {
-            case 'order':
-                return (
-                    <div className="space-y-2">
-                        <div className="flex justify-between">
-                            <span className="font-medium">Order Number:</span>
-                            <span className="font-bold">{data.orderNumber}</span>
-                        </div>
+        if (type === 'order' && data.type === 'order') {
+            return (
+                <div className="space-y-2">
+                    <div className="flex justify-between">
+                        <span className="font-medium">Order Number:</span>
+                        <span className="font-bold">{data.orderId}</span>
+                    </div>
+                    {data.customerName && (
                         <div className="flex justify-between">
                             <span className="font-medium">Customer:</span>
                             <span className="font-bold">{data.customerName}</span>
                         </div>
+                    )}
+                    {data.total !== undefined && (
                         <div className="flex justify-between">
                             <span className="font-medium">Total:</span>
                             <span className="font-bold">${data.total}</span>
                         </div>
+                    )}
+                    {data.status && (
                         <div className="flex justify-between">
                             <span className="font-medium">Status:</span>
                             <span className="font-bold">{data.status}</span>
                         </div>
-                        {data.items && (
-                            <div>
-                                <span className="font-medium">Items:</span>
-                                <ul className="list-disc list-inside ml-4">
-                                    {data.items.map((item: string, index: number) => (
-                                        <li key={index} className="text-gray-700">{item}</li>
-                                    ))}
-                                </ul>
-                            </div>
-                        )}
-                    </div>
-                );
-            case 'product':
-                return (
-                    <div className="space-y-2">
-                        <div className="flex justify-between">
-                            <span className="font-medium">Product:</span>
-                            <span className="font-bold">{data.name}</span>
+                    )}
+                    {data.items && (
+                        <div>
+                            <span className="font-medium">Items:</span>
+                            <ul className="list-disc list-inside ml-4">
+                                {data.items.map((item: string, index: number) => (
+                                    <li key={index} className="text-gray-700">{item}</li>
+                                ))}
+                            </ul>
                         </div>
+                    )}
+                </div>
+            );
+        }
+
+        if (type === 'product' && data.type === 'product') {
+            return (
+                <div className="space-y-2">
+                    <div className="flex justify-between">
+                        <span className="font-medium">Product:</span>
+                        <span className="font-bold">{data.name}</span>
+                    </div>
+                    {data.price !== undefined && (
                         <div className="flex justify-between">
                             <span className="font-medium">Price:</span>
                             <span className="font-bold">${data.price}</span>
                         </div>
+                    )}
+                    {data.category && (
                         <div className="flex justify-between">
                             <span className="font-medium">Category:</span>
                             <span className="font-bold">{data.category}</span>
                         </div>
+                    )}
+                    {data.stock !== undefined && (
                         <div className="flex justify-between">
                             <span className="font-medium">Stock:</span>
                             <span className="font-bold">{data.stock} units</span>
                         </div>
-                        {data.sku && (
-                            <div className="flex justify-between">
-                                <span className="font-medium">SKU:</span>
-                                <span className="font-bold">{data.sku}</span>
-                            </div>
-                        )}
-                    </div>
-                );
-            case 'vendor':
-                return (
-                    <div className="space-y-2">
+                    )}
+                    {data.sku && (
+                        <div className="flex justify-between">
+                            <span className="font-medium">SKU:</span>
+                            <span className="font-bold">{data.sku}</span>
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        if (type === 'vendor' && data.type === 'vendor') {
+            return (
+                <div className="space-y-2">
+                    {data.vendorName && (
                         <div className="flex justify-between">
                             <span className="font-medium">Vendor:</span>
                             <span className="font-bold">{data.vendorName}</span>
                         </div>
+                    )}
+                    {data.category && (
                         <div className="flex justify-between">
                             <span className="font-medium">Category:</span>
                             <span className="font-bold">{data.category}</span>
                         </div>
+                    )}
+                    {data.rating !== undefined && (
                         <div className="flex justify-between">
                             <span className="font-medium">Rating:</span>
                             <span className="font-bold">{data.rating}/5.0</span>
                         </div>
-                        {data.location && (
-                            <div className="flex justify-between">
-                                <span className="font-medium">Location:</span>
-                                <span className="font-bold">{data.location}</span>
-                            </div>
-                        )}
-                    </div>
-                );
-            case 'coupon':
-                return (
-                    <div className="space-y-2">
+                    )}
+                    {data.location && (
                         <div className="flex justify-between">
-                            <span className="font-medium">Code:</span>
-                            <span className="font-bold">{data.code}</span>
+                            <span className="font-medium">Location:</span>
+                            <span className="font-bold">{data.location}</span>
                         </div>
+                    )}
+                </div>
+            );
+        }
+
+        if (type === 'promo' && data.type === 'promo') {
+            return (
+                <div className="space-y-2">
+                    <div className="flex justify-between">
+                        <span className="font-medium">Code:</span>
+                        <span className="font-bold">{data.promoCode || data.code}</span>
+                    </div>
+                    {data.discount !== undefined && (
                         <div className="flex justify-between">
                             <span className="font-medium">Discount:</span>
                             <span className="font-bold">{data.discount}%</span>
                         </div>
+                    )}
+                    {data.minimumOrder !== undefined && (
                         <div className="flex justify-between">
                             <span className="font-medium">Min Order:</span>
                             <span className="font-bold">${data.minimumOrder}</span>
                         </div>
+                    )}
+                    {data.expiry && (
                         <div className="flex justify-between">
                             <span className="font-medium">Expires:</span>
                             <span className="font-bold">{new Date(data.expiry).toLocaleDateString()}</span>
                         </div>
-                        {data.description && (
-                            <div>
-                                <span className="font-medium">Description:</span>
-                                <p className="text-gray-700 mt-1">{data.description}</p>
-                            </div>
-                        )}
-                    </div>
-                );
-            default:
-                return <div className="text-gray-500">Unknown QR code type</div>;
+                    )}
+                    {data.description && (
+                        <div>
+                            <span className="font-medium">Description:</span>
+                            <p className="text-gray-700 mt-1">{data.description}</p>
+                        </div>
+                    )}
+                </div>
+            );
         }
+
+        return <div className="text-gray-500">Unknown or invalid QR code type</div>;
     };
+
+    // ... render return block stays mostly the same but just replace usage of logic ...
+    // Wait, the ReplacementContent must encompass the whole file or strict block.
+    // I'll replace the whole file content to be safe and clean.
 
     return (
         <div className={cn("inline-block", className)}>
