@@ -9,7 +9,9 @@ import {
     Easing,
     TextInput,
     Keyboard,
+    RefreshControl,
 } from 'react-native';
+import { FlashList } from '@shopify/flash-list';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { vendorService } from '../../services/mockDataService';
@@ -705,55 +707,69 @@ export default function OrdersTab() {
             </View>
 
             {/* Content */}
-            <ScrollView
-                style={styles.scrollView}
-                contentContainerStyle={styles.scrollContent}
-                showsVerticalScrollIndicator={false}
-            >
+            <View style={styles.contentContainer}>
                 {isLoading ? (
-                    <View style={styles.ordersList}>
-                        {[1, 2, 3].map((i) => (
-                            <View key={i} style={styles.orderCard}>
-                                <View style={styles.orderCardHeader}>
-                                    <View>
-                                        <Skeleton width={100} height={20} style={{ marginBottom: 4 }} />
-                                        <Skeleton width={140} height={16} />
+                    <ScrollView
+                        style={styles.scrollView}
+                        contentContainerStyle={styles.scrollContent}
+                        showsVerticalScrollIndicator={false}
+                    >
+                        <View style={styles.ordersList}>
+                            {[1, 2, 3].map((i) => (
+                                <View key={i} style={styles.orderCard}>
+                                    <View style={styles.orderCardHeader}>
+                                        <View>
+                                            <Skeleton width={100} height={20} style={{ marginBottom: 4 }} />
+                                            <Skeleton width={140} height={16} />
+                                        </View>
+                                        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                                            <Skeleton width={80} height={24} borderRadius={12} style={{ marginRight: 8 }} />
+                                            <Skeleton width={20} height={20} borderRadius={10} />
+                                        </View>
                                     </View>
-                                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                                        <Skeleton width={80} height={24} borderRadius={12} style={{ marginRight: 8 }} />
-                                        <Skeleton width={20} height={20} borderRadius={10} />
+                                    <View style={styles.vendorSection}>
+                                        <View style={{ flexDirection: 'row', gap: -12 }}>
+                                            <Skeleton width={40} height={40} borderRadius={8} />
+                                            <Skeleton width={40} height={40} borderRadius={8} />
+                                            <Skeleton width={40} height={40} borderRadius={8} />
+                                        </View>
+                                        <View style={{ marginLeft: 16 }}>
+                                            <Skeleton width={120} height={20} style={{ marginBottom: 4 }} />
+                                            <Skeleton width={60} height={16} />
+                                        </View>
+                                    </View>
+                                    <View style={styles.orderFooter}>
+                                        <Skeleton width={60} height={24} />
+                                        <View style={{ flexDirection: 'row', gap: 8 }}>
+                                            <Skeleton width={80} height={32} borderRadius={16} />
+                                            <Skeleton width={100} height={32} borderRadius={16} />
+                                        </View>
                                     </View>
                                 </View>
-                                <View style={styles.vendorSection}>
-                                    <View style={{ flexDirection: 'row', gap: -12 }}>
-                                        <Skeleton width={40} height={40} borderRadius={8} />
-                                        <Skeleton width={40} height={40} borderRadius={8} />
-                                        <Skeleton width={40} height={40} borderRadius={8} />
-                                    </View>
-                                    <View style={{ marginLeft: 16 }}>
-                                        <Skeleton width={120} height={20} style={{ marginBottom: 4 }} />
-                                        <Skeleton width={60} height={16} />
-                                    </View>
-                                </View>
-                                <View style={styles.orderFooter}>
-                                    <Skeleton width={60} height={24} />
-                                    <View style={{ flexDirection: 'row', gap: 8 }}>
-                                        <Skeleton width={80} height={32} borderRadius={16} />
-                                        <Skeleton width={100} height={32} borderRadius={16} />
-                                    </View>
-                                </View>
-                            </View>
-                        ))}
+                            ))}
+                        </View>
+                    </ScrollView>
+                ) : filteredOrders.length > 0 ? (
+                    <View style={{ flex: 1, minHeight: 2 }}>
+                        <FlashList
+                            data={filteredOrders}
+                            estimatedItemSize={200}
+                            renderItem={({ item, index }) => renderOrderCard(item, index)}
+                            contentContainerStyle={styles.scrollContent}
+                            showsVerticalScrollIndicator={false}
+                            ListFooterComponent={<View style={{ height: 100 }} />}
+                        />
                     </View>
-                ) : filteredOrders.length === 0 ? (
-                    renderEmptyState()
                 ) : (
-                    filteredOrders.map((order, index) => renderOrderCard(order, index))
+                    <ScrollView
+                        style={styles.scrollView}
+                        contentContainerStyle={styles.scrollContent}
+                        showsVerticalScrollIndicator={false}
+                    >
+                        {renderEmptyState()}
+                    </ScrollView>
                 )}
-
-                {/* Bottom padding for tab bar */}
-                <View style={{ height: 100 }} />
-            </ScrollView>
+            </View>
         </SafeAreaView>
     );
 }
@@ -771,6 +787,9 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         paddingHorizontal: Spacing.base,
         paddingVertical: Spacing.md,
+    },
+    contentContainer: {
+        flex: 1,
     },
     ordersList: {
         marginBottom: Spacing.lg,

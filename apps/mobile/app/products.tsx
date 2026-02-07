@@ -13,6 +13,7 @@ import {
   Keyboard,
   RefreshControl,
 } from 'react-native';
+import { FlashList } from '@shopify/flash-list';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { ArrowLeft, Funnel, X, Package, MagnifyingGlass } from 'phosphor-react-native';
@@ -35,10 +36,10 @@ import { isSupabaseConfigured } from '../lib/supabase';
 
 // Map onboardingService Region to mockDataService Region format
 const mapOnboardingRegionToRegion = (region: OnboardingRegion): Region => {
-  const countries = region.description 
+  const countries = region.description
     ? region.description.split(',').map(c => c.trim()).filter(Boolean)
     : [];
-  
+
   return {
     id: region.id,
     name: region.name,
@@ -100,7 +101,7 @@ export default function ProductsScreen() {
       if (!isRefresh) {
         setLoading(true);
       }
-      
+
       // Fetch products from database or mock
       let productData: Product[];
       if (isSupabaseConfigured()) {
@@ -222,11 +223,11 @@ export default function ProductsScreen() {
         const description = String(p.description || '').toLowerCase();
         const category = String(p.category || '').toLowerCase();
         const culturalRegion = String(p.cultural_region || '').toLowerCase();
-        
+
         return name.includes(query) ||
-               description.includes(query) ||
-               category.includes(query) ||
-               culturalRegion.includes(query);
+          description.includes(query) ||
+          category.includes(query) ||
+          culturalRegion.includes(query);
       });
     }
 
@@ -367,7 +368,7 @@ export default function ProductsScreen() {
             autoCapitalize="none"
           />
           {searchQuery.length > 0 && (
-            <TouchableOpacity 
+            <TouchableOpacity
               onPress={() => setSearchQuery('')}
               hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
             >
@@ -464,27 +465,25 @@ export default function ProductsScreen() {
         )}
       </View>
 
-      <ScrollView
-        style={styles.scrollView}
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-            tintColor={Colors.primary}
-          />
-        }
-      >
-        <Animated.View style={{ opacity: fadeAnim, transform: [{ translateY: slideAnim }] }}>
-          {filteredProducts.length === 0 ? (
+      <View style={styles.listContainer}>
+        {filteredProducts.length === 0 ? (
+          <ScrollView
+            refreshControl={
+              <RefreshControl
+                refreshing={refreshing}
+                onRefresh={onRefresh}
+                tintColor={Colors.primary}
+              />
+            }
+            contentContainerStyle={styles.emptyScrollContent}
+          >
             <View style={styles.emptyContainer}>
               <View style={styles.emptyIconContainer}>
                 <Package size={48} color={Colors.textMuted} weight="duotone" />
               </View>
               <Text style={styles.emptyTitle}>No products found</Text>
               <Text style={styles.emptySubtitle}>
-                {searchQuery.trim() 
+                {searchQuery.trim()
                   ? `No products match "${searchQuery}". Try a different search term or clear filters.`
                   : 'Try adjusting your filters to find what you\'re looking for'}
               </Text>
@@ -497,30 +496,42 @@ export default function ProductsScreen() {
                 />
               )}
             </View>
-          ) : (
-            <View style={styles.productsGrid}>
-              {filteredProducts.map((product, index) => (
-                <View
-                  key={product.id}
-                  style={{
-                    width: productCardWidth,
-                    marginRight: index % 2 === 0 ? PRODUCT_GAP : 0,
-                    marginBottom: PRODUCT_GAP,
-                  }}
-                >
-                  <ProductCard
-                    product={product}
-                    onPress={() => handleProductPress(product)}
-                    onAddToCart={() => handleAddToCart(product)}
-                  />
-                </View>
-              ))}
-            </View>
-          )}
-        </Animated.View>
-
-        <View style={{ height: 100 }} />
-      </ScrollView>
+          </ScrollView>
+        ) : (
+          <FlashList
+            data={filteredProducts}
+            numColumns={2}
+            estimatedItemSize={280}
+            contentContainerStyle={styles.listContent}
+            showsVerticalScrollIndicator={false}
+            refreshControl={
+              <RefreshControl
+                refreshing={refreshing}
+                onRefresh={onRefresh}
+                tintColor={Colors.primary}
+              />
+            }
+            renderItem={({ item, index }) => (
+              <Animated.View
+                style={{
+                  opacity: fadeAnim,
+                  transform: [{ translateY: slideAnim }],
+                  width: productCardWidth,
+                  marginRight: index % 2 === 0 ? PRODUCT_GAP : 0,
+                  marginBottom: PRODUCT_GAP,
+                }}
+              >
+                <ProductCard
+                  product={item}
+                  onPress={() => handleProductPress(item)}
+                  onAddToCart={() => handleAddToCart(item)}
+                />
+              </Animated.View>
+            )}
+            ListFooterComponent={<View style={{ height: 100 }} />}
+          />
+        )}
+      </View>
     </SafeAreaView>
   );
 }
@@ -660,11 +671,15 @@ const styles = StyleSheet.create({
     fontSize: FontSize.small,
     color: Colors.primary,
   },
-  scrollView: {
+  listContainer: {
     flex: 1,
   },
-  scrollContent: {
+  listContent: {
     paddingHorizontal: Spacing.base,
+    paddingTop: Spacing.sm,
+  },
+  emptyScrollContent: {
+    flexGrow: 1,
   },
   productsGrid: {
     flexDirection: 'row',

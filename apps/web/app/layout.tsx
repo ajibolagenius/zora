@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import QueryProvider from "../providers/QueryProvider";
 
 export const metadata: Metadata = {
     title: "Zora African Market - Authentic African Products Delivered",
@@ -43,7 +44,7 @@ export default function RootLayout({
                 >
                     Skip to main content
                 </a>
-                {children}
+                <QueryProvider>{children}</QueryProvider>
             </body>
         </html>
     );

@@ -42,3 +42,4 @@ export {
 // Navigation
 export { Tabs, TabsList, TabsTrigger, TabsContent } from "./Tabs";
 export * from './ConnectionStatus';
+export { ErrorBoundary } from "./ErrorBoundary";

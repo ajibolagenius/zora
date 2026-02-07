@@ -22,13 +22,13 @@ import {
     MapPin,
     Clock,
 } from 'phosphor-react-native';
+import { FlashList } from '@shopify/flash-list';
 import { Colors } from '../../constants/colors';
 import { Spacing, BorderRadius, Heights, Shadows, Gaps } from '../../constants/spacing';
 import { FontSize, FontFamily } from '../../constants/typography';
 import { AnimationDuration, AnimationEasing } from '../../constants';
 import { vendorService as mockVendorService, type Vendor as MockVendor } from '../../services/mockDataService';
 import { vendorService as supabaseVendorService } from '../../services/supabaseService';
-import type { Vendor } from '../../services/supabaseService';
 import { realtimeService } from '../../services/realtimeService';
 import { isSupabaseConfigured } from '../../lib/supabase';
 import { getVendorRoute } from '../../lib/navigationHelpers';
@@ -44,7 +44,7 @@ const FILTERS: { id: FilterType; label: string }[] = [
 ];
 
 // Transform vendor data for display
-const transformVendorForDisplay = (vendor: Vendor | MockVendor) => ({
+const transformVendorForDisplay = (vendor: MockVendor) => ({
     id: vendor.id,
     name: vendor.shop_name,
     category: Array.isArray(vendor.categories) ? vendor.categories.join(' • ') : '',
@@ -72,10 +72,10 @@ export default function ExploreScreen() {
     const fetchVendors = async () => {
         try {
             setLoading(true);
-            let vendorData: (Vendor | MockVendor)[];
+            let vendorData: MockVendor[];
 
             if (isSupabaseConfigured()) {
-                vendorData = await supabaseVendorService.getAll();
+                vendorData = (await supabaseVendorService.getAll()) as unknown as MockVendor[];
             } else {
                 vendorData = mockVendorService.getAll();
             }
@@ -136,16 +136,16 @@ export default function ExploreScreen() {
         // Find vendor from current list
         const vendor = vendors.find(v => v.id === vendorId);
         if (vendor && vendor.vendor) {
-            router.push(getVendorRoute(vendor.vendor as any, vendorId));
+            router.push(getVendorRoute(vendor.vendor as any, vendorId) as any);
         } else {
             // Fallback: try to get vendor from service
             if (isSupabaseConfigured()) {
                 supabaseVendorService.getById(vendorId).then(v => {
-                    if (v) router.push(getVendorRoute(v as any, vendorId));
+                    if (v) router.push(getVendorRoute(v as any, vendorId) as any);
                 });
             } else {
                 const v = mockVendorService.getById(vendorId);
-                if (v) router.push(getVendorRoute(v as any, vendorId));
+                if (v) router.push(getVendorRoute(v as any, vendorId) as any);
             }
         }
     };
@@ -288,67 +288,68 @@ export default function ExploreScreen() {
                         ))}
                     </ScrollView>
                 ) : (
-                    <ScrollView
-                        style={styles.vendorsList}
-                        showsVerticalScrollIndicator={false}
-                        contentContainerStyle={styles.vendorsListContent}
-                    >
-                        {vendors.map((vendor) => (
-                            <TouchableOpacity
-                                key={vendor.id}
-                                style={styles.vendorCard}
-                                onPress={() => handleVendorPress(vendor.id)}
-                                activeOpacity={0.8}
-                            >
-                                {/* Vendor Image */}
-                                <View style={styles.vendorImageContainer}>
-                                    <LazyImage
-                                        source={vendor.image}
-                                        style={styles.vendorImage}
-                                        contentFit="cover"
-                                        showLoader={false}
-                                    />
-                                </View>
-
-                                {/* Vendor Info */}
-                                <View style={styles.vendorInfo}>
-                                    <Text style={styles.vendorName} numberOfLines={1}>
-                                        {vendor.name}
-                                    </Text>
-                                    <Text style={styles.vendorCategory} numberOfLines={1}>
-                                        {vendor.category}
-                                    </Text>
-
-                                    {/* Rating and Meta */}
-                                    <View style={styles.vendorMeta}>
-                                        <RatingDisplay
-                                            rating={vendor.rating}
-                                            size="small"
-                                            variant="compact"
-                                            showReviewCount={false}
+                    <View style={styles.vendorsList}>
+                        <FlashList
+                            data={vendors}
+                            // @ts-ignore: estimatedItemSize is required but types might be outdated
+                            estimatedItemSize={100}
+                            showsVerticalScrollIndicator={false}
+                            contentContainerStyle={styles.vendorsListContent}
+                            renderItem={({ item: vendor }) => (
+                                <TouchableOpacity
+                                    key={vendor.id}
+                                    style={styles.vendorCard}
+                                    onPress={() => handleVendorPress(vendor.id)}
+                                    activeOpacity={0.8}
+                                >
+                                    {/* Vendor Image */}
+                                    <View style={styles.vendorImageContainer}>
+                                        <LazyImage
+                                            source={vendor.image}
+                                            style={styles.vendorImage}
+                                            contentFit="cover"
+                                            showLoader={false}
                                         />
-                                        <Text style={styles.metaDivider}>•</Text>
-                                        <Text style={styles.metaText}>{vendor.distance}</Text>
-                                        <Text style={styles.metaDivider}>•</Text>
-                                        <Text style={styles.metaText}>{vendor.deliveryTime}</Text>
                                     </View>
 
-                                    {/* Status */}
-                                    <Text style={[styles.statusText, { color: vendor.statusColor }]}>
-                                        {vendor.status}
-                                    </Text>
-                                </View>
-                            </TouchableOpacity>
-                        ))}
+                                    {/* Vendor Info */}
+                                    <View style={styles.vendorInfo}>
+                                        <Text style={styles.vendorName} numberOfLines={1}>
+                                            {vendor.name}
+                                        </Text>
+                                        <Text style={styles.vendorCategory} numberOfLines={1}>
+                                            {vendor.category}
+                                        </Text>
 
-                        {/* Bottom padding for tab bar */}
-                        <View style={{ height: 140 }} />
-                    </ScrollView>
+                                        {/* Rating and Meta */}
+                                        <View style={styles.vendorMeta}>
+                                            <RatingDisplay
+                                                rating={vendor.rating}
+                                                size="small"
+                                                variant="compact"
+                                                showReviewCount={false}
+                                            />
+                                            <Text style={styles.metaDivider}>•</Text>
+                                            <Text style={styles.metaText}>{vendor.distance}</Text>
+                                            <Text style={styles.metaDivider}>•</Text>
+                                            <Text style={styles.metaText}>{vendor.deliveryTime}</Text>
+                                        </View>
+
+                                        {/* Status */}
+                                        <Text style={[styles.statusText, { color: vendor.statusColor }]}>
+                                            {vendor.status}
+                                        </Text>
+                                    </View>
+                                </TouchableOpacity>
+                            )}
+                            ListFooterComponent={<View style={{ height: 140 }} />}
+                        />
+                    </View>
                 )}
-            </Animated.View>
+            </Animated.View >
 
             {/* Floating List View Button */}
-            <View style={styles.floatingButtonContainer}>
+            < View style={styles.floatingButtonContainer} >
                 <TouchableOpacity
                     style={styles.floatingButton}
                     onPress={() => router.push('/vendors')}
@@ -357,8 +358,8 @@ export default function ExploreScreen() {
                     <Text style={styles.floatingButtonText}>List View</Text>
                     <ListBullets size={18} color={Colors.textPrimary} weight="bold" />
                 </TouchableOpacity>
-            </View>
-        </View>
+            </View >
+        </View >
     );
 }
 

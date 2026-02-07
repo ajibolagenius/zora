@@ -9,7 +9,9 @@ import {
     Modal,
     Pressable,
     Keyboard,
+    RefreshControl,
 } from 'react-native';
+import { FlashList } from '@shopify/flash-list';
 import { LazyImage } from '../components/ui';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -128,7 +130,7 @@ export default function SearchScreen() {
 
     // Navigate to product
     const handleProductPress = (productId: string) => {
-        router.push(getProductRoute(productId));
+        router.push(getProductRoute(productId) as any);
     };
 
     // Handle selecting a suggestion
@@ -344,86 +346,91 @@ export default function SearchScreen() {
                     </View>
                 )}
 
-                {/* Results */}
-                <ScrollView className="flex-1 px-4" showsVerticalScrollIndicator={false}>
+                {/* Results/Content Area */}
+                <View className="flex-1 px-4">
                     {/* Results Count */}
-                    {searchQuery.length >= 2 && (
+                    {searchQuery.length >= 2 && !isLoading && searchResults.length > 0 && (
                         <Text className="text-text-muted text-sm mb-3">
-                            {isLoading ? 'Searching...' : `${searchResults.length} results found`}
+                            {searchResults.length} results found
                         </Text>
                     )}
 
-                    {/* Loading State */}
-                    {(isLoading || isFetching) && searchQuery.length >= 2 && (
-                        <View className="py-8 items-center">
+                    {/* Content Logic */}
+                    {isLoading || isFetching ? (
+                        <View className="flex-1 items-center justify-center">
                             <ActivityIndicator size="large" color="#C1272D" />
                         </View>
-                    )}
-
-                    {/* Empty State */}
-                    {!isLoading && searchQuery.length >= 2 && searchResults.length === 0 && (
-                        <View className="py-12 items-center">
-                            <MagnifyingGlass size={48} color={Colors.textMuted} weight="duotone" />
-                            <Text className="text-text-primary text-lg font-semibold mt-4">No results found</Text>
-                            <Text className="text-text-muted text-sm mt-2 text-center">
-                                Try adjusting your search or filters
-                            </Text>
-                        </View>
-                    )}
-
-                    {/* Prompt to Search */}
-                    {searchQuery.length < 2 && (
-                        <View className="py-12 items-center">
-                            <MagnifyingGlass size={48} color={Colors.textMuted} weight="duotone" />
-                            <Text className="text-text-primary text-lg font-semibold mt-4">Search for products</Text>
-                            <Text className="text-text-muted text-sm mt-2 text-center">
-                                Enter at least 2 characters to search
-                            </Text>
-                        </View>
-                    )}
-
-                    {/* Results Grid */}
-                    {!isLoading && searchResults.length > 0 && (
-                        <View className="flex-row flex-wrap" style={{ marginHorizontal: -6 }}>
-                            {searchResults.map((product) => (
-                                <TouchableOpacity
-                                    key={product.id}
-                                    onPress={() => handleProductPress(product.id)}
-                                    className="w-1/2 p-1.5"
-                                    activeOpacity={0.8}
-                                >
-                                    <View className="bg-card-dark rounded-xl overflow-hidden">
-                                        <LazyImage
-                                            source={product.image_urls?.[0] || PlaceholderImages.image200}
-                                            style={{ width: '100%', height: 128 }}
-                                            contentFit="cover"
-                                            showLoader={false}
-                                        />
-                                        <View className="p-3">
-                                            <Text className="text-text-primary text-sm font-semibold" numberOfLines={2}>
-                                                {product.name}
-                                            </Text>
-                                            <Text className="text-text-muted text-xs mt-1">{product.category}</Text>
-                                            <View className="flex-row items-center justify-between mt-2">
-                                                <Text className="text-zora-yellow text-base font-bold">
-                                                    £{product.price.toFixed(2)}
-                                                </Text>
-                                                {product.rating && (
-                                                    <View className="flex-row items-center gap-1">
-                                                        <Star size={12} color="#FFCC00" weight="fill" />
-                                                        <Text className="text-text-muted text-xs">{product.rating}</Text>
+                    ) : searchResults.length > 0 ? (
+                        <View className="flex-1 -mx-1.5">
+                            {/* @ts-ignore */}
+                            <FlashList
+                                data={searchResults}
+                                numColumns={2}
+                                estimatedItemSize={220}
+                                showsVerticalScrollIndicator={false}
+                                renderItem={({ item }) => (
+                                    <View className="w-full p-1.5">
+                                        <TouchableOpacity
+                                            onPress={() => handleProductPress(item.id)}
+                                            activeOpacity={0.8}
+                                        >
+                                            <View className="bg-card-dark rounded-xl overflow-hidden">
+                                                <LazyImage
+                                                    source={item.image_urls?.[0] || PlaceholderImages.image200}
+                                                    style={{ width: '100%', height: 128 }}
+                                                    contentFit="cover"
+                                                    showLoader={false}
+                                                />
+                                                <View className="p-3">
+                                                    <Text className="text-text-primary text-sm font-semibold" numberOfLines={2}>
+                                                        {item.name}
+                                                    </Text>
+                                                    <Text className="text-text-muted text-xs mt-1">{item.category}</Text>
+                                                    <View className="flex-row items-center justify-between mt-2">
+                                                        <Text className="text-zora-yellow text-base font-bold">
+                                                            £{item.price.toFixed(2)}
+                                                        </Text>
+                                                        {item.rating && (
+                                                            <View className="flex-row items-center gap-1">
+                                                                <Star size={12} color="#FFCC00" weight="fill" />
+                                                                <Text className="text-text-muted text-xs">{item.rating}</Text>
+                                                            </View>
+                                                        )}
                                                     </View>
-                                                )}
+                                                </View>
                                             </View>
-                                        </View>
+                                        </TouchableOpacity>
                                     </View>
-                                </TouchableOpacity>
-                            ))}
+                                )}
+                                ListFooterComponent={<View style={{ height: 100 }} />}
+                            />
                         </View>
-                    )}
+                    ) : (
+                        <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
+                            {/* Empty State */}
+                            {searchQuery.length >= 2 && (
+                                <View className="py-12 items-center">
+                                    <MagnifyingGlass size={48} color={Colors.textMuted} weight="duotone" />
+                                    <Text className="text-text-primary text-lg font-semibold mt-4">No results found</Text>
+                                    <Text className="text-text-muted text-sm mt-2 text-center">
+                                        Try adjusting your search or filters
+                                    </Text>
+                                </View>
+                            )}
 
-                    <View style={{ height: 100 }} />
-                </ScrollView>
+                            {/* Prompt to Search */}
+                            {searchQuery.length < 2 && (
+                                <View className="py-12 items-center">
+                                    <MagnifyingGlass size={48} color={Colors.textMuted} weight="duotone" />
+                                    <Text className="text-text-primary text-lg font-semibold mt-4">Search for products</Text>
+                                    <Text className="text-text-muted text-sm mt-2 text-center">
+                                        Enter at least 2 characters to search
+                                    </Text>
+                                </View>
+                            )}
+                        </ScrollView>
+                    )}
+                </View>
             </SafeAreaView>
 
             {/* Filter Modal */}

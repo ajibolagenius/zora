@@ -390,7 +390,7 @@ export default function AutomationPage() {
                                                 </div>
                                             </div>
                                             <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg">
-                                                <Pulse size={20} className="text-purple-600" />
+                                                <Pulse size={20} className="text-blue-600" />
                                                 <div className="flex-1">
                                                     <div className="font-medium">Database optimization completed</div>
                                                     <div className="text-sm text-gray-600">1 hour ago</div>
