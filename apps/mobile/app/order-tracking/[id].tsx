@@ -301,6 +301,20 @@ export default function OrderTrackingScreen() {
                             router.replace('/(tabs)');
                         }
                     }}
+                    onLongPress={async () => {
+                        // HIDDEN DEBUG ACTION: Simulate Dispatch
+                        if (order?.id) {
+                            await orderService.adminSimulateDispatch(
+                                order.id,
+                                'DPD',
+                                '15504203025211',
+                                'https://www.dpd.co.uk/tracking'
+                            );
+                            // Refresh order
+                            fetchOrder();
+                            alert('DEBUG: Order dispatched with DPD!');
+                        }
+                    }}
                 >
                     <ArrowLeft size={22} color="#FFFFFF" weight="bold" />
                 </TouchableOpacity>
@@ -345,34 +359,81 @@ export default function OrderTrackingScreen() {
                         </View>
                     </View>
 
-                    {/* Driver Card */}
+                    {/* Delivery Info Card */}
                     <View style={styles.driverCard}>
-                        <View style={styles.driverPhoto}>
-                            <Image
-                                source={{ uri: ImageUrlBuilders.dicebearAvatar('David') }}
-                                style={styles.driverImage}
-                            />
-                            <View style={styles.ratingBadge}>
-                                <Text style={styles.ratingText}>★ 4.9</Text>
-                            </View>
-                        </View>
+                        {order?.delivery_provider ? (
+                            // Third-Party Courier UI
+                            <>
+                                <View style={styles.driverPhoto}>
+                                    <View style={[styles.driverImage, { backgroundColor: '#FFFFFF', alignItems: 'center', justifyContent: 'center' }]}>
+                                        <Truck size={32} color={Colors.primary} weight="duotone" />
+                                    </View>
+                                </View>
 
-                        <View style={styles.driverInfo}>
-                            <Text style={styles.driverName}>David</Text>
-                            <Text style={styles.vehicleInfo}>White Toyota Camry</Text>
-                            <View style={styles.licensePlate}>
-                                <Text style={styles.licensePlateText}>AB 123 CD</Text>
-                            </View>
-                        </View>
+                                <View style={styles.driverInfo}>
+                                    <Text style={styles.driverName}>Shipped with {order.delivery_provider}</Text>
+                                    <Text style={styles.vehicleInfo}>
+                                        Ref: <Text style={{ fontFamily: FontFamily.body }}>{order.tracking_reference || 'N/A'}</Text>
+                                    </Text>
+                                </View>
 
-                        <View style={styles.driverActions}>
-                            <TouchableOpacity style={styles.callButton}>
-                                <Phone size={20} color="#FFFFFF" weight="fill" />
-                            </TouchableOpacity>
-                            <TouchableOpacity style={styles.chatButton}>
-                                <ChatCircle size={20} color={Colors.primary} weight="fill" />
-                            </TouchableOpacity>
-                        </View>
+                                <View style={styles.driverActions}>
+                                    <TouchableOpacity
+                                        style={[styles.callButton, { width: 'auto', paddingHorizontal: Spacing.md }]}
+                                        onPress={() => {
+                                            if (order.tracking_url) {
+                                                // Open external link
+                                                import('react-native').then(({ Linking }) => {
+                                                    Linking.openURL(order.tracking_url!);
+                                                });
+                                            } else {
+                                                // Fallback or copy to clipboard
+                                                import('react-native').then(({ Alert, Clipboard }) => {
+                                                    if (order.tracking_reference) {
+                                                        Clipboard.setString(order.tracking_reference);
+                                                        Alert.alert('Copied', 'Tracking reference copied to clipboard');
+                                                    }
+                                                });
+                                            }
+                                        }}
+                                    >
+                                        <Text style={{ color: '#FFF', fontFamily: FontFamily.bodySemiBold, fontSize: FontSize.small }}>
+                                            Track
+                                        </Text>
+                                    </TouchableOpacity>
+                                </View>
+                            </>
+                        ) : (
+                            // Fallback / Internal Driver UI (Legacy)
+                            <>
+                                <View style={styles.driverPhoto}>
+                                    <Image
+                                        source={{ uri: ImageUrlBuilders.dicebearAvatar('David') }}
+                                        style={styles.driverImage}
+                                    />
+                                    <View style={styles.ratingBadge}>
+                                        <Text style={styles.ratingText}>★ 4.9</Text>
+                                    </View>
+                                </View>
+
+                                <View style={styles.driverInfo}>
+                                    <Text style={styles.driverName}>David</Text>
+                                    <Text style={styles.vehicleInfo}>White Toyota Camry</Text>
+                                    <View style={styles.licensePlate}>
+                                        <Text style={styles.licensePlateText}>AB 123 CD</Text>
+                                    </View>
+                                </View>
+
+                                <View style={styles.driverActions}>
+                                    <TouchableOpacity style={styles.callButton}>
+                                        <Phone size={20} color="#FFFFFF" weight="fill" />
+                                    </TouchableOpacity>
+                                    <TouchableOpacity style={styles.chatButton}>
+                                        <ChatCircle size={20} color={Colors.primary} weight="fill" />
+                                    </TouchableOpacity>
+                                </View>
+                            </>
+                        )}
                     </View>
 
                     {/* Timeline */}

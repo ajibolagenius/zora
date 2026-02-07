@@ -183,6 +183,11 @@ export interface Order {
   estimated_delivery?: string;
   actual_delivery?: string;
   qr_code?: string;
+  delivery_provider?: string;
+  tracking_reference?: string;
+  tracking_url?: string;
+  dispatched_at?: string;
+  updated_at?: string;
 }
 
 export interface PromoCode {

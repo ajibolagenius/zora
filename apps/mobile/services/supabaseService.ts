@@ -807,6 +807,52 @@ export const orderService = {
     return data;
   },
 
+  // Debug/Admin method to simulate dispatch
+  adminSimulateDispatch: async (orderId: string, provider: string, trackingRef: string, trackingUrl?: string): Promise<Order | null> => {
+    const updateData = {
+      status: 'out_for_delivery',
+      delivery_provider: provider,
+      tracking_reference: trackingRef,
+      tracking_url: trackingUrl,
+      dispatched_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    };
+
+    if (!isSupabaseConfigured()) {
+      const orderIndex = (mockDatabase.orders as any[]).findIndex(o => o.id === orderId);
+      if (orderIndex >= 0) {
+        const updatedOrder = {
+          ...(mockDatabase.orders[orderIndex] as any),
+          ...updateData,
+        };
+        // In a real app we'd update the mock DB in memory, but here we return the simulated object
+        (mockDatabase.orders as any[])[orderIndex] = updatedOrder;
+        return updatedOrder as Order;
+      }
+      return null;
+    }
+
+    const fromMethod = await getSupabaseFrom();
+    if (!fromMethod) {
+      return null;
+    }
+
+    const { data, error } = await fromMethod('orders')
+      .update(updateData)
+      .eq('id', orderId)
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error simulating dispatch:', error);
+      return null;
+    }
+
+    return data;
+  },
+
+
+
   updateStatus: async (orderId: string, status: Order['status']): Promise<Order | null> => {
     if (!isSupabaseConfigured()) {
       return null;
@@ -825,6 +871,8 @@ export const orderService = {
 
     return data;
   },
+
+
 
   verifyQRCode: async (qrCode: string): Promise<Order | null> => {
     let searchCode = qrCode;
