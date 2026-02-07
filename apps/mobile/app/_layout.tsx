@@ -23,6 +23,7 @@ import { ToastProvider } from '../components/ui';
 import { MobileRealtimeProvider } from '../providers/RealtimeProvider';
 import { useAuthStore } from '../stores/authStore';
 import { getSupabaseClient, isSupabaseConfigured } from '../lib/supabase';
+import { ErrorBoundary } from '../components/ErrorBoundary';
 import '../global.css';
 
 // Keep the splash screen visible while we fetch resources
@@ -262,21 +263,23 @@ export default function RootLayout() {
     }
 
     return (
-        <QueryProvider>
-            <ToastProvider>
-                <MobileRealtimeProvider>
-                    <StatusBar style="light" />
-                    <Stack
-                        screenOptions={{
-                            headerShown: false,
-                            contentStyle: { backgroundColor: Colors.backgroundDark },
-                            animation: 'fade',
-                            gestureEnabled: true,
-                        }}
-                    />
-                </MobileRealtimeProvider>
-            </ToastProvider>
-        </QueryProvider>
+        <ErrorBoundary>
+            <QueryProvider>
+                <ToastProvider>
+                    <MobileRealtimeProvider>
+                        <StatusBar style="light" />
+                        <Stack
+                            screenOptions={{
+                                headerShown: false,
+                                contentStyle: { backgroundColor: Colors.backgroundDark },
+                                animation: 'fade',
+                                gestureEnabled: true,
+                            }}
+                        />
+                    </MobileRealtimeProvider>
+                </ToastProvider>
+            </QueryProvider>
+        </ErrorBoundary>
     );
 }
 

@@ -184,25 +184,46 @@ export class AdvancedSearchService {
         const lowerQuery = query.toLowerCase();
 
         // Define semantic patterns
-        const foodPatterns = ['food', 'cook', 'recipe', 'ingredient', 'meal', 'dish'];
-        const clothingPatterns = ['cloth', 'wear', 'fashion', 'style', 'outfit'];
+        const foodPatterns = ['food', 'cook', 'recipe', 'ingredient', 'meal', 'dish', 'rice', 'stew', 'soup', 'spice'];
+        const clothingPatterns = ['cloth', 'wear', 'fashion', 'style', 'outfit', 'dress', 'shirt', 'fabric', 'textile'];
         const culturalPatterns = ['african', 'nigerian', 'ghanaian', 'ethiopian', 'kenyan'];
 
+        // Determine query intent
+        const isFoodQuery = foodPatterns.some(pattern => lowerQuery.includes(pattern));
+        const isClothingQuery = clothingPatterns.some(pattern => lowerQuery.includes(pattern));
+        const isCulturalQuery = culturalPatterns.some(pattern => lowerQuery.includes(pattern));
+
         return allProducts.filter(product => {
-            const searchText = `${product.name} ${product.description || ''} ${product.category || ''}`.toLowerCase();
+            const productText = `${product.name} ${product.description || ''} ${product.category || ''}`.toLowerCase();
 
-            // Check for semantic matches
-            const hasFoodMatch = foodPatterns.some(pattern => lowerQuery.includes(pattern));
-            const hasClothingMatch = clothingPatterns.some(pattern => lowerQuery.includes(pattern));
-            const hasCulturalMatch = culturalPatterns.some(pattern => lowerQuery.includes(pattern));
-
-            // Boost score for semantic matches
-            if (hasFoodMatch || hasClothingMatch || hasCulturalMatch) {
-                return true; // Prioritize semantic matches
+            // 1. If query implies a category, prioritize products in that category
+            if (isFoodQuery) {
+                const isFoodProduct = product.category?.toLowerCase() === 'food' ||
+                    product.category?.toLowerCase() === 'groceries' ||
+                    product.category?.toLowerCase() === 'spices' ||
+                    productText.includes('food') || productText.includes('ingredient');
+                if (isFoodProduct) return true;
             }
 
-            // Otherwise, do basic text matching
-            return searchText.includes(lowerQuery);
+            if (isClothingQuery) {
+                const isClothingProduct = product.category?.toLowerCase() === 'fashion' ||
+                    product.category?.toLowerCase() === 'clothing' ||
+                    product.category?.toLowerCase() === 'textiles' ||
+                    productText.includes('cloth') || productText.includes('wear');
+                if (isClothingProduct) return true;
+            }
+
+            // 2. If query implies a culture/region, prioritize products from that region
+            if (isCulturalQuery) {
+                // Extract which culture is being queried
+                const matchedCultures = culturalPatterns.filter(p => lowerQuery.includes(p));
+                const isFromRegion = matchedCultures.some(culture => productText.includes(culture));
+                if (isFromRegion) return true;
+            }
+
+            // 3. Fallback: Basic text match if semantic intent doesn't match this product
+            // (Only if semantic intent was NOT found, or as a secondary check)
+            return productText.includes(lowerQuery);
         });
     }
 

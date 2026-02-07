@@ -58,7 +58,7 @@ const FavoriteButton = ({ product }: { product: Product }) => {
     const toggleWishlist = useWishlistStore((state) => state.toggleWishlist);
 
     return (
-        <TouchableOpacity 
+        <TouchableOpacity
             style={styles.favoriteButton}
             onPress={(e) => {
                 e.stopPropagation();
@@ -66,10 +66,10 @@ const FavoriteButton = ({ product }: { product: Product }) => {
             }}
             activeOpacity={0.7}
         >
-            <Heart 
-                size={16} 
-                color={isInWishlist ? Colors.primary : Colors.textPrimary} 
-                weight={isInWishlist ? 'fill' : 'regular'} 
+            <Heart
+                size={16}
+                color={isInWishlist ? Colors.primary : Colors.textPrimary}
+                weight={isInWishlist ? 'fill' : 'regular'}
             />
         </TouchableOpacity>
     );
@@ -100,13 +100,13 @@ export default function StoreScreen() {
 
     const fetchData = useCallback(async () => {
         if (!vendorSlug) return;
-        
+
         // Validate slug format
         if (!isValidRouteParam(vendorSlug, 'slug') || !isValidVendorSlug(vendorSlug)) {
             setLoading(false);
             return; // Will show NotFoundScreen
         }
-        
+
         try {
             setLoading(true);
             // Use slug-based lookup
@@ -343,17 +343,23 @@ export default function StoreScreen() {
             <NotFoundScreen
                 title="Store Not Found"
                 message="This store doesn't exist or may have been removed. It might have been deleted or the link is incorrect."
-                onBack={() => router.back()}
+                onBack={() => {
+                    if (router.canGoBack()) {
+                        router.back();
+                    } else {
+                        router.replace('/(tabs)');
+                    }
+                }}
             />
         );
     }
 
     const vendorId = vendor.id;
     const shopName = (vendor as any).shop_name || (vendor as any).name || 'Store';
-    
+
     // Get vendor image URL
     const vendorImageUrl = (vendor as any).cover_image_url || (vendor as any).cover_image || (vendor as any).logo_url || '';
-    
+
     // Generate vendor URL
     const vendorUrl = `/store/${vendorSlug}`;
 
@@ -388,12 +394,18 @@ export default function StoreScreen() {
                     <SafeAreaView style={styles.header} edges={['top']}>
                         <TouchableOpacity
                             style={styles.headerButton}
-                            onPress={() => router.back()}
+                            onPress={() => {
+                                if (router.canGoBack()) {
+                                    router.back();
+                                } else {
+                                    router.replace('/(tabs)');
+                                }
+                            }}
                         >
                             <ArrowLeft size={22} color={Colors.textPrimary} weight="bold" />
                         </TouchableOpacity>
                         <View style={styles.headerActions}>
-                            <TouchableOpacity 
+                            <TouchableOpacity
                                 style={styles.headerButton}
                                 onPress={handleSearch}
                                 activeOpacity={0.8}
@@ -456,8 +468,8 @@ export default function StoreScreen() {
                             {Number((vendor as any).rating || 0).toFixed(1)}
                         </Text>
                         <Text style={styles.ratingCount}>
-                            ({((vendor as any).review_count || 0) >= 1000 
-                                ? `${((vendor as any).review_count / 1000).toFixed(1)}k` 
+                            ({((vendor as any).review_count || 0) >= 1000
+                                ? `${((vendor as any).review_count / 1000).toFixed(1)}k`
                                 : (vendor as any).review_count || 0} reviews)
                         </Text>
                     </View>
@@ -498,8 +510,8 @@ export default function StoreScreen() {
                         >
                             <ChatCircle size={20} color={Colors.textPrimary} weight="duotone" />
                         </TouchableOpacity>
-                        <TouchableOpacity 
-                            style={styles.iconButton} 
+                        <TouchableOpacity
+                            style={styles.iconButton}
                             onPress={handleShare}
                             activeOpacity={0.8}
                         >
@@ -541,10 +553,10 @@ export default function StoreScreen() {
                         {/* Product Grid */}
                         <View style={styles.productGrid}>
                             {products.map((product) => {
-                                const productImages = Array.isArray(product.image_urls) 
-                                    ? product.image_urls 
+                                const productImages = Array.isArray(product.image_urls)
+                                    ? product.image_urls
                                     : [product.image_urls || ''];
-                                
+
                                 return (
                                     <TouchableOpacity
                                         key={product.id}

@@ -75,7 +75,7 @@ export default function AdvancedSearchScreen() {
             Keyboard.dismiss();
             performSearch(searchQuery);
         }
-    }, [performSearch]);
+    }, [performSearch, searchQuery]);
 
     // Handle suggestion selection
     const handleSuggestionPress = useCallback((suggestion: string) => {
@@ -374,7 +374,13 @@ export default function AdvancedSearchScreen() {
         <SafeAreaView style={styles.container} edges={['top', 'left', 'right', 'bottom']}>
             {/* Header */}
             <View style={styles.header}>
-                <TouchableOpacity onPress={() => router.back()}>
+                <TouchableOpacity onPress={() => {
+                    if (router.canGoBack()) {
+                        router.back();
+                    } else {
+                        router.replace('/(tabs)');
+                    }
+                }}>
                     <ArrowLeft size={24} color={Colors.textPrimary} weight="bold" />
                 </TouchableOpacity>
                 <View style={styles.headerContent}>

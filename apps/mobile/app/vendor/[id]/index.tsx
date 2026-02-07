@@ -55,7 +55,7 @@ const FavoriteButton = ({ product }: { product: Product | MockProduct }) => {
     const toggleWishlist = useWishlistStore((state) => state.toggleWishlist);
 
     return (
-        <TouchableOpacity 
+        <TouchableOpacity
             style={styles.favoriteButton}
             onPress={(e) => {
                 e.stopPropagation();
@@ -63,10 +63,10 @@ const FavoriteButton = ({ product }: { product: Product | MockProduct }) => {
             }}
             activeOpacity={0.7}
         >
-            <Heart 
-                size={16} 
-                color={isInWishlist ? Colors.primary : Colors.textPrimary} 
-                weight={isInWishlist ? 'fill' : 'regular'} 
+            <Heart
+                size={16}
+                color={isInWishlist ? Colors.primary : Colors.textPrimary}
+                weight={isInWishlist ? 'fill' : 'regular'}
             />
         </TouchableOpacity>
     );
@@ -229,8 +229,8 @@ export default function VendorScreen() {
     };
 
     const handleAddToCart = (product: Product | MockProduct) => {
-        const imageUrls = Array.isArray(product.image_urls) 
-            ? product.image_urls 
+        const imageUrls = Array.isArray(product.image_urls)
+            ? product.image_urls
             : [product.image_urls || ''];
         addToCart({
             id: product.id,
@@ -260,14 +260,20 @@ export default function VendorScreen() {
             <NotFoundScreen
                 title="Vendor Not Found"
                 message="This vendor doesn't exist or may have been removed. It might have been deleted or the link is incorrect."
-                onBack={() => router.back()}
+                onBack={() => {
+                    if (router.canGoBack()) {
+                        router.back();
+                    } else {
+                        router.replace('/(tabs)');
+                    }
+                }}
             />
         );
     }
 
     // Get vendor image URL
     const vendorImageUrl = vendor.cover_image_url || vendor.logo_url || '';
-    
+
     // Generate vendor URL
     const vendorUrl = `/vendor/${id}`;
 
@@ -302,7 +308,13 @@ export default function VendorScreen() {
                     <SafeAreaView style={styles.header} edges={['top']}>
                         <TouchableOpacity
                             style={styles.headerButton}
-                            onPress={() => router.back()}
+                            onPress={() => {
+                                if (router.canGoBack()) {
+                                    router.back();
+                                } else {
+                                    router.replace('/(tabs)');
+                                }
+                            }}
                         >
                             <ArrowLeft size={22} color={Colors.textPrimary} weight="bold" />
                         </TouchableOpacity>

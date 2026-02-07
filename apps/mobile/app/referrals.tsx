@@ -303,7 +303,13 @@ export default function ReferralsScreen() {
             <View style={styles.header}>
                 <TouchableOpacity
                     style={styles.headerButton}
-                    onPress={() => router.back()}
+                    onPress={() => {
+                        if (router.canGoBack()) {
+                            router.back();
+                        } else {
+                            router.replace('/(tabs)');
+                        }
+                    }}
                     activeOpacity={0.8}
                 >
                     <ArrowLeft size={24} color={Colors.textPrimary} weight="bold" />
