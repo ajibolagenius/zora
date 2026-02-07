@@ -81,12 +81,17 @@ export function AdvancedSearch({
     }, [setSearchQuery, getSuggestions, recordSearchPerformance]);
 
     // Handle search submission
-    const handleSearch = useCallback(async () => {
-        if (!searchQuery.trim()) return;
+    const handleSearch = useCallback(async (queryOverride?: string) => {
+        const queryToSearch = queryOverride || searchQuery;
+        if (!queryToSearch.trim()) return;
 
         const startTime = performance.now();
         setIsOpen(false);
         setShowSuggestions(false);
+        // Ensure state matches what we are searching (if triggered by click)
+        if (queryOverride) {
+            setSearchQuery(queryOverride);
+        }
 
         try {
             const filters = {
@@ -96,37 +101,31 @@ export function AdvancedSearch({
                 region: selectedRegion || undefined,
             };
 
-            const result = await performSearch(searchQuery, filters);
+            const result = await performSearch(queryToSearch, filters);
             setSearchResults(result.results);
             setRecommendations(result.recommendations);
 
             recordSearchPerformance(performance.now() - startTime, true);
-            onSearch?.(searchQuery, result.results);
+            onSearch?.(queryToSearch, result.results);
         } catch (error) {
             recordSearchPerformance(performance.now() - startTime, false);
         }
-    }, [searchQuery, selectedCategory, selectedPriceRange, selectedRegion, performSearch, recordSearchPerformance, onSearch]);
+    }, [searchQuery, selectedCategory, selectedPriceRange, selectedRegion, performSearch, recordSearchPerformance, onSearch, setSearchQuery]);
 
     // Handle suggestion selection
     const handleSuggestionSelect = useCallback((suggestion: string) => {
-        setSearchQuery(suggestion);
-        setShowSuggestions(false);
-        handleSearch();
-    }, [setSearchQuery, handleSearch]);
+        handleSearch(suggestion);
+    }, [handleSearch]);
 
     // Handle history item selection
     const handleHistorySelect = useCallback((item: any) => {
-        setSearchQuery(item.query);
-        setShowSuggestions(false);
-        handleSearch();
-    }, [setSearchQuery, handleSearch]);
+        handleSearch(item.query);
+    }, [handleSearch]);
 
     // Handle trending search selection
     const handleTrendingSelect = useCallback((trending: string) => {
-        setSearchQuery(trending);
-        setShowSuggestions(false);
-        handleSearch();
-    }, [setSearchQuery, handleSearch]);
+        handleSearch(trending);
+    }, [handleSearch]);
 
     // Clear search
     const handleClear = useCallback(() => {

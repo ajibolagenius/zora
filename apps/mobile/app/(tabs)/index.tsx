@@ -436,6 +436,13 @@ export default function HomeScreen() {
         );
     }, [homeData, selectedRegion, handleBannerPress, handleRegionPress, handleVendorPress, router]);
 
+    // Fetch unread messages count
+    useEffect(() => {
+        if (user?.user_id && isSupabaseConfigured()) {
+            messagingService.getUnreadCount(user.user_id).then(setUnreadMessagesCount);
+        }
+    }, [user?.user_id]);
+
     const ListFooter = useCallback(() => {
         if (loadingMore && hasMoreProducts) {
             return (

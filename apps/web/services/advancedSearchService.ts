@@ -93,7 +93,12 @@ export class AdvancedSearchService {
       };
     } catch (error) {
       console.error('Advanced search error:', error);
-      return { results: [], suggestions: [], analytics: null, recommendations: [] };
+      return {
+        results: [],
+        suggestions: [],
+        analytics: { query, timestamp: Date.now(), resultCount: 0 },
+        recommendations: []
+      };
     }
   }
 
@@ -113,7 +118,7 @@ export class AdvancedSearchService {
     ];
 
     const results = await Promise.allSettled(searchStrategies.map(strategy => strategy()));
-    
+
     // Combine unique results
     const allResults = results
       .filter((result): result is PromiseFulfilledResult<Product[]> => result.status === 'fulfilled')
@@ -151,9 +156,9 @@ export class AdvancedSearchService {
     try {
       // Generate fuzzy variations
       const variations = this.generateFuzzyVariations(query);
-      
+
       const results = await Promise.all(
-        variations.map(variation => 
+        variations.map(variation =>
           productsService.getAll({
             search: variation,
             ...filters,
@@ -237,7 +242,7 @@ export class AdvancedSearchService {
     try {
       // Identify category keywords in query
       const categoryKeywords = this.extractCategoryKeywords(query);
-      
+
       if (categoryKeywords.length === 0) return [];
 
       // Search for products in identified categories
@@ -381,7 +386,7 @@ export class AdvancedSearchService {
    */
   private static generateFuzzyVariations(query: string): string[] {
     const variations = [query];
-    
+
     // Common African food/cultural term variations
     const commonVariations: Record<string, string[]> = {
       'jollof': ['jollof rice', 'jolof', 'jolof rice'],
@@ -392,10 +397,10 @@ export class AdvancedSearchService {
     };
 
     const lowerQuery = query.toLowerCase();
-    
-    for (const [key, variations] of Object.entries(commonVariations)) {
+
+    for (const [key, synonyms] of Object.entries(commonVariations)) {
       if (lowerQuery.includes(key)) {
-        variations.forEach(variation => {
+        synonyms.forEach(variation => {
           if (!variations.includes(variation)) {
             variations.push(variation);
           }
