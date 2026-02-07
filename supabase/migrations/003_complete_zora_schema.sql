@@ -1,5 +1,5 @@
 -- Complete Zora African Market Database Schema
--- This migration creates all necessary tables for the Zora marketplace
+-- This migration creates all necessary tables for the Zora African Market
 -- Uses Supabase best practices: profiles table extends auth.users
 -- Handles existing tables and policies gracefully
 
@@ -32,7 +32,7 @@ CREATE TABLE IF NOT EXISTS public.profiles (
 );
 
 -- Add Zora-specific columns if they don't exist
-DO $$ 
+DO $$
 BEGIN
     -- Check if table exists first
     IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'profiles') THEN
@@ -40,27 +40,27 @@ BEGIN
         IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'profiles' AND column_name = 'email') THEN
             ALTER TABLE public.profiles ADD COLUMN email TEXT UNIQUE;
         END IF;
-        
+
         IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'profiles' AND column_name = 'phone') THEN
             ALTER TABLE public.profiles ADD COLUMN phone TEXT;
         END IF;
-        
+
         IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'profiles' AND column_name = 'membership_tier') THEN
             ALTER TABLE public.profiles ADD COLUMN membership_tier TEXT DEFAULT 'bronze' CHECK (membership_tier IN ('bronze', 'silver', 'gold', 'platinum'));
         END IF;
-        
+
         IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'profiles' AND column_name = 'zora_credits') THEN
             ALTER TABLE public.profiles ADD COLUMN zora_credits DECIMAL(10,2) DEFAULT 0.00;
         END IF;
-        
+
         IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'profiles' AND column_name = 'loyalty_points') THEN
             ALTER TABLE public.profiles ADD COLUMN loyalty_points INTEGER DEFAULT 0;
         END IF;
-        
+
         IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'profiles' AND column_name = 'referral_code') THEN
             ALTER TABLE public.profiles ADD COLUMN referral_code TEXT UNIQUE;
         END IF;
-        
+
         IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'profiles' AND column_name = 'cultural_interests') THEN
             ALTER TABLE public.profiles ADD COLUMN cultural_interests TEXT[] DEFAULT '{}';
         END IF;
@@ -100,7 +100,7 @@ BEGIN
         'ZORA' || UPPER(SUBSTRING(NEW.id::TEXT, 1, 6))
     )
     ON CONFLICT (id) DO UPDATE
-    SET 
+    SET
         email = EXCLUDED.email,
         full_name = COALESCE(EXCLUDED.full_name, profiles.full_name),
         avatar_url = COALESCE(EXCLUDED.avatar_url, profiles.avatar_url);
@@ -236,8 +236,8 @@ CREATE POLICY "Products are viewable by everyone" ON public.products
 CREATE POLICY "Vendors can manage own products" ON public.products
     FOR ALL USING (
         EXISTS (
-            SELECT 1 FROM public.vendors 
-            WHERE vendors.id = products.vendor_id 
+            SELECT 1 FROM public.vendors
+            WHERE vendors.id = products.vendor_id
             AND vendors.user_id = auth.uid()
         )
     );
@@ -352,8 +352,8 @@ CREATE POLICY "Users can create orders" ON public.orders
 CREATE POLICY "Vendors can view shop orders" ON public.orders
     FOR SELECT USING (
         EXISTS (
-            SELECT 1 FROM public.vendors 
-            WHERE vendors.id = orders.vendor_id 
+            SELECT 1 FROM public.vendors
+            WHERE vendors.id = orders.vendor_id
             AND vendors.user_id = auth.uid()
         )
     );
@@ -378,8 +378,8 @@ DROP POLICY IF EXISTS "Vendors can view shop order items" ON public.order_items;
 CREATE POLICY "Users can view own order items" ON public.order_items
     FOR SELECT USING (
         EXISTS (
-            SELECT 1 FROM public.orders 
-            WHERE orders.id = order_items.order_id 
+            SELECT 1 FROM public.orders
+            WHERE orders.id = order_items.order_id
             AND orders.user_id = auth.uid()
         )
     );
@@ -387,9 +387,9 @@ CREATE POLICY "Users can view own order items" ON public.order_items
 CREATE POLICY "Vendors can view shop order items" ON public.order_items
     FOR SELECT USING (
         EXISTS (
-            SELECT 1 FROM public.orders 
+            SELECT 1 FROM public.orders
             JOIN public.vendors ON vendors.id = orders.vendor_id
-            WHERE orders.id = order_items.order_id 
+            WHERE orders.id = order_items.order_id
             AND vendors.user_id = auth.uid()
         )
     );
@@ -485,22 +485,22 @@ RETURNS TRIGGER AS $$
 BEGIN
     IF NEW.vendor_id IS NOT NULL THEN
         UPDATE public.vendors
-        SET 
+        SET
             rating = (SELECT AVG(rating)::DECIMAL(2,1) FROM public.reviews WHERE vendor_id = NEW.vendor_id),
             review_count = (SELECT COUNT(*) FROM public.reviews WHERE vendor_id = NEW.vendor_id),
             updated_at = NOW()
         WHERE id = NEW.vendor_id;
     END IF;
-    
+
     IF NEW.product_id IS NOT NULL THEN
         UPDATE public.products
-        SET 
+        SET
             rating = (SELECT AVG(rating)::DECIMAL(2,1) FROM public.reviews WHERE product_id = NEW.product_id),
             review_count = (SELECT COUNT(*) FROM public.reviews WHERE product_id = NEW.product_id),
             updated_at = NOW()
         WHERE id = NEW.product_id;
     END IF;
-    
+
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
@@ -527,16 +527,16 @@ BEGIN
         REGEXP_REPLACE(p_shop_name, '[^a-zA-Z0-9\s-]', '', 'g'),
         '\s+', '-', 'g'
     ));
-    
+
     base_slug := TRIM(BOTH '-' FROM base_slug);
     base_slug := LEFT(base_slug, 100);
-    
+
     IF base_slug = '' THEN
         base_slug := 'vendor-' || SUBSTRING(gen_random_uuid()::TEXT, 1, 8);
     END IF;
-    
+
     unique_slug := base_slug;
-    
+
     WHILE EXISTS (
         SELECT 1 FROM public.vendors
         WHERE slug = unique_slug
@@ -544,12 +544,12 @@ BEGIN
     ) LOOP
         counter := counter + 1;
         unique_slug := base_slug || '-' || counter::TEXT;
-        
+
         IF counter > 1000 THEN
             RAISE EXCEPTION 'Unable to generate unique slug after 1000 attempts';
         END IF;
     END LOOP;
-    
+
     RETURN unique_slug;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;

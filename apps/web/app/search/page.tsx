@@ -5,7 +5,7 @@ import { SearchResults } from '../../components/search/SearchResults';
 import { generatePageMetaTags } from '../../lib/metaTags';
 
 export const metadata: Metadata = generatePageMetaTags({
-  title: 'Search African Products | Zora Marketplace',
+  title: 'Search African Products | Zora African Market',
   description: 'Discover authentic African products, food, clothing, crafts, and more. Advanced search with filters and recommendations.',
   keywords: 'African products, search, marketplace, jollof rice, egusi soup, african clothing, crafts',
 });
@@ -47,7 +47,7 @@ export default function SearchPage() {
             <p className="text-muted-foreground text-center mb-6">
               Discover authentic African products from local vendors
             </p>
-            
+
             <AdvancedSearch
               onSearch={handleSearch}
               placeholder="Search for jollof rice, african fabrics, crafts, and more..."

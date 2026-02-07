@@ -1,4 +1,4 @@
-# ZORA Marketplace - Technical Implementation Requirements
+# Zora African Market - Technical Implementation Requirements
 
 ## Executive Summary
 

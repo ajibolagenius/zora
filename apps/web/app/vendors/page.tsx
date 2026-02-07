@@ -221,7 +221,7 @@ export default function VendorsPage() {
                     <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-3xl p-6 sm:p-8 md:p-12">
                         <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold font-display text-gray-900 mb-3 sm:mb-6">Ready to Grow Your Business?</h2>
                         <p className="text-base sm:text-lg lg:text-xl text-gray-800 mb-6 sm:mb-8 max-w-2xl mx-auto leading-relaxed">
-                            Join the Zora marketplace today and start reaching African diaspora customers across the UK.
+                            Join the Zora African Market today and start reaching African diaspora customers across the UK.
                         </p>
                         <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
                             <Link
